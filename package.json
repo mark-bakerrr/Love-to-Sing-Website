@@ -1,0 +1,24 @@
+{
+  "name": "audio-chapter-markers",
+  "version": "1.0.0",
+  "description": "Adobe Premiere Pro extension to create chapter markers from audio clips",
+  "main": "index.html",
+  "scripts": {
+    "package": "node build-zxp.js"
+  },
+  "keywords": [
+    "adobe",
+    "premiere-pro",
+    "cep",
+    "extension",
+    "audio",
+    "chapters",
+    "markers"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mark-bakerrr/lovetosing.git"
+  }
+}

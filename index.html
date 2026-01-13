@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Audio Chapter Markers</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Audio Chapter Markers</h1>
+      <p class="subtitle">Create chapter markers from audio clips</p>
+    </header>
+
+    <section class="sequence-info">
+      <h2>SEQUENCE INFO</h2>
+      <div class="info-row">
+        <span class="label">Name:</span>
+        <span class="value" id="sequenceName">N/A</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Duration:</span>
+        <span class="value" id="sequenceDuration">--:--</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Audio Tracks:</span>
+        <span class="value" id="audioTracks">0</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Markers:</span>
+        <span class="value" id="markerCount">0</span>
+      </div>
+    </section>
+
+    <button class="btn btn-primary" id="createMarkersBtn">CREATE CHAPTER MARKERS</button>
+
+    <button class="btn btn-secondary" id="previewAudioBtn">PREVIEW AUDIO CLIPS</button>
+
+    <button class="btn btn-danger" id="removeMarkersBtn">REMOVE ALL MARKERS</button>
+
+    <div id="statusMessage" class="status-message"></div>
+
+    <section class="export-section">
+      <h2>EXPORT MARKER LIST</h2>
+      <button class="btn btn-secondary" id="copyNumberedBtn">COPY AS NUMBERED LIST</button>
+      <button class="btn btn-secondary" id="copyTimecodesBtn">COPY WITH TIMECODES</button>
+    </section>
+
+    <div class="note">
+      <strong>Note:</strong><br>
+      Markers are created as chapter markers. To change marker color to red, right-click the marker in Premiere Pro and select a color.
+    </div>
+
+    <button class="btn btn-secondary" id="refreshBtn">REFRESH SEQUENCE INFO</button>
+
+    <footer>
+      <p>Audio Chapter Markers v1.0</p>
+    </footer>
+  </div>
+
+  <script type="text/javascript" src="./js/CSInterface.js"></script>
+  <script type="text/javascript" src="./js/main.js"></script>
+</body>
+</html>
