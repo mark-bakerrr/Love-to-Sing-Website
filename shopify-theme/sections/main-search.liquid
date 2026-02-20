@@ -1,0 +1,145 @@
+{%- liquid
+  content_for "block", type: "spacing", id: "main-collection"
+-%}
+
+{%- if search.performed -%}
+  {%- if section.settings.enable_filters or section.settings.enable_sorting -%}
+    {{- 'component-facets.css' | asset_url | stylesheet_tag -}}
+    <script src="{{- 'facets.js' | asset_url -}}" defer="defer"></script>
+    <script src="{{- 'dropdown-input.js' | asset_url -}}" defer="defer"></script>
+  {%- endif -%}
+
+  <script src="{{- 'main-collection.js' | asset_url -}}" defer="defer"></script>
+  {{- 'collection.css' | asset_url | stylesheet_tag -}}
+
+  <section class="section-collection">
+    <main-collection
+      class="collection"
+      data-section-id="{{ section.id }}"
+    >
+      {% comment %} {%- if section.settings.enable_filters or section.settings.enable_sorting -%}
+        {%- render 'facets-bar',
+          results: search,
+          enable_filtering: section.settings.enable_filters,
+          enable_sorting: section.settings.enable_sorting,
+          section_id: section.id
+        -%}
+      {%- endif -%} {% endcomment %}
+
+      <div class="collection__inner">
+        {%- paginate search.results by section.settings.products_per_page -%}
+          {%- if section.settings.enable_filters or section.settings.enable_sorting -%}
+            {%- if search.results_count > 0 -%}
+              {% comment %} {%- render 'facets',
+                results: search,
+                enable_filtering: section.settings.enable_filters,
+                enable_sorting: section.settings.enable_sorting,
+                section_id: section.id
+              -%} {% endcomment %}
+              {%- render 'facets-bar',
+                results: search,
+                enable_filtering: section.settings.enable_filters,
+                enable_sorting: section.settings.enable_sorting,
+                section_id: section.id,
+                always_visible: true,
+                show_results_count: show_products_count,
+              -%}
+            {%- endif -%}
+          {%- endif -%}
+
+          <div class="collection-grid-container" id="ProductGridContainer">
+            <div class="container">
+              {%- if search.results_count == 0 -%}
+                <div class="center">
+                  <h2 class="h3 regular">
+                    {%- if search.terms -%}
+                      {{- 'search.empty_with_terms' | t: terms: search.terms -}}<br>
+                    {%- else -%}
+                      {{- 'search.empty' | t -}}<br>
+                    {%- endif -%}
+                    {{- 'search.change_search_terms' | t -}}
+                  </h2><!-- /.h3 regular -->
+                </div><!-- /.center -->
+
+              {%- else -%}
+                <div class="collection__grid list-unstyled grid grid--4" role="list" id="product-grid" data-id="{{- section.id -}}">
+                  {%- for result in search.results -%}
+                    {%- case result.object_type -%}
+                      {%- when 'product' -%}
+                        {%- render 'card-product', product_ref: result, class: 'grid__item' -%}
+                      {%- else -%}
+                        {%- render 'card-result', result: result, class: 'grid__item' -%}
+                      {%- when 'page' -%}
+                    {%- endcase -%}
+                  {%- endfor -%}
+                </div><!-- /#product-grid.collection__grid list-unstyled grid grid--4 -->
+
+                {%- if paginate.pages > 1 and paginate.next -%}
+                  <div class="collection__load-more">
+                    {%- liquid
+                      assign button_label = 'blog.show_more' | t
+                      capture attr
+                        echo 'main-collection="show-more"'
+                        echo 'data-next="'
+                          echo paginate.next.url | default: ''
+                        echo '"'
+                        echo 'data-label="'
+                          echo button_label
+                        echo '"'
+                      endcapture
+
+
+                      render 'button', type: 'button', style: 'secondary,sm', value: button_label, attr: attr
+                    -%}
+                  </div><!-- /.collection__load-more -->
+                {%- endif -%}
+                {% comment %} {%- if paginate.pages > 1 -%}
+                  {%- render 'pagination', paginate: paginate, anchor: '' -%}
+                {%- endif -%} {% endcomment %}
+              {%- endif -%}
+            </div><!-- /.container -->
+          </div><!-- /.collection-grid-container -->
+        {%- endpaginate -%}
+      </div>
+    </main-collection><!-- /.collection -->
+  </section><!-- /.section-collection -->
+{%- endif -%}
+
+{% schema %}
+  {
+    "name": "t:sections.main-search.name",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:sections.main-search.settings.header.filters_and_sorting.content"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_filters",
+        "label": "t:sections.main-search.settings.enable_filters.label",
+        "default": true,
+        "info": "t:sections.main-search.settings.enable_filters.info"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_sorting",
+        "label": "t:sections.main-search.settings.enable_sorting.label",
+        "default": true,
+        "info": "t:sections.main-search.settings.enable_sorting.info"
+      },
+      {
+        "type": "header",
+        "content": "t:sections.main-search.settings.header.products_grid.content"
+      },
+      {
+        "type": "range",
+        "id": "products_per_page",
+        "min": 8,
+        "max": 24,
+        "step": 4,
+        "label": "t:sections.main-search.settings.products_per_page.label",
+        "default": 16
+      }
+    ]
+  }
+{% endschema %}

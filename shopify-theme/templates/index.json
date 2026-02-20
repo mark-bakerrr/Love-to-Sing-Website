@@ -1,0 +1,393 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero_banner_search_DH7Mng": {
+      "type": "hero-banner-search",
+      "blocks": {
+        "chart_bdMqTK": {
+          "type": "chart",
+          "settings": {
+            "heading": "Top 10 Love to Sing Songs",
+            "filter_label": "all channels",
+            "collection": "top-10-chart",
+            "button_label": "View all songs",
+            "button_url": "shopify://collections/all-songs"
+          }
+        },
+        "chart_A88bEn": {
+          "type": "chart",
+          "settings": {
+            "heading": "Celebration",
+            "filter_label": "Celebration Songs",
+            "collection": "celebration-song-lyrics",
+            "button_label": "View All Celebration Songs",
+            "button_url": "#"
+          }
+        },
+        "chart_GLMpCT": {
+          "type": "chart",
+          "settings": {
+            "heading": "Top 10 Christmas Songs",
+            "filter_label": "Christmas Songs",
+            "collection": "top-10-christmas-songs",
+            "button_label": "View All Christmas Songs",
+            "button_url": "shopify://collections/christmas-song-lyrics"
+          }
+        },
+        "chart_Nr8JFY": {
+          "type": "chart",
+          "settings": {
+            "heading": "Top 10 Kids Songs",
+            "filter_label": "Kids Songs",
+            "collection": "top-10-kids-songs",
+            "button_label": "",
+            "button_url": ""
+          }
+        }
+      },
+      "block_order": [
+        "chart_bdMqTK",
+        "chart_A88bEn",
+        "chart_GLMpCT",
+        "chart_Nr8JFY"
+      ],
+      "name": "Hero Search banner",
+      "settings": {
+        "background": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "video": "",
+        "video_mobile": "",
+        "overlay_color": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "overlay_opacity": 20,
+        "enable_decoration": true,
+        "title_color": "#ffffff",
+        "title": "Connecting the World \nThrough Music"
+      }
+    },
+    "featured_articles_9GaPNt": {
+      "type": "featured-articles",
+      "blocks": {
+        "article_bJfA3z": {
+          "type": "article",
+          "name": "Article",
+          "settings": {
+            "article": "christmas-music/set-the-scene-christmas-carols-by-candlelight"
+          },
+          "blocks": {}
+        },
+        "article_qP3bYM": {
+          "type": "article",
+          "name": "Article",
+          "settings": {
+            "article": "christmas-history/the-complete-history-of-jingle-bells"
+          },
+          "blocks": {}
+        },
+        "article_DedmeW": {
+          "type": "article",
+          "name": "Article",
+          "settings": {
+            "article": "christmas-history/what-is-a-carol-anyway"
+          },
+          "blocks": {}
+        },
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "article_bJfA3z",
+        "article_qP3bYM",
+        "article_DedmeW"
+      ],
+      "name": "Featured articles",
+      "settings": {
+        "hide_if_no_articles": true,
+        "large_tiles": true,
+        "border_bottom": false,
+        "border_top": false,
+        "title": "Featured",
+        "subtitle": "from the learning hub",
+        "button_text": "",
+        "button_url": "",
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "1658994245757c7b20": {
+      "type": "featured-products",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "settings": {
+        "show_placeholder_cards": true,
+        "alt_background": false,
+        "border_top": false,
+        "border_bottom": false,
+        "title": "Buy Music Albums",
+        "subtitle": "Explore our diverse range of music offerings today!",
+        "button_label": "View All Albums",
+        "button_link": "shopify://collections/digital-albums",
+        "large_tiles": true,
+        "product_aspect_ratio": "1-1",
+        "collection": "digital-albums",
+        "product_list": [],
+        "products_count": 6,
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "section_cta_9Wb4dm": {
+      "type": "section-cta",
+      "blocks": {
+        "cta-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_top_mobile": 0,
+            "spacing_bottom_mobile": 0
+          },
+          "blocks": {}
+        },
+        "cta-button-1": {
+          "type": "button",
+          "static": true,
+          "settings": {
+            "heading": "View License Options",
+            "link": "shopify://collections/love-to-sing-christmas-music-licences",
+            "type": "primary",
+            "icon_position": ""
+          },
+          "blocks": {}
+        },
+        "cta-button-2": {
+          "type": "button",
+          "disabled": true,
+          "static": true,
+          "settings": {
+            "heading": "test",
+            "link": "#",
+            "type": "primary",
+            "icon_position": "right"
+          },
+          "blocks": {}
+        }
+      },
+      "name": "Section CTA",
+      "settings": {
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "text_color": "#ffffff",
+        "title": "Don’t worry about copyright issues—purchase one of our music licenses for your church or school."
+      }
+    },
+    "featured_products_GxCczm": {
+      "type": "featured-products",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "settings": {
+        "show_placeholder_cards": true,
+        "alt_background": false,
+        "border_top": false,
+        "border_bottom": false,
+        "title": "Buy Merch",
+        "subtitle": "Explore our diverse range of music offerings today!",
+        "button_label": "View All",
+        "button_link": "shopify://collections/christmas-merch",
+        "large_tiles": true,
+        "product_aspect_ratio": "1-1",
+        "collection": "christmas-merch",
+        "product_list": [],
+        "products_count": 8,
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "featured_products_Tmxq8q": {
+      "type": "featured-products",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "settings": {
+        "show_placeholder_cards": true,
+        "alt_background": true,
+        "border_top": false,
+        "border_bottom": false,
+        "title": "Buy Music Videos",
+        "subtitle": "Explore our diverse range of music offerings today!",
+        "button_label": "View All",
+        "button_link": "shopify://collections/christmas-video-songs",
+        "large_tiles": false,
+        "product_aspect_ratio": "16-9",
+        "collection": "christmas-video-songs",
+        "product_list": [],
+        "products_count": 8,
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "featured_articles_jnjJCt": {
+      "type": "featured-articles",
+      "blocks": {
+        "article_jHNQRA": {
+          "type": "article",
+          "name": "Article",
+          "settings": {
+            "article": "christmas-music/35-of-the-best-christian-christmas-songs-of-all-time"
+          },
+          "blocks": {}
+        },
+        "article_9c7qWQ": {
+          "type": "article",
+          "name": "Article",
+          "settings": {
+            "article": "christmas-music/this-little-light-of-mine-with-easy-dance-moves"
+          },
+          "blocks": {}
+        },
+        "article_cg7r9a": {
+          "type": "article",
+          "name": "Article",
+          "settings": {
+            "article": "christmas-music/dance-to-christmas-song-jingle-bells-with-easy-choreography"
+          },
+          "blocks": {}
+        },
+        "article_3jfThL": {
+          "type": "article",
+          "name": "Article",
+          "settings": {
+            "article": "christmas-music/the-lyrics-to-amazing-grace-and-the-meaning-of-the-traditional-hymn"
+          },
+          "blocks": {}
+        },
+        "article_PGYUQ6": {
+          "type": "article",
+          "name": "Article",
+          "settings": {
+            "article": "christmas-music/o-come-all-ye-faithful-the-lyrics-and-the-meaning-of-the-song"
+          },
+          "blocks": {}
+        },
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "article_jHNQRA",
+        "article_9c7qWQ",
+        "article_cg7r9a",
+        "article_3jfThL",
+        "article_PGYUQ6"
+      ],
+      "name": "Featured articles",
+      "settings": {
+        "hide_if_no_articles": false,
+        "large_tiles": true,
+        "border_bottom": false,
+        "border_top": false,
+        "title": "From the Blog",
+        "subtitle": "Explore our diverse range of music offerings today!",
+        "button_text": "View All",
+        "button_url": "shopify://blogs/all",
+        "autoplay": true,
+        "autoplay_speed": 5
+      }
+    },
+    "165899557771fa749f": {
+      "type": "newsletter-banner",
+      "blocks": {
+        "newsletter-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_top_mobile": 0,
+            "spacing_bottom_mobile": 0
+          },
+          "blocks": {}
+        }
+      },
+      "settings": {
+        "background_top": "#ffffff",
+        "background_bottom": "#790200",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "text_color": "#ffffff",
+        "title": "Join Our Newsletter",
+        "subtitle": "Sign up to our newsletter and we will send you a free song!"
+      }
+    }
+  },
+  "order": [
+    "hero_banner_search_DH7Mng",
+    "featured_articles_9GaPNt",
+    "1658994245757c7b20",
+    "section_cta_9Wb4dm",
+    "featured_products_GxCczm",
+    "featured_products_Tmxq8q",
+    "featured_articles_jnjJCt",
+    "165899557771fa749f"
+  ]
+}

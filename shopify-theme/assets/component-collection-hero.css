@@ -1,0 +1,21 @@
+.collection-hero {
+  padding: 5.6rem 0;
+}
+
+.collection-hero {
+  padding-top: calc(5.6rem + var(--header-top-position, 7.5rem));
+}
+
+.collection-hero__breadcrumbs {
+  margin-bottom: 1.6rem;
+}
+
+.collection-hero__title {
+  color: inherit;
+  margin-bottom: 1.6rem;
+}
+
+.collection-hero__entry {
+  max-width: 84.5rem;
+  font-size: var(--fz-l);
+}

@@ -1,0 +1,215 @@
+{%- assign _section = section.settings -%}
+{{- 'card-featured-article.css' | asset_url | stylesheet_tag -}}
+{{- 'section-blog.css' | asset_url | stylesheet_tag -}}
+<script src="{{ 'main-blog.js' | asset_url }}" defer="defer"></script>
+
+<section class="blog">
+  <main-blog>
+    <header class="blog__head">
+      <div class="blog__banner">
+        <div class="container">
+          {%- if _section.link_text != blank and _section.link_url != blank -%}
+            <div class="blog__link-back center">
+              {%- liquid
+                capture icon
+                  render 'icon', icon: 'chevron-left'
+                endcapture
+
+                render 'button', type: 'link', style: 'text,sm', icon_position: 'left', value: _section.link_text, href: _section.link_url, custom_icon: icon
+              -%}
+            </div><!-- /.blog__link-back -->
+          {%- endif -%}
+
+          <h1 class="blog__title h2 center">{{- blog.title | escape -}}</h1><!-- /.blog__title h2 center -->
+
+          {%- if _section.subtitle != blank -%}
+            <p class="blog__subtitle center">
+              {{ _section.subtitle }}
+            </p><!-- /.blog__subtitle -->
+          {%- endif -%}
+        </div><!-- /.container -->
+      </div><!-- /.blog__banner -->
+
+      {%- if blog.all_tags.size > 0 -%}
+        <nav class="blog__nav caption center">
+          <div class="container">
+            <ul class="blog__links list-unstyled">
+              <li class="blog__link">
+                {%-
+                  liquid
+                  assign link_all_text = 'blog.categories.all.text' | t
+                  assign link_all_title = 'blog.categories.all.title' | t
+                  assign class_replace = 'class="full-unstyled-link tag tag--interactive" href'
+
+                  if current_tags == blank
+                    assign class_replace = 'class="full-unstyled-link tag tag--interactive active" href'
+                  endif
+
+                  echo link_all_text | link_to: blog.url, title: link_all_title | replace: 'href', class_replace
+                -%}
+              </li><!-- /.blog__link -->
+
+              {%- for tag in blog.all_tags -%}
+                {%- liquid
+                  assign class_replace = 'class="full-unstyled-link tag tag--interactive" href'
+
+                  if current_tags contains tag
+                    assign class_replace = 'class="full-unstyled-link tag tag--interactive active" href'
+                  endif
+                -%}
+                <li class="blog__link">
+                  {{- tag | link_to_tag: tag | replace: 'href', class_replace -}}
+                </li><!-- /.blog__link -->
+              {%- endfor -%}
+
+              <li class="blog__search">
+                <div class="form-search">
+                  {%- liquid
+                    assign tag = current_tags | join: ','
+                    assign placeholder = 'search.placeholder_articles' | t
+                    capture search_input_attr
+                      echo 'role="combobox" '
+                      echo 'aria-autocomplete="list" '
+                      echo 'autocorrect="off" '
+                      echo 'autocomplete="off" '
+                      echo 'autocapitalize="off" '
+                      echo 'spellcheck="false"'
+                    endcapture
+
+
+                    render 'form-search', namespace: 'blog', input_attr: search_input_attr, class: 'blog__search-form', placeholder: placeholder, type: 'article',  tag: tag,
+                  -%}
+                </div><!-- /.blog__search -->
+              </li>
+            </ul><!-- /.blog__links list-unstyled -->
+          </div><!-- /.container -->
+        </nav><!-- /.blog__nav caption center -->
+      {%- endif -%}
+    </header><!-- /.blog__head -->
+
+    {%- assign blog_tag_color = blog.metafields.custom.tag_color -%}
+
+    <div
+      class="blog__featured-article"
+      {%- if blog_tag_color -%}
+        style="--featured-color: {{ blog_tag_color }};"
+      {%- endif -%}
+    >
+      <div class="container">
+        {%- assign featured_article = blog.articles | first -%}
+        {%- capture featured_article_tag -%}
+          <span
+            class="tag"
+            style="color: {{ _section.tag_color }}; --tag-background: {{ _section.tag_background }};"
+          >
+            {{- _section.tag -}}
+          </span><!-- /.tag -->
+        {%- endcapture -%}
+
+        {%- if featured_article != blank -%}
+          {%- render 'card-featured-article',
+            article_ref: featured_article,
+            custom_tag: featured_article_tag
+          -%}
+        {%- endif -%}
+      </div><!-- /.container -->
+    </div><!-- /.blog__featured-article -->
+
+    {%- paginate blog.articles by 15 -%}
+      <div class="blog__body">
+        <div class="container">
+          {%- if blog.articles_count > 0 -%}
+            <div
+              class="blog__grid grid grid--3"
+              main-blog="grid"
+            >
+              {%- for article_ref in blog.articles -%}
+                {% render 'card-article', article_ref: article_ref %}
+              {%- endfor -%}
+            </div><!-- /.blog__grid grid -->
+
+            {%- if paginate.pages > 1 -%}
+              <div class="blog__load-more">
+                {%- liquid
+                  assign button_label = 'blog.show_more' | t
+                  capture attr
+                    echo 'main-blog="show-more"'
+                    echo 'data-next="'
+                      echo paginate.next.url | default: ''
+                    echo '"'
+                    echo 'data-label="'
+                      echo button_label
+                    echo '"'
+                  endcapture
+
+
+                  render 'button', type: 'button', style: 'secondary', value: button_label, attr: attr
+                -%}
+              </div><!-- /.blog__load-more -->
+            {%- endif -%}
+
+          {%- else -%}
+            <h2 class="h5 regular center">{{- 'blog.empty' | t -}}</h2><!-- /.h5 regular center -->
+          {%- endif -%}
+        </div><!-- /.container -->
+      </div><!-- /.blog__body -->
+    {%- endpaginate -%}
+  </main-blog>
+</section><!-- /.blog -->
+
+{% schema %}
+  {
+    "name": "Main blog",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Back link"
+      },
+      {
+        "type": "text",
+        "id": "link_text",
+        "label": "Link text",
+        "default": "Blog"
+      },
+      {
+        "type": "url",
+        "id": "link_url",
+        "label": "Link URL",
+      },
+      {
+        "type": "text",
+        "id": "subtitle",
+        "label": "Subtitle"
+      },
+      {
+        "type": "header",
+        "content": "Custom tag"
+      },
+      {
+        "type": "text",
+        "id": "tag",
+        "label": "Tag text",
+        "default": "Featured"
+      },
+      {
+        "type": "color",
+        "id": "tag_background",
+        "label": "Tag background",
+        "default": "#EC5450"
+      },
+      {
+        "type": "color",
+        "id": "tag_color",
+        "label": "Tag color",
+        "default": "#ffffff"
+      },
+    ],
+    "presets": [
+      {
+        "name": "Main blog",
+        "settings": {
+        }
+      }
+    ]
+  }
+{% endschema %}

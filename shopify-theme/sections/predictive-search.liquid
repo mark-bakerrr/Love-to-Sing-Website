@@ -1,0 +1,104 @@
+{%- if predictive_search.performed -%}
+  <div id="predictive-search-results motion-reduce">
+    <div class="predictive-search__inner">
+      <div class="predictive-search__back large-up-hide">
+        <button
+          class="predictive-search__hide button-reset"
+          predictive-search="hide-results"
+        >
+          <i>
+            {%- render 'icon', icon: 'chevron-left' -%}
+          </i>
+
+          <span>
+            {{- 'accessibility.back' | t -}}
+          </span>
+        </button><!-- /.predictive-search__hide -->
+      </div><!-- /.predictive-search__back -->
+
+      <div class="predictive-search__songs">
+        <p class="header__search-results-title h6">
+          {{- 'predictive_search.title_songs' | t -}}
+        </p><!-- /.header__search-results-title -->
+
+        {% comment %} Show only products with tag "song" {% endcomment %}
+        {%- if predictive_search.resources.products.size > 0 -%}
+          <div class="predictive-search__songs-list">
+            {%- for product_resource in predictive_search.resources.products -%}
+              {%- if product_resource.tags contains 'song' -%}
+                {% render 'predictive-search-item',
+                   class: 'predictive-search__item--product',
+                   heading_class: 'caption caption--small',
+                   resource_item: product_resource,
+                   image: product_resource.featured_image,
+                   show_image: true,
+                   is_product: true
+                %}
+              {%- endif -%}
+            {%- endfor -%}
+          </div><!-- /.predictive-search__songs-list -->
+
+          <div class="predictive-search__actions">
+            {%-
+              liquid
+              assign link_text = 'predictive_search.see_all_songs' | t
+              assign link_url = routes.search_url | append: '?q=' | append: predictive_search.terms | append: '+tag:song&type=product' | append: '&options[prefix]=last&'
+              render 'button', type: 'link', href: link_url, value: link_text, style: 'secondary,sm', icon_position: 'right'
+            -%}
+          </div><!-- /.predictive-search__actions -->
+        {%- else -%}
+          <p class="header__search-results-empty p4">{{ 'predictive_search.no_results' | t }}</p><!-- /.header__search-results-empty p4 -->
+        {%- endif -%}
+      </div><!-- /.predictive-search__songs -->
+
+      <div class="predictive-search__others">
+        <p class="header__search-results-title h6">{{ 'predictive_search.title_articles_and_pages' | t }}</p><!-- /.header__search-results-title h5 -->
+
+        {%- for product_resource in predictive_search.resources.products limit: 3 -%}
+          {%- unless product_resource.tags contains 'song' -%}
+            {% render 'predictive-search-item',
+                class: 'predictive-search__item--product',
+                heading_class: 'caption',
+                resource_item: product_resource,
+                image: product_resource.featured_image,
+                show_image: true,
+                show_tag: true,
+                is_product: true
+            %}
+          {%- endunless -%}
+        {%- endfor -%}
+
+        {%- if predictive_search.resources.articles.size > 0 or predictive_search.resources.pages.size > 0 -%}
+          {%- for article_resource in predictive_search.resources.articles limit: 3 -%}
+            {% render 'predictive-search-item',
+              class: 'predictive-search__item--article',
+              heading_class: 'h6 caption',
+              show_image: true,
+              resource_item: article_resource,
+            %}
+          {%- endfor -%}
+
+          {%- for page_resource in predictive_search.resources.pages limit: 3 -%}
+            {% render 'predictive-search-item',
+              class: 'predictive-search__item--page',
+              heading_class: 'h6 caption',
+              resource_item: page_resource,
+              show_image: true,
+            %}
+          {%- endfor -%}
+
+          <div class="predictive-search__actions">
+            {%-
+              liquid
+              assign link_text = 'predictive_search.see_all_results' | t
+              assign link_url = routes.search_url | append: '?q=' | append: predictive_search.terms | append: '&type=article,page' | append: '&options[prefix]=last'
+              render 'button', type: 'link', href: link_url, value: link_text,style: 'secondary,sm', icon_position: 'right'
+            -%}
+          </div><!-- /.predictive-search__actions -->
+        {%- else -%}
+          <p class="header__search-results-empty p4">No Results</p><!-- /.header__search-results-empty p4 -->
+        {%- endif -%}
+      </div><!-- /.predictive-search__others -->
+    </div><!-- /.predictive-search__inner -->
+  </div>
+{%- endif -%}

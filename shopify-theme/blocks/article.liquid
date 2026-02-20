@@ -1,0 +1,26 @@
+{%- liquid
+  assign _block = block.settings
+
+  if _block.article != blank
+    render 'card-article', article_ref: _block.article
+  endif
+-%}
+
+{% schema %}
+  {
+    "name": "Article",
+    "settings": [
+      {
+        "type": "article",
+        "id": "article",
+        "label": "Article"
+      },
+    ],
+    "presets": [
+      {
+        "name": "Article",
+        "settings": {}
+      }
+    ]
+  }
+{% endschema %}

@@ -1,0 +1,257 @@
+.main-song {
+  padding-block: var(--header-top-position, 7.4rem) 6.4rem;
+  position: relative;
+}
+
+.main-song__breadcrumbs {
+  margin-bottom: 1.6rem;
+}
+
+.main-song__head {
+  color: var(--color-background-body);
+  padding-block: 8rem 24rem;
+
+  @media (max-width: 767px) {
+    padding-block: 6.4rem 16rem;
+  }
+}
+
+/* Transparent Header */
+.template:not(:has(.shopify-section-group-header-group .header--solid)) {
+  .main-song {
+    padding-top: 0;
+  }
+
+  .main-song__head {
+    padding-top: calc(8rem + var(--header-top-position, 7.4rem));
+
+    @media (max-width: 767px) {
+      padding-top: calc(6.4rem + var(--header-top-position, 5.6rem));
+    }
+  }
+}
+
+
+.main-song__background {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--c-main-500) 0%, var(--c-main-600) 100%);
+}
+
+.main-song__background img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: var(--opacity);
+}
+
+.main-song__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+    gap: 4rem;
+  }
+}
+
+.main-song__image {
+  border-radius: var(--radius-l);
+
+  @media (max-width: 767px) {
+    border-radius: var(--radius-m);
+  }
+}
+
+.main-song__info {
+  align-self: center;
+  padding-left: 6.4rem;
+  container-type: inline-size;
+  container-name: ms-info;
+
+  @media (max-width: 1139px) {
+    padding-left: 4rem;
+  }
+
+  @media (max-width: 767px) {
+    padding-left: 0;
+  }
+}
+
+.main-song__title {
+  color: inherit;
+}
+
+.main-song__actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+  margin-top: 3.2rem;
+}
+
+@media (min-width: 768px) {
+  @container ms-info (width < 409px) {
+    .main-song__actions {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .main-song__actions .button {
+    padding-inline: 0;
+  }
+
+  .main-song__actions .button span {
+    font-size: var(--fz-t);
+  }
+}
+
+.main-song .button span {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.main-song .button svg {
+  fill: currentColor;
+}
+
+.main-song__body {
+  background-color: var(--c-neutral-100);
+  display: flex;
+  gap: 4rem;
+  padding: 4rem;
+  border-radius: var(--radius-m);
+  margin-top: -16rem;
+  position: relative;
+  z-index: 1;
+
+  @media (max-width: 1139px) {
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 767px) {
+    padding: 2.4rem 2rem;
+    margin-top: -12rem;
+  }
+}
+
+.main-song__banner {
+  width: 16rem;
+  height: 60rem;
+  flex-shrink: 0;
+
+  @media (min-width: 1140px) {
+    align-self: flex-start;
+    position: sticky;
+    top: calc(var(--header-top-position) + 4rem);
+  }
+
+  @media (max-width: 1139px) {
+    width: 100%;
+  }
+}
+
+.main-song__body-inner {
+  flex-grow: 1;
+  display: grid;
+  grid-template-columns: auto 28rem;
+  gap: 4rem;
+
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.main-song__body-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2.4rem;
+}
+
+.main-song__body-image img {
+  border-radius: var(--radius-m);
+}
+
+.main-song__form {
+  padding: 3.2rem;
+  border-radius: var(--radius-m);
+}
+
+.main-song__form:has(.main-song__background) {
+  color: var(--color-background-body);
+}
+
+.main-song__form-title {
+  color: inherit;
+  margin-bottom: 0.8rem;
+}
+
+.main-song__form-text {
+  font-size: var(--fz-s);
+  margin-bottom: 0;
+}
+
+.main-song__form .form-row {
+  margin-top: 2.4rem;
+}
+
+.main-song__form .form-row + .form-row {
+  margin-top: 1.2rem;
+}
+
+.main-song__stream {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+
+  .main-song__stream-title {
+    margin-bottom: 0.8rem;
+  }
+
+  .button span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .button img {
+    width: 2.4rem;
+    height: auto;
+  }
+}
+
+.main-song__share-title {
+  margin-bottom: 1.6rem;
+}
+
+.main-song__share ul {
+  gap: 1.6rem;
+
+  li {
+    padding: 0;
+  }
+
+  a {
+    line-height: 0;
+    transition: color var(--duration-default) linear;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .main-song__share a:hover {
+    color: var(--c-main-500);
+  }
+}
+
+[css-show-submitted],
+.is-submitted [css-hide-submitted] {
+  display: none;
+}
+
+.is-submitted a[css-show-submitted] {
+  display: inline-flex;
+}

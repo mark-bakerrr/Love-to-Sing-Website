@@ -1,0 +1,113 @@
+{{- 'addresses.css' | asset_url | stylesheet_tag -}}
+
+<script src="{{- 'shopify.js' | asset_url -}}" defer="defer"></script>
+<script src="{{- 'addresses.js' | asset_url -}}" defer="defer"></script>
+
+<div
+  class="addresses-dashboard"
+  style="--background: {{ section.settings.background }};"
+>
+  {%- paginate customer.addresses by 6 -%}
+    <div class="addresses" data-customer-addresses>
+      <div class="container container--narrow">
+        <div class="addresses-dashboard__content">
+          <header class="addresses__head">
+            <h1 class="addresses__title h2 center">{{- 'customer.addresses.title' | t -}}</h1><!-- /.addresses__title h2 center -->
+
+            <div class="center">
+              <a href="{{- routes.account_url -}}" class="link">
+                {{- 'customer.addresses.return' | t -}}
+              </a>
+            </div><!-- /.center -->
+
+            <div class="addresses__new" data-address>
+              <div class="center">
+                {%-
+                  liquid
+                  assign value = 'customer.addresses.add_new' | t
+                  render 'button', value: value, attr: 'data-form-id="AddAddress"'
+                  assign value = nil
+                -%}
+              </div><!-- /.center -->
+
+              {%- render 'address-form' -%}
+            </div><!-- /.addresses__new -->
+          </header><!-- /.addresses__head -->
+
+          <div class="addresses__body">
+            <ul role="list" class="list-unstyled">
+              {%- for address in customer.addresses -%}
+                <li class="addresses__item {% if address == customer.default_address %} color-background-accent {% endif %}" data-address>
+                  {%- if address == customer.default_address -%}
+                    <h2 class="addresses__item-title h5 regular center">
+                      {{- 'customer.addresses.default' | t -}}
+                    </h2><!-- /.addresses__item-title h5 regular center -->
+                  {%- endif -%}
+
+                  <div class="addresses__item-body center">
+                    {{- address | format_address -}}
+                  </div><!-- /.addresses__item-body center -->
+
+                  <div class="addresses__item-actions center">
+                    {%-
+                      liquid
+                      assign value = 'customer.addresses.edit_address' | t
+                      assign attr = 'data-form-id="EditAddress_' | append: address.id | append: '"'
+                      assign id = 'EditFormButton_' | append: address.id
+                      render 'button', value: value, attr: attr, id: id, style: 'outlined,sm'
+                      assign value = nil
+                      assign attr = nil
+                      assign id = nil
+                    -%}
+
+                    {%-
+                      liquid
+                      assign value = 'customer.addresses.delete_address' | t
+                      capture attr
+                        assign confirm_message = 'customer.addresses.delete_confirm' | t | escape
+                        echo 'data-target="' | append: address.url | append: '"'
+                        echo 'data-confirm-message="' | append: confirm_message | append: '"'
+                      endcapture
+                      render 'button', value: value, attr: attr, id: id, style: 'outlined,sm'
+                      assign value = nil
+                      assign attr = nil
+                    -%}
+                  </div><!-- /.addresses__item-actions center -->
+
+                  {%- render 'address-form', address: address -%}
+                </li><!-- /.addresses__item -->
+              {%- endfor -%}
+            </ul><!-- /.list-unstyled -->
+          </div><!-- /.addresses__body -->
+
+          {%- if paginate.pages > 1 -%}
+            <div class="addresses__paging">
+              {%- render 'pagination', paginate: paginate -%}
+            </div><!-- /.addresses__paging -->
+          {%- endif -%}
+        </div><!-- /.addresses-dashboard__content -->
+      </div><!-- /.container container--narrow -->
+    </div><!-- /.addresses -->
+  {%- endpaginate -%}
+</div><!-- /.addresses-dashboard -->
+
+<script>
+  window.onload = () => {
+    typeof CustomerAddresses !== 'undefined' && new CustomerAddresses();
+  }
+</script>
+
+{% schema %}
+  {
+    "name": "Addresses",
+    "settings": [
+      {
+        "type": "color_background",
+        "id": "background",
+        "label": "Background",
+        "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+      },
+
+    ]
+  }
+{% endschema %}

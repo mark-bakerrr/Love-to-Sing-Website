@@ -1,0 +1,129 @@
+{%- liquid
+  assign alt_background = section.settings.alt_background
+  assign title = section.settings.title
+  assign content = section.settings.content
+  assign aside_title = section.settings.aside_title
+  assign collections_ref = section.settings.collections
+
+  assign meta_date = product.metafields.videoObject.video_upload_date
+  assign meta_duration = product.metafields.videoObject.duration
+-%}
+
+{%- if content != blank or collections_ref.size > 0  -%}
+  {{- 'song-about.css' | asset_url | stylesheet_tag -}}
+
+  <section class="song-about" id="SongDescription">
+    <div class="container">
+      <div class="song-about__inner" {% if alt_background %} style="background-color: var(--neutral-100, #F4F4F4);"{% endif %}>
+        {%- if title != blank or content != blank -%}
+          <div class="song-about__main">
+            {%- if title != blank -%}
+              <h2 class="song-about__title">
+                {{- title | escape | newline_to_br -}}
+              </h2><!-- /.song-about__title -->
+            {%- endif -%}
+
+            {%- if meta_date != blank or meta_duration != blank -%}
+              <div class="song-about__meta">
+                {%- if meta_date != blank -%}
+                  {%- assign date = meta_date | date: '%B %d, %Y' -%}
+
+                  <p>{% render 'icon-calendar' %} {{ 'song.released_on_html' | t: date: date -}}</p>
+                {%- endif -%}
+
+                {%- if meta_duration != blank -%}
+                  {%- assign minutes = meta_duration | split: "M" | first | remove: "PT" | plus: 0 -%}
+                  {%- assign seconds = meta_duration | split: "M" | last | remove: "S" -%}
+
+                  <p>{% render 'icon-clock' %} {{ 'song.length_html' | t: minutes: minutes, seconds: seconds -}}</p>
+                {%- endif -%}
+              </div><!-- /.song-about__meta -->
+            {%- endif -%}
+
+            {%- if content != blank -%}
+              <div class="song-about__content rte">
+                {{ content }}
+              </div><!-- /.song-about__content -->
+            {%- endif -%}
+            {% if product.metafields.custom.song_activities != blank %}
+              <h2 class="song-about__title">
+                {{- product.title | escape }} Song Activities
+              </h2>
+              <div>
+                {{ product.metafields.custom.song_activities | metafield_tag }}
+              </div>
+            {% endif %}
+          </div><!-- /.song-about__main -->
+        {%- endif -%}
+
+        {%- if collections_ref.size > 0 or collections_ref.count > 0 -%}
+          <div class="song-about__aside">
+            {%- if aside_title != blank -%}
+              <h3 class="song-about__aside-title h5">
+                {{- aside_title | escape -}}
+              </h3><!-- /.song-about__aside-title -->
+            {%- endif -%}
+
+            <ul class="song-about__collections">
+              {%- for collection_ref in collections_ref limit: 10 -%}
+                <li>
+                  <a href="{{- collection_ref.url -}}" class="song-about__collection">
+                    {{- collection_ref.title | escape -}}
+                  </a><!-- /.song-about__collection -->
+                </li>
+              {%- endfor -%}
+            </ul><!-- /.song-about__collections -->
+          </div><!-- /.song-about__aside -->
+        {%- endif -%}
+      </div><!-- /.song-about__inner -->
+    </div><!-- /.container -->
+  </section><!-- /.song-about -->
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Song About",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "alt_background",
+      "label": "Alternative background",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:sections.featured-products.settings.title.label",
+      "default": "Heading goes here"
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "Content",
+      "default": "<p>Content goes here</p>"
+    },
+    {
+      "type": "header",
+      "content": "Aside"
+    },
+    {
+      "type": "text",
+      "id": "aside_title",
+      "label": "Title",
+      "default": "Categories"
+    },
+    {
+      "type": "collection_list",
+      "id": "collections",
+      "label": "Collections"
+    }
+  ],
+  "enabled_on": { "templates": ["product"] },
+  "presets": [
+    {
+      "name": "Song About",
+      "settings": {}
+    }
+  ]
+}
+{% endschema %}

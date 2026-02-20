@@ -1,0 +1,99 @@
+{%- unless product.has_only_default_variant or product.variants_count == 1 -%}
+  <div class="product-selector__options product__block-small" {{ block.shopify_attributes }}>
+    {%- for option in product.options_with_values -%}
+      {%- assign option_name_handle = option.name | handle -%}
+      {%- assign color_option = settings.swatches_option_name | default: 'color' | handleize -%}
+      {%- if option_name_handle == color_option -%}
+        <fieldset class="product-selector__buttons">
+          <legend class="product-selector__label">
+            {{- option.name | replace: ':', '' -}}:
+          </legend>
+
+          {%- for value in option.values -%}
+            <input
+              type="radio"
+              id="{{- section.id -}}-{{- option.position -}}-{{- forloop.index0 -}}"
+              name="{{- option.name -}}"
+              value="{{- value | escape -}}"
+              class="visually-hidden"
+              data-type="color"
+              data-name="color"
+              {% if option.selected_value == value %}checked{% endif %}
+            >
+            <label
+              for="{{- section.id -}}-{{- option.position -}}-{{- forloop.index0 -}}"
+              class="swatch swatch--{{- value | handle -}}"
+              title="{{- value -}}"
+            >
+              <span class="visually-hidden">{{- value -}}</span>
+            </label>
+          {%- endfor -%}
+        </fieldset><!-- /.product-selector__buttons -->
+      {%- else -%}
+        {%-
+          liquid
+          assign label = option.name | escape
+          assign id = 'Option-' | append: section.id | append: '-' | append: forloop.index0
+          assign name = 'options[' | append: label | append: ']'
+
+          assign sizeguide_option = settings.sizeguide_option_name | handle
+          assign is_sizeguide = false
+          assign option_handle = option.name | handle
+
+          if sizeguide_option == option_handle
+            assign is_sizeguide = true
+          endif
+
+          assign sizeguide = product.metafields.custom.sizeguide.value
+        -%}
+
+        <fieldset class="product-selector__buttons">
+          <legend class="product-selector__label">
+            {{- option.name | replace: ':', '' -}}:
+
+            {%- if is_sizeguide and sizeguide -%}
+              <modal-opener class="product-selector__sizeguide" data-modal="#SizeguideModal">
+                <button class="link" type="button" aria-haspopup="dialog">
+                  {% render 'icon-sizeguide' %}
+
+                  {%- if settings.sizeguide_button_label != blank -%}
+                    {{- settings.sizeguide_button_label -}}
+                  {%- endif -%}
+                </button>
+              </modal-opener>
+
+              {% render 'sizeguide-modal', sizeguide: sizeguide %}
+            {%- endif -%}
+          </legend>
+
+          {%- for value in option.values -%}
+            <input
+              type="radio"
+              id="{{- section.id -}}-{{- option.position -}}-{{- forloop.index0 -}}"
+              name="{{- option.name -}}"
+              value="{{- value | escape -}}"
+              class="visually-hidden"
+              data-name="{{- option.name | handle -}}"
+              {% if option.selected_value == value %}checked{% endif %}
+            >
+            <label
+              for="{{- section.id -}}-{{- option.position -}}-{{- forloop.index0 -}}"
+              class="product-selector__radio"
+              title="{{- value -}}"
+            >
+              {{- value -}}
+            </label>
+          {%- endfor -%}
+        </fieldset><!-- /.product-selector__buttons -->
+
+        {%-
+          liquid
+          assign label = nil
+          assign id = nil
+          assign name = nil
+          assign options = nil
+        -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </div><!-- /.product-selector__options -->
+{%- endunless -%}

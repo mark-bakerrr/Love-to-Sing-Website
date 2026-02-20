@@ -1,0 +1,275 @@
+{%- liquid
+
+  echo 'section-youtube-stats.css' | asset_url | stylesheet_tag
+-%}
+
+<div
+  class="youtube-stats"
+  style="--padding-top: {{ section.settings.padding_top | default: 80 }}px; --padding-bottom: {{ section.settings.padding_bottom | default: 80 }}px;--padding-top-mobile: {{ section.settings.padding_top_mobile | default: 40 }}px; --padding-bottom-mobile: {{ section.settings.padding_bottom_mobile | default: 40 }}px;"
+>
+  <div class="container">
+    <div class="youtube-stats__grid">
+      <div class="youtube-stats__text-content">
+        {%- if section.settings.eyebrow != blank -%}
+          <span class="youtube-stats__eyebrow">{{ section.settings.eyebrow }}</span>
+        {%- endif -%}
+
+        {%- if section.settings.title != blank -%}
+          <h2 class="youtube-stats__title">{{ section.settings.title }}</h2>
+        {%- endif -%}
+
+        {%- if section.settings.subtitle != blank -%}
+          <div class="youtube-stats__subtitle rte">
+            {{ section.settings.subtitle }}
+          </div>
+        {%- endif -%}
+
+        {%- if section.blocks.size > 0 -%}
+          <div class="youtube-stats__features-grid">
+            {%- for block in section.blocks -%}
+              <div class="youtube-stats__item" {{ block.shopify_attributes }}>
+                {%- if block.settings.icon_svg != blank or block.settings.icon_img != blank -%}
+                  <div
+                    class="youtube-stats__item-icon"
+                    style="--width: {{ block.settings.icon_width | default: 48 }}px;"
+                  >
+                    {%- liquid
+                      if block.settings.icon_svg != blank
+                        echo block.settings.icon_svg
+                      elsif block.settings.icon_img != blank
+                        render 'image', image: block.settings.icon_img
+                      endif
+                    -%}
+                  </div>
+                {%- endif -%}
+
+                {%- if block.settings.heading != blank -%}
+                  <h3 class="youtube-stats__item-heading h5">{{ block.settings.heading }}</h3>
+                {%- endif -%}
+
+                {%- if block.settings.text != blank -%}
+                  <div class="youtube-stats__item-text rte">{{ block.settings.text }}</div>
+                {%- endif -%}
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div
+        class="youtube-stats__card"
+        {%- if section.settings.background_image -%}
+          style="--background-image: url('{{ section.settings.background_image | image_url: width: 500 }}');"
+        {%- endif -%}
+      >
+        <div class="youtube-stats__card-content">
+          <div class="youtube-stats__card-head">
+            <svg class="youtube-stats__card-logo" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M27.427 3.123A3.533 3.533 0 0 0 24.96  .658C22.784 0 14 0 14 0S5.216 0 3.04.658A3.533 3.533 0 0 0 .573 3.123C0 5.352 0 10 0 10s0 4.648.573 6.877a3.533 3.533 0 0 0 2.467 2.465C5.216 19.999 14 19.999 14 19.999s8.784 0 10.96-.658a3.533 3.533 0 0 0 2.467-2.465C28 14.647 28 9.999 28 9.999s0-4.647-.573-6.876ZM11.2 14.285V5.714L18.48 10 11.2 14.285Z" fill="#FF0000"/></svg>
+
+            {%- if section.settings.channel_name != blank -%}
+              <p class="youtube-stats__card-name">
+                {{ section.settings.channel_name }}
+              </p>
+            {%- endif -%}
+          </div><!-- /.youtube-stats__card-head -->
+
+          <div
+            class="youtube-stats__boxes"
+            style="--background-image: url({{ 'hearts-background.png' | asset_url }});"
+          >
+            {%- if section.settings.subscriber_count != blank -%}
+              <div class="youtube-stats__box">
+                <p class="youtube-stats__number h4">
+                  {{ section.settings.subscriber_count }}
+                </p>
+
+                <p class="youtube-stats__label">
+                  {{ 'youtube-stats.subscribers' | t }}
+                </p>
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.view_count != blank -%}
+              <div class="youtube-stats__box">
+                <p class="youtube-stats__number h4">
+                  {{ section.settings.view_count }}
+                </p>
+
+                <p class="youtube-stats__label">
+                  {{ 'youtube-stats.views' | t }}
+                </p>
+              </div>
+            {%- endif -%}
+          </div>
+
+          {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
+            {%- render 'button',
+              type: 'link',
+              value: section.settings.button_label,
+              href: section.settings.button_link
+            -%}
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "YouTube Stats",
+  "tag": "section",
+  "class": "section-youtube-stats",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "number",
+      "id": "padding_top",
+      "label": "Top padding",
+      "default": 80
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "default": 80
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Top padding Mobile",
+      "default": 40
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Bottom padding Mobile",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "eyebrow",
+      "default": "Our Journey"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Passion for Music and Community"
+    },
+    {
+      "type": "richtext",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "<p>At Love to Sing, we celebrate the joy of music creation. Our mission is to empower artists and connect communities through the art of singing.</p>"
+    },
+    {
+      "type": "header",
+      "content": "YouTube Card Settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image"
+    },
+    {
+      "type": "text",
+      "id": "channel_name",
+      "label": "Channel Name",
+      "default": "Youtube Channel"
+    },
+    {
+      "type": "text",
+      "id": "subscriber_count",
+      "label": "Subscriber Count",
+      "default": "2,496,428"
+    },
+    {
+      "type": "text",
+      "id": "view_count",
+      "label": "View Count",
+      "default": "1,426,335,203"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button Label",
+      "default": "SUBSCRIBE TO US"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    },
+  ],
+  "blocks": [
+    {
+      "type": "feature_item",
+      "name": "Feature Item",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon_img",
+          "label": "Icon image"
+        },
+        {
+          "type": "textarea",
+          "id": "icon_svg",
+          "label": "Icon SVG",
+          "info": "Paste your SVG code here."
+        },
+        {
+          "type": "number",
+          "id": "icon_width",
+          "label": "Icon width",
+          "default": 48
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Feature Title"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Use this text to share more information about your feature.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "YouTube Stats",
+      "blocks": [
+        {
+          "type": "feature_item",
+          "settings": {
+            "icon_svg": "<svg width=\"48\" height=\"49\" viewBox=\"0 0 48 49\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M38 34.5V10.5C38 9.43913 37.5786 8.42172 36.8284 7.67157C36.0783 6.92143 35.0609 6.5 34 6.5H8\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M16 42.5H40C41.0609 42.5 42.0783 42.0786 42.8284 41.3284C43.5786 40.5783 44 39.5609 44 38.5V36.5C44 35.9696 43.7893 35.4609 43.4142 35.0858C43.0391 34.7107 42.5304 34.5 42 34.5H22C21.4696 34.5 20.9609 34.7107 20.5858 35.0858C20.2107 35.4609 20 35.9696 20 36.5V38.5C20 39.5609 19.5786 40.5783 18.8284 41.3284C18.0783 42.0786 17.0609 42.5 16 42.5ZM16 42.5C14.9391 42.5 13.9217 42.0786 13.1716 41.3284C12.4214 40.5783 12 39.5609 12 38.5V10.5C12 9.43913 11.5786 8.42172 10.8284 7.67157C10.0783 6.92143 9.06087 6.5 8 6.5C6.93913 6.5 5.92172 6.92143 5.17157 7.67157C4.42143 8.42172 4 9.43913 4 10.5V14.5C4 15.0304 4.21071 15.5391 4.58579 15.9142C4.96086 16.2893 5.46957 16.5 6 16.5H12\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>",
+            "heading": "Our History",
+            "text": "<p>Founded by passionate musicians, we have grown into a vibrant creative hub.</p>"
+          }
+        },
+        {
+          "type": "feature_item",
+          "settings": {
+            "icon_svg": "<svg width=\"48\" height=\"49\" viewBox=\"0 0 48 49\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M14.4209 30.5L5.32089 14.78C4.92849 14.1017 4.74395 13.3232 4.79017 12.541C4.83639 11.7587 5.11134 11.0073 5.58089 10.38L8.80089 6.1C9.17348 5.60322 9.65661 5.2 10.212 4.92229C10.7675 4.64458 11.3799 4.5 12.0009 4.5H36.0009C36.6219 4.5 37.2343 4.64458 37.7897 4.92229C38.3452 5.2 38.8283 5.60322 39.2009 6.1L42.4009 10.38C42.8735 11.0053 43.152 11.7557 43.2018 12.5379C43.2516 13.3202 43.0705 14.0998 42.6809 14.78L33.5809 30.5\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M22.0002 24.5004L10.2402 4.90039\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M26 24.5004L37.76 4.90039\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M16 14.5H32\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M24 44.5C29.5228 44.5 34 40.0228 34 34.5C34 28.9772 29.5228 24.5 24 24.5C18.4772 24.5 14 28.9772 14 34.5C14 40.0228 18.4772 44.5 24 44.5Z\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M24 36.5V32.5H23\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>",
+            "heading": "Our Achievements",
+            "text": "<p>We've helped countless artists find their voice and reach their dreams.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

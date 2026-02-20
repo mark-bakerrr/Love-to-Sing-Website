@@ -1,0 +1,63 @@
+{% comment %}
+    Renders a set of links for paginated results. Must be used within paginate tags.
+
+    Usage:
+    {% paginate results by 2 %}
+      {% render 'pagination', paginate: paginate, anchor: '#yourID' %}
+    {% endpaginate %}
+
+    Accepts:
+    - paginate: {Object}
+    - anchor: {String} (optional) This can be added so that on page reload it takes you to wherever you've placed your anchor tag.
+{% endcomment %}
+
+{%- if paginate.parts.size > 0 -%}
+  <nav class="center" role="navigation" aria-label="{{- 'general.pagination.label' | t -}}">
+    <ul class="list-unstyled list-flex list-flex--center" role="list">
+      {%- if paginate.previous -%}
+        <li>
+          <a
+            href="{{ paginate.previous.url }}{{ anchor }}"
+            class="link"
+            aria-label="{{- 'general.pagination.previous' | t -}}"
+            title="{{- 'general.pagination.previous' | t -}}"
+          >
+            {%- render 'icon-chevron-left' -%}
+          </a>
+        </li>
+      {%- endif -%}
+
+      {%- for part in paginate.parts -%}
+        <li>
+          {%- if part.is_link -%}
+            <a
+              href="{{ part.url }}{{ anchor }}"
+              class="link"
+              aria-label="{{- 'general.pagination.page' | t: number: part.title -}}"
+            >{{- part.title -}}</a>
+          {%- else -%}
+            <span
+              {% if part.title == paginate.current_page %}
+                aria-current="page"
+                aria-label="{{- 'general.pagination.page' | t: number: part.title -}}"
+              {% endif %}
+            >{{- part.title -}}</span>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+
+      {%- if paginate.next -%}
+        <li>
+          <a
+            href="{{ paginate.next.url }}{{ anchor }}"
+            class="link"
+            aria-label="{{- 'general.pagination.next' | t -}}"
+            title="{{- 'general.pagination.next' | t -}}"
+          >
+            {%- render 'icon-chevron-right' -%}
+          </a>
+        </li>
+      {%- endif -%}
+    </ul><!-- /.list-unstyled list-flex list-flex--center -->
+  </nav><!-- /.center -->
+{%- endif -%}

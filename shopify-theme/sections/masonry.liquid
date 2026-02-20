@@ -1,0 +1,86 @@
+{%- liquid
+  content_for "block", type: "spacing", id: "masonry-gallery-spacing-bottom"
+
+  echo 'section-masonry.css' | asset_url | stylesheet_tag
+
+  capture classes
+    echo 'masonry'
+    if section.settings.border_top
+      echo ' border-top'
+    endif
+
+    if section.settings.border_bottom
+      echo ' border-bottom'
+    endif
+  endcapture
+-%}
+
+<section class="{{  classes }}">
+  <div class="container">
+    <div class="masonry__header">
+      {%- if section.settings.title != blank -%}
+        <h2>{{ section.settings.title }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subtitle != blank -%}
+        <div class="subtitle rte">{{ section.settings.subtitle }}</div>
+      {%- endif -%}
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="masonry__grid">
+        {% content_for 'blocks' %}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+
+{% schema %}
+{
+  "name": "Masonry Gallery",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "border_top",
+      "label": "Add border top",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "border_bottom",
+      "label": "Add border bottom",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Fan Showcase"
+    },
+    {
+      "type": "richtext",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image-item"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Masonry Gallery",
+      "blocks": [
+        { "type": "image-item" },
+        { "type": "image-item" },
+        { "type": "image-item" },
+        { "type": "image-item" },
+        { "type": "image-item" },
+        { "type": "image-item" }
+      ]
+    }
+  ]
+}
+{% endschema %}

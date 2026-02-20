@@ -1,0 +1,43 @@
+{%- comment -%}
+  Render accordion element.
+
+  Accepts:
+  - title: {String} Title - Required
+  - title_class: {String} Title class
+  - content: {String} Content markup
+  - class: {String} Custom class list
+  - id: {String}
+  - is_open: {Boolean} Open by default
+  - attr: {String} container attributes
+
+  Use:
+  {%- render 'accordion-item', title: title, content: content -%}
+{%- endcomment -%}
+{%- if is_open -%}
+  {%- assign open_class = 'is-open' -%}
+{%- endif -%}
+
+{% if title != blank %}
+  <accordion-item
+    class="accordion-item {{ class }}"
+    {{ attr }}
+  >
+    <details
+      class="accordion {{ open_class }}"
+      {% if id != blank %}id="{{ id }}"{% endif %}
+      {% if is_open %}open{% endif %}
+    >
+      <summary class="accordion__summary focus-offset {{ title_class }}">
+        <span>{{- title -}}</span>
+
+        <span class="accordion__icon"></span>
+      </summary><!-- /.accordion__summary focus-offset -->
+
+      <div class="accordion__content">
+        <div class="accordion__content-inner">
+          {{ content }}
+        </div><!-- /.accordion__content-inner -->
+      </div><!-- /.accordion__content -->
+    </details>
+  </accordion-item>
+{% endif %}

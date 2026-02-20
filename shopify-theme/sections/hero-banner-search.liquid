@@ -1,0 +1,268 @@
+{%- liquid
+  assign _section = section.settings
+  assign _blocks = section.blocks
+  assign video = _section.video | default: nil
+  assign video_mobile = _section.video_mobile | default: video
+-%}
+<script src="{{- 'dropdown-tabs.js' | asset_url -}}" defer="defer" data-theme-script></script>
+<script src="{{ 'predictive-search.js' | asset_url }}" defer="defer"></script>
+
+<link rel="stylesheet" href="{{ 'component-predictive-search.css' | asset_url }}" media="print" onload="this.media='all'">
+{{- 'component-card-chart.css' | asset_url | stylesheet_tag -}}
+{{- 'component-dropdown-tabs.css' | asset_url | stylesheet_tag -}}
+{{- 'section-hero-banner-search.css' | asset_url | stylesheet_tag -}}
+
+<section class="hero-banner-search">
+  <div
+    class="hero-banner-search__main"
+    style="background: {{ _section.background }};"
+  >
+    <div class="container">
+      <div
+        class="hero__background"
+        style="opacity: {{ _section.media_opacity | divided_by: 100.0 }};"
+      >
+        {%- if video != blank -%}
+          {%- assign video_title = video.alt | default: _section.title -%}
+
+          <div class="media media--16-9 hero__media media--transparent small-hide">
+            {% render 'external-video', video: video, title: video_title %}
+          </div><!-- /.media -->
+
+          <div class="media media--16-9 hero__media media--transparent large-up-hide medium-hide">
+            {% render 'external-video', video: video_mobile, title: video_title %}
+          </div><!-- /.media -->
+        {%- else -%}
+          <div class="media media--16-9 hero__media media--transparent">
+            {%-
+              liquid
+              if _section.image != blank
+                assign image_mobile = _section.image_mobile | default: _section.image
+                render 'image', image: _section.image, class: 'small-hide'
+                render 'image', image: image_mobile, class: 'medium-hide large-up-hide'
+              else
+                echo 'image' | placeholder_svg_tag: 'placeholder-svg'
+              endif
+            -%}
+          </div><!-- /.media -->
+        {%- endif -%}
+      </div><!-- /.hero__background -->
+
+      {%- if _section.overlay_color != blank and _section.overlay_opacity > 0 -%}
+        {%- assign overlay_opacity = _section.overlay_opacity | divided_by: 100.0 -%}
+
+        <div class="hero__overlay" style="background: {{ _section.overlay_color }}; opacity: {{ overlay_opacity }};"></div><!-- /.hero__overlay -->
+      {%- endif -%}
+
+      <div class="hero__inner">
+        {%- if _section.title != blank -%}
+          {%- liquid
+            assign heading_tag = 'h2'
+            if section.index == 1
+              assign heading_tag = 'h1'
+            endif
+          -%}
+
+          <{{ heading_tag }}
+            class="hero__title h1"
+            style="color: {{ _section.title_color }};"
+          >
+            <span>
+              {{- _section.title | newline_to_br -}}
+            </span>
+
+            {%- if _section.enable_decoration -%}
+              <i class="hero__title-decoration small-hide">
+                {%- render 'icon', icon: 'heart-with-note' -%}
+              </i>
+
+              <i class="hero__title-decoration small small-hide">
+                {%- render 'icon', icon: 'heart-with-note' -%}
+              </i>
+            {%- endif -%}
+          </{{ heading_tag }}><!-- /.hero__title -->
+        {%- endif -%}
+
+        <div class="hero__search form-search">
+          <predictive-search
+            class="no-js-hidden"
+            data-results-limit="50"
+            data-custom-query="&resources[type]=product&resources[limit]=50&filter.p.tag=song"
+          >
+            <div class="hero__search-inner motion-reduce">
+              {%-
+                liquid
+                capture search_input_attr
+                  echo 'role="combobox" '
+                  echo 'aria-expanded="false" '
+                  echo 'aria-owns="predictive-search-results-list" '
+                  echo 'aria-controls="predictive-search-results-list" '
+                  echo 'aria-haspopup="listbox" '
+                  echo 'aria-autocomplete="list" '
+                  echo 'autocorrect="off" '
+                  echo 'autocomplete="off" '
+                  echo 'autocapitalize="off" '
+                  echo 'spellcheck="false"'
+                endcapture
+
+                render 'form-search', namespace: 'hero-banner-search', input_attr: search_input_attr, class: 'hero__search-form', type: 'product', tag: 'song'
+              -%}
+
+              <predictive-search-results class="hero__search-results"></predictive-search-results>
+            </div>
+          </predictive-search>
+        </div><!-- /.hero__search -->
+      </div><!-- /.hero__inner -->
+    </div><!-- /.container -->
+  </div><!-- /.hero-banner-search__main -->
+
+  {%- if _blocks.size > 0 -%}
+    <div class="hero-banner-search__charts">
+      <div class="container">
+        {%- render 'dropdown-tabs', blocks: _blocks -%}
+      </div><!-- /.container -->
+    </div><!-- /.hero-banner-search__charts -->
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Hero Search banner",
+  "settings": [
+    {
+      "type": "color_background",
+      "id": "background",
+      "label": "Background",
+      "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:sections.hero-banner.settings.background_paragraph.content"
+    },
+    {
+      "type": "range",
+      "id": "media_opacity",
+      "label": "Media opacity",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 100
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:sections.hero-banner.settings.image.desktop.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "t:sections.hero-banner.settings.image.mobile.label",
+      "info": "t:sections.hero-banner.settings.image.mobile.info"
+    },
+    {
+      "type": "video_url",
+      "id": "video",
+      "accept": [
+        "youtube",
+        "vimeo"
+      ],
+      "info": "t:sections.hero-banner.settings.video.desktop.info",
+      "label": "t:sections.hero-banner.settings.video.desktop.label"
+    },
+    {
+      "type": "video_url",
+      "id": "video_mobile",
+      "accept": [
+        "youtube",
+        "vimeo"
+      ],
+      "label": "t:sections.hero-banner.settings.video.mobile.label",
+      "info": "t:sections.hero-banner.settings.video.mobile.info"
+    },
+    {
+      "type": "color_background",
+      "id": "overlay_color",
+      "label": "t:sections.hero-banner.settings.background_overlay.color.label",
+      "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "t:sections.hero-banner.settings.background_overlay.opacity.label",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_decoration",
+      "label": "Enable decoration",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Heading color",
+      "default": "#fff"
+    },
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "t:sections.hero-banner.settings.title.label",
+      "default": "Connecting the World \nThrough Music"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header"]
+  },
+  "blocks": [
+    {
+      "name": "chart",
+      "type": "chart",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "text",
+          "id": "filter_label",
+          "label": "Filter label"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Label"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Search banner"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,204 @@
+{%- liquid
+  assign _section = section.settings
+  assign product_aspect_ratio = _section.product_aspect_ratio
+
+  content_for "block", type: "spacing", id: "main-collection"
+
+  assign collection_ref = collection
+
+  assign show_products_count = false
+  if _section.filters_right_side == 'products_count'
+    assign show_products_count = true
+  endif
+-%}
+
+{%- capture filters_content -%}
+  {%- if _section.filters_right_side == 'content' -%}
+    {%- if _section.heading != blank -%}
+      <h2 class="section-collection__title">
+        {{ _section.heading }}
+      </h2><!-- /.section-collection__title -->
+    {%- endif -%}
+
+    {%- if _section.content != blank -%}
+      <div class="section-collection__content">
+        {{ _section.content }}
+      </div><!-- /.section-collection__content -->
+    {%- endif -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- if section.settings.enable_filters or section.settings.enable_sorting -%}
+  {{- 'component-facets.css' | asset_url | stylesheet_tag -}}
+  <script src="{{- 'facets.js' | asset_url -}}" defer="defer"></script>
+  <script src="{{- 'dropdown-input.js' | asset_url -}}" defer="defer"></script>
+{%- endif -%}
+
+<script src="{{- 'main-collection.js' | asset_url -}}" defer="defer"></script>
+
+{{- 'collection.css' | asset_url | stylesheet_tag -}}
+
+<section class="section-collection">
+  <main-collection
+    class="collection"
+    data-collection-handle="{{ collection_ref.handle }}"
+    data-section-id="{{ section.id }}"
+  >
+    {% comment %} {%- if section.settings.enable_filters or section.settings.enable_sorting -%}
+      {%- render 'facets-bar',
+        results: collection,
+        enable_filtering: section.settings.enable_filters,
+        enable_sorting: section.settings.enable_sorting,
+        section_id: section.id
+      -%}
+    {%- endif -%} {% endcomment %}
+
+    <div class="collection__inner">
+      {%- if section.settings.enable_filters or section.settings.enable_sorting -%}
+        {%- render 'facets-bar',
+          results: collection_ref,
+          enable_filtering: section.settings.enable_filters,
+          enable_sorting: section.settings.enable_sorting,
+          section_id: section.id,
+          always_visible: true,
+          show_results_count: show_products_count,
+          content_left: filters_content
+        -%}
+      {%- endif -%}
+
+      {%- paginate collection_ref.products by section.settings.products_per_page -%}
+        <div class="collection-grid-container" id="ProductGridContainer">
+          <div class="container">
+            {%- if collection_ref.products_count == 0 -%}
+              <div class="center">
+                <h2 class="h3 regular">
+                  {{- 'collection.empty' | t -}}<br>
+                  {{- 'collection.use_fewer_filters_html' | t: link: collection_ref.url, class: "link" -}}
+                </h2><!-- /.h3 regular -->
+              </div><!-- /.center -->
+
+            {%- else -%}
+              <div class="collection__grid list-unstyled grid grid--3" role="list" id="product-grid" data-id="{{- section.id -}}">
+                {%- for product_ref in collection_ref.products -%}
+                  {%- render 'card-product',
+                    product_ref: product_ref,
+                    class: 'grid__item',
+                    collection_ref: collection_ref,
+                    media_aspect: product_aspect_ratio
+                  -%}
+                {%- endfor -%}
+              </div><!-- /#product-grid.collection__grid list-unstyled grid grid--4 -->
+
+              {%- if paginate.pages > 1 and paginate.next -%}
+                <div class="collection__load-more">
+                  {%- liquid
+                    assign button_label = 'blog.show_more' | t
+                    capture attr
+                      echo 'main-collection="show-more"'
+                      echo 'data-next="'
+                        echo paginate.next.url | default: ''
+                      echo '"'
+                      echo 'data-label="'
+                        echo button_label
+                      echo '"'
+                    endcapture
+
+
+                    render 'button', type: 'button', style: 'secondary,sm', value: button_label, attr: attr
+                  -%}
+                </div><!-- /.collection__load-more -->
+              {%- endif -%}
+            {%- endif -%}
+          </div><!-- /.container -->
+        </div><!-- /.collection-grid-container -->
+      {%- endpaginate -%}
+    </div>
+  </main-collection><!-- /.collection -->
+</section><!-- /.section-collection -->
+
+{% schema %}
+  {
+    "name": "Main Collection",
+    "settings": [
+      {
+        "type": "select",
+        "id": "product_aspect_ratio",
+        "label": "Product media aspect ratio",
+        "options": [
+          {
+            "value": "1-1",
+            "label": "Square"
+          },
+          {
+            "value": "16-9",
+            "label": "Landscape"
+          },
+          {
+            "value": "portrait",
+            "label": "Portrait"
+          }
+        ],
+        "default": "1-1"
+      },
+      {
+        "type": "select",
+        "id": "filters_right_side",
+        "label": "Filters right side",
+        "options": [
+          {
+            "value": "products_count",
+            "label": "Products count"
+          },
+          {
+            "value": "content",
+            "label": "Content"
+          },
+        ],
+        "default": "products_count"
+      },
+      {
+        "type": "text",
+        "id": "heading",
+        "label": "Heading",
+        "visible_if": "{{ section.settings.filters_right_side == 'content' }}"
+      },
+      {
+        "type": "textarea",
+        "id": "content",
+        "label": "Content",
+        "visible_if": "{{ section.settings.filters_right_side == 'content' }}"
+      },
+      {
+        "type": "header",
+        "content": "t:sections.main-collection.settings.header.filters_and_sorting.content"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_filters",
+        "label": "t:sections.main-collection.settings.enable_filters.label",
+        "default": true,
+        "info": "t:sections.main-collection.settings.enable_filters.info"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_sorting",
+        "label": "t:sections.main-collection.settings.enable_sorting.label",
+        "default": true,
+        "info": "t:sections.main-collection.settings.enable_sorting.info"
+      },
+      {
+        "type": "header",
+        "content": "t:sections.main-collection.settings.header.products_grid.content"
+      },
+      {
+        "type": "range",
+        "id": "products_per_page",
+        "min": 8,
+        "max": 24,
+        "step": 4,
+        "label": "t:sections.main-collection.settings.products_per_page.label",
+        "default": 16
+      }
+    ],
+  }
+{% endschema %}

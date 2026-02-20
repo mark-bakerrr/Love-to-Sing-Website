@@ -1,0 +1,59 @@
+{% comment %}
+    Renders single product media
+    Accepts:
+    - media: {Object} Liquid media object
+    - is_gallery_media: {Boolean} True if media is modal gallery media
+    Usage:
+    {%- render 'card-result', result: result, class: 'grid__item' -%}
+{% endcomment %}
+
+<div class="product__image{% if is_gallery_media %} hidden{% endif %}">
+  {%- capture media_image -%}
+    {%-
+      liquid
+      assign sizes = 'auto'
+      if is_gallery_media
+        assign sizes = '100vw'
+      endif
+      render 'image', image: media, sizes: sizes
+    -%}
+  {%- endcapture -%}
+
+  {%- if media.media_type == 'image' -%}
+    {%- if is_gallery_media -%}
+      <div class="media media--1-1 media--transparent js-product-gallery-media" data-media-id="{{- media.id -}}">
+        {{- media_image -}}
+      </div><!-- /.media -->
+    {%- else -%}
+      <modal-opener class="product__gallery-opener" data-modal="#ProductModal-{{- modal_id -}}">
+        <div class="media media--1-1">
+          {{- media_image -}}
+        </div><!-- /.media -->
+      </modal-opener>
+    {%- endif -%}
+  {%- elsif media.media_type == 'video' or media.media_type == 'external_video' -%}
+    {%- unless is_gallery_media -%}
+      <deferred-media class="deferred-media">
+        <button class="deferred-media__button" id="Deferred-Poster-Modal-{{- media.id -}}" type="button">
+          <span class="media media--portrait">
+            {{- media_image -}}
+          </span>
+
+          {%- render 'icon-play' -%}
+        </button>
+
+        <template>
+          <div class="deferred-media__wrapper">
+            {%- case media.media_type -%}
+              {%- when 'external_video' -%}
+                {%- assign video_class = 'js-' | append: media.host -%}
+                {{- media | external_video_url: autoplay: true, loop: true | external_video_tag: class: video_class, loading: 'lazy' -}}
+              {%- when 'video' -%}
+                {{- media | media_tag: image_size: '2048x', autoplay: true, loop: true, controls: true, preload: 'none' -}}
+            {%- endcase -%}
+          </div><!-- /.deferred-media__wrapper -->
+        </template>
+      </deferred-media><!-- /.deferred-media -->
+    {%- endunless -%}
+  {%- endif -%}
+</div><!-- /.product__image -->

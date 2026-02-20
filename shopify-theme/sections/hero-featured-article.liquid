@@ -1,0 +1,188 @@
+{%- liquid
+  assign _section = section.settings
+  assign video = _section.video | default: nil
+  assign video_mobile = _section.video_mobile | default: video
+-%}
+
+{{- 'section-hero-featured-article.css' | asset_url | stylesheet_tag -}}
+{{- 'card-featured-article.css' | asset_url | stylesheet_tag -}}
+
+<section
+  class="hero-banner flex flex--justify-center"
+  style="background: {{ _section.background }}; color: {{ _section.content_color }}"
+>
+  <div class="container">
+    <div
+      class="hero__background"
+      style="opacity: {{ _section.media_opacity | divided_by: 100.0 }};"
+    >
+      {%- if video != blank -%}
+
+        {%- assign video_title = video.alt | default: _section.title -%}
+        <div class="media media--16-9 hero__media media--transparent small-hide">
+          {% render 'external-video', video: video, title: video_title %}
+        </div><!-- /.media -->
+
+        <div class="media media--16-9 hero__media media--transparent large-up-hide medium-hide">
+          {% render 'external-video', video: video_mobile, title: video_title %}
+        </div><!-- /.media -->
+      {%- else -%}
+        <div class="media media--16-9 hero__media media--transparent">
+          {%-
+            liquid
+            if _section.image != blank
+              assign image_mobile = _section.image_mobile | default: _section.image
+              render 'image', image: _section.image, class: 'small-hide'
+              render 'image', image: image_mobile, class: 'medium-hide large-up-hide'
+            endif
+          -%}
+        </div><!-- /.media -->
+      {%- endif -%}
+    </div><!-- /.hero__background -->
+
+    {%- if _section.overlay_color != blank and _section.overlay_opacity > 0 -%}
+      {%- assign overlay_opacity = _section.overlay_opacity | divided_by: 100.0 -%}
+      <div class="hero__overlay" style="background: {{ _section.overlay_color }}; opacity: {{ overlay_opacity }};"></div><!-- /.hero__overlay -->
+    {%- endif -%}
+
+    <div class="hero__inner">
+      {%- if _section.article != blank -%}
+        {%- if _section.tag != blank -%}
+          {%- capture custom_tag -%}
+            <span
+              class="tag"
+              style="color: {{ _section.tag_color }}; --tag-background: {{ _section.tag_background }};"
+            >
+              {{- _section.tag -}}
+            </span><!-- /.tag -->
+          {%- endcapture -%}
+        {%- endif -%}
+
+        {%- render 'card-featured-article',
+          article_ref: _section.article,
+          custom_tag: custom_tag,
+        -%}
+      {%- endif -%}
+    </div><!-- /.hero__inner -->
+  </div><!-- /.container -->
+</section>
+
+{% schema %}
+{
+  "name": "Hero featured article",
+  "settings": [
+    {
+      "type": "article",
+      "id": "article",
+      "label": "Featured article"
+    },
+    {
+      "type": "color",
+      "id": "content_color",
+      "label": "Content color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Custom tag"
+    },
+    {
+      "type": "text",
+      "id": "tag",
+      "label": "Tag text",
+      "default": "Featured"
+    },
+    {
+      "type": "color",
+      "id": "tag_background",
+      "label": "Tag background",
+      "default": "#EC5450"
+    },
+    {
+      "type": "color",
+      "id": "tag_color",
+      "label": "Tag color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Styling"
+    },
+    {
+      "type": "color_background",
+      "id": "background",
+      "label": "Background",
+      "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:sections.hero-banner.settings.background_paragraph.content"
+    },
+    {
+      "type": "range",
+      "id": "media_opacity",
+      "label": "Media opacity",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 100
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:sections.hero-banner.settings.image.desktop.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "t:sections.hero-banner.settings.image.mobile.label",
+      "info": "t:sections.hero-banner.settings.image.mobile.info"
+    },
+    {
+      "type": "video_url",
+      "id": "video",
+      "accept": [
+        "youtube",
+        "vimeo"
+      ],
+      "info": "t:sections.hero-banner.settings.video.desktop.info",
+      "label": "t:sections.hero-banner.settings.video.desktop.label"
+    },
+    {
+      "type": "video_url",
+      "id": "video_mobile",
+      "accept": [
+        "youtube",
+        "vimeo"
+      ],
+      "label": "t:sections.hero-banner.settings.video.mobile.label",
+      "info": "t:sections.hero-banner.settings.video.mobile.info"
+    },
+    {
+      "type": "color_background",
+      "id": "overlay_color",
+      "label": "t:sections.hero-banner.settings.background_overlay.color.label",
+      "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "t:sections.hero-banner.settings.background_overlay.opacity.label",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 20
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header"]
+  },
+  "presets": [
+    {
+      "name": "Hero featured article"
+    }
+  ]
+}
+{% endschema %}

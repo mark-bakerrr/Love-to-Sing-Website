@@ -1,0 +1,65 @@
+{% comment %}
+  Renders text input form element
+  Accepts:
+  - class {String} Form class
+  - namespace {String} Namespace for input element
+  - form_attr {String} Data attributes to be added to the form element
+  - input_attr {String} Data attributes to be added to the input element
+  - extra_search_terms {String} Adds extra search terms(tags)
+  - type {String} type of result that will be displayed. Accepts: product,page,article
+
+  Usage:
+  {% render 'search-form', namespace: 'Main-Search' %}
+{% endcomment %}
+{%-
+  liquid
+  assign class = class | default: 'form-search'
+  assign namespace = namespace | default: 'Search-'
+  assign form_attr = form_attr | default: false
+  assign input_attr = input_attr | default: false
+  assign action = action | default:  routes.search_url
+-%}
+
+<form
+  action="{{ action }}"
+  class="{{ class }}"
+  {% if form_attr %} {{ form_attr }} {% endif %}
+  {% if extra_search_terms %}
+    onsubmit="this.q.value += '{{ extra_search_terms }}'"
+  {% endif %}
+>
+  {%- if type != blank -%}
+    <input type="hidden" name="type" value="{{ type }}" />
+  {%- endif -%}
+
+  {%- if tag != blank -%}
+    <input type="hidden" name="filter.p.tag" value="{{ tag }}" />
+  {%- endif -%}
+
+  <div class="form-row">
+    {%-
+      liquid
+      assign default_placeholder = 'search.placeholder' | t
+      assign placeholder = placeholder | default: default_placeholder
+      assign id = namespace | append: '-Input'
+      render 'text-input', type: 'search', value: search.terms, id: id, name: 'q', placeholder: placeholder, attr: input_attr
+      assign placeholder = nil
+    -%}
+  </div><!-- /.form-row form-row--double -->
+
+  <div class="form-row">
+    <div>
+
+      <button
+        type="submit"
+        class="{{ class }}__button"
+      >
+        <span class="visually-hidden">
+          {{- 'search.submit' | t -}}
+        </span><!-- /.visually-hidden -->
+
+        {%- render 'icon', icon: 'search' -%}
+      </button>
+    </div>
+  </div><!-- /.form-row -->
+</form>

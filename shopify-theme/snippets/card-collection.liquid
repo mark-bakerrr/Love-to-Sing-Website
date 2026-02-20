@@ -1,0 +1,31 @@
+{%- comment -%}
+--------------------------------------------------------------------
+  Collection card.
+
+  Accepts:
+  - collection_ref {Object}
+--------------------------------------------------------------------
+{%- endcomment -%}
+
+<div class="card-collection">
+  <a href="{{- collection_ref.url -}}" class="media media--1-1">
+    <span class="visually-hidden">{{- collection_ref.title | escape -}}</span>
+
+    {%-
+      liquid
+      if collection_ref.featured_image
+        render 'image', image: collection_ref.featured_image
+      else
+        echo 'collection-6' | placeholder_svg_tag
+      endif
+    -%}
+  </a>
+
+  <h2 class="card-collection__title h5">
+    <a href="{{- collection_ref.url -}}" class="full-unstyled-link">{{- collection_ref.title | escape | default: 'Collection title' -}}</a>
+  </h2><!-- /.h5 -->
+
+  <a href="{{- collection_ref.url -}}" class="link">
+    {{- 'list_collections.callout_text' | t -}}
+  </a>
+</div>

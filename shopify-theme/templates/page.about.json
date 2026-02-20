@@ -1,0 +1,285 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {
+        "title": "",
+        "subtitle": ""
+      }
+    },
+    "hero_banner_jwMXX3": {
+      "type": "hero-banner",
+      "name": "t:sections.hero-banner.name",
+      "settings": {
+        "background": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 100,
+        "image": "shopify://shop_images/Starship_Auckland_Hospital_Christmas_Show_Love_to_Sing.jpg",
+        "video": "",
+        "video_mobile": "",
+        "overlay_color": "#2D0B0A",
+        "overlay_opacity": 80,
+        "image_overlay_alignment": "center",
+        "image_overlay_width": 60,
+        "eyebrow": "Hello, We are",
+        "content_color": "#ffffff",
+        "title": "Love to Sing",
+        "content": "<p>We are the team behind YouTube's most popular Christmas music channel Christmas Songs & Carols - Love to Sing and the Love to Sing brand of channels<br/><br/></p>",
+        "button_text": "",
+        "button_url": ""
+      }
+    },
+    "youtube_stats_eXRYi6": {
+      "type": "youtube-stats",
+      "blocks": {
+        "feature_item_87Vh8q": {
+          "type": "feature_item",
+          "settings": {
+            "icon_svg": "<svg width=\"48\" height=\"49\" viewbox=\"0 0 48 49\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M38 34.5V10.5C38 9.43913 37.5786 8.42172 36.8284 7.67157C36.0783 6.92143 35.0609 6.5 34 6.5H8\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n<path d=\"M16 42.5H40C41.0609 42.5 42.0783 42.0786 42.8284 41.3284C43.5786 40.5783 44 39.5609 44 38.5V36.5C44 35.9696 43.7893 35.4609 43.4142 35.0858C43.0391 34.7107 42.5304 34.5 42 34.5H22C21.4696 34.5 20.9609 34.7107 20.5858 35.0858C20.2107 35.4609 20 35.9696 20 36.5V38.5C20 39.5609 19.5786 40.5783 18.8284 41.3284C18.0783 42.0786 17.0609 42.5 16 42.5ZM16 42.5C14.9391 42.5 13.9217 42.0786 13.1716 41.3284C12.4214 40.5783 12 39.5609 12 38.5V10.5C12 9.43913 11.5786 8.42172 10.8284 7.67157C10.0783 6.92143 9.06087 6.5 8 6.5C6.93913 6.5 5.92172 6.92143 5.17157 7.67157C4.42143 8.42172 4 9.43913 4 10.5V14.5C4 15.0304 4.21071 15.5391 4.58579 15.9142C4.96086 16.2893 5.46957 16.5 6 16.5H12\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n</svg>",
+            "icon_width": 48,
+            "heading": "Our History",
+            "text": "<p>Founded in 1991 by Linda Adamson, Love to Sing has grown into a multi-media studio</p>"
+          }
+        },
+        "feature_item_C7gp7c": {
+          "type": "feature_item",
+          "settings": {
+            "icon_svg": "<svg width=\"48\" height=\"49\" viewbox=\"0 0 48 49\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M14.4209 30.5L5.32089 14.78C4.92849 14.1017 4.74395 13.3232 4.79017 12.541C4.83639 11.7587 5.11134 11.0073 5.58089 10.38L8.80089 6.1C9.17348 5.60322 9.65661 5.2 10.212 4.92229C10.7675 4.64458 11.3799 4.5 12.0009 4.5H36.0009C36.6219 4.5 37.2343 4.64458 37.7897 4.92229C38.3452 5.2 38.8283 5.60322 39.2009 6.1L42.4009 10.38C42.8735 11.0053 43.152 11.7557 43.2018 12.5379C43.2516 13.3202 43.0705 14.0998 42.6809 14.78L33.5809 30.5\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n<path d=\"M22.0002 24.5004L10.2402 4.90039\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n<path d=\"M26 24.5004L37.76 4.90039\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n<path d=\"M16 14.5H32\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n<path d=\"M24 44.5C29.5228 44.5 34 40.0228 34 34.5C34 28.9772 29.5228 24.5 24 24.5C18.4772 24.5 14 28.9772 14 34.5C14 40.0228 18.4772 44.5 24 44.5Z\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n<path d=\"M24 36.5V32.5H23\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n</svg>",
+            "icon_width": 48,
+            "heading": "Our Achievements",
+            "text": "<p>We've helped countless artists find their voice and reach their dreams.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "feature_item_87Vh8q",
+        "feature_item_C7gp7c"
+      ],
+      "name": "YouTube Stats",
+      "settings": {
+        "padding_top": 80,
+        "padding_bottom": 80,
+        "padding_top_mobile": 40,
+        "padding_bottom_mobile": 40,
+        "eyebrow": "Our Journey",
+        "title": "Passion for Music and Community",
+        "subtitle": "<p>At Love to Sing, we celebrate the joy of connection through music. Our mission is to connect the world through the power of song.</p>",
+        "background_image": "shopify://shop_images/Linda_and_Tessa_Adamson_Johanna_Stewart_Bay_of_Plenty_Under_5_Show.jpg",
+        "channel_name": "Youtube Channels",
+        "subscriber_count": "3,038,770",
+        "view_count": "1,745,132,122",
+        "button_label": "",
+        "button_link": "#"
+      }
+    },
+    "richtext_mbafpD": {
+      "type": "richtext",
+      "blocks": {
+        "richtext-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 118,
+            "spacing_bottom": 92,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.richtext.name",
+      "settings": {
+        "add_decorations": true,
+        "border_top": true,
+        "border_bottom": false,
+        "background": "#ffffff",
+        "text_color": "#000000",
+        "text_align": "center",
+        "eyebrow": "Our Mission",
+        "eyebrow_color": "#b91f1c",
+        "title": "“To spread the joy of music around the world.”",
+        "content": "",
+        "button_text": "",
+        "button_url": ""
+      }
+    },
+    "image_and_text_NkXykK": {
+      "type": "image-and-text",
+      "blocks": {
+        "image-text-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.image-and-text.name",
+      "settings": {
+        "background": "#F4F4F4",
+        "flip_content": false,
+        "image": "shopify://shop_images/about-santa.png",
+        "push_content_up": false,
+        "content_color": "#000000",
+        "eyebrow": "Our Journey",
+        "eyebrow_color": "#b91f1c",
+        "title": "Over 30 years of fun",
+        "content": "<p>Founded by Linda Adamson in 1991, Love to Sing began as a small New Zealand children's music company born from a passion for quality kids' songs. What started with songbooks published by Scholastic NZ has grown into a globally loved music brand with over 400 songs, a billion YouTube views, and listeners in every country on earth. From classrooms in New Zealand to living rooms across the globe, our mission remains the same — to connect people of all ages through the joy of singing together.<br/><br/></p>",
+        "button_text": "",
+        "button_url": ""
+      }
+    },
+    "image_and_text_Ybi4jM": {
+      "type": "image-and-text",
+      "blocks": {
+        "image-text-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.image-and-text.name",
+      "settings": {
+        "background": "#ffffff",
+        "flip_content": true,
+        "image": "shopify://shop_images/about-play-guitar.png",
+        "push_content_up": false,
+        "content_color": "#000000",
+        "eyebrow": "Created with Love",
+        "eyebrow_color": "#b91f1c",
+        "title": "Every song is filled with love",
+        "content": "<p><br/>Every Love to Sing song is crafted with heart and soul. From the melodies and arrangements to the lyrics and production, we pour love into every note. Whether it's a nursery rhyme to make little ones giggle, a Christmas carol to bring families together, or an action song to get kids moving, our music is made to spark joy and create memories that last a lifetime.<br/><br/></p>",
+        "button_text": "",
+        "button_url": ""
+      }
+    },
+    "featured_reviews_zfTxqH": {
+      "type": "featured-reviews",
+      "blocks": {
+        "review_8n7hPx": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "My favourite song is My Mum Likes to Rock and Roll. I do hearty fun warm ups.",
+            "author": "Danielle",
+            "position": "Primary Teacher"
+          },
+          "blocks": {}
+        },
+        "review_zQFYCz": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "I started singing your songs with my daughter fifteen  years ago and have been singing them in classrooms around Asia ever since. The  Sit Down song has saved my sanity on many occasions! Great to find them available on the internet now when I need a refresher.",
+            "author": "Sue",
+            "position": "Kindergarten Teacher"
+          },
+          "blocks": {}
+        },
+        "review_4WVywe": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "I am enjoying teaching children through music from your website. It is just wonderful.",
+            "author": "Harji",
+            "position": "Music Teacher"
+          },
+          "blocks": {}
+        },
+        "review_gLFwiQ": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "I used to listen to your songs when I was in New Zealand they are awesome. Now I am working in the USA at a Montessori school and I have already introduced a few songs from Love to Sing to our kids. They really enjoy!.",
+            "author": "Saradha",
+            "position": "Kindergarten Teacher"
+          },
+          "blocks": {}
+        },
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "review_8n7hPx",
+        "review_zQFYCz",
+        "review_4WVywe",
+        "review_gLFwiQ"
+      ],
+      "name": "Featured reviews",
+      "settings": {
+        "alt_background": false,
+        "border_top": false,
+        "border_bottom": false,
+        "title": "Don't just take it from us",
+        "subtitle": "We love to hear how our music is used all around the world.",
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "newsletter_banner_wh8yRt": {
+      "type": "newsletter-banner",
+      "blocks": {
+        "newsletter-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_top_mobile": 0,
+            "spacing_bottom_mobile": 0
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.newsletter.name",
+      "settings": {
+        "background_top": "#ffffff",
+        "background_bottom": "#790200",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "text_color": "#ffffff",
+        "title": "Join Our Newsletter",
+        "subtitle": "Sign up to our newsletter and we will send you a free song!"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "hero_banner_jwMXX3",
+    "youtube_stats_eXRYi6",
+    "richtext_mbafpD",
+    "image_and_text_NkXykK",
+    "image_and_text_Ybi4jM",
+    "featured_reviews_zfTxqH",
+    "newsletter_banner_wh8yRt"
+  ]
+}

@@ -1,0 +1,48 @@
+{%- liquid
+  echo 'section-main-page.css' | asset_url | stylesheet_tag
+-%}
+
+<section class="main-page">
+  <div class="main-page__header">
+    <div class="main-page__header-inner">
+      <h1 class="main-page__title center">
+        {{- section.settings.title | default: page.title -}}
+      </h1><!-- /.h1 center -->
+
+      {%- if section.settings.subtitle != blank -%}
+        <div class="main-page__subtitle center">
+          {{ section.settings.subtitle }}
+        </div><!-- /.main-page__subtitle -->
+      {%- endif -%}
+    </div><!-- /.main-page__header-inner -->
+  </div><!-- /.main-page__header -->
+
+  <div class="container">
+    <div class="main-page__content rte">
+      {{- page.content
+        | replace: '<h2', '<h2 class="h3"'
+        | replace: '<h3', '<h2 class="h4"'
+        | replace: '<h4', '<h2 class="h5"'
+      -}}
+    </div><!-- /.main-page__content -->
+  </div><!-- /.container -->
+</section><!-- /.container container--narrow rte -->
+
+{% schema %}
+  {
+    "name": "Main page",
+    "settings": [
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Heading",
+        "info": "Defaults to page heading"
+      },
+      {
+        "type": "text",
+        "id": "subtitle",
+        "label": "Subheading"
+      },
+    ],
+  }
+{% endschema %}

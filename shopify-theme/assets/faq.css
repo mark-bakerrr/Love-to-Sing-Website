@@ -1,0 +1,29 @@
+.faq__head {
+  max-width: 64rem;
+  margin-inline: auto;
+}
+
+.faq__body {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  align-items: flex-start;
+  gap: 0.8rem;
+
+  @media (max-width: 989px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.faq__body:not(:first-child) {
+  margin-top: 8rem;
+
+  @media (max-width: 989px) {
+    margin-top: 4rem;
+  }
+}
+
+.faq__column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}

@@ -1,0 +1,55 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-blog",
+      "settings": {
+        "link_text": "Blog",
+        "link_url": "shopify://blogs/kids-music",
+        "subtitle": "Explore our diverse range of music offerings today!",
+        "tag": "Featured",
+        "tag_background": "#ec5450",
+        "tag_color": "#ffffff"
+      }
+    },
+    "newsletter_banner_PQiF4J": {
+      "type": "newsletter-banner",
+      "blocks": {
+        "newsletter-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.newsletter.name",
+      "settings": {
+        "background_top": "#ffffff",
+        "background_bottom": "#790200",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "text_color": "#ffffff",
+        "title": "Join Our Newsletter",
+        "subtitle": "Sign up to our newsletter and we will send you a free song!"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "newsletter_banner_PQiF4J"
+  ]
+}

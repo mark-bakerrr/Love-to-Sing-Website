@@ -1,0 +1,123 @@
+{%- liquid
+  # Spacing block
+  content_for "block", type: "spacing", id: "faq-spacing"
+
+  assign border_top = section.settings.border_top
+  assign border_bottom = section.settings.border_bottom
+  assign title = section.settings.title
+  assign subtitle = section.settings.subtitle
+  assign faq_group = section.settings.faq_group
+  assign entries = faq_group.entries.value
+
+  capture classes
+    echo 'faq'
+
+    if border_bottom
+      echo ' section-border-bottom'
+    endif
+
+    if border_top
+      echo ' section-border-top'
+    endif
+  endcapture
+-%}
+
+{{- 'faq.css' | asset_url | stylesheet_tag -}}
+{{- 'faq-item.css' | asset_url | stylesheet_tag -}}
+
+<section class="{{- classes -}}">
+  <div class="container">
+    {%- if title != blank or subtitle != blank -%}
+      <div class="faq__head center">
+        {%- if title != blank -%}
+          <h2 class="faq__title">
+            {{- title | escape | newline_to_br -}}
+          </h2><!-- /.faq__title -->
+        {%- endif -%}
+
+        {%- if subtitle != blank -%}
+          <p class="faq__subtitle">
+            {{- subtitle | escape | newline_to_br -}}
+          </p><!-- /.faq__subtitle -->
+        {%- endif -%}
+      </div><!-- /.faq__head -->
+    {%- endif -%}
+
+    {%- if entries -%}
+      {%- assign half = entries.count | divided_by: 2 | ceil -%}
+
+      <div class="faq__body">
+        <div class="faq__column">
+          {%- assign is_open = true -%}
+
+          {%- for entry in entries limit: half -%}
+            {%- assign answer = entry.answer | metafield_tag -%}
+
+            {% render 'faq-item', heading: entry.question, answer: answer, is_open: is_open, modifier: 'large' %}
+
+            {%- assign is_open = false -%}
+          {%- endfor -%}
+        </div><!-- /.faq__column -->
+
+        <div class="faq__column">
+          {%- for entry in entries offset: half -%}
+            {%- assign answer = entry.answer | metafield_tag -%}
+
+            {% render 'faq-item', heading: entry.question, answer: answer, is_open: false, modifier: 'large' %}
+          {%- endfor -%}
+        </div><!-- /.faq__column -->
+      </div><!-- /.faq__body -->
+    {%- endif -%}
+  </div><!-- /.container -->
+</section><!-- /.faq -->
+
+{% schema %}
+{
+  "name": "FAQ",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "border_top",
+      "label": "Add border to top",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "border_bottom",
+      "label": "Add border to bottom",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:sections.featured-products.settings.title.label",
+      "default": "Category"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "t:sections.featured-products.settings.subtitle.label",
+      "default": "Find answers to your most pressing questions about music licenses for Churches and Schools."
+    },
+    {
+      "type": "metaobject",
+      "id": "faq_group",
+      "label": "FAQ Group",
+      "metaobject_type": "faq_group"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.popups"]
+  },
+  "presets": [
+    {
+      "name": "FAQ",
+      "settings": {}
+    }
+  ]
+}
+{% endschema %}

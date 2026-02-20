@@ -1,0 +1,366 @@
+{%- liquid
+  assign background_image = section.settings.background_image
+  assign ad_left = section.settings.ad_left
+  assign ad_right = section.settings.ad_right
+  assign form_title = section.settings.form_title
+  assign form_text = section.settings.form_text
+  assign enable_share = section.settings.enable_share
+  assign share_title = section.settings.share_title
+
+  assign video = product.metafields.custom.youtube_main_video
+  assign thumbnail = product.images[0] | image_url: width: 1080
+  assign description = product.description
+
+  assign album = product.metafields.custom.album_product.value
+  assign video_purchase_url = product.metafields.my_fields.video_purchase_url
+  assign pdf_file = product.metafields.custom.pdf_lyric_sheet_download | file_url
+  assign pdf = pdf_file | default: product.metafields.global.pdf
+  assign lyrics = product.metafields.my_fields.song_lyrics
+
+  assign icon_buttons = section.blocks | where: 'type', 'icon_button'
+
+  assign class = ''
+
+  if product.metafields.custom.main_color != blank
+    assign class = class | append: 'main-color-' | append: product.metafields.custom.main_color | downcase
+  endif
+-%}
+<script>console.log({{ product.images[0] | json }});</script>
+{{- 'main-song.css' | asset_url | stylesheet_tag -}}
+<script src="{{- 'save-email.js' | asset_url -}}" defer></script>
+
+<section class="main-song {{ class }}">
+  <div class="main-song__head relative">
+    {%- if background_image != blank -%}
+      <div class="main-song__background" style="--background: {{ background }}; --opacity: {{ section.settings.background_opacity | divided_by: 100.0 }};">
+        {{- background_image | image_url: width: 1920 | image_tag -}}
+      </div><!-- /.main-song__background -->
+    {%- endif -%}
+
+    <div class="container">
+      <div class="main-song__breadcrumbs relative">
+        {%- liquid
+          assign breadcrumbs_menu = settings.breadcrumbs_map
+          assign meta_collection = product.metafields.custom.breadcrumbs_collection.value
+          assign current_collection = meta_collection
+
+          unless current_collection
+            for collection_ref in product.collections
+              if collection_ref.handle != 'all' and collection_ref.handle != 'all-1'
+                assign current_collection = collection_ref
+                break
+              endif
+            endfor
+          endunless
+        -%}
+
+        <nav role="navigation" aria-label="{{- 'general.breadcrumbs.label' | t -}}">
+          {% render 'breadcrumbs-from-nav', breadcrumbs_menu: breadcrumbs_menu, current_collection: current_collection %}
+        </nav>
+      </div><!-- /.main-song__breadcrumbs -->
+
+      <div class="main-song__grid relative">
+        {%- if video -%}
+          <div class="main-song__media">
+            {%- liquid
+              assign video_id = video | split: '?v=' | last
+
+              assign thumbnail = thumbnail | default: 'https://img.youtube.com/vi/' | append: video_id | append: '/maxresdefault.jpg'
+            -%}
+
+            {{- 'youtube-player.css' | asset_url | stylesheet_tag -}}
+            <script src="{{- 'youtube-player.js' | asset_url -}}" defer></script>
+
+            {% render 'youtube-player', video_id: video_id, thumbnail: thumbnail %}
+          </div><!-- /.main-song__media -->
+        {%- elsif thumbnail -%}
+          <div class="main-song__media">
+            <img class="main-song__image" src="{{ thumbnail }}" alt="" loading="lazy">
+          </div><!-- /.main-song__media -->
+        {%- endif -%}
+
+        <div class="main-song__info">
+          <h1 class="main-song__title h2">
+            {{- product.title | escape -}}
+          </h1><!-- /.main-song__title -->
+
+          {%- if description != blank -%}
+            <p class="main-song__description">
+              {{ description | strip_html | escape | truncatewords: 28, '...' }} <a href="#SongDescription">{{- 'blog.read_more' | t | downcase -}}</a>
+            </p><!-- /.main-song__description -->
+          {%- endif -%}
+
+          {%- if album != blank or video_purchase_url != blank -%}
+            <div class="main-song__actions">
+              {%- if album != blank -%}
+                <a href="{{- album.url -}}" class="button button--full">
+                  <span>
+                    {% render 'icon-cart' %}
+
+                    {{- 'song.buy_album' | t -}}
+                  </span>
+                </a><!-- /.button -->
+              {%- endif -%}
+
+              {%- if video_purchase_url != blank -%}
+                <a href="{{- video_purchase_url -}}" class="button button--secondary button--full">
+                  <span>
+                    {{- 'song.buy_video_song' | t -}}
+                  </span>
+                </a><!-- /.button button--secondary -->
+              {%- endif -%}
+            </div><!-- /.main-song__actions -->
+          {%- endif -%}
+        </div><!-- /.main-song__info -->
+      </div><!-- /.main-song__grid -->
+    </div><!-- /.container -->
+  </div><!-- /.main-song__head -->
+
+  <div class="container">
+    <div class="main-song__body">
+      {%- if ad_left != blank -%}
+        <div class="main-song__banner">
+          {{- ad_left -}}
+        </div><!-- /.main-song__banner -->
+      {%- endif -%}
+
+      <div class="main-song__body-inner">
+        <div class="main-song__body-lyrics">
+          <h2 class="main-song__body-title h3">
+            {{- product.title | escape }} Lyrics
+          </h2><!-- /.main-song__body-title -->
+
+          <p>
+            {{- lyrics | escape | newline_to_br -}}
+          </p>
+        </div><!-- /.main-song__body-lyrics -->
+
+        <div class="main-song__body-main">
+          {%- if product.images[1] != blank -%}
+            <div class="main-song__body-image">
+              {{- product.images[1] | image_url: width: 560 | image_tag -}}
+            </div><!-- /.main-song__body-image -->
+          {%- endif -%}
+
+          <div class="main-song__form relative overflow-hidden">
+            {%- if background_image != blank -%}
+              <div class="main-song__background" style="--background: {{ background }}; --opacity: {{ section.settings.background_opacity | divided_by: 100.0 }};">
+                {{- background_image | image_url: width: 1920 | image_tag -}}
+              </div><!-- /.main-song__background -->
+            {%- endif -%}
+
+            {%- if pdf != blank -%}
+              <save-email style="display: contents;">
+                {%- form 'customer', class: 'relative' -%}
+                  {%- if form.posted_successfully? -%}
+                    <script>window.location.href = '{{ pdf }}';</script>
+                  {%- endif -%}
+
+                  <input type="hidden" name="contact[tags]" value="download-pdf">
+
+                  {%- if form_title != blank -%}
+                    <h3 class="main-song__form-title h6">
+                      {{- form_title | escape | newline_to_br -}}
+                    </h3><!-- /.main-song__form-title -->
+                  {%- endif -%}
+
+                  {% comment %} Hidden with CSS if there is a subscribed email in localStorage {% endcomment %}
+                  {%- unless customer -%}
+                    {%- if form_text != blank -%}
+                      <p class="main-song__form-text" css-hide-submitted>
+                        {{- form_text | escape | newline_to_br -}}
+                      </p><!-- /.main-song__form-text -->
+                    {%- endif -%}
+
+                    <div class="form-row" css-hide-submitted>
+                      {%-
+                        liquid
+                        assign label = 'newsletter-form.email.label' | t
+                        assign placeholder = 'newsletter-form.email.placeholder' | t
+                        capture attr
+                          echo 'aria-required="true" '
+                          echo 'autocapitalize="off" '
+                          echo 'autocomplete="email" '
+                          if form.errors
+                            echo 'autofocus '
+                          endif
+                        endcapture
+                        if form.errors
+                          assign message = form.errors.translated_fields['email'] | capitalize | append: ' ' | append: form.errors.messages['email']
+                          assign has_error = true
+                        elsif form.posted_successfully?
+                          assign message = 'newsletter-form.success' | t
+                        endif
+                        assign id = 'PDFForm--' | append: section.id
+                        render 'text-input', id: id, label: label, hide_label: true, type: 'email', name: 'contact[email]', placeholder: placeholder, attr: attr, message: message, has_error: has_error, required: true, value: form.email
+                      -%}
+                    </div><!-- /.form-row -->
+                  {%- endunless -%}
+
+                  <div class="form-row">
+                      <a href="{{- pdf -}}" class="button button--full" target="_blank" css-show-submitted>
+                        <span>
+                          {% render 'icon-download' %}
+
+                          {{- 'song.download' | t -}}
+                        </span>
+                      </a>
+
+                      <button type="submit" class="button button--full" css-hide-submitted>
+                        <span>
+                          {% render 'icon-download' %}
+
+                          {{- 'song.download' | t -}}
+                        </span>
+                      </button><!-- /.button -->
+                  </div><!-- /.form-row -->
+                {%- endform -%}
+              </save-email>
+            {%- endif -%}
+          </div><!-- /.main-song__form -->
+
+          {%- if icon_buttons.size > 0 -%}
+            <div class="main-song__stream">
+              <h3 class="main-song__stream-title h6">
+                {{- 'song.stream_anywhere' | t -}}
+              </h3><!-- /.main-song__stream-title -->
+
+              {%- for block in icon_buttons -%}
+                {%- liquid
+                  assign block_image = block.settings.image
+                  assign block_title = block.settings.title
+                  assign block_link = block.settings.link
+                -%}
+
+                {%- if block_link != blank and block_title != blank or block_image != blank -%}
+                  {%- if block_title != blank or block_image != blank -%}
+                    <a href="{{- block_link -}}" class="button button--white button--full" target="_blank">
+                      <span>
+                        {%- if block_image != blank -%}
+                          {{- block_image | image_url: width: 100 | image_tag -}}
+                        {%- endif -%}
+
+                        {%- if block_title != blank -%}
+                          {{- block_title | escape -}}
+                        {%- endif -%}
+                      </span>
+                    </a><!-- /.button button--white -->
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+            </div><!-- /.main-song__stream -->
+          {%- endif -%}
+
+          {%- if enable_share -%}
+            <div class="main-song__share center">
+              {%- if share_title != blank -%}
+                <h3 class="main-song__share-title h6">
+                  {{- share_title | escape | newline_to_br -}}
+                </h3><!-- /.main-song__share-title -->
+              {%- endif -%}
+
+              {% render 'share', object: product %}
+            </div><!-- /.main-song__share -->
+          {%- endif -%}
+        </div><!-- /.main-song__body-main -->
+      </div><!-- /.main-song__body-inner -->
+
+      {%- if ad_right != blank -%}
+        <div class="main-song__banner">
+          {{- ad_right -}}
+        </div><!-- /.main-song__banner -->
+      {%- endif -%}
+    </div><!-- /.main-song__body -->
+  </div><!-- /.container -->
+</section><!-- /.main-song -->
+
+{% schema %}
+{
+  "name": "Main Song Product",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "range",
+      "id": "background_opacity",
+      "label": "Background opacity",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "textarea",
+      "id": "ad_left",
+      "label": "Ad (Left)"
+    },
+    {
+      "type": "textarea",
+      "id": "ad_right",
+      "label": "Ad (Right)"
+    },
+    {
+      "type": "header",
+      "content": "Form"
+    },
+    {
+      "type": "textarea",
+      "id": "form_title",
+      "label": "Title",
+      "default": "Get Free Lyric Sheet PDF"
+    },
+    {
+      "type": "textarea",
+      "id": "form_text",
+      "label": "Text",
+      "default": "Login to download any lyric sheet without having to re-enter your email."
+    },
+    {
+      "type": "header",
+      "content": "Share"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_share",
+      "label": "Enable share",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "share_title",
+      "label": "Title",
+      "default": "Share this song"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "icon_button",
+      "name": "Icon Button",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Title"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "default": "/"
+        }
+      ]
+    },
+  ]
+
+}
+{% endschema %}

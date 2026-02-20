@@ -1,0 +1,27 @@
+{{- 'component-collection-hero.css' | asset_url | stylesheet_tag -}}
+
+<div class="collection-hero">
+  <div class="container">
+    {%- unless section.settings.hide_title -%}
+      <h1 class="collection-hero__title h2">
+        {{- 'search.title' | t -}}
+      </h1><!-- /.collection-hero__title h2 -->
+    {%- endunless -%}
+
+    {% render 'form-search', namespace: 'Main-Search' %}
+  </div><!-- /.container -->
+</div><!-- /.collection-hero -->
+
+{% schema %}
+  {
+    "name": "Search banner",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "hide_title",
+        "label": "Hide title",
+        "default": true
+      },
+    ]
+  }
+{% endschema %}

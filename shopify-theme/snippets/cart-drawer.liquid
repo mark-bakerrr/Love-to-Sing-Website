@@ -1,0 +1,85 @@
+{%- comment -%}
+  Renders cart drawer
+
+  Usage:
+  {%- render 'cart-drawer' -%}
+{%- endcomment -%}
+
+{{- 'component-cart-drawer.css' | asset_url | stylesheet_tag -}}
+
+<link rel="stylesheet" href="{{ 'component-cart-items.css' | asset_url }}" media="print" onload="this.media='all'">
+
+<noscript>
+  {{- 'component-cart-items.css' | asset_url | stylesheet_tag -}}
+</noscript>
+
+<script src="{{- 'cart.js' | asset_url -}}" defer="defer"></script>
+<script src="{{- 'cart-drawer.js' | asset_url -}}" defer="defer"></script>
+
+<cart-drawer>
+  <div class="cart-drawer" id="CartDrawer">
+    <div id="CartDrawer-Overlay" class="cart-drawer__overlay"></div><!-- /.cart-drawer__overlay -->
+
+    <div
+      class="cart-drawer__inner"
+      role="dialog"
+      aria-modal="true"
+      aria-label="{{- 'cart.title' | t -}}"
+      tabindex="-1"
+    >
+      <div class="cart-drawer__head">
+        <p class="cart-drawer__title h4">
+          {{- 'cart.title' | t -}}
+        </p><!-- /.cart-drawer__title h4 -->
+
+        <button
+          class="cart-drawer__close"
+          type="button"
+          onclick="this.closest('cart-drawer').close()"
+          aria-label="{{- 'accessibility.close' | t -}}"
+          data-drawer-close
+        >
+          {%- render 'icon-close' -%}
+        </button>
+      </div><!-- /.cart-drawer__head -->
+
+      <div class="cart-drawer__body" id="CartDrawer-Body">
+        {%- if cart == empty -%}
+          <div class="cart-drawer__empty">
+            {{- 'cart.empty' | t -}}
+          </div><!-- /.cart-drawer__empty -->
+        {%- else -%}
+          <cart-drawer-items>
+            <form
+              action="{{- routes.cart_url -}}"
+              id="CartDrawer-Form"
+              class="cart-drawer__form"
+              method="post"
+            >
+              <div class="cart-drawer__contents" id="CartDrawer-CartItems">
+                <table class="cart-drawer__items" role="table">
+                  <tbody>
+                    {%- for line_item in cart.items -%}
+                      {%- render 'line-item', line_item: line_item, compact: true -%}
+                    {%- endfor -%}
+                  </tbody>
+                </table><!-- /.cart-drawer__items -->
+              </div><!-- /#CartDrawer-CartItems.cart-drawer__contents -->
+            </form>
+          </cart-drawer-items>
+
+          <div class="cart-drawer__summary">
+            <form
+              action="{{- routes.cart_url -}}"
+              id="CartDrawer-FormSummary"
+              class="cart-drawer__form-summary"
+              method="post"
+            >
+              {%- render 'cart-summary', show_cart_link: true -%}
+            </form>
+          </div><!-- /.cart-drawer__summary -->
+        {%- endif -%}
+      </div><!-- /.cart-drawer__body -->
+    </div><!-- /.cart-drawer__inner -->
+  </div><!-- /#CartDrawer.cart-drawer -->
+</cart-drawer>

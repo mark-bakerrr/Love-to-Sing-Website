@@ -1,0 +1,176 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "banner": {
+      "type": "main-collection-banner",
+      "disabled": true,
+      "settings": {
+        "background_color": "#FDEFEF",
+        "text_color": "#000000",
+        "heading": "",
+        "content": ""
+      }
+    },
+    "hero_banner_C6zNKp": {
+      "type": "hero-banner",
+      "name": "t:sections.hero-banner.name",
+      "settings": {
+        "background": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "video": "",
+        "video_mobile": "",
+        "overlay_color": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "overlay_opacity": 20,
+        "image_aside": "shopify://shop_images/hero-albums.png",
+        "image_overlay_alignment": "center",
+        "image_overlay_width": 82,
+        "eyebrow": "Buy Music Albums",
+        "content_color": "#ffffff",
+        "title": "Share the joy of Love to Sing Music",
+        "content": "<p>Take our music offline by purchasing one of our mp3 albums!</p>",
+        "button_text": "",
+        "button_url": ""
+      }
+    },
+    "main": {
+      "type": "main-collection",
+      "blocks": {
+        "main-collection": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 40,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "settings": {
+        "product_aspect_ratio": "1-1",
+        "filters_right_side": "content",
+        "heading": "Buy Love to Sing Albums",
+        "content": "Explore all Love to Sing albums to take with you on your device",
+        "enable_filters": false,
+        "enable_sorting": true,
+        "products_per_page": 20
+      }
+    },
+    "featured_reviews_NgPk9X": {
+      "type": "featured-reviews",
+      "blocks": {
+        "review_E6jmJk": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "I’ve loved Love to Sing since I taught in New Zealand in 2000-01 and been singing it with my class ever since I moved back home to the US!  — they are always surefire hits!",
+            "author": "Nanci Guartofierro",
+            "position": "Preschool Teacher, USA"
+          },
+          "blocks": {}
+        },
+        "review_ezTTKY": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "Such beautiful Christmas music for the best time of the year",
+            "author": "Reece",
+            "position": "Top Christmas Fan"
+          },
+          "blocks": {}
+        },
+        "review_dJRyhi": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "I have enjoyed \"Love to Sing\" music for the past 10 years as a classroom teacher and now a performing arts teacher at Vermont South Special School, thank you for all the special music you have published over the years.",
+            "author": "Milli Popp",
+            "position": "Teacher, Canada"
+          },
+          "blocks": {}
+        },
+        "review_BqdmaY": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "We all agreed that your Hearty Fun Fitness Programme is amazing with wonderful music, lyrics and fabulous routines!!",
+            "author": "Stella Shrewing",
+            "position": "Parent"
+          },
+          "blocks": {}
+        },
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "review_E6jmJk",
+        "review_ezTTKY",
+        "review_dJRyhi",
+        "review_BqdmaY"
+      ],
+      "name": "Featured reviews",
+      "settings": {
+        "alt_background": false,
+        "border_top": false,
+        "border_bottom": false,
+        "title": "Hear from our amazing fans",
+        "subtitle": "We love to see our music used around the world by so many walks of life!",
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "newsletter_banner_E7zW6U": {
+      "type": "newsletter-banner",
+      "blocks": {
+        "newsletter-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_top_mobile": 0,
+            "spacing_bottom_mobile": 0
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.newsletter.name",
+      "settings": {
+        "background_top": "#ffffff",
+        "background_bottom": "#790200",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 6,
+        "image": "shopify://shop_images/hearts-background.png",
+        "text_color": "#ffffff",
+        "title": "Join Our Newsletter",
+        "subtitle": "Sign up to our newsletter and we will send you a free song!"
+      }
+    }
+  },
+  "order": [
+    "banner",
+    "hero_banner_C6zNKp",
+    "main",
+    "featured_reviews_NgPk9X",
+    "newsletter_banner_E7zW6U"
+  ]
+}

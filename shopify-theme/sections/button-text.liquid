@@ -1,0 +1,104 @@
+{%- liquid
+  # Spacing block
+  content_for "block", type: "spacing", id: "faq-spacing"
+
+  assign border_top = section.settings.border_top
+  assign border_bottom = section.settings.border_bottom
+  assign title = section.settings.title
+  assign subtitle = section.settings.subtitle
+  assign button_text = section.settings.button_text
+  assign button_url = section.settings.button_url
+
+  capture classes
+    echo 'button-text'
+
+    if border_bottom
+      echo ' section-border-bottom'
+    endif
+
+    if border_top
+      echo ' section-border-top'
+    endif
+  endcapture
+-%}
+
+{{- 'button-text.css' | asset_url | stylesheet_tag -}}
+
+<section class="{{- classes -}}">
+  <div class="container">
+    {%- if title != blank -%}
+      <h2 class="button-text__title h4">
+        {{- title | escape | newline_to_br -}}
+      </h2><!-- /.button-text__title -->
+    {%- endif -%}
+
+    {%- if subtitle != blank -%}
+      <p class="button-text__subtitle">
+        {{- subtitle | escape | newline_to_br -}}
+      </p><!-- /.button-text__subtitle -->
+    {%- endif -%}
+
+    {%- if button_text != blank and button_url != blank -%}
+      <div class="button-text__actions">
+        <a href="{{- button_url -}}" class="button button--secondary">
+          {{- button_text | escape -}}
+        </a><!-- /.button -->
+      </div><!-- /.button-text__actions -->
+    {%- endif -%}
+  </div><!-- /.container -->
+</section><!-- /.button-text -->
+
+{% schema %}
+{
+  "name": "Button text",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "border_top",
+      "label": "Add border to top",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "border_bottom",
+      "label": "Add border to bottom",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:sections.featured-products.settings.title.label",
+      "default": "Still have questions?"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "t:sections.featured-products.settings.subtitle.label",
+      "default": "We're here to help you!"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "t:sections.product-recommendations.settings.button_text.label",
+      "default": "Contact Us"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "t:sections.product-recommendations.settings.button_url.label",
+      "default": "/collections/all"
+    }
+  ],
+  "disabled_on": { "groups": ["header"] },
+  "presets": [
+    {
+      "name": "Button text",
+      "settings": {}
+    }
+  ]
+}
+{% endschema %}

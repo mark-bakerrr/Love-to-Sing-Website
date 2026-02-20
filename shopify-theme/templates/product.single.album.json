@@ -1,0 +1,383 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "breadcrumbs_WgKXch": {
+          "type": "breadcrumbs",
+          "settings": {}
+        },
+        "title_UiHBGm": {
+          "type": "title",
+          "settings": {}
+        },
+        "price_b4UzxK": {
+          "type": "price",
+          "settings": {}
+        },
+        "description_dijYyc": {
+          "type": "description",
+          "settings": {
+            "text": "{{ product.description }}"
+          }
+        },
+        "divider_XghWqw": {
+          "type": "divider",
+          "settings": {}
+        },
+        "variant_selector_WNNtFc": {
+          "type": "variant_selector",
+          "settings": {}
+        },
+        "divider_ny8egR": {
+          "type": "divider",
+          "settings": {}
+        },
+        "album_metadata_HLXfFp": {
+          "type": "album_metadata",
+          "settings": {}
+        },
+        "divider_LLNihc": {
+          "type": "divider",
+          "settings": {}
+        },
+        "quantity_QCBqCj": {
+          "type": "quantity",
+          "settings": {
+            "custom_label": "Select how many albums you wish to buy"
+          }
+        },
+        "divider_gQyjTn": {
+          "type": "divider",
+          "settings": {}
+        },
+        "buy_buttons_gMWGHq": {
+          "type": "buy_buttons",
+          "settings": {}
+        },
+        "tracklist_DcxzFf": {
+          "type": "tracklist",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "breadcrumbs_WgKXch",
+        "title_UiHBGm",
+        "price_b4UzxK",
+        "description_dijYyc",
+        "divider_XghWqw",
+        "variant_selector_WNNtFc",
+        "divider_ny8egR",
+        "album_metadata_HLXfFp",
+        "divider_LLNihc",
+        "quantity_QCBqCj",
+        "divider_gQyjTn",
+        "buy_buttons_gMWGHq",
+        "tracklist_DcxzFf"
+      ],
+      "settings": {}
+    },
+    "section_cta_EUH9cG": {
+      "type": "section-cta",
+      "blocks": {
+        "cta-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 40,
+            "spacing_bottom": 40,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        },
+        "cta-button-1": {
+          "type": "button",
+          "disabled": true,
+          "static": true,
+          "settings": {
+            "heading": "Learn More",
+            "link": "shopify://pages/about-us",
+            "type": "text",
+            "icon_position": "right"
+          },
+          "blocks": {}
+        },
+        "cta-button-2": {
+          "type": "button",
+          "static": true,
+          "settings": {
+            "heading": "Learn more",
+            "link": "shopify://collections/love-to-sing-christmas-music-licences",
+            "type": "secondary",
+            "icon_position": "right"
+          },
+          "blocks": {}
+        }
+      },
+      "name": "Section CTA",
+      "settings": {
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "text_color": "#ffffff",
+        "title": "Don’t worry about copyright issues—purchase one of our music licenses for your church or school."
+      }
+    },
+    "featured_products_aMCEgm": {
+      "type": "featured-products",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.featured-products.name",
+      "settings": {
+        "show_placeholder_cards": true,
+        "alt_background": false,
+        "border_top": false,
+        "border_bottom": false,
+        "title": "Buy Albums",
+        "subtitle": "Discover our music to listen offline",
+        "button_label": "View all",
+        "button_link": "shopify://collections/digital-albums",
+        "large_tiles": false,
+        "product_aspect_ratio": "1-1",
+        "collection": "digital-albums",
+        "product_list": [],
+        "products_count": 12,
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "featured_reviews_CYTrzp": {
+      "type": "featured-reviews",
+      "blocks": {
+        "review_LwJGVG": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare.",
+            "author": "Emily Johnson",
+            "position": "Music Producer, Freelance"
+          },
+          "blocks": {}
+        },
+        "review_JtG4Vt": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare.",
+            "author": "Emily Johnson",
+            "position": "Music Producer, Freelance"
+          },
+          "blocks": {}
+        },
+        "review_kBpaeP": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare.",
+            "author": "Emily Johnson",
+            "position": "Music Producer, Freelance"
+          },
+          "blocks": {}
+        },
+        "review_mrN6hz": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare.",
+            "author": "Emily Johnson",
+            "position": "Music Producer, Freelance"
+          },
+          "blocks": {}
+        },
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "review_LwJGVG",
+        "review_JtG4Vt",
+        "review_kBpaeP",
+        "review_mrN6hz"
+      ],
+      "disabled": true,
+      "name": "Featured reviews",
+      "settings": {
+        "alt_background": false,
+        "border_top": false,
+        "border_bottom": false,
+        "title": "Reviews",
+        "subtitle": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "featured_products_jLGDNk": {
+      "type": "featured-products",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.featured-products.name",
+      "settings": {
+        "show_placeholder_cards": false,
+        "alt_background": false,
+        "border_top": false,
+        "border_bottom": false,
+        "title": "Related Albums",
+        "subtitle": "Explore our diverse range of music offerings today!",
+        "button_label": "",
+        "button_link": "{{ section.settings.collection.url }}",
+        "large_tiles": false,
+        "product_aspect_ratio": "1-1",
+        "collection": "{{ product.metafields.custom.related_albums_collection.value }}",
+        "product_list": [],
+        "products_count": 12,
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "featured_products_eckbpt": {
+      "type": "featured-products",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.featured-products.name",
+      "settings": {
+        "show_placeholder_cards": false,
+        "alt_background": true,
+        "border_top": false,
+        "border_bottom": false,
+        "title": "Related Music Videos",
+        "subtitle": "Explore our diverse range of music offerings today!",
+        "button_label": "View All",
+        "button_link": "{{ section.settings.collection.url }}",
+        "large_tiles": false,
+        "product_aspect_ratio": "16-9",
+        "collection": "{{ product.metafields.custom.related_videos_collection.value }}",
+        "product_list": [],
+        "products_count": 12,
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "featured_products_mwFAJa": {
+      "type": "featured-products",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.featured-products.name",
+      "settings": {
+        "show_placeholder_cards": false,
+        "alt_background": false,
+        "border_top": false,
+        "border_bottom": false,
+        "title": "Related Merch",
+        "subtitle": "Explore our diverse range of music offerings today!",
+        "button_label": "View All",
+        "button_link": "{{ section.settings.collection.url }}",
+        "large_tiles": false,
+        "product_aspect_ratio": "1-1",
+        "collection": "{{ product.metafields.custom.related_merch_collection.value }}",
+        "product_list": [],
+        "products_count": 12,
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "newsletter_banner_WbQgch": {
+      "type": "newsletter-banner",
+      "blocks": {
+        "newsletter-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_top_mobile": 0,
+            "spacing_bottom_mobile": 0
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.newsletter.name",
+      "settings": {
+        "background_top": "#ffffff",
+        "background_bottom": "#790200",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "text_color": "#ffffff",
+        "title": "Join Our Newsletter",
+        "subtitle": "Sign up to our newsletter and we will send you a free song!"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "section_cta_EUH9cG",
+    "featured_products_aMCEgm",
+    "featured_reviews_CYTrzp",
+    "featured_products_jLGDNk",
+    "featured_products_eckbpt",
+    "featured_products_mwFAJa",
+    "newsletter_banner_WbQgch"
+  ]
+}

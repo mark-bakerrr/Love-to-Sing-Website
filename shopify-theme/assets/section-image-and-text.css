@@ -1,0 +1,47 @@
+/* ------------------------------------------------------------ *\
+  Section image and text
+\* ------------------------------------------------------------ */
+
+.image-text .image-text__inner {
+  gap: 8rem;
+}
+
+@media (max-width: 989px) {
+  .image-text .grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-grid-row-mobile) var(--spacing-grid-col-mobile);
+  }
+}
+
+.image-text .image-text__media {
+  border-radius: var(--radius-m);
+  overflow: hidden;
+
+  .media {
+    padding-bottom: 80%;
+  }
+}
+
+.image-text.content-pad .image-text__content {
+  padding-bottom: 5rem;
+}
+
+@media (max-width: 989px) {
+  .image-text.content-pad .image-text__content {
+    padding-bottom: 0;
+  }
+}
+
+.image-text__eyebrow {
+  margin-bottom: 1.6rem;
+  font-weight: 700;
+  font-size: var(--fz-r);
+}
+
+.image-text .image-text__title {
+  margin-bottom: 1.5rem;
+}
+
+.image-text .image-text__entry > *:last-child {
+  margin-bottom: 0;
+}

@@ -1,0 +1,80 @@
+.song-about {
+  scroll-margin-top: var(--header-top-position, 7.4rem);
+}
+
+.song-about__inner {
+  display: grid;
+  grid-template-columns: 608fr 460fr;
+  gap: 8rem;
+  padding: 6.4rem;
+  border-radius: var(--radius-m);
+
+  @media (max-width: 1023px) {
+    padding: 3.2rem;
+    gap: 4rem;
+  }
+
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.song-about__title {
+  margin-bottom: 2.4rem;
+}
+
+.song-about__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem 3.2rem;
+  margin-bottom: 2.4rem;
+}
+
+.song-about__meta p {
+  font-size: var(--fz-s);
+  line-height: 1.4;
+  color: var(--c-neutral-500);
+  display: flex;
+  align-items: center;
+}
+
+.song-about__meta p svg {
+  color: var(--color-paragraphs);
+  margin-right: 0.8rem;
+  transform: translate3d(0, -0.2rem, 0);
+}
+
+.song-about__meta span {
+  color: var(--color-paragraphs);
+  margin-left: 0.25em;
+}
+
+.song-about__aside-title {
+  margin-bottom: 2.4rem;
+}
+
+.song-about__collections {
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin: 0;
+}
+
+.song-about__collection {
+  font-size: var(--fz-r);
+  font-weight: 500;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  padding: 0.4rem 1.2rem;
+  border: 1px solid var(--c-neutral-300);
+  border-radius: 4rem;
+  transition: background-color var(--duration-default) linear;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .song-about__collection:hover {
+    background-color: var(--c-neutral-300);
+  }
+}

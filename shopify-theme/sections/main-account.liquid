@@ -1,0 +1,122 @@
+{{- 'account-dashboard.css' | asset_url | stylesheet_tag -}}
+
+<section
+  class="account-dashboard"
+  style="--background: {{ section.settings.background }};"
+>
+  <div class="container">
+    <div class="account-dashboard__content">
+      <header class="account__head center">
+        <h1 class="account__title h2">{{- 'customer.account.title' | t -}}</h1><!-- /.account__title h2 -->
+        {%- assign logout_label = 'customer.logout' | t -%}
+        {%- capture chevron -%}
+          {%- render 'icon', icon: 'chevron-left' -%}
+        {%- endcapture -%}
+        {% render 'button',
+          type: 'link',
+          href: routes.account_logout_url,
+          value: logout_label,
+          style: 'sm',
+          icon_position: 'left',
+          custom_icon: chevron,
+        %}
+      </header><!-- /.account__head -->
+
+      <div class="account__body">
+        <div class="account__col account__col--orders">
+          <h2 class="account__title h4">{{- 'customer.account.order_history' | t -}}</h2><!-- /.account__title h4 -->
+          {%- paginate customer.orders by 10 -%}
+            {%- if customer.orders_count > 0 -%}
+              <div class="account__table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="caption regular color-subdued">{{- 'customer.orders.order' | t -}}</th>
+
+                      <th class="caption regular color-subdued">{{- 'customer.orders.order_date' | t -}}</th>
+
+                      <th class="caption regular color-subdued">{{- 'customer.orders.payment_status' | t -}}</th>
+
+                      <th class="caption regular color-subdued">{{- 'customer.orders.shipping_status' | t -}}</th>
+
+                      <th class="caption regular color-subdued">{{- 'customer.orders.total' | t -}}</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {%- for order in customer.orders -%}
+                      <tr>
+                        <td data-heading="{{- 'customer.orders.order' | t -}}">
+                          <a href="{{- order.customer_url -}}" class="link bold">{{- order.name -}}</a>
+                        </td>
+
+                        <td data-heading="{{- 'customer.orders.order_date' | t -}}">
+                          {{- order.created_at | time_tag: format: 'day_month_year' -}}
+                        </td>
+
+                        <td data-heading="{{- 'customer.orders.payment_status' | t -}}">
+                          {{- order.financial_status_label -}}
+                        </td>
+
+                        <td data-heading="{{- 'customer.orders.shipping_status' | t -}}">
+                          {{- order.fulfillment_status_label -}}
+                        </td>
+
+                        <td data-heading="{{- 'customer.orders.total' | t -}}">
+                          {{- order.total_price | money_with_currency -}}
+                        </td>
+                      </tr>
+                    {%- endfor -%}
+                  </tbody>
+                </table>
+              </div><!-- /.account__table -->
+
+              {%- if paginate.pages > 1 -%}
+                <div class="account__paging">
+                  {%- render 'pagination', paginate: paginate -%}
+                </div><!-- /.account__paging -->
+              {%- endif -%}
+            {%- else -%}
+              <p>{{- 'customer.account.order_history_empty' | t -}}</p>
+            {%- endif -%}
+          {%- endpaginate -%}
+        </div><!-- /.account__col account__col--orders -->
+
+        <div class="account__col account__col--address">
+          <div class="account__address">
+            <h3 class="account__title h4">{{- 'customer.account.account_details' | t -}}</h3><!-- /.account__title h4 -->
+
+            {%- if customer.default_address -%}
+              <div class="caption">
+                {{- customer.default_address | format_address -}}
+              </div>
+            {%- endif -%}
+
+            <a href="{{ routes.account_addresses_url }}" class="link">
+              {%- if customer.addresses_count > 0 -%}
+                {{ 'customer.account.view_addresses' | t }} ({{ customer.addresses_count }})
+              {%- else -%}
+                {{- 'customer.account.add_address' | t -}}
+              {%- endif -%}
+            </a>
+          </div><!-- /.account__address -->
+        </div><!-- /.account__col account__col--address -->
+      </div><!-- /.account__body -->
+    </div><!-- /.account-dashboard__content -->
+  </div><!-- /.container -->
+</section><!-- /.account-dashboard -->
+
+
+{% schema %}
+  {
+    "name": "Main account",
+    "settings": [
+      {
+        "type": "color_background",
+        "id": "background",
+        "label": "Background",
+        "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+      },
+    ]
+  }
+{% endschema %}

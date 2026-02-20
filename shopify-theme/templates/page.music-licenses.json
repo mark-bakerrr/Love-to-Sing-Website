@@ -1,0 +1,302 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {
+        "title": "",
+        "subtitle": ""
+      }
+    },
+    "hero_banner_C6zNKp": {
+      "type": "hero-banner",
+      "name": "t:sections.hero-banner.name",
+      "settings": {
+        "background": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "video": "",
+        "video_mobile": "",
+        "overlay_color": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "overlay_opacity": 20,
+        "image_aside": "shopify://shop_images/licenses-banner-image.png",
+        "image_overlay_alignment": "center",
+        "image_overlay_width": 76,
+        "eyebrow": "License Shop",
+        "content_color": "#ffffff",
+        "title": "Share the joy of Love to Sing Music",
+        "content": "<p>Discover our exclusive merchandise designed for music lovers and creators alike. Elevate your passion with unique items that resonate with your style and creativity.</p>",
+        "button_text": "",
+        "button_url": ""
+      }
+    },
+    "featured_columns_FbLpF4": {
+      "type": "featured-columns",
+      "blocks": {
+        "feature_column_WycMNT": {
+          "type": "feature_column",
+          "settings": {
+            "image": "shopify://shop_images/piece-of-mind.png",
+            "heading": "Peace of Mind",
+            "text": "<p>Use this text to share information about your feature. Describe a product, share announcements, or welcome customers to your store.</p>",
+            "link": ""
+          }
+        },
+        "feature_column_KdJQDC": {
+          "type": "feature_column",
+          "settings": {
+            "image": "shopify://shop_images/give-back.png",
+            "heading": "Give Back to Creators",
+            "text": "<p>Every license helps compensate songwriters, composers, and performers for their work. When you use licensed music, you’re uplifting artists and encouraging continued creativity.<br/><br/></p>",
+            "link": ""
+          }
+        },
+        "feature_column_KEECVJ": {
+          "type": "feature_column",
+          "settings": {
+            "image": "shopify://shop_images/bring-programs-to-life.png",
+            "heading": "Bring Programs to Life",
+            "text": "<p>Use this text to share information about your feature. Describe a product, share announcements, or welcome customers to your store.</p>",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "feature_column_WycMNT",
+        "feature_column_KdJQDC",
+        "feature_column_KEECVJ"
+      ],
+      "name": "Feature Columns",
+      "settings": {
+        "border_bottom": true,
+        "title": "Unlock the Power of Music Licenses",
+        "subtitle": "<p>Obtaining music licenses allows Churches and Schools to use music legally and ethically. Enhance your programs and events while respecting artists' rights.</p>",
+        "padding_top": 80,
+        "padding_bottom": 56
+      }
+    },
+    "featured_products_YcN37j": {
+      "type": "featured-products",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 42,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.featured-products.name",
+      "settings": {
+        "show_placeholder_cards": true,
+        "alt_background": false,
+        "border_top": false,
+        "border_bottom": true,
+        "title": "Music Licenses for Your Church",
+        "subtitle": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "button_label": "",
+        "button_link": "",
+        "large_tiles": true,
+        "product_aspect_ratio": "1-1",
+        "collection": "",
+        "product_list": [
+          "church-all-in-one-copyright-and-streaming-licence",
+          "single-use-performance-church-copyright-licence",
+          "church-copyright-licence"
+        ],
+        "products_count": 12,
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "featured_products_WPkXrA": {
+      "type": "featured-products",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 41,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.featured-products.name",
+      "settings": {
+        "show_placeholder_cards": true,
+        "alt_background": false,
+        "border_top": false,
+        "border_bottom": false,
+        "title": "Music Licenses for Your School",
+        "subtitle": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "button_label": "",
+        "button_link": "",
+        "large_tiles": true,
+        "product_aspect_ratio": "1-1",
+        "collection": "",
+        "product_list": [
+          "all-in-one-school-copyright-and-livestream-licence",
+          "single-use-performance-school-copyright-licence",
+          "school-copyright-licence"
+        ],
+        "products_count": 12,
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "section_cta_x6khNB": {
+      "type": "section-cta",
+      "blocks": {
+        "cta-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_top_mobile": 0,
+            "spacing_bottom_mobile": 0
+          },
+          "blocks": {}
+        },
+        "cta-button-1": {
+          "type": "button",
+          "static": true,
+          "settings": {
+            "heading": "contact us",
+            "link": "shopify://pages/contact-us",
+            "type": "secondary",
+            "icon_position": ""
+          },
+          "blocks": {}
+        },
+        "cta-button-2": {
+          "type": "button",
+          "static": true,
+          "settings": {
+            "heading": "",
+            "link": "",
+            "type": "primary",
+            "icon_position": "right"
+          },
+          "blocks": {}
+        }
+      },
+      "disabled": true,
+      "name": "Section CTA",
+      "settings": {
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "text_color": "#ffffff",
+        "title": "Don’t see what you are looking for? Reach out, we would love to hear from you."
+      }
+    },
+    "faqs_6JdhwA": {
+      "type": "faqs",
+      "blocks": {
+        "faq_item_m9Gq7W": {
+          "type": "faq_item",
+          "settings": {
+            "heading": "What is a license?",
+            "answer": "<p>A music license grants permission to use copyrighted music legally. It ensures that the rights of the creators are respected. Different licenses applcy depending on the intended use.</p>"
+          }
+        },
+        "faq_item_TnKKbE": {
+          "type": "faq_item",
+          "settings": {
+            "heading": "Do I need one?",
+            "answer": "<p>A music license grants permission to use copyrighted music legally. It ensures that the rights of the creators are respected. Different licenses apply depending on the intended use.</p>"
+          }
+        },
+        "faq_item_iTz4WN": {
+          "type": "faq_item",
+          "settings": {
+            "heading": "How to obtain licenses?",
+            "answer": "<p>A music license grants permission to use copyrighted music legally. It ensures that the rights of the creators are respected. Different licenses apply depending on the intended use.</p>"
+          }
+        },
+        "faq_item_8mzBN6": {
+          "type": "faq_item",
+          "settings": {
+            "heading": "Are there different types?",
+            "answer": "<p>A music license grants permission to use copyrighted music legally. It ensures that the rights of the creators are respected. Different licenses apply depending on the intended use.</p>"
+          }
+        },
+        "faq_item_993E4e": {
+          "type": "faq_item",
+          "settings": {
+            "heading": "What if I have issues?",
+            "answer": "<p>A music license grants permission to use copyrighted music legally. It ensures that the rights of the creators are respected. Different licenses apply depending on the intended use.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "faq_item_m9Gq7W",
+        "faq_item_TnKKbE",
+        "faq_item_iTz4WN",
+        "faq_item_8mzBN6",
+        "faq_item_993E4e"
+      ],
+      "name": "FAQ Accordion",
+      "settings": {
+        "title": "FAQs",
+        "subtitle": "<p>Find answers to your most pressing questions about music licenses for Churches and Schools.</p>",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+    "newsletter_banner_V9fURe": {
+      "type": "newsletter-banner",
+      "blocks": {
+        "newsletter-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.newsletter.name",
+      "settings": {
+        "background_top": "#fff",
+        "background_bottom": "#790200",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(145, 36, 34, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "text_color": "#fff",
+        "title": "Join Our Newsletter",
+        "subtitle": "Sign up to our newsletter and we will send you a free song!"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "hero_banner_C6zNKp",
+    "featured_columns_FbLpF4",
+    "featured_products_YcN37j",
+    "featured_products_WPkXrA",
+    "section_cta_x6khNB",
+    "faqs_6JdhwA",
+    "newsletter_banner_V9fURe"
+  ]
+}

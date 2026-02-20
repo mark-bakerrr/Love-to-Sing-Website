@@ -1,0 +1,43 @@
+{% comment %}
+    Renders a product card
+    Accepts:
+    - product_ref: {Object} Product Liquid object
+    - collection_ref: {Object} Collection Liquid object
+    - class: {String} CSS class to apply to the card
+    Usage:
+    {%- render 'card-product', product_ref: product_ref -%}
+{% endcomment %}
+
+<div class="card-product {{ class }}">
+  <a
+    {% if product_ref and product_ref != empty %}
+      href="{{- product_ref.url | within: collection_ref -}}"
+    {% endif %}
+    class="media {% if media_aspect != blank %}media--{{ media_aspect }}{% else %}media--1-1{% endif %}"
+  >
+    {%- if product_ref and product_ref != empty -%}
+      <span class="visually-hidden">{{- product_ref.title | escape -}}</span>
+    {%- endif -%}
+
+    {%-
+      liquid
+      if product_ref.featured_media
+        render 'image', image: product_ref.featured_media
+      else
+        echo 'image' | placeholder_svg_tag
+      endif
+    -%}
+  </a>
+
+  <h4 class="card-product__title">
+    {%- if product_ref and product_ref != empty -%}
+      <a href="{{- product_ref.url | within: collection_ref -}}" class="full-unstyled-link">{{- product_ref.title | escape -}}</a>
+    {%- else -%}
+      {{- 'products.product.title' | t -}}
+    {%- endif -%}
+  </h4><!-- /.caption -->
+
+  <div class="card-product__price">
+    {%- render 'price', product_ref: product_ref, use_variant: true, price_class: '' -%}
+  </div><!-- /.card-product__price -->
+</div><!-- /.card-product -->

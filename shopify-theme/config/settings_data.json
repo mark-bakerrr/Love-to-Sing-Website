@@ -1,0 +1,156 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "current": {
+    "type_header_font": "nunito_n7",
+    "type_body_font": "nunito_n4",
+    "breadcrumbs_map": "breadcrumbs-map",
+    "social_twitter_link": "#",
+    "social_facebook_link": "#",
+    "social_instagram_link": "#",
+    "social_youtube_link": "#",
+    "social_linkedin_link": "#",
+    "social_tiktok_link": "#",
+    "content_for_index": [],
+    "blocks": {
+      "15132424025755801183": {
+        "type": "shopify://apps/upload-lift/blocks/app-embed/3c98bdcb-7587-4ade-bfe4-7d8af00d05ca",
+        "disabled": false,
+        "settings": {}
+      }
+    },
+    "color_schemes": {
+      "primary": {
+        "settings": {
+          "header_background": "linear-gradient(180deg, rgba(185, 31, 28, 1), rgba(145, 36, 34, 1) 100%)",
+          "header_text_color": "#ffffff",
+          "megamenu_left_background": "linear-gradient(180deg, rgba(185, 31, 28, 1), rgba(145, 36, 34, 1) 100%)",
+          "megamenu_left_text_color": "#ffffff",
+          "footer_background": "#790200",
+          "footer_text_color": "#ffffff",
+          "body_background_color": "#ffffff",
+          "media_background_color": "#fcdcdb",
+          "background_primary": "#000000",
+          "background_secondary": "#ffffff",
+          "background_accent": "#e5e5e5",
+          "headings_color": "#000000",
+          "paragraphs_color": "#000000",
+          "subdued_color": "#797979",
+          "buttons_solid_color": "#ffffff",
+          "buttons_solid_background": "linear-gradient(180deg, rgba(231, 37, 57, 1), rgba(196, 38, 55, 1) 100%)",
+          "buttons_solid_color_hover": "#ffffff",
+          "buttons_solid_background_hover": "linear-gradient(180deg, rgba(61, 61, 61, 1), rgba(0, 0, 0, 1) 100%)",
+          "buttons_solid_color_alt": "#000000",
+          "buttons_solid_background_alt": "#e8e8e8",
+          "buttons_solid_color_alt_hover": "#ffffff",
+          "buttons_solid_background_alt_hover": "linear-gradient(180deg, rgba(61, 61, 61, 1), rgba(0, 0, 0, 1) 100%)",
+          "buttons_outline_color": "#000000",
+          "buttons_outline_color_hover": "#ffffff",
+          "buttons_outline_border": "#000000",
+          "red_color": "#ff2424",
+          "border": "#c6c6c6"
+        }
+      },
+      "secondary": {
+        "settings": {
+          "header_background": "linear-gradient(180deg, rgba(32, 95, 169, 1), rgba(21, 74, 143, 1) 100%)",
+          "header_text_color": "#ffffff",
+          "megamenu_left_background": "linear-gradient(180deg, rgba(32, 95, 169, 1), rgba(21, 74, 143, 1) 100%)",
+          "megamenu_left_text_color": "#ffffff",
+          "footer_background": "linear-gradient(180deg, rgba(32, 95, 169, 1), rgba(21, 74, 143, 1) 100%)",
+          "footer_text_color": "#ffffff",
+          "body_background_color": "#ffffff",
+          "media_background_color": "#e5e5e5",
+          "background_primary": "#000000",
+          "background_secondary": "#ffffff",
+          "background_accent": "#e5e5e5",
+          "headings_color": "#000000",
+          "paragraphs_color": "#000000",
+          "subdued_color": "#797979",
+          "buttons_solid_color": "#ffffff",
+          "buttons_solid_background": "#000",
+          "buttons_solid_color_hover": "#ffffff",
+          "buttons_solid_background_hover": "linear-gradient(180deg, rgba(61, 61, 61, 1), rgba(0, 0, 0, 1) 100%)",
+          "buttons_solid_color_alt": "#000000",
+          "buttons_solid_background_alt": "#e8e8e8",
+          "buttons_solid_color_alt_hover": "#ffffff",
+          "buttons_solid_background_alt_hover": "linear-gradient(180deg, rgba(61, 61, 61, 1), rgba(0, 0, 0, 1) 100%)",
+          "buttons_outline_color": "#000000",
+          "buttons_outline_color_hover": "#ffffff",
+          "buttons_outline_border": "#000000",
+          "red_color": "#ff2424",
+          "border": "#c6c6c6"
+        }
+      },
+      "scheme-9ae3eb4c-1c34-4199-afec-5bed8dc0fdb1": {
+        "settings": {
+          "header_background": "linear-gradient(180deg, rgba(238, 214, 71, 1), rgba(238, 214, 71, 1) 3.237%, rgba(235, 186, 91, 1) 99%)",
+          "header_text_color": "#ffffff",
+          "megamenu_left_background": "linear-gradient(180deg, rgba(238, 214, 71, 1), rgba(247, 198, 104, 1) 3.597%, rgba(222, 171, 72, 1) 100%)",
+          "megamenu_left_text_color": "#ffffff",
+          "footer_background": "linear-gradient(180deg, rgba(238, 214, 71, 1), rgba(207, 151, 42, 1) 95%)",
+          "footer_text_color": "#ffffff",
+          "body_background_color": "#ffffff",
+          "media_background_color": "#fcdcdb",
+          "background_primary": "#000000",
+          "background_secondary": "#ffffff",
+          "background_accent": "#e5e5e5",
+          "headings_color": "#000000",
+          "paragraphs_color": "#000000",
+          "subdued_color": "#797979",
+          "buttons_solid_color": "#ffffff",
+          "buttons_solid_background": "linear-gradient(180deg, rgba(231, 37, 57, 1), rgba(196, 38, 55, 1) 100%)",
+          "buttons_solid_color_hover": "#ffffff",
+          "buttons_solid_background_hover": "linear-gradient(180deg, rgba(235, 211, 98, 1), rgba(235, 186, 91, 1) 100%)",
+          "buttons_solid_color_alt": "#000000",
+          "buttons_solid_background_alt": "#e8e8e8",
+          "buttons_solid_color_alt_hover": "#ffffff",
+          "buttons_solid_background_alt_hover": "linear-gradient(180deg, rgba(61, 61, 61, 1), rgba(0, 0, 0, 1) 100%)",
+          "buttons_outline_color": "#000000",
+          "buttons_outline_color_hover": "#ffffff",
+          "buttons_outline_border": "#000000",
+          "red_color": "#ff2424",
+          "border": "#c6c6c6"
+        }
+      },
+      "scheme-4cfb1a8d-ac82-4df1-bde3-fa577b070d6e": {
+        "settings": {
+          "header_background": "linear-gradient(180deg, rgba(0, 0, 0, 1), rgba(58, 58, 58, 1) 100%)",
+          "header_text_color": "#ffffff",
+          "megamenu_left_background": "linear-gradient(180deg, rgba(0, 0, 0, 1), rgba(58, 58, 58, 1) 100%)",
+          "megamenu_left_text_color": "#ffffff",
+          "footer_background": "#000000",
+          "footer_text_color": "#ffffff",
+          "body_background_color": "#ffffff",
+          "media_background_color": "#d1d1d1",
+          "background_primary": "#000000",
+          "background_secondary": "#ffffff",
+          "background_accent": "#e5e5e5",
+          "headings_color": "#ffffff",
+          "paragraphs_color": "#ffffff",
+          "subdued_color": "#797979",
+          "buttons_solid_color": "#ffffff",
+          "buttons_solid_background": "linear-gradient(180deg, rgba(58, 58, 58, 1) 3%, rgba(0, 0, 0, 1) 100%)",
+          "buttons_solid_color_hover": "#ffffff",
+          "buttons_solid_background_hover": "linear-gradient(180deg, rgba(61, 61, 61, 1), rgba(0, 0, 0, 1) 100%)",
+          "buttons_solid_color_alt": "#000000",
+          "buttons_solid_background_alt": "#e8e8e8",
+          "buttons_solid_color_alt_hover": "#ffffff",
+          "buttons_solid_background_alt_hover": "linear-gradient(180deg, rgba(61, 61, 61, 1), rgba(0, 0, 0, 1) 100%)",
+          "buttons_outline_color": "#000000",
+          "buttons_outline_color_hover": "#ffffff",
+          "buttons_outline_border": "#000000",
+          "red_color": "#ff2424",
+          "border": "#c6c6c6"
+        }
+      }
+    }
+  }
+}

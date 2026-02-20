@@ -1,0 +1,154 @@
+{%- liquid
+  echo 'swiper-bundle.min.css' | asset_url | stylesheet_tag
+  echo 'section-featured-articles.css' | asset_url | stylesheet_tag
+
+  assign _section = section.settings
+  content_for "block", type: "spacing", id: "videos-spacing"
+
+  assign resources = _section.collection.products | default: _section.product_list | default: nil
+
+  assign has_resources = false
+
+  if resources
+    assign has_resources = true
+  endif
+
+  capture classes
+    echo 'videos'
+
+    if _section.large_tiles
+      echo ' large-tiles'
+    endif
+
+    if _section.border_bottom
+      echo ' border-bottom'
+    endif
+
+    if _section.border_top
+      echo ' border-top'
+    endif
+
+    if has_resources == false and _section.show_placeholder_cards == false
+      echo ' hidden'
+    endif
+  endcapture
+
+  assign videos = product.metafields.custom.videos.value
+-%}
+
+{%- if videos -%}
+  {{- 'videos.css' | asset_url | stylesheet_tag -}}
+  {{- 'youtube-player.css' | asset_url | stylesheet_tag -}}
+  <script src="{{- 'youtube-player.js' | asset_url -}}" defer></script>
+  <script src="{{- 'featured-articles-carousel.js' | asset_url -}}" defer="defer" data-theme-script></script>
+
+  <section
+    class="{{ classes }}"
+    {%- if _section.alt_background -%}
+      style="background-color: var(--neutral-100, #F4F4F4);"
+    {%- endif -%}
+  >
+    <div class="container">
+      {%- if _section.title != blank or _section.subtitle != blank -%}
+        <div class="videos__head">
+          {%- if _section.title != blank -%}
+            <h3 class="videos__title h2">
+              {{- _section.title | escape -}}
+            </h3><!-- /.videos__title -->
+          {%- endif -%}
+
+          {%- if _section.subtitle != blank -%}
+            <p class="videos__subtitle">
+              {{ _section.subtitle | escape }}
+            </p>
+          {%- endif -%}
+        </div><!-- /.videos__head -->
+      {%- endif -%}
+
+      <div class="videos__body">
+        <div class="videos__grid small-hide medium-hide">
+          {%- for video in videos -%}
+            {%- liquid
+              assign video_id = video | split: '?v='
+              assign thumbnail = 'https://img.youtube.com/vi/' | append: video_id[1] | append: '/sddefault.jpg'
+            -%}
+
+            {%- if video_id[1] -%}
+              <div class="videos__item">
+                {% render 'youtube-player', video_id: video_id[1], thumbnail: thumbnail, class: 'youtube-player--radius-sm' %}
+              </div><!-- /.videos__item -->
+            {%- endif -%}
+          {%- endfor -%}
+        </div><!-- /.videos__grid -->
+
+        <featured-articles-carousel class="featured-articles-carousel large-up-hide" data-autoplay="" data-autoplay-speed="5000">
+          <div class="swiper" data-slider>
+            <div class="swiper-wrapper">
+              {%- for video in videos -%}
+                {%- liquid
+                  assign video_id = video | split: '?v='
+                  assign thumbnail = 'https://img.youtube.com/vi/' | append: video_id[1] | append: '/sddefault.jpg'
+                -%}
+
+                {%- if video_id[1] -%}
+                  <div class="swiper-slide">
+                    {% render 'youtube-player', video_id: video_id[1], thumbnail: thumbnail, class: 'youtube-player--radius-sm' %}
+                  </div><!-- /.swiper-slide -->
+                {%- endif -%}
+              {%- endfor -%}
+            </div><!-- /.swiper-wrapper -->
+          </div><!-- /.swiper -->
+        </featured-articles-carousel>
+      </div><!-- /.videos__body -->
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Videos",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "alt_background",
+      "label": "Alternative background",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "border_top",
+      "label": "Add border to top",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "border_bottom",
+      "label": "Add border to bottom",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:sections.featured-products.settings.title.label",
+      "default": "Heading goes here"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "t:sections.featured-products.settings.subtitle.label",
+      "default": "Subtitle goes here"
+    }
+  ],
+  "enabled_on": { "templates": ["product"] },
+  "presets": [
+    {
+      "name": "Videos",
+      "settings": {}
+    }
+  ]
+}
+{% endschema %}

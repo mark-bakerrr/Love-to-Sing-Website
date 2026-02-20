@@ -1,0 +1,114 @@
+{%- style -%}
+  {%- liquid
+    assign body_font_bold = settings.type_body_font | font_modify: 'weight', 'bold'
+    assign body_font_medium = settings.type_body_font | font_modify: 'weight', '500'
+    assign body_font_italic = settings.type_body_font | font_modify: 'style', 'italic'
+    assign body_font_bold_italic = body_font_bold | font_modify: 'style', 'italic'
+    assign colors_codes = settings.swatches_hex_codes | newline_to_br | strip_newlines | split: '<br />'
+  %}
+
+  {{ settings.type_body_font | font_face: font_display: 'swap' }}
+  {{ body_font_bold | font_face: font_display: 'swap' }}
+  {{ body_font_medium | font_face: font_display: 'swap' }}
+  {{ body_font_italic | font_face: font_display: 'swap' }}
+  {{ body_font_bold_italic | font_face: font_display: 'swap' }}
+  {{ settings.type_header_font | font_face: font_display: 'swap' }}
+
+  {% for scheme in settings.color_schemes %}
+    {% assign scheme_classes = scheme_classes | append: ', .color-' | append: scheme.id %}
+    {% if forloop.index == 1 %}
+      :root,
+    {% endif %}
+    .color-{{ scheme.id }} {
+      --color-header-background: {{ scheme.settings.header_background }};
+      --color-header-text: {{ scheme.settings.header_text_color }};
+
+      --color-megamenu-left-background: {{ scheme.settings.megamenu_left_background }};
+      --color-megamenu-left-text: {{ scheme.settings.megamenu_left_text_color }};
+
+      --color-footer-background: {{ scheme.settings.footer_background }};
+      --color-footer-text: {{ scheme.settings.footer_text_color }};
+
+      --color-background-body: {{ scheme.settings.body_background_color }};
+      --color-background-media: {{ scheme.settings.media_background_color }};
+
+      --color-headings: {{ scheme.settings.headings_color }};
+      --color-paragraphs: {{ scheme.settings.paragraphs_color }};
+
+      --color-solid-button: {{ scheme.settings.buttons_solid_color }};
+      --color-solid-button-hover: {{ scheme.settings.buttons_solid_color_hover }};
+      --color-solid-button-background: {{ scheme.settings.buttons_solid_background }};
+      --color-solid-button-background-hover: {{ scheme.settings.buttons_solid_background_hover }};
+
+      --color-solid-button-alt: {{ scheme.settings.buttons_solid_color_alt }};
+      --color-solid-button-alt-hover: {{ scheme.settings.buttons_solid_color_alt_hover }};
+      --color-solid-button-background-alt: {{ scheme.settings.buttons_solid_background_alt }};
+      --color-solid-button-background-alt-hover: {{ scheme.settings.buttons_solid_background_alt_hover }};
+
+      --color-outline-button: {{ scheme.settings.buttons_outline_color }};
+      --color-outline-button-hover: {{ scheme.settings.buttons_outline_color_hover }};
+      --color-outline-button-border: {{ scheme.settings.buttons_outline_border }};
+
+      --color-red: {{ scheme.settings.red_color }};
+      --color-background-primary: {{ scheme.settings.background_primary }};
+      --color-background-secondary: {{ scheme.settings.background_secondary }};
+      --color-background-accent: {{ scheme.settings.background_accent }};
+      --color-subdued: {{ scheme.settings.subdued_color }};
+      --color-border: {{ scheme.settings.border }};
+    }
+  {% endfor %}
+
+  :root {
+    --font-body-family: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }};
+    --font-body-style: {{ settings.type_body_font.style }};
+    --font-body-weight: {{ settings.type_body_font.weight }};
+
+    --font-heading-family: {{ settings.type_header_font.family }}, {{ settings.type_header_font.fallback_families }};
+    --font-heading-style: {{ settings.type_header_font.style }};
+    --font-heading-weight: {{ settings.type_header_font.weight }};
+
+    --font-body-scale: 1;
+    --font-heading-scale: 1;
+
+    {%- for color_code in colors_codes -%}
+      {%- liquid
+        assign color_code_value = color_code | split: '|' | last
+        capture color_value
+          if color_code_value contains '.'
+            assign color_image = color_code_value | file_img_url: '36x'
+            echo 'url(' | append: color_image | append: ')'
+          else
+            echo color_code_value
+          endif
+        endcapture
+      -%}
+      --color-swatch-{{ color_code | split: '|' | first | handle }}: {{ color_value }};
+    {%- endfor -%}
+
+    --page-width: 1356px;
+
+    --spacing-grid-col: 3.2rem;
+    --spacing-grid-row: 7.2rem;
+    --spacing-grid-col-mobile: 2.4rem;
+    --spacing-grid-row-mobile: 3.8rem;
+
+    --duration-short: 100ms;
+    --duration-default: 200ms;
+    --duration-long: 500ms;
+
+    --z-header: 400;
+    --z-modals: 800;
+  }
+
+  {%- for color_code in colors_codes -%}
+    {%- assign swatch_name = color_code | split: '|' | first | handle -%}
+    {%- assign swatch_value = color_code | split: '|' | last -%}
+    .swatch--{{ swatch_name }} {
+      {%- if swatch_value contains '.' -%}
+        background-image: var(--color-swatch-{{ swatch_name }});
+      {%- else -%}
+        color: var(--color-swatch-{{ swatch_name }});
+      {%- endif -%}
+    }
+  {%- endfor -%}
+{%- endstyle -%}

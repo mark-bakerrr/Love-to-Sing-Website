@@ -1,0 +1,52 @@
+/* ------------------------------------------------------------ *\
+  Section featured articles
+\* ------------------------------------------------------------ */
+
+.featured-articles {
+  overflow: hidden;
+}
+
+.featured-articles.border-bottom {
+  border-bottom: 1px solid var(--c-neutral-200);
+}
+
+.featured-articles.border-top {
+  border-top: 1px solid var(--c-neutral-200);
+}
+
+.featured-articles.hide-if-to-articles:not(:has(.card-article)) {
+  display: none;
+}
+
+.featured-articles__head {
+  padding-bottom: var(--space-800);
+}
+
+@media (max-width: 989px) {
+  .featured-articles__head {
+    padding-bottom: var(--space-400);
+  }
+}
+
+.featured-articles__grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-600) var(--space-400);
+}
+
+.featured-articles__grid > * {
+  grid-column: span 4;
+}
+
+.large-tiles .featured-articles__grid >
+*:is(:first-child:not(:nth-last-child(3)),:nth-child(2):not(:nth-last-child(2))) {
+  grid-column: span 6;
+}
+
+.featured-articles-carousel {
+  display: block;
+}
+
+.featured-articles-carousel :is(.swiper, .swiper-wrapper) {
+  overflow: visible;
+}

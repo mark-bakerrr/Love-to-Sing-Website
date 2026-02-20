@@ -1,0 +1,14 @@
+/* ------------------------------------------------------------ *\
+  List collections
+\* ------------------------------------------------------------ */
+
+@media (max-width: 989px) {
+  .list-collections .grid {
+    grid-template-columns: repeat(2,1fr);
+  }
+}
+
+.card-collection .media {
+  border-radius: var(--radius-m);
+  margin-bottom: 1rem;
+}
