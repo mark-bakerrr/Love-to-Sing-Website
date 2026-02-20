@@ -3,6 +3,7 @@
 
   assign daily_limit = section.settings.daily_chat_limit | default: 3
   assign required_tag = section.settings.required_customer_tag | strip
+  assign allow_guest_preview = section.settings.allow_guest_preview
   assign is_member = false
 
   if customer
@@ -19,9 +20,9 @@
   data-ai-content-studio
   data-api-base="{{ section.settings.api_base_url | escape }}"
   data-daily-limit="{{ daily_limit }}"
-  data-is-logged-in="{% if customer %}true{% else %}false{% endif %}"
+  data-is-logged-in="{% if customer or allow_guest_preview %}true{% else %}false{% endif %}"
   data-is-member="{% if is_member %}true{% else %}false{% endif %}"
-  data-customer-id="{% if customer %}{{ customer.id }}{% endif %}"
+  data-customer-id="{% if customer %}{{ customer.id }}{% elsif allow_guest_preview %}guest-preview{% endif %}"
 >
   <div class="container">
     <header class="ai-content-studio__header">
@@ -37,13 +38,13 @@
       </p>
     </header>
 
-    <div class="ai-content-studio__gate" data-auth-gate {% if customer %}hidden{% endif %}>
+    <div class="ai-content-studio__gate" data-auth-gate {% if customer or allow_guest_preview %}hidden{% endif %}>
       <h3>Log in to use Love to Sing AI Content Studio</h3>
       <p>Teachers, parents and members can create lesson plans, colouring sheets, activity plans and music learning resources.</p>
       <a class="button" href="{{ routes.account_login_url }}">Log in</a>
     </div>
 
-    <div class="ai-content-studio__app" data-app-shell {% unless customer %}hidden{% endunless %}>
+    <div class="ai-content-studio__app" data-app-shell {% unless customer or allow_guest_preview %}hidden{% endunless %}>
       <div class="ai-content-studio__meta">
         <span class="badge" data-quota-badge>Chats remaining today: {{ daily_limit }}</span>
         <span class="badge badge--member" data-member-badge>
@@ -127,6 +128,12 @@
       "id": "daily_chat_limit",
       "label": "Daily chat limit",
       "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "allow_guest_preview",
+      "label": "Allow guest preview mode",
+      "default": true
     },
     {
       "type": "text",
