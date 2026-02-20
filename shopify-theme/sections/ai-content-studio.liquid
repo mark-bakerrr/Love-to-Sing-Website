@@ -1,0 +1,155 @@
+{%- liquid
+  echo 'ai-content-studio.css' | asset_url | stylesheet_tag
+
+  assign daily_limit = section.settings.daily_chat_limit | default: 3
+  assign required_tag = section.settings.required_customer_tag | strip
+  assign is_member = false
+
+  if customer
+    if required_tag == blank
+      assign is_member = true
+    elsif customer.tags contains required_tag
+      assign is_member = true
+    endif
+  endif
+-%}
+
+<section
+  class="ai-content-studio"
+  data-ai-content-studio
+  data-api-base="{{ section.settings.api_base_url | escape }}"
+  data-daily-limit="{{ daily_limit }}"
+  data-is-logged-in="{% if customer %}true{% else %}false{% endif %}"
+  data-is-member="{% if is_member %}true{% else %}false{% endif %}"
+  data-customer-id="{% if customer %}{{ customer.id }}{% endif %}"
+>
+  <div class="container">
+    <header class="ai-content-studio__header">
+      <h1>{{ section.settings.heading }}</h1>
+      {%- if section.settings.subheading != blank -%}
+        <p>{{ section.settings.subheading }}</p>
+      {%- endif -%}
+      <p class="ai-content-studio__songs-link">
+        Songs source:
+        <a href="https://www.lovetosing.com/collections/all-songs" target="_blank" rel="noopener">
+          www.lovetosing.com/collections/all-songs
+        </a>
+      </p>
+    </header>
+
+    <div class="ai-content-studio__gate" data-auth-gate {% if customer %}hidden{% endif %}>
+      <h3>Log in to use Love to Sing AI Content Studio</h3>
+      <p>Teachers, parents and members can create lesson plans, colouring sheets, activity plans and music learning resources.</p>
+      <a class="button" href="{{ routes.account_login_url }}">Log in</a>
+    </div>
+
+    <div class="ai-content-studio__app" data-app-shell {% unless customer %}hidden{% endunless %}>
+      <div class="ai-content-studio__meta">
+        <span class="badge" data-quota-badge>Chats remaining today: {{ daily_limit }}</span>
+        <span class="badge badge--member" data-member-badge>
+          {% if is_member %}Member access active{% else %}No active AI membership{% endif %}
+        </span>
+      </div>
+
+      <div class="ai-content-studio__layout">
+        <div class="ai-content-studio__chat">
+          <div class="ai-content-studio__messages" data-chat-messages>
+            <div class="message message--system">
+              Hi, I can help you create Love to Sing classroom resources.
+            </div>
+          </div>
+
+          <form class="ai-content-studio__composer" data-chat-form>
+            <label class="visually-hidden" for="aiPrompt">Ask AI</label>
+            <textarea id="aiPrompt" name="prompt" rows="4" placeholder="Create a 30-minute lesson plan using two beginner songs for year 1." required></textarea>
+            <div class="ai-content-studio__composer-actions">
+              <select name="contentType" aria-label="Content type">
+                <option value="lesson_plan">Lesson plan</option>
+                <option value="colouring_sheet">Colouring sheet</option>
+                <option value="activity_plan">Activity plan</option>
+                <option value="music_learning_guide">Music learning guide</option>
+              </select>
+              <button type="submit" class="button">Generate preview</button>
+            </div>
+          </form>
+        </div>
+
+        <aside class="ai-content-studio__preview">
+          <h3>Preview</h3>
+          <div class="ai-content-studio__preview-body" data-preview>
+            Generate content to preview it here.
+          </div>
+
+          <div class="ai-content-studio__export-actions">
+            <button class="button" data-generate-file="docx" {% unless is_member %}disabled{% endunless %}>Generate DOCX</button>
+            <button class="button" data-generate-file="pdf" {% unless is_member %}disabled{% endunless %}>Generate PDF</button>
+          </div>
+
+          <p class="ai-content-studio__policy">
+            Downloads require paid membership. Files are branded for Love to Sing and remain copyright Love to Sing.
+            Reproduction outside Terms of Service is prohibited.
+            {%- if section.settings.terms_url != blank -%}
+              <a href="{{ section.settings.terms_url }}" target="_blank" rel="noopener">Terms</a>
+            {%- endif -%}
+          </p>
+        </aside>
+      </div>
+
+      <section class="ai-content-studio__files">
+        <h3>My files</h3>
+        <p>Each generated file can be re-downloaded up to 3 times.</p>
+        <div data-files-list>Files will appear here after generation.</div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<script src="{{ 'ai-content-studio.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "AI Content Studio",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Love to Sing AI Content Studio"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Create classroom-ready resources powered by Love to Sing songs."
+    },
+    {
+      "type": "number",
+      "id": "daily_chat_limit",
+      "label": "Daily chat limit",
+      "default": 3
+    },
+    {
+      "type": "text",
+      "id": "required_customer_tag",
+      "label": "Required customer tag for file generation",
+      "default": "ai_member"
+    },
+    {
+      "type": "text",
+      "id": "api_base_url",
+      "label": "Backend API base URL",
+      "default": "/apps/lts-ai"
+    },
+    {
+      "type": "url",
+      "id": "terms_url",
+      "label": "Terms of Service URL"
+    }
+  ],
+  "presets": [
+    {
+      "name": "AI Content Studio"
+    }
+  ]
+}
+{% endschema %}

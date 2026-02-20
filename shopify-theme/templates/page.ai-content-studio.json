@@ -1,0 +1,17 @@
+{
+  "sections": {
+    "main": {
+      "type": "ai-content-studio",
+      "settings": {
+        "heading": "Love to Sing AI Content Studio",
+        "subheading": "Generate teacher-ready content powered by Love to Sing songs.",
+        "daily_chat_limit": 3,
+        "required_customer_tag": "ai_member",
+        "api_base_url": "/apps/lts-ai"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

@@ -1,0 +1,22 @@
+.ai-content-studio { padding: 4rem 0; }
+.ai-content-studio__header h1 { margin-bottom: .8rem; }
+.ai-content-studio__header p { margin: 0 0 1rem; }
+.ai-content-studio__meta { display: flex; gap: .8rem; margin: 1rem 0 1.2rem; }
+.ai-content-studio__layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.2rem; }
+.ai-content-studio__chat, .ai-content-studio__preview, .ai-content-studio__files, .ai-content-studio__gate {
+  border: 1px solid #ddd; border-radius: 10px; padding: 1rem; background: #fff;
+}
+.ai-content-studio__messages { min-height: 320px; max-height: 520px; overflow: auto; background:#fafafa; border:1px solid #eee; border-radius:8px; padding:.8rem; }
+.message { padding: .6rem .8rem; border-radius: 8px; margin-bottom: .6rem; }
+.message--user { background:#e8f3ff; }
+.message--assistant { background:#f2f9ee; }
+.message--system { background:#f7f7f7; }
+.ai-content-studio__composer { margin-top: .8rem; }
+.ai-content-studio__composer textarea { width: 100%; }
+.ai-content-studio__composer-actions { display: flex; gap: .6rem; margin-top: .6rem; }
+.ai-content-studio__preview-body { min-height: 220px; background:#fafafa; border:1px solid #eee; border-radius:8px; padding:.8rem; white-space: pre-wrap; }
+.ai-content-studio__export-actions { display:flex; gap:.6rem; margin-top:.8rem; }
+.ai-content-studio__policy { margin-top: .8rem; font-size: .9rem; }
+.badge { background:#f1f1f1; border-radius:999px; padding:.3rem .7rem; font-size:.85rem; }
+.badge--member { background:#efe8ff; }
+@media (max-width: 990px) { .ai-content-studio__layout { grid-template-columns: 1fr; } }
