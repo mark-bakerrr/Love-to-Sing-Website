@@ -3,7 +3,7 @@
 
   assign daily_limit = section.settings.daily_chat_limit | default: 3
   assign required_tag = section.settings.required_customer_tag | strip
-  assign allow_guest_preview = section.settings.allow_guest_preview
+  assign allow_guest_preview = section.settings.allow_guest_preview | default: true
   assign is_member = false
 
   if customer
