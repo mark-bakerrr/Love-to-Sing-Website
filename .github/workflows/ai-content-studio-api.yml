@@ -1,0 +1,48 @@
+name: AI Content Studio API
+
+on:
+  push:
+    branches: ["love-to-sing-dot-com-theme", "main", "master"]
+    paths:
+      - "shopify-theme/apps/ai-content-studio-api/**"
+      - ".github/workflows/ai-content-studio-api.yml"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: shopify-theme/apps/ai-content-studio-api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: shopify-theme/apps/ai-content-studio-api/package.json
+
+      - name: Install deps
+        run: npm install
+
+      - name: Syntax check
+        run: node --check src/server.js
+
+  deploy:
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "RENDER_DEPLOY_HOOK_URL not set. Skipping deploy."
+            exit 0
+          fi
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+          echo "Deploy hook triggered."
