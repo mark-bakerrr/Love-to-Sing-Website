@@ -2,6 +2,16 @@
 
 Base URL (theme setting): `/apps/lts-ai`
 
+Local API scaffold implementation lives at:
+- `shopify-theme/apps/ai-content-studio-api`
+
+Run locally:
+```bash
+cd shopify-theme/apps/ai-content-studio-api
+npm install
+npm run dev
+```
+
 ## POST /chat
 Request:
 ```json
@@ -23,6 +33,10 @@ Response:
 Rules:
 - Requires logged-in Shopify customer
 - Enforce daily cap: 3 chats/day
+
+Scaffold auth headers (temporary):
+- `x-shopify-customer-id: <id>`
+- `x-lts-entitled: true|false`
 
 ## POST /generate
 Request:
