@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import PDFDocument from 'pdfkit';
+import { Document, Packer, Paragraph, HeadingLevel, TextRun } from 'docx';
 
 dotenv.config();
 
@@ -15,9 +17,13 @@ const DAILY_LIMIT = Number(process.env.DAILY_CHAT_LIMIT || 3);
 const PORT = Number(process.env.PORT || 8787);
 const SIGNING_SECRET = process.env.SIGNING_SECRET || 'replace-me';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const SHOPIFY_APP_PROXY_SECRET = process.env.SHOPIFY_APP_PROXY_SECRET || '';
+const SHOPIFY_ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN || '';
+const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN || '';
+const REQUIRED_MEMBER_TAG = process.env.REQUIRED_MEMBER_TAG || 'ai_member';
+
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const DATA_PATH = path.join(DATA_DIR, 'store.json');
-
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const db = {
@@ -26,33 +32,65 @@ const db = {
   files: {},
   termsAcceptance: {}
 };
-
 if (fs.existsSync(DATA_PATH)) {
-  try {
-    Object.assign(db, JSON.parse(fs.readFileSync(DATA_PATH, 'utf8')));
-  } catch {
-    // ignore corrupt file for now
-  }
+  try { Object.assign(db, JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'))); } catch {}
 }
+function persistDb() { fs.writeFileSync(DATA_PATH, JSON.stringify(db, null, 2), 'utf8'); }
 
-function persistDb() {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(db, null, 2), 'utf8');
+function nowIso() { return new Date().toISOString(); }
+function getDateKey() { return new Date().toISOString().slice(0, 10); }
+function nextId(prefix) { return `${prefix}_${Math.random().toString(36).slice(2, 10)}`; }
+
+function verifyAppProxySignature(query) {
+  if (!SHOPIFY_APP_PROXY_SECRET || !query.signature) return false;
+  const pairs = Object.keys(query)
+    .filter((k) => k !== 'signature')
+    .sort()
+    .map((k) => `${k}=${Array.isArray(query[k]) ? query[k].join(',') : query[k]}`)
+    .join('');
+  const digest = crypto.createHmac('sha256', SHOPIFY_APP_PROXY_SECRET).update(pairs).digest('hex');
+  return digest === query.signature;
 }
 
 function getUserId(req) {
-  return req.header('x-shopify-customer-id') || req.query.customerId;
+  const headerId = req.header('x-shopify-customer-id') || req.query.customerId;
+  const appProxyId = req.query.logged_in_customer_id;
+
+  if (appProxyId && verifyAppProxySignature(req.query)) {
+    return String(appProxyId);
+  }
+  return headerId ? String(headerId) : null;
 }
 
-function getDateKey() {
-  return new Date().toISOString().slice(0, 10);
-}
+async function isEntitled(req, userId) {
+  const headerEntitled = req.header('x-lts-entitled') === 'true';
+  if (headerEntitled) return true;
 
-function canGenerate(req) {
-  return req.header('x-lts-entitled') === 'true';
-}
+  if (!SHOPIFY_ADMIN_TOKEN || !SHOPIFY_STORE_DOMAIN || !userId) return false;
 
-function nextId(prefix) {
-  return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
+  const query = `#graphql
+    query getCustomer($id: ID!) {
+      customer(id: $id) {
+        id
+        tags
+      }
+    }
+  `;
+
+  const gid = `gid://shopify/Customer/${userId}`;
+  const response = await fetch(`https://${SHOPIFY_STORE_DOMAIN}/admin/api/2024-10/graphql.json`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': SHOPIFY_ADMIN_TOKEN
+    },
+    body: JSON.stringify({ query, variables: { id: gid } })
+  });
+  if (!response.ok) return false;
+
+  const data = await response.json();
+  const tags = data?.data?.customer?.tags || [];
+  return tags.includes(REQUIRED_MEMBER_TAG);
 }
 
 function generateDownloadToken(payload) {
@@ -77,43 +115,61 @@ function verifyDownloadToken(token) {
 
 async function generateWithGeminiFlash(prompt, contentType) {
   if (!GEMINI_API_KEY) {
-    return {
-      text: `Draft ${contentType.replace('_', ' ')} based on Love to Sing songs:\n\n${prompt}\n\n(Placeholder response, GEMINI_API_KEY not configured)`
-    };
+    return { text: `Draft ${contentType.replace('_', ' ')} based on Love to Sing songs:\n\n${prompt}\n\n(Placeholder response, GEMINI_API_KEY not configured)` };
   }
 
-  const instruction = `You are generating classroom resources only about Love to Sing music. Keep output practical, age-appropriate, and classroom safe.`;
+  const instruction = 'Generate classroom-safe educational content only related to Love to Sing music catalog. Use practical structure and include suggested songs.';
   const body = {
     contents: [{ role: 'user', parts: [{ text: `${instruction}\n\nType: ${contentType}\nPrompt: ${prompt}` }] }],
     generationConfig: { temperature: 0.7, maxOutputTokens: 1400 }
   };
 
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
   });
-
-  if (!response.ok) {
-    throw new Error(`Gemini failed (${response.status})`);
-  }
-
+  if (!response.ok) throw new Error(`Gemini failed (${response.status})`);
   const data = await response.json();
   const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text).filter(Boolean).join('\n') || 'No content returned';
   return { text };
 }
 
-app.get('/health', (_req, res) => {
-  res.json({ ok: true });
-});
+async function renderDocxBuffer(title, body) {
+  const doc = new Document({
+    sections: [{
+      children: [
+        new Paragraph({ text: 'Love to Sing', heading: HeadingLevel.HEADING_1 }),
+        new Paragraph({ children: [new TextRun({ text: title, bold: true })] }),
+        ...body.split('\n').map((line) => new Paragraph({ text: line || ' ' })),
+        new Paragraph({ text: '© Love to Sing. All rights reserved.' }),
+        new Paragraph({ text: 'Generated content remains copyright Love to Sing. Reproduction/distribution prohibited outside Terms of Service.' })
+      ]
+    }]
+  });
+  return Packer.toBuffer(doc);
+}
+
+function renderPdfBuffer(title, body) {
+  return new Promise((resolve) => {
+    const chunks = [];
+    const doc = new PDFDocument({ margin: 50 });
+    doc.on('data', (c) => chunks.push(c));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+
+    doc.fontSize(22).text('Love to Sing');
+    doc.moveDown().fontSize(16).text(title);
+    doc.moveDown().fontSize(11).text(body);
+    doc.moveDown(2).fontSize(9).text('© Love to Sing. All rights reserved.');
+    doc.text('Generated content remains copyright Love to Sing. Reproduction/distribution prohibited outside Terms of Service.');
+    doc.end();
+  });
+}
+
+app.get('/health', (_req, res) => res.json({ ok: true }));
 
 app.post('/terms/accept', (req, res) => {
   const userId = getUserId(req);
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-  db.termsAcceptance[userId] = {
-    acceptedAt: new Date().toISOString(),
-    version: req.body?.version || 'v1'
-  };
+  db.termsAcceptance[userId] = { acceptedAt: nowIso(), version: req.body?.version || 'v1' };
   persistDb();
   res.json({ ok: true });
 });
@@ -123,72 +179,52 @@ app.post('/chat', async (req, res) => {
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   const { prompt, contentType = 'lesson_plan' } = req.body || {};
-  if (!prompt || typeof prompt !== 'string') {
-    return res.status(400).json({ error: 'prompt is required' });
-  }
+  if (!prompt || typeof prompt !== 'string') return res.status(400).json({ error: 'prompt is required' });
 
-  const day = getDateKey();
-  const usageKey = `${userId}:${day}`;
+  const usageKey = `${userId}:${getDateKey()}`;
   const used = db.usageByUserDate[usageKey] || 0;
-  if (used >= DAILY_LIMIT) {
-    return res.status(429).json({ error: 'Daily chat limit reached', dailyLimit: DAILY_LIMIT });
-  }
+  if (used >= DAILY_LIMIT) return res.status(429).json({ error: 'Daily chat limit reached', dailyLimit: DAILY_LIMIT });
 
   let ai;
-  try {
-    ai = await generateWithGeminiFlash(prompt, contentType);
-  } catch (err) {
-    return res.status(502).json({ error: 'Model generation failed', detail: String(err.message || err) });
-  }
+  try { ai = await generateWithGeminiFlash(prompt, contentType); }
+  catch (err) { return res.status(502).json({ error: 'Model generation failed', detail: String(err.message || err) }); }
 
   db.usageByUserDate[usageKey] = used + 1;
-
   const generationId = nextId('gen');
-  db.generations[generationId] = {
-    id: generationId,
-    userId,
-    prompt,
-    contentType,
-    previewText: ai.text,
-    createdAt: new Date().toISOString()
-  };
+  db.generations[generationId] = { id: generationId, userId, prompt, contentType, previewText: ai.text, createdAt: nowIso() };
   persistDb();
 
-  res.json({
-    generationId,
-    message: 'Preview generated',
-    previewText: ai.text,
-    remainingChats: Math.max(DAILY_LIMIT - (used + 1), 0)
-  });
+  res.json({ generationId, message: 'Preview generated', previewText: ai.text, remainingChats: Math.max(DAILY_LIMIT - (used + 1), 0) });
 });
 
-app.post('/generate', (req, res) => {
+app.post('/generate', async (req, res) => {
   const userId = getUserId(req);
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-  if (!canGenerate(req)) return res.status(402).json({ error: 'Membership required' });
+
+  const entitled = await isEntitled(req, userId);
+  if (!entitled) return res.status(402).json({ error: 'Membership required' });
 
   const { generationId, format } = req.body || {};
-  if (!generationId || !format || !['docx', 'pdf'].includes(format)) {
-    return res.status(400).json({ error: 'generationId and format(docx|pdf) are required' });
-  }
+  if (!generationId || !format || !['docx', 'pdf'].includes(format)) return res.status(400).json({ error: 'generationId and format(docx|pdf) are required' });
 
   const generation = db.generations[generationId];
-  if (!generation || generation.userId !== userId) {
-    return res.status(404).json({ error: 'Generation not found' });
-  }
+  if (!generation || generation.userId !== userId) return res.status(404).json({ error: 'Generation not found' });
 
   const fileId = nextId('file');
   const fileName = `${generation.contentType}-${new Date().toISOString().slice(0, 10)}.${format}`;
+
+  let contentBase64;
+  if (format === 'docx') {
+    const buffer = await renderDocxBuffer('AI Resource', generation.previewText);
+    contentBase64 = buffer.toString('base64');
+  } else {
+    const buffer = await renderPdfBuffer('AI Resource', generation.previewText);
+    contentBase64 = buffer.toString('base64');
+  }
+
   db.files[fileId] = {
-    id: fileId,
-    userId,
-    generationId,
-    format,
-    name: fileName,
-    content: generation.previewText,
-    downloadCount: 0,
-    maxDownloads: 3,
-    createdAt: new Date().toISOString()
+    id: fileId, userId, generationId, format, name: fileName,
+    contentBase64, downloadCount: 0, maxDownloads: 3, createdAt: nowIso()
   };
   persistDb();
 
@@ -201,6 +237,7 @@ app.get('/files', (req, res) => {
 
   const userFiles = Object.values(db.files)
     .filter((f) => f.userId === userId)
+    .map((f) => ({ ...f, contentBase64: undefined }))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   res.json({ files: userFiles });
@@ -212,9 +249,7 @@ app.post('/files/:id/download', (req, res) => {
 
   const file = db.files[req.params.id];
   if (!file || file.userId !== userId) return res.status(404).json({ error: 'File not found' });
-  if (file.downloadCount >= file.maxDownloads) {
-    return res.status(403).json({ error: 'Download limit reached' });
-  }
+  if (file.downloadCount >= file.maxDownloads) return res.status(403).json({ error: 'Download limit reached' });
 
   file.downloadCount += 1;
   persistDb();
@@ -234,14 +269,12 @@ app.get('/files/:id/stream', (req, res) => {
   const file = db.files[req.params.id];
   if (!file || file.userId !== payload.userId) return res.status(404).send('File not found');
 
-  const brandedContent = `Love to Sing\n\n© Love to Sing. All rights reserved.\nGenerated content remains copyright Love to Sing. Reproduction/distribution prohibited outside Terms of Service.\n\n${file.content}`;
   const mime = file.format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  const buffer = Buffer.from(file.contentBase64, 'base64');
 
   res.setHeader('Content-Type', mime);
   res.setHeader('Content-Disposition', `attachment; filename="${file.name}"`);
-  res.send(brandedContent);
+  res.send(buffer);
 });
 
-app.listen(PORT, () => {
-  console.log(`AI Content Studio API listening on :${PORT}`);
-});
+app.listen(PORT, () => console.log(`AI Content Studio API listening on :${PORT}`));

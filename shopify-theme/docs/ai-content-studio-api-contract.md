@@ -34,9 +34,15 @@ Rules:
 - Requires logged-in Shopify customer
 - Enforce daily cap: 3 chats/day
 
-Scaffold auth headers (temporary):
-- `x-shopify-customer-id: <id>`
-- `x-lts-entitled: true|false`
+Auth modes:
+- Production: Shopify App Proxy signature + `logged_in_customer_id`
+- Dev fallback headers:
+  - `x-shopify-customer-id: <id>`
+  - `x-lts-entitled: true|false`
+
+Entitlement modes:
+- Production: customer tag check through Shopify Admin API (`REQUIRED_MEMBER_TAG`)
+- Dev fallback: `x-lts-entitled: true`
 
 ## POST /generate
 Request:
