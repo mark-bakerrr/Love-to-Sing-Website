@@ -53,7 +53,7 @@ function verifyAppProxySignature(query) {
 }
 
 function getUserId(req) {
-  const headerId = req.header('x-shopify-customer-id') || req.query.customerId;
+  const headerId = req.header('x-shopify-customer-id') || req.query.customerId || req.body?.customerId;
   const appProxyId = req.query.logged_in_customer_id;
 
   if (appProxyId && verifyAppProxySignature(req.query)) {
@@ -163,6 +163,29 @@ function renderPdfBuffer(title, body) {
     doc.end();
   });
 }
+
+app.get('/', (_req, res) => {
+  res.type('html').send(`<!doctype html>
+  <html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Love to Sing AI Preview</title>
+  <style>body{font-family:Arial,sans-serif;max-width:760px;margin:30px auto;padding:0 12px}textarea{width:100%;height:120px}button{padding:10px 14px}pre{background:#f6f6f6;padding:12px;border-radius:8px;white-space:pre-wrap}</style>
+  </head><body>
+    <h2>Love to Sing AI Preview</h2>
+    <p>Quick preview endpoint. This uses guest preview mode and respects daily limits.</p>
+    <textarea id="prompt" placeholder="Create a 20-minute classroom activity plan using two Love to Sing songs"></textarea><br/><br/>
+    <button id="go">Generate Chat Preview</button>
+    <pre id="out">Waiting...</pre>
+    <script>
+      document.getElementById('go').onclick = async () => {
+        const prompt = document.getElementById('prompt').value.trim();
+        if(!prompt) return;
+        const res = await fetch('/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({customerId:'guest-preview', prompt, contentType:'lesson_plan'})});
+        const data = await res.json();
+        document.getElementById('out').textContent = JSON.stringify(data, null, 2);
+      };
+    </script>
+  </body></html>`);
+});
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
