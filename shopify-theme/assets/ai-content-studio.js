@@ -6,6 +6,7 @@
   const dailyLimit = Number(root.dataset.dailyLimit || 3);
   const isLoggedIn = root.dataset.isLoggedIn === 'true';
   const isMember = root.dataset.isMember === 'true';
+  const customerId = root.dataset.customerId || '';
 
   const form = root.querySelector('[data-chat-form]');
   const messages = root.querySelector('[data-chat-messages]');
@@ -17,6 +18,12 @@
   let used = 0;
   let latestGenerationId = null;
   const dateKey = `lts-ai-chat-used-${new Date().toISOString().slice(0, 10)}`;
+
+  const authHeaders = () => ({
+    'Content-Type': 'application/json',
+    'x-shopify-customer-id': customerId,
+    'x-lts-entitled': isMember ? 'true' : 'false'
+  });
 
   try { used = Number(localStorage.getItem(dateKey) || 0); } catch (_) {}
 
@@ -44,10 +51,26 @@
     });
   };
 
+  const triggerDownload = async (fileId) => {
+    try {
+      const res = await fetch(`${apiBase}/files/${fileId}/download`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: authHeaders()
+      });
+      if (!res.ok) throw new Error('Failed');
+      const data = await res.json();
+      if (data.url) window.open(data.url, '_blank');
+      await loadFiles();
+    } catch {
+      appendMessage('system', 'Download failed or limit reached.');
+    }
+  };
+
   const loadFiles = async () => {
     if (!isLoggedIn) return;
     try {
-      const res = await fetch(`${apiBase}/files`, { credentials: 'include' });
+      const res = await fetch(`${apiBase}/files`, { credentials: 'include', headers: authHeaders() });
       if (!res.ok) throw new Error('Failed to load files');
       const data = await res.json();
       if (!Array.isArray(data.files) || !data.files.length) {
@@ -56,8 +79,12 @@
       }
       filesList.innerHTML = data.files.map((f) => {
         const remaining = Math.max((f.maxDownloads || 3) - (f.downloadCount || 0), 0);
-        return `<div><strong>${f.name}</strong> (${f.format.toUpperCase()}) - downloads left: ${remaining}</div>`;
+        return `<div class="file-row"><strong>${f.name}</strong> (${f.format.toUpperCase()}) - downloads left: ${remaining} <button data-download-id="${f.id}" ${remaining <= 0 ? 'disabled' : ''}>Download</button></div>`;
       }).join('');
+
+      filesList.querySelectorAll('[data-download-id]').forEach((btn) => {
+        btn.addEventListener('click', () => triggerDownload(btn.dataset.downloadId));
+      });
     } catch (err) {
       filesList.textContent = 'Unable to load files right now.';
     }
@@ -83,7 +110,7 @@
         const res = await fetch(`${apiBase}/chat`, {
           method: 'POST',
           credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify({ prompt, contentType })
         });
         if (!res.ok) throw new Error('Chat failed');
@@ -118,7 +145,7 @@
         const res = await fetch(`${apiBase}/generate`, {
           method: 'POST',
           credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify({ generationId: latestGenerationId, format })
         });
         if (!res.ok) throw new Error('Generation failed');
