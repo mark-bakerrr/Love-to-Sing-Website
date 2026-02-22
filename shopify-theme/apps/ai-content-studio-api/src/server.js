@@ -220,7 +220,8 @@ app.post('/chat', async (req, res) => {
 
   const usageKey = `${userId}:${getDateKey()}`;
   const used = db.usageByUserDate[usageKey] || 0;
-  if (used >= DAILY_LIMIT) return proxyJson(res, 429, { error: 'Daily chat limit reached', dailyLimit: DAILY_LIMIT });
+  // TODO: Re-enable daily limit for production
+  // if (used >= DAILY_LIMIT) return proxyJson(res, 429, { error: 'Daily chat limit reached', dailyLimit: DAILY_LIMIT });
 
   let ai;
   try { ai = await generateWithGeminiFlash(prompt, contentType); }
