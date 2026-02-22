@@ -43,11 +43,9 @@
 
   const setGenerating = (state) => {
     fileButtons.forEach((btn) => {
-      if (!isMember) {
-        btn.disabled = true;
-      } else {
-        btn.disabled = state;
-      }
+      // TODO: Re-enable member check for production
+      // if (!isMember) { btn.disabled = true; } else { btn.disabled = state; }
+      btn.disabled = state;
     });
   };
 
@@ -131,10 +129,8 @@
 
   fileButtons.forEach((btn) => {
     btn.addEventListener('click', async () => {
-      if (!isMember) {
-        appendMessage('system', 'Membership required before document generation.');
-        return;
-      }
+      // TODO: Re-enable member check for production
+      // if (!isMember) { appendMessage('system', 'Membership required before document generation.'); return; }
       if (!latestGenerationId) {
         appendMessage('system', 'Generate a preview first.');
         return;

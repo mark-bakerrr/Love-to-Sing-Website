@@ -63,6 +63,11 @@ function getUserId(req) {
 }
 
 async function isEntitled(req, userId) {
+  // TODO: Re-enable customer tag check for production
+  // For now, allow all authenticated users to download for testing
+  return true;
+
+  /*
   const headerEntitled = req.header('x-lts-entitled') === 'true';
   if (headerEntitled) return true;
 
@@ -91,6 +96,7 @@ async function isEntitled(req, userId) {
   const data = await response.json();
   const tags = data?.data?.customer?.tags || [];
   return tags.includes(REQUIRED_MEMBER_TAG);
+  */
 }
 
 function generateDownloadToken(payload) {

@@ -82,8 +82,9 @@
           </div>
 
           <div class="ai-content-studio__export-actions">
-            <button class="button" data-generate-file="docx" {% unless is_member %}disabled{% endunless %}>Generate DOCX</button>
-            <button class="button" data-generate-file="pdf" {% unless is_member %}disabled{% endunless %}>Generate PDF</button>
+            {%- comment -%}TODO: Re-enable member gate for production: {% unless is_member %}disabled{% endunless %}{%- endcomment -%}
+            <button class="button" data-generate-file="docx">Generate DOCX</button>
+            <button class="button" data-generate-file="pdf">Generate PDF</button>
           </div>
 
           <p class="ai-content-studio__policy">
