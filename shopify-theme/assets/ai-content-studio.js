@@ -49,7 +49,38 @@
     });
   };
 
-  const triggerDownload = async (fileId) => {
+  // Simple markdown to HTML: headings, bold, italic, lists, paragraphs
+  const renderMarkdown = (md) => {
+    if (!md) return '';
+    return md
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/^### (.+)$/gm, '<h4>$1</h4>')
+      .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^# (.+)$/gm, '<h2>$1</h2>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/^[-*] (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>\n?)+/g, (m) => `<ul>${m}</ul>`)
+      .replace(/^(?!<[hul])(.*\S.*)$/gm, '<p>$1</p>')
+      .replace(/\n{2,}/g, '');
+  };
+
+  // Fetch file as blob and trigger browser save dialog (works cross-origin)
+  const downloadBlob = async (url, fileName) => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Download failed');
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = fileName || 'download';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(blobUrl);
+  };
+
+  const triggerDownload = async (fileId, fileName) => {
     try {
       const res = await fetch(`${apiBase}/files/${fileId}/download`, {
         method: 'POST',
@@ -58,17 +89,24 @@
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      if (data.url) {
-        const a = document.createElement('a');
-        a.href = data.url;
-        a.download = '';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      }
+      if (data.url) await downloadBlob(data.url, fileName || 'document');
       await loadFiles();
     } catch (err) {
       appendMessage('system', err.message || 'Download failed or limit reached.');
+    }
+  };
+
+  // Show PDF in preview pane via iframe
+  const previewPdf = async (url) => {
+    if (!preview) return;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Preview failed');
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      preview.innerHTML = `<iframe src="${blobUrl}" style="width:100%;height:500px;border:none;" title="PDF preview"></iframe>`;
+    } catch {
+      // Fall back to text preview if PDF embed fails
     }
   };
 
@@ -84,11 +122,11 @@
       }
       filesList.innerHTML = data.files.map((f) => {
         const remaining = Math.max((f.maxDownloads || 3) - (f.downloadCount || 0), 0);
-        return `<div class="file-row"><strong>${f.name}</strong> (${f.format.toUpperCase()}) - downloads left: ${remaining} <button data-download-id="${f.id}" ${remaining <= 0 ? 'disabled' : ''}>Download</button></div>`;
+        return `<div class="file-row"><strong>${f.name}</strong> (${f.format.toUpperCase()}) - downloads left: ${remaining} <button data-download-id="${f.id}" data-download-name="${f.name}" ${remaining <= 0 ? 'disabled' : ''}>Download</button></div>`;
       }).join('');
 
       filesList.querySelectorAll('[data-download-id]').forEach((btn) => {
-        btn.addEventListener('click', () => triggerDownload(btn.dataset.downloadId));
+        btn.addEventListener('click', () => triggerDownload(btn.dataset.downloadId, btn.dataset.downloadName));
       });
     } catch (err) {
       filesList.textContent = 'Unable to load files right now.';
@@ -122,7 +160,7 @@
         if (data.error) throw new Error(data.error);
 
         appendMessage('assistant', data.message || 'Generated preview.');
-        if (preview) preview.textContent = data.previewText || data.message || '';
+        if (preview) preview.innerHTML = renderMarkdown(data.previewText || data.message || '');
         latestGenerationId = data.generationId || null;
 
         used += 1;
@@ -154,6 +192,18 @@
         const data = await res.json();
         if (data.error) throw new Error(data.error);
         appendMessage('system', `${format.toUpperCase()} ready: ${data.fileName || 'saved to My Files'}`);
+
+        // Auto-preview PDF in the preview pane
+        if (format === 'pdf' && data.fileId) {
+          const dlRes = await fetch(`${apiBase}/files/${data.fileId}/download`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: authHeaders()
+          });
+          const dlData = await dlRes.json();
+          if (dlData.url) await previewPdf(dlData.url);
+        }
+
         await loadFiles();
       } catch (_) {
         appendMessage('system', `Failed to generate ${format.toUpperCase()}.`);
