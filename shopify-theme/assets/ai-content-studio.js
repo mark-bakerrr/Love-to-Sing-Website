@@ -124,7 +124,7 @@
         try { localStorage.setItem(dateKey, String(used)); } catch (_) {}
         renderQuota();
       } catch (err) {
-        appendMessage('system', 'Sorry, there was a generation error.');
+        appendMessage('system', err.message || 'Sorry, there was a generation error.');
       }
     });
   }
