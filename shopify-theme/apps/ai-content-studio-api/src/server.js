@@ -146,16 +146,25 @@ async function generateColouringImage(prompt) {
   const imagePrompt = `Create a simple black and white colouring page for children. Line art only, no shading, no filled areas, thick clear outlines suitable for colouring in. The scene should be: ${prompt}`;
   const body = {
     contents: [{ role: 'user', parts: [{ text: imagePrompt }] }],
-    generationConfig: { responseModalities: ['IMAGE'], temperature: 0.7 }
+    generationConfig: { responseModalities: ['IMAGE'] }
   };
 
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`, {
+  console.log('Generating colouring image...');
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_API_KEY}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
   });
-  if (!response.ok) return null;
+  if (!response.ok) {
+    const errText = await response.text().catch(() => '');
+    console.error(`Image generation failed (${response.status}):`, errText.slice(0, 300));
+    return null;
+  }
   const data = await response.json();
   const imagePart = data?.candidates?.[0]?.content?.parts?.find((p) => p.inlineData);
-  if (!imagePart) return null;
+  if (!imagePart) {
+    console.error('No image in response. Parts:', JSON.stringify(data?.candidates?.[0]?.content?.parts?.map((p) => Object.keys(p))));
+    return null;
+  }
+  console.log(`Image generated: ${imagePart.inlineData.data.length} bytes base64`);
   return Buffer.from(imagePart.inlineData.data, 'base64');
 }
 
