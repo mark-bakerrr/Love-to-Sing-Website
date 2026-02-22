@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import PDFDocument from 'pdfkit';
-import { Document, Packer, Paragraph, HeadingLevel, TextRun, ImageRun, AlignmentType, BorderStyle } from 'docx';
+import { Document, Packer, Paragraph, HeadingLevel, TextRun, ImageRun, AlignmentType, BorderStyle, PageBreak } from 'docx';
 
 dotenv.config();
 
@@ -125,7 +125,21 @@ async function generateWithGeminiFlash(prompt, contentType) {
     return { text: `Draft ${contentType.replace('_', ' ')} based on Love to Sing songs:\n\n${prompt}\n\n(Placeholder response, GEMINI_API_KEY not configured)` };
   }
 
-  const instruction = 'Generate classroom-safe educational content only related to Love to Sing music catalog. Use practical structure and include suggested songs.';
+  let instruction;
+  if (contentType === 'colouring_sheet') {
+    instruction = `You are creating a colouring activity guide for teachers and parents using Love to Sing songs.
+Do NOT describe what the image should look like — the image is generated separately.
+Instead, provide practical content:
+- A title for the colouring activity
+- Suggested Love to Sing songs to play while colouring
+- Learning objectives (fine motor skills, colour recognition, creativity, etc.)
+- Step-by-step activity instructions for the teacher/parent
+- Discussion questions to ask children about the picture
+- Extension activities (e.g. cut and paste, colour by number, group display)
+Keep it practical, fun, and classroom-ready.`;
+  } else {
+    instruction = 'Generate classroom-safe educational content only related to Love to Sing music catalog. Use practical structure and include suggested songs.';
+  }
   const body = {
     contents: [{ role: 'user', parts: [{ text: `${instruction}\n\nType: ${contentType}\nPrompt: ${prompt}` }] }],
     generationConfig: { temperature: 0.7, maxOutputTokens: 4000 }
@@ -233,11 +247,15 @@ async function renderDocxBuffer(title, body, imageBuffer) {
   ];
 
   if (imageBuffer) {
+    // Page break before image
+    children.push(new Paragraph({ children: [new PageBreak()] }));
     children.push(new Paragraph({
-      children: [new ImageRun({ data: imageBuffer, transformation: { width: 500, height: 500 }, type: 'png' })],
+      children: [new ImageRun({ data: imageBuffer, transformation: { width: 550, height: 550 }, type: 'png' })],
       alignment: AlignmentType.CENTER,
-      spacing: { before: 200, after: 200 }
+      spacing: { before: 100, after: 100 }
     }));
+    // Page break after image so text starts on a new page
+    children.push(new Paragraph({ children: [new PageBreak()] }));
   }
 
   children.push(...markdownToDocxParagraphs(body));
@@ -275,13 +293,22 @@ function renderPdfBuffer(title, body, imageBuffer) {
     doc.moveDown(0.3).fontSize(16).font('Helvetica-Bold').fillColor('#555555').text(title, { align: 'center' });
     doc.moveDown(0.8);
 
-    // Colouring sheet image
+    // Colouring sheet image on its own page
     if (imageBuffer) {
       try {
-        doc.image(imageBuffer, { fit: [500, 500], align: 'center' });
-        doc.moveDown(1);
+        doc.addPage();
+        const pageW = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+        const pageH = doc.page.height - doc.page.margins.top - doc.page.margins.bottom;
+        doc.image(imageBuffer, doc.page.margins.left, doc.page.margins.top, {
+          fit: [pageW, pageH],
+          align: 'center',
+          valign: 'center'
+        });
       } catch { /* skip image on error */ }
     }
+
+    // Text content on a new page after the image
+    if (imageBuffer) doc.addPage();
 
     // Formatted body
     doc.fillColor('#000000');
