@@ -58,12 +58,12 @@
         credentials: 'include',
         headers: authHeaders()
       });
-      if (!res.ok) throw new Error('Failed');
       const data = await res.json();
+      if (data.error) throw new Error(data.error);
       if (data.url) window.open(data.url, '_blank');
       await loadFiles();
-    } catch {
-      appendMessage('system', 'Download failed or limit reached.');
+    } catch (err) {
+      appendMessage('system', err.message || 'Download failed or limit reached.');
     }
   };
 
@@ -71,8 +71,8 @@
     if (!isLoggedIn) return;
     try {
       const res = await fetch(`${apiBase}/files`, { credentials: 'include', headers: authHeaders() });
-      if (!res.ok) throw new Error('Failed to load files');
       const data = await res.json();
+      if (data.error) throw new Error(data.error);
       if (!Array.isArray(data.files) || !data.files.length) {
         filesList.textContent = 'No files yet.';
         return;
@@ -113,9 +113,9 @@
           headers: authHeaders(),
           body: JSON.stringify({ prompt, contentType })
         });
-        if (!res.ok) throw new Error('Chat failed');
-
         const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
         appendMessage('assistant', data.message || 'Generated preview.');
         if (preview) preview.textContent = data.previewText || data.message || '';
         latestGenerationId = data.generationId || null;
@@ -148,8 +148,8 @@
           headers: authHeaders(),
           body: JSON.stringify({ generationId: latestGenerationId, format })
         });
-        if (!res.ok) throw new Error('Generation failed');
         const data = await res.json();
+        if (data.error) throw new Error(data.error);
         appendMessage('system', `${format.toUpperCase()} ready: ${data.fileName || 'saved to My Files'}`);
         await loadFiles();
       } catch (_) {

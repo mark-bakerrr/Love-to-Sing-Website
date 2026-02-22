@@ -187,51 +187,58 @@ app.get('/', (_req, res) => {
   </body></html>`);
 });
 
+// Shopify App Proxy intercepts non-2xx responses and renders storefront HTML
+// instead of forwarding the JSON body. All API routes must return HTTP 200
+// with a { statusCode, error } payload so the frontend can handle errors.
+function proxyJson(res, statusCode, body) {
+  res.status(200).json({ ...body, statusCode });
+}
+
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
 app.post('/terms/accept', (req, res) => {
   const userId = getUserId(req);
-  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  if (!userId) return proxyJson(res, 401, { error: 'Unauthorized' });
   db.termsAcceptance[userId] = { acceptedAt: nowIso(), version: req.body?.version || 'v1' };
   persistDb();
-  res.json({ ok: true });
+  proxyJson(res, 200, { ok: true });
 });
 
 app.post('/chat', async (req, res) => {
   const userId = getUserId(req);
-  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  if (!userId) return proxyJson(res, 401, { error: 'Unauthorized' });
 
   const { prompt, contentType = 'lesson_plan' } = req.body || {};
-  if (!prompt || typeof prompt !== 'string') return res.status(400).json({ error: 'prompt is required' });
+  if (!prompt || typeof prompt !== 'string') return proxyJson(res, 400, { error: 'prompt is required' });
 
   const usageKey = `${userId}:${getDateKey()}`;
   const used = db.usageByUserDate[usageKey] || 0;
-  if (used >= DAILY_LIMIT) return res.status(429).json({ error: 'Daily chat limit reached', dailyLimit: DAILY_LIMIT });
+  if (used >= DAILY_LIMIT) return proxyJson(res, 429, { error: 'Daily chat limit reached', dailyLimit: DAILY_LIMIT });
 
   let ai;
   try { ai = await generateWithGeminiFlash(prompt, contentType); }
-  catch (err) { return res.status(502).json({ error: 'Model generation failed', detail: String(err.message || err) }); }
+  catch (err) { return proxyJson(res, 502, { error: 'Model generation failed', detail: String(err.message || err) }); }
 
   db.usageByUserDate[usageKey] = used + 1;
   const generationId = nextId('gen');
   db.generations[generationId] = { id: generationId, userId, prompt, contentType, previewText: ai.text, createdAt: nowIso() };
   persistDb();
 
-  res.json({ generationId, message: 'Preview generated', previewText: ai.text, remainingChats: Math.max(DAILY_LIMIT - (used + 1), 0) });
+  proxyJson(res, 200, { generationId, message: 'Preview generated', previewText: ai.text, remainingChats: Math.max(DAILY_LIMIT - (used + 1), 0) });
 });
 
 app.post('/generate', async (req, res) => {
   const userId = getUserId(req);
-  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  if (!userId) return proxyJson(res, 401, { error: 'Unauthorized' });
 
   const entitled = await isEntitled(req, userId);
-  if (!entitled) return res.status(402).json({ error: 'Membership required' });
+  if (!entitled) return proxyJson(res, 402, { error: 'Membership required' });
 
   const { generationId, format } = req.body || {};
-  if (!generationId || !format || !['docx', 'pdf'].includes(format)) return res.status(400).json({ error: 'generationId and format(docx|pdf) are required' });
+  if (!generationId || !format || !['docx', 'pdf'].includes(format)) return proxyJson(res, 400, { error: 'generationId and format(docx|pdf) are required' });
 
   const generation = db.generations[generationId];
-  if (!generation || generation.userId !== userId) return res.status(404).json({ error: 'Generation not found' });
+  if (!generation || generation.userId !== userId) return proxyJson(res, 404, { error: 'Generation not found' });
 
   const fileId = nextId('file');
   const fileName = `${generation.contentType}-${new Date().toISOString().slice(0, 10)}.${format}`;
@@ -251,34 +258,34 @@ app.post('/generate', async (req, res) => {
   };
   persistDb();
 
-  res.json({ fileId, fileName });
+  proxyJson(res, 200, { fileId, fileName });
 });
 
 app.get('/files', (req, res) => {
   const userId = getUserId(req);
-  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  if (!userId) return proxyJson(res, 401, { error: 'Unauthorized' });
 
   const userFiles = Object.values(db.files)
     .filter((f) => f.userId === userId)
     .map((f) => ({ ...f, contentBase64: undefined }))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
-  res.json({ files: userFiles });
+  proxyJson(res, 200, { files: userFiles });
 });
 
 app.post('/files/:id/download', (req, res) => {
   const userId = getUserId(req);
-  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  if (!userId) return proxyJson(res, 401, { error: 'Unauthorized' });
 
   const file = db.files[req.params.id];
-  if (!file || file.userId !== userId) return res.status(404).json({ error: 'File not found' });
-  if (file.downloadCount >= file.maxDownloads) return res.status(403).json({ error: 'Download limit reached' });
+  if (!file || file.userId !== userId) return proxyJson(res, 404, { error: 'File not found' });
+  if (file.downloadCount >= file.maxDownloads) return proxyJson(res, 403, { error: 'Download limit reached' });
 
   file.downloadCount += 1;
   persistDb();
 
   const token = generateDownloadToken({ fileId: file.id, userId, exp: Date.now() + 1000 * 60 * 10 });
-  res.json({
+  proxyJson(res, 200, {
     url: `/files/${file.id}/stream?token=${token}`,
     downloadCount: file.downloadCount,
     remainingDownloads: Math.max(file.maxDownloads - file.downloadCount, 0)
