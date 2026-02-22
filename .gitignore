@@ -1,0 +1,20 @@
+# Environment files with secrets
+.env
+.env.local
+.env.render
+.env.production
+.env.staging
+
+# Keep example env files
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Runtime data
+data/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
