@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import PDFDocument from 'pdfkit';
-import { Document, Packer, Paragraph, HeadingLevel, TextRun } from 'docx';
+import { Document, Packer, Paragraph, HeadingLevel, TextRun, ImageRun, AlignmentType, BorderStyle } from 'docx';
 
 dotenv.config();
 
@@ -128,7 +128,7 @@ async function generateWithGeminiFlash(prompt, contentType) {
   const instruction = 'Generate classroom-safe educational content only related to Love to Sing music catalog. Use practical structure and include suggested songs.';
   const body = {
     contents: [{ role: 'user', parts: [{ text: `${instruction}\n\nType: ${contentType}\nPrompt: ${prompt}` }] }],
-    generationConfig: { temperature: 0.7, maxOutputTokens: 1400 }
+    generationConfig: { temperature: 0.7, maxOutputTokens: 4000 }
   };
 
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -140,33 +140,182 @@ async function generateWithGeminiFlash(prompt, contentType) {
   return { text };
 }
 
-async function renderDocxBuffer(title, body) {
+async function generateColouringImage(prompt) {
+  if (!GEMINI_API_KEY) return null;
+
+  const imagePrompt = `Create a simple black and white colouring page for children. Line art only, no shading, no filled areas, thick clear outlines suitable for colouring in. The scene should be: ${prompt}`;
+  const body = {
+    contents: [{ role: 'user', parts: [{ text: imagePrompt }] }],
+    generationConfig: { responseModalities: ['IMAGE'], temperature: 0.7 }
+  };
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+  });
+  if (!response.ok) return null;
+  const data = await response.json();
+  const imagePart = data?.candidates?.[0]?.content?.parts?.find((p) => p.inlineData);
+  if (!imagePart) return null;
+  return Buffer.from(imagePart.inlineData.data, 'base64');
+}
+
+// Parse markdown line into docx TextRuns with bold/italic support
+function parseInlineFormatting(text) {
+  const runs = [];
+  const regex = /\*\*(.+?)\*\*|\*(.+?)\*/g;
+  let lastIndex = 0;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      runs.push(new TextRun({ text: text.slice(lastIndex, match.index), size: 22 }));
+    }
+    if (match[1]) {
+      runs.push(new TextRun({ text: match[1], bold: true, size: 22 }));
+    } else if (match[2]) {
+      runs.push(new TextRun({ text: match[2], italics: true, size: 22 }));
+    }
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    runs.push(new TextRun({ text: text.slice(lastIndex), size: 22 }));
+  }
+  return runs.length ? runs : [new TextRun({ text, size: 22 })];
+}
+
+// Convert markdown text to an array of docx Paragraphs
+function markdownToDocxParagraphs(md) {
+  const paragraphs = [];
+  for (const line of md.split('\n')) {
+    const trimmed = line.trimEnd();
+    if (trimmed.startsWith('### ')) {
+      paragraphs.push(new Paragraph({ text: trimmed.slice(4), heading: HeadingLevel.HEADING_3, spacing: { before: 200, after: 100 } }));
+    } else if (trimmed.startsWith('## ')) {
+      paragraphs.push(new Paragraph({ text: trimmed.slice(3), heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 120 } }));
+    } else if (trimmed.startsWith('# ')) {
+      paragraphs.push(new Paragraph({ text: trimmed.slice(2), heading: HeadingLevel.HEADING_1, spacing: { before: 400, after: 150 } }));
+    } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      paragraphs.push(new Paragraph({ children: parseInlineFormatting(trimmed.slice(2)), bullet: { level: 0 }, spacing: { after: 60 } }));
+    } else if (/^\d+\.\s/.test(trimmed)) {
+      const text = trimmed.replace(/^\d+\.\s/, '');
+      paragraphs.push(new Paragraph({ children: parseInlineFormatting(text), numbering: { reference: 'default-numbering', level: 0 }, spacing: { after: 60 } }));
+    } else if (trimmed === '---' || trimmed === '***') {
+      paragraphs.push(new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { before: 200, after: 200 } }));
+    } else if (trimmed === '') {
+      paragraphs.push(new Paragraph({ text: '', spacing: { after: 80 } }));
+    } else {
+      paragraphs.push(new Paragraph({ children: parseInlineFormatting(trimmed), spacing: { after: 80 } }));
+    }
+  }
+  return paragraphs;
+}
+
+async function renderDocxBuffer(title, body, imageBuffer) {
+  const children = [
+    new Paragraph({
+      children: [new TextRun({ text: 'Love to Sing', bold: true, size: 36, color: '333333' })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 100 }
+    }),
+    new Paragraph({
+      children: [new TextRun({ text: title, bold: true, size: 28, color: '555555' })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 300 }
+    }),
+  ];
+
+  if (imageBuffer) {
+    children.push(new Paragraph({
+      children: [new ImageRun({ data: imageBuffer, transformation: { width: 500, height: 500 }, type: 'png' })],
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 200, after: 200 }
+    }));
+  }
+
+  children.push(...markdownToDocxParagraphs(body));
+
+  children.push(
+    new Paragraph({ text: '', spacing: { before: 400 } }),
+    new Paragraph({
+      children: [new TextRun({ text: '\u00A9 Love to Sing. All rights reserved.', size: 16, color: '999999', italics: true })],
+      alignment: AlignmentType.CENTER
+    })
+  );
+
   const doc = new Document({
-    sections: [{
-      children: [
-        new Paragraph({ text: 'Love to Sing', heading: HeadingLevel.HEADING_1 }),
-        new Paragraph({ children: [new TextRun({ text: title, bold: true })] }),
-        ...body.split('\n').map((line) => new Paragraph({ text: line || ' ' })),
-        new Paragraph({ text: '© Love to Sing. All rights reserved.' }),
-        new Paragraph({ text: 'Generated content remains copyright Love to Sing. Reproduction/distribution prohibited outside Terms of Service.' })
-      ]
-    }]
+    numbering: {
+      config: [{
+        reference: 'default-numbering',
+        levels: [{ level: 0, format: 'decimal', text: '%1.', alignment: AlignmentType.START }]
+      }]
+    },
+    sections: [{ children }]
   });
   return Packer.toBuffer(doc);
 }
 
-function renderPdfBuffer(title, body) {
+// Render markdown text into a formatted PDF
+function renderPdfBuffer(title, body, imageBuffer) {
   return new Promise((resolve) => {
     const chunks = [];
-    const doc = new PDFDocument({ margin: 50 });
+    const doc = new PDFDocument({ margin: 50, bufferPages: true });
     doc.on('data', (c) => chunks.push(c));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
 
-    doc.fontSize(22).text('Love to Sing');
-    doc.moveDown().fontSize(16).text(title);
-    doc.moveDown().fontSize(11).text(body);
-    doc.moveDown(2).fontSize(9).text('© Love to Sing. All rights reserved.');
-    doc.text('Generated content remains copyright Love to Sing. Reproduction/distribution prohibited outside Terms of Service.');
+    // Header
+    doc.fontSize(24).font('Helvetica-Bold').fillColor('#333333').text('Love to Sing', { align: 'center' });
+    doc.moveDown(0.3).fontSize(16).font('Helvetica-Bold').fillColor('#555555').text(title, { align: 'center' });
+    doc.moveDown(0.8);
+
+    // Colouring sheet image
+    if (imageBuffer) {
+      try {
+        doc.image(imageBuffer, { fit: [500, 500], align: 'center' });
+        doc.moveDown(1);
+      } catch { /* skip image on error */ }
+    }
+
+    // Formatted body
+    doc.fillColor('#000000');
+    for (const line of body.split('\n')) {
+      const trimmed = line.trimEnd();
+      if (trimmed.startsWith('### ')) {
+        doc.moveDown(0.4).fontSize(13).font('Helvetica-Bold').text(trimmed.slice(4));
+      } else if (trimmed.startsWith('## ')) {
+        doc.moveDown(0.5).fontSize(15).font('Helvetica-Bold').text(trimmed.slice(3));
+      } else if (trimmed.startsWith('# ')) {
+        doc.moveDown(0.6).fontSize(18).font('Helvetica-Bold').text(trimmed.slice(2));
+      } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+        doc.fontSize(11).font('Helvetica').text(`  \u2022  ${trimmed.slice(2)}`, { indent: 15 });
+      } else if (/^\d+\.\s/.test(trimmed)) {
+        doc.fontSize(11).font('Helvetica').text(`  ${trimmed}`, { indent: 15 });
+      } else if (trimmed === '---' || trimmed === '***') {
+        doc.moveDown(0.3).moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).strokeColor('#CCCCCC').stroke();
+        doc.moveDown(0.3);
+      } else if (trimmed === '') {
+        doc.moveDown(0.3);
+      } else {
+        // Handle inline bold by splitting on **...**
+        const parts = trimmed.split(/(\*\*.+?\*\*)/g);
+        if (parts.some((p) => p.startsWith('**'))) {
+          doc.fontSize(11);
+          for (const part of parts) {
+            if (part.startsWith('**') && part.endsWith('**')) {
+              doc.font('Helvetica-Bold').text(part.slice(2, -2), { continued: true });
+            } else if (part) {
+              doc.font('Helvetica').text(part, { continued: true });
+            }
+          }
+          doc.font('Helvetica').text('');
+        } else {
+          doc.fontSize(11).font('Helvetica').text(trimmed);
+        }
+      }
+    }
+
+    // Footer
+    doc.moveDown(2).fontSize(8).font('Helvetica-Oblique').fillColor('#999999')
+      .text('\u00A9 Love to Sing. All rights reserved.', { align: 'center' });
+
     doc.end();
   });
 }
@@ -249,20 +398,29 @@ app.post('/generate', async (req, res) => {
   if (!generation || generation.userId !== userId) return proxyJson(res, 404, { error: 'Generation not found' });
 
   const fileId = nextId('file');
+  const titleMap = { lesson_plan: 'Lesson Plan', colouring_sheet: 'Colouring Sheet', activity_plan: 'Activity Plan', music_learning_guide: 'Music Learning Guide' };
+  const docTitle = titleMap[generation.contentType] || 'AI Resource';
   const fileName = `${generation.contentType}-${new Date().toISOString().slice(0, 10)}.${format}`;
+
+  // Generate colouring sheet image if applicable
+  let imageBuffer = null;
+  if (generation.contentType === 'colouring_sheet') {
+    try { imageBuffer = await generateColouringImage(generation.prompt); } catch { /* continue without image */ }
+  }
 
   let contentBase64;
   if (format === 'docx') {
-    const buffer = await renderDocxBuffer('AI Resource', generation.previewText);
+    const buffer = await renderDocxBuffer(docTitle, generation.previewText, imageBuffer);
     contentBase64 = buffer.toString('base64');
   } else {
-    const buffer = await renderPdfBuffer('AI Resource', generation.previewText);
+    const buffer = await renderPdfBuffer(docTitle, generation.previewText, imageBuffer);
     contentBase64 = buffer.toString('base64');
   }
 
   db.files[fileId] = {
+    // TODO: Re-enable maxDownloads: 3 for production
     id: fileId, userId, generationId, format, name: fileName,
-    contentBase64, downloadCount: 0, maxDownloads: 3, createdAt: nowIso()
+    contentBase64, downloadCount: 0, maxDownloads: 999, createdAt: nowIso()
   };
   persistDb();
 
@@ -287,7 +445,8 @@ app.post('/files/:id/download', (req, res) => {
 
   const file = db.files[req.params.id];
   if (!file || file.userId !== userId) return proxyJson(res, 404, { error: 'File not found' });
-  if (file.downloadCount >= file.maxDownloads) return proxyJson(res, 403, { error: 'Download limit reached' });
+  // TODO: Re-enable download limit for production
+  // if (file.downloadCount >= file.maxDownloads) return proxyJson(res, 403, { error: 'Download limit reached' });
 
   file.downloadCount += 1;
   persistDb();
