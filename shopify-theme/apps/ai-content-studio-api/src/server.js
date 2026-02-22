@@ -21,6 +21,7 @@ const SHOPIFY_APP_PROXY_SECRET = process.env.SHOPIFY_APP_PROXY_SECRET || '';
 const SHOPIFY_ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_TOKEN || '';
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN || '';
 const REQUIRED_MEMBER_TAG = process.env.REQUIRED_MEMBER_TAG || 'ai_member';
+const PUBLIC_API_URL = process.env.PUBLIC_API_URL || '';
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const DATA_PATH = path.join(DATA_DIR, 'store.json');
@@ -291,8 +292,9 @@ app.post('/files/:id/download', (req, res) => {
   persistDb();
 
   const token = generateDownloadToken({ fileId: file.id, userId, exp: Date.now() + 1000 * 60 * 10 });
+  const streamPath = `/files/${file.id}/stream?token=${token}`;
   proxyJson(res, 200, {
-    url: `/files/${file.id}/stream?token=${token}`,
+    url: PUBLIC_API_URL ? `${PUBLIC_API_URL}${streamPath}` : streamPath,
     downloadCount: file.downloadCount,
     remainingDownloads: Math.max(file.maxDownloads - file.downloadCount, 0)
   });
