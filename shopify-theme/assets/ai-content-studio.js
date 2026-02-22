@@ -58,7 +58,14 @@
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      if (data.url) window.open(data.url, '_blank');
+      if (data.url) {
+        const a = document.createElement('a');
+        a.href = data.url;
+        a.download = '';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
       await loadFiles();
     } catch (err) {
       appendMessage('system', err.message || 'Download failed or limit reached.');
