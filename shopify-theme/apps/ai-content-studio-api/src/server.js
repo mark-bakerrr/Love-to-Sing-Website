@@ -233,7 +233,21 @@ function markdownToDocxParagraphs(md) {
 }
 
 async function renderDocxBuffer(title, body, imageBuffer) {
-  const children = [
+  const children = [];
+
+  if (imageBuffer) {
+    // Page 1: full-page colouring image
+    children.push(new Paragraph({
+      children: [new ImageRun({ data: imageBuffer, transformation: { width: 600, height: 750 }, type: 'png' })],
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 0, after: 0 }
+    }));
+    // Page break so title + text start on page 2
+    children.push(new Paragraph({ children: [new PageBreak()] }));
+  }
+
+  // Title header (page 1 if no image, page 2 if image)
+  children.push(
     new Paragraph({
       children: [new TextRun({ text: 'Love to Sing', bold: true, size: 36, color: '333333' })],
       alignment: AlignmentType.CENTER,
@@ -244,19 +258,7 @@ async function renderDocxBuffer(title, body, imageBuffer) {
       alignment: AlignmentType.CENTER,
       spacing: { after: 300 }
     }),
-  ];
-
-  if (imageBuffer) {
-    // Page break before image
-    children.push(new Paragraph({ children: [new PageBreak()] }));
-    children.push(new Paragraph({
-      children: [new ImageRun({ data: imageBuffer, transformation: { width: 550, height: 550 }, type: 'png' })],
-      alignment: AlignmentType.CENTER,
-      spacing: { before: 100, after: 100 }
-    }));
-    // Page break after image so text starts on a new page
-    children.push(new Paragraph({ children: [new PageBreak()] }));
-  }
+  );
 
   children.push(...markdownToDocxParagraphs(body));
 
@@ -288,15 +290,9 @@ function renderPdfBuffer(title, body, imageBuffer) {
     doc.on('data', (c) => chunks.push(c));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
 
-    // Header
-    doc.fontSize(24).font('Helvetica-Bold').fillColor('#333333').text('Love to Sing', { align: 'center' });
-    doc.moveDown(0.3).fontSize(16).font('Helvetica-Bold').fillColor('#555555').text(title, { align: 'center' });
-    doc.moveDown(0.8);
-
-    // Colouring sheet image on its own page
+    // Page 1: full-page colouring image (if present)
     if (imageBuffer) {
       try {
-        doc.addPage();
         const pageW = doc.page.width - doc.page.margins.left - doc.page.margins.right;
         const pageH = doc.page.height - doc.page.margins.top - doc.page.margins.bottom;
         doc.image(imageBuffer, doc.page.margins.left, doc.page.margins.top, {
@@ -305,10 +301,13 @@ function renderPdfBuffer(title, body, imageBuffer) {
           valign: 'center'
         });
       } catch { /* skip image on error */ }
+      doc.addPage();
     }
 
-    // Text content on a new page after the image
-    if (imageBuffer) doc.addPage();
+    // Header (page 1 if no image, page 2 if image)
+    doc.fontSize(24).font('Helvetica-Bold').fillColor('#333333').text('Love to Sing', { align: 'center' });
+    doc.moveDown(0.3).fontSize(16).font('Helvetica-Bold').fillColor('#555555').text(title, { align: 'center' });
+    doc.moveDown(0.8);
 
     // Formatted body
     doc.fillColor('#000000');
