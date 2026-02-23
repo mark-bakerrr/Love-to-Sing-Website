@@ -32,7 +32,7 @@
 .ai-content-studio {
   font-family: 'Nunito', sans-serif;
   color: var(--lts-text);
-  padding: 2.5rem 0 4rem;
+  padding: calc(var(--header-top-position, 7.4rem) + 2.5rem) 0 4rem;
   background:
     radial-gradient(ellipse 80% 60% at 20% 10%, var(--lts-red-glow), transparent),
     radial-gradient(ellipse 60% 50% at 85% 80%, rgba(74, 156, 94, 0.06), transparent),
