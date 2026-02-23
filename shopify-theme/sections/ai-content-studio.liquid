@@ -53,38 +53,77 @@
       </div>
 
       <div class="ai-content-studio__layout">
+        <!-- Chat panel -->
         <div class="ai-content-studio__chat">
+          <div class="ai-content-studio__chat-header">
+            <div class="ai-content-studio__chat-avatar">&#9835;</div>
+            <div class="ai-content-studio__chat-header-text">
+              <h3>Content Studio AI</h3>
+              <span>Powered by Love to Sing</span>
+            </div>
+          </div>
+
           <div class="ai-content-studio__messages" data-chat-messages>
             <div class="message message--system">
-              Hi, I can help you create Love to Sing classroom resources.
+              Hi! I can help you create classroom-ready resources using Love to Sing songs. Choose a content type below and describe what you need.
             </div>
           </div>
 
           <form class="ai-content-studio__composer" data-chat-form>
-            <label class="visually-hidden" for="aiPrompt">Ask AI</label>
-            <textarea id="aiPrompt" name="prompt" rows="4" placeholder="Create a 30-minute lesson plan using two beginner songs for year 1." required></textarea>
-            <div class="ai-content-studio__composer-actions">
-              <select name="contentType" aria-label="Content type">
-                <option value="lesson_plan">Lesson plan</option>
-                <option value="colouring_sheet">Colouring sheet</option>
-                <option value="activity_plan">Activity plan</option>
-                <option value="music_learning_guide">Music learning guide</option>
-              </select>
-              <button type="submit" class="button">Generate preview</button>
+            <div class="ai-content-studio__content-types" data-content-types>
+              <button type="button" class="ai-content-studio__type-btn active" data-type-value="lesson_plan">
+                <span class="type-icon">&#128218;</span> Lesson plan
+              </button>
+              <button type="button" class="ai-content-studio__type-btn" data-type-value="colouring_sheet">
+                <span class="type-icon">&#127912;</span> Colouring sheet
+              </button>
+              <button type="button" class="ai-content-studio__type-btn" data-type-value="activity_plan">
+                <span class="type-icon">&#127922;</span> Activity plan
+              </button>
+              <button type="button" class="ai-content-studio__type-btn" data-type-value="music_learning_guide">
+                <span class="type-icon">&#127925;</span> Music guide
+              </button>
+            </div>
+            <input type="hidden" name="contentType" value="lesson_plan" data-content-type-input>
+            <div class="ai-content-studio__input-row">
+              <div class="ai-content-studio__input-wrap">
+                <label class="visually-hidden" for="aiPrompt">Ask AI</label>
+                <textarea
+                  id="aiPrompt"
+                  name="prompt"
+                  rows="2"
+                  placeholder="Create a 30-minute lesson plan using two beginner songs for year 1..."
+                  required
+                ></textarea>
+              </div>
+              <button type="submit" class="ai-content-studio__send-btn" aria-label="Generate preview">
+                <span class="send-icon">&#10148;</span>
+              </button>
             </div>
           </form>
         </div>
 
+        <!-- Preview panel -->
         <aside class="ai-content-studio__preview">
-          <h3>Preview</h3>
+          <div class="ai-content-studio__preview-header">
+            <h3>Preview</h3>
+          </div>
+
           <div class="ai-content-studio__preview-body" data-preview>
-            Generate content to preview it here.
+            <div class="ai-content-studio__preview-empty">
+              <span class="ai-content-studio__preview-empty-icon">&#127925;</span>
+              <p>Generate content to preview it here</p>
+            </div>
           </div>
 
           <div class="ai-content-studio__export-actions">
             {%- comment -%}TODO: Re-enable member gate for production: {% unless is_member %}disabled{% endunless %}{%- endcomment -%}
-            <button class="button" data-generate-file="docx">Generate DOCX</button>
-            <button class="button" data-generate-file="pdf">Generate PDF</button>
+            <button class="ai-content-studio__export-btn" data-generate-file="docx">
+              <span class="export-icon">&#128196;</span> Generate DOCX
+            </button>
+            <button class="ai-content-studio__export-btn" data-generate-file="pdf">
+              <span class="export-icon">&#128462;</span> Generate PDF
+            </button>
           </div>
 
           <p class="ai-content-studio__policy">
@@ -97,10 +136,15 @@
         </aside>
       </div>
 
+      <!-- Files section -->
       <section class="ai-content-studio__files">
-        <h3>My files</h3>
-        <p>Each generated file can be re-downloaded up to 3 times.</p>
-        <div data-files-list>Files will appear here after generation.</div>
+        <div class="ai-content-studio__files-header">
+          <h3>My Files</h3>
+          <span>Each file can be re-downloaded up to 3 times</span>
+        </div>
+        <div class="ai-content-studio__files-body" data-files-list>
+          No files yet. Generate content above to get started.
+        </div>
       </section>
     </div>
   </div>
