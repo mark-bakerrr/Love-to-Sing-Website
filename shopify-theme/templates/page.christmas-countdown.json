@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "main": {
+      "type": "christmas-countdown",
+      "settings": {
+        "year": 2026,
+        "enable_snow": true
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

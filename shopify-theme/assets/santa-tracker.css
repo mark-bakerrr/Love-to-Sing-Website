@@ -1,0 +1,337 @@
+/* Santa Tracker — christmas-countdown section */
+
+.santa-tracker {
+  display: block; /* custom elements default to inline, which kills the background */
+  position: relative;
+  overflow: hidden;
+  color: var(--c-neutral-50);
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -10%, var(--c-blue-800) 0%, transparent 60%),
+    linear-gradient(180deg, var(--c-blue-950) 0%, var(--c-blue-900) 55%, var(--c-blue-800) 100%);
+}
+
+/* Twinkling stars (two layered speckle patterns) */
+.santa-tracker::before,
+.santa-tracker::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 28% 64%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 41% 32%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 57% 12%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 66% 48%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 78% 26%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 88% 58%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 8% 81%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 49% 79%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 94% 86%, #fff 50%, transparent 51%);
+  opacity: 0.7;
+  animation: santa-twinkle 4s ease-in-out infinite alternate;
+}
+
+.santa-tracker::after {
+  transform: scaleX(-1);
+  animation-delay: -2s;
+  opacity: 0.45;
+}
+
+@keyframes santa-twinkle {
+  from { opacity: 0.25; }
+  to { opacity: 0.8; }
+}
+
+.santa-tracker__inner {
+  position: relative;
+  z-index: 2;
+  padding-block: var(--space-900) var(--space-1000);
+  text-align: center;
+}
+
+.santa-tracker__eyebrow {
+  color: var(--c-yellow-300);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: var(--fz-s);
+  margin-bottom: var(--space-150);
+}
+
+.santa-tracker h1,
+.santa-tracker h2,
+.santa-tracker h3 {
+  color: var(--c-neutral-50);
+}
+
+.santa-tracker__title {
+  margin-block: 0 var(--space-200);
+}
+
+.santa-tracker__subtitle {
+  max-width: 64rem;
+  margin-inline: auto;
+  margin-bottom: var(--space-500);
+  color: var(--c-blue-100);
+  font-size: var(--fz-m);
+}
+
+/* ---------- Countdown ---------- */
+
+.santa-countdown {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-200);
+  margin-bottom: var(--space-600);
+  flex-wrap: wrap;
+}
+
+.santa-countdown__unit {
+  min-width: 11rem;
+  padding: var(--space-300) var(--space-200);
+  border-radius: var(--radius-m);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.35);
+}
+
+.santa-countdown__value {
+  display: block;
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight);
+  font-size: clamp(3.6rem, 8vw, 6.4rem);
+  line-height: 1;
+  color: var(--c-yellow-300);
+  font-variant-numeric: tabular-nums;
+}
+
+.santa-countdown__value.is-ticking {
+  animation: santa-tick 0.45s ease-out;
+}
+
+@keyframes santa-tick {
+  0% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.santa-countdown__label {
+  display: block;
+  margin-top: var(--space-100);
+  font-size: var(--fz-s);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-blue-100);
+}
+
+.santa-tracker__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-100);
+  padding: var(--space-200) var(--space-500);
+  border-radius: 99rem;
+  background: var(--c-red-500);
+  color: var(--c-neutral-50);
+  font-weight: 700;
+  font-size: var(--fz-m);
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.santa-tracker__cta:hover {
+  background: var(--c-red-400);
+  transform: translateY(-2px);
+}
+
+/* ---------- Live tracker ---------- */
+
+.santa-live__status {
+  display: inline-block;
+  margin-bottom: var(--space-300);
+  padding: var(--space-100) var(--space-300);
+  border-radius: 99rem;
+  background: var(--c-red-500);
+  font-size: var(--fz-m);
+  font-weight: 700;
+}
+
+.santa-live__map-wrap {
+  position: relative;
+  max-width: 110rem;
+  margin-inline: auto;
+  border-radius: var(--radius-l);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.5);
+}
+
+.santa-live__map {
+  height: min(62vh, 56rem);
+  min-height: 34rem;
+  background: var(--c-blue-950);
+}
+
+.santa-live__follow {
+  position: absolute;
+  z-index: 800;
+  bottom: var(--space-200);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-100) var(--space-300);
+  border: 0;
+  border-radius: 99rem;
+  background: var(--c-yellow-300);
+  color: var(--c-black-900);
+  font-weight: 700;
+  font-size: var(--fz-s);
+  cursor: pointer;
+}
+
+.santa-live__cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-200);
+  max-width: 110rem;
+  margin: var(--space-300) auto 0;
+}
+
+.santa-live__card {
+  padding: var(--space-250) var(--space-200);
+  border-radius: var(--radius-m);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.santa-live__card-label {
+  display: block;
+  font-size: var(--fz-t);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-blue-100);
+  margin-bottom: var(--space-50);
+}
+
+.santa-live__card-value {
+  font-family: var(--font-heading-family);
+  font-size: var(--fz-l, 2rem);
+  font-weight: 700;
+  color: var(--c-yellow-300);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sleigh marker */
+.santa-sleigh-icon {
+  background: none;
+  border: none;
+}
+
+.santa-sleigh-icon__inner {
+  width: 64px;
+  height: 40px;
+  filter: drop-shadow(0 0 6px rgba(250, 204, 85, 0.8));
+  transform: scaleX(-1); /* route runs westward, sleigh faces left by default */
+  animation: santa-bob 2.4s ease-in-out infinite;
+}
+
+.santa-sleigh-icon__inner.is-eastbound {
+  transform: scaleX(1);
+}
+
+@keyframes santa-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -5px; }
+}
+
+/* ---------- Finished / Christmas Day ---------- */
+
+.santa-post__emoji {
+  font-size: 6.4rem;
+  line-height: 1;
+  margin-bottom: var(--space-200);
+}
+
+.santa-post__actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-200);
+  flex-wrap: wrap;
+  margin-top: var(--space-400);
+}
+
+.santa-post__replay {
+  padding: var(--space-200) var(--space-500);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 99rem;
+  background: transparent;
+  color: var(--c-neutral-50);
+  font-weight: 700;
+  font-size: var(--fz-m);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.santa-post__replay:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ---------- Snow ---------- */
+
+[data-snow-layer] {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.santa-snowflake {
+  position: absolute;
+  top: -5%;
+  animation-name: santa-snowfall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.santa-snowflake::before {
+  content: '❄';
+  color: #fff;
+}
+
+@keyframes santa-snowfall {
+  to { transform: translateY(110vh) rotate(300deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .santa-snowflake,
+  .santa-sleigh-icon__inner,
+  .santa-tracker::before,
+  .santa-tracker::after,
+  .santa-countdown__value.is-ticking {
+    animation: none;
+  }
+}
+
+/* ---------- Responsive ---------- */
+
+@media screen and (max-width: 749px) {
+  .santa-tracker__inner {
+    padding-block: var(--space-600) var(--space-700);
+  }
+
+  .santa-countdown {
+    gap: var(--space-100);
+  }
+
+  .santa-countdown__unit {
+    min-width: 7.4rem;
+    padding: var(--space-200) var(--space-100);
+  }
+
+  .santa-live__cards {
+    grid-template-columns: 1fr;
+  }
+
+  .santa-live__map {
+    height: 56vh;
+  }
+}
