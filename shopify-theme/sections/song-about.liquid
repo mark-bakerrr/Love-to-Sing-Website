@@ -5,8 +5,10 @@
   assign aside_title = section.settings.aside_title
   assign collections_ref = section.settings.collections
 
-  assign meta_date = product.metafields.videoObject.video_upload_date
-  assign meta_duration = product.metafields.videoObject.duration
+  assign meta_date = product.metafields.custom.song_release_date
+  assign meta_duration = product.metafields.custom.duration
+  assign meta_video_views = product.metafields.custom.video_views
+  assign video = product.metafields.custom.youtube_main_video
 -%}
 
 {%- if content != blank or collections_ref.size > 0  -%}
@@ -32,12 +34,26 @@
                 {%- endif -%}
 
                 {%- if meta_duration != blank -%}
-                  {%- assign minutes = meta_duration | split: "M" | first | remove: "PT" | plus: 0 -%}
-                  {%- assign seconds = meta_duration | split: "M" | last | remove: "S" -%}
-
-                  <p>{% render 'icon-clock' %} {{ 'song.length_html' | t: minutes: minutes, seconds: seconds -}}</p>
+                  {% comment %}
+                    {%- assign minutes = meta_duration | split: "M" | first | remove: "PT" | plus: 0 -%}
+                    {%- assign seconds = meta_duration | split: "M" | last | remove: "S" -%}
+                     <p>{% render 'icon-clock' %} {{ 'song.length_html' | t: minutes: minutes, seconds: seconds -}}</p>
+                  {% endcomment %}
+                  <p>{% render 'icon-clock' %} <span>{{ meta_duration }}</span></p>
                 {%- endif -%}
               </div><!-- /.song-about__meta -->
+            {%- endif -%}
+
+            {%- if video != blank -%}
+              {%- assign video_id = video | split: '?v=' | last -%}
+              {%- assign thumbnail = product.images[0] | image_url: width: 1080 -%}
+
+              {{- 'youtube-player.css' | asset_url | stylesheet_tag -}}
+              <script src="{{- 'youtube-player.js' | asset_url -}}" defer></script>
+
+              <div class="song-about__video">
+                {% render 'youtube-player', video_id: video_id, thumbnail: thumbnail %}
+              </div><!-- /.song-about__video -->
             {%- endif -%}
 
             {%- if content != blank -%}

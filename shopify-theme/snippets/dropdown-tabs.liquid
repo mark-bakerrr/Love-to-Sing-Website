@@ -79,8 +79,8 @@
                   assign views = product_ref.metafields.custom.chart_views
                   assign youtube_channel = product_ref.metafields.details.youtube_channel.value
                 -%}
-
-                {%- capture views -%}
+                {% comment %}
+                  {%- capture views -%}
                   {%- if views != blank -%}
                     <p class="card-charts__views">
                       <i>
@@ -92,7 +92,8 @@
                       </span>
                     </p>
                   {%- endif -%}
-                {%- endcapture -%}
+                  {%- endcapture -%}
+                {% endcomment %}
 
                 <li>
                   <div class="card-chart">
@@ -131,12 +132,18 @@
                                 {{ tag }}
                               </span><!-- /.tag -->
                             {%- endif -%}
-
-                            {%- if views != blank -%}
+                              {%- if views != blank -%}
                               <div class="medium-hide large-up-hide">
-                                {{ views }}
+                              <p class="card-charts__views">
+                               <i>
+                                {%- render 'icon', icon: 'eye' -%}
+                              </i>
+                                <span data-format-number> {{ views }} </span> views                               
+                              </p>
                               </div><!-- /.large-up-hide -->
                             {%- endif -%}
+                              
+                              <!-- /.large-up-hide -->
                           </div><!-- /.card-chart__tag -->
                         {%- endif -%}
                       </div><!-- /.card-chart__head -->
@@ -149,12 +156,27 @@
                         {%- if youtube_channel != blank -%}
                           <p>{{ youtube_channel.name }}</p>
                         {%- endif -%}
-
+                        
                         {%- if views != blank -%}
+                          <div class="small-hide">
+                            {%- if views != blank -%}
+                              <p class="card-charts__views">
+                               <i>
+                                {%- render 'icon', icon: 'eye' -%}
+                              </i>
+                                <span data-format-number> {{ views }} </span> views                               
+                              </p>
+                            {%- endif -%}
+                          </div><!-- /.small-hide -->
+                        {%- endif -%}
+                        {% comment %}
+                          {%- if views != blank -%}
                           <div class="small-hide">
                             {{ views }}
                           </div><!-- /.small-hide -->
                         {%- endif -%}
+                        {% endcomment %}
+                        
                       </div><!-- /.card-chart__details -->
                     </div><!-- /.card-chart__content -->
                   </div><!-- /.card-chart -->
@@ -177,4 +199,12 @@
       {%- endif -%}
     {%- endfor -%}
   </dropdown-tabs><!-- /.dropdown-tabs -->
+  <script>
+document.querySelectorAll('[data-format-number]').forEach(function(el) {
+  var num = parseInt(el.textContent.trim(), 10);
+  if (!isNaN(num)) {
+    el.textContent = num.toLocaleString();
+  }
+});
+</script>
 {%- endif -%}

@@ -13,7 +13,7 @@
 {{- 'section-hero-banner-search.css' | asset_url | stylesheet_tag -}}
 {{- 'main-collection-songs.css' | asset_url | stylesheet_tag -}}
 
-<section class="hero-banner-search main-collection-songs">
+<section class="hero-banner-search main-collection-songs main-color-{{ _section.main_color }}">
   <div
     class="hero-banner-search__main"
     style="background: {{ _section.background }};"
@@ -265,6 +265,20 @@
         "step": 4,
         "label": "t:sections.main-collection.settings.products_per_page.label",
         "default": 16
+      },
+      {
+        "type": "select",
+        "id": "main_color",
+        "label": "Icon colour scheme",
+        "info": "Sets the music-note icon colour for songs without a per-product main_color metafield.",
+        "options": [
+          { "value": "red",    "label": "Red" },
+          { "value": "blue",   "label": "Blue" },
+          { "value": "green",  "label": "Green" },
+          { "value": "black",  "label": "Black" },
+          { "value": "yellow", "label": "Yellow" }
+        ],
+        "default": "red"
       }
     ]
   }

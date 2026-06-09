@@ -91,12 +91,17 @@
         "title": "Christmas Jumpers",
         "subtitle": "Explore our diverse range of music offerings today!",
         "button_label": "View All",
-        "button_link": "shopify://collections/christmas-merch",
+        "button_link": "shopify://collections/christmas-jumpers",
         "large_tiles": true,
         "product_aspect_ratio": "1-1",
-        "collection": "christmas-merch",
-        "product_list": [],
-        "products_count": 12,
+        "collection": "christmas-jumpers",
+        "product_list": [
+          "mens-christmas-snowflake-sweater-green-trim",
+          "mens-tartan-sweater-green-trim",
+          "red-tartan-knitted-christmas-pet-sweater",
+          "womens-christmas-snowflake-sweater-red-trim"
+        ],
+        "products_count": 6,
         "autoplay": false,
         "autoplay_speed": 5
       }

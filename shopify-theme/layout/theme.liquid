@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="">
     <link rel="canonical" href="{{ canonical_url }}">
+    {%- if request.page_type == 'search' -%}
+      <meta name="robots" content="noindex,follow">
+    {%- endif -%}
     <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
 
     {%- if settings.favicon != blank -%}
@@ -17,7 +20,16 @@
     {%- endunless -%}
 
     <title>
-      {{ page_title }}
+      {%- if request.page_type == 'search' and search.terms != blank -%}
+        {%- assign _clean_terms = search.terms | remove: 'tag:song' | strip -%}
+        {%- if search.terms contains 'tag:song' -%}
+          {{- 'search.song_scope_title' | t: terms: _clean_terms | strip_html -}}
+        {%- else -%}
+          {{- 'search.results_for' | t: terms: _clean_terms | strip_html -}}
+        {%- endif -%}
+      {%- else -%}
+        {{ page_title }}
+      {%- endif -%}
       {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
       {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
       {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
@@ -113,5 +125,6 @@
         soldOut: '{{ 'products.product.sold_out' | t }}',
       }
     </script>
+  {% render 'lts-blog-blocks' %}
   </body>
 </html>

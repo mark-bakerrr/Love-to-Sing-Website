@@ -34,7 +34,7 @@
         "eyebrow": "License Shop",
         "content_color": "#ffffff",
         "title": "Share the joy of Love to Sing Music",
-        "content": "<p>Discover our exclusive merchandise designed for music lovers and creators alike. Elevate your passion with unique items that resonate with your style and creativity.</p>",
+        "content": "<p>Unlock the perfect soundtrack for your projects with Love to Sing music licenses. </p>",
         "button_text": "",
         "button_url": ""
       }
@@ -45,27 +45,27 @@
         "feature_column_WycMNT": {
           "type": "feature_column",
           "settings": {
-            "image": "shopify://shop_images/piece-of-mind.png",
+            "image": "shopify://shop_images/underground-concert.jpg",
             "heading": "Peace of Mind",
-            "text": "<p>Use this text to share information about your feature. Describe a product, share announcements, or welcome customers to your store.</p>",
+            "text": "<p>A music license gives you peace of mind. Use your music with confidence, knowing you have the legal right to do so. Protect yourself from copyright issues and focus on your creative work.</p>",
             "link": ""
           }
         },
         "feature_column_KdJQDC": {
           "type": "feature_column",
           "settings": {
-            "image": "shopify://shop_images/give-back.png",
-            "heading": "Give Back to Creators",
-            "text": "<p>Every license helps compensate songwriters, composers, and performers for their work. When you use licensed music, you’re uplifting artists and encouraging continued creativity.<br/><br/></p>",
+            "image": "shopify://shop_images/indie-music-concert.jpg",
+            "heading": "Every Love to Sing Song",
+            "text": "<p>Our extensive catalog of music is available for immediate access and use across all your projects. Browse, license, and start using quality music today with Love to Sing's simple, straightforward licensing process.</p>",
             "link": ""
           }
         },
         "feature_column_KEECVJ": {
           "type": "feature_column",
           "settings": {
-            "image": "shopify://shop_images/bring-programs-to-life.png",
-            "heading": "Bring Programs to Life",
-            "text": "<p>Use this text to share information about your feature. Describe a product, share announcements, or welcome customers to your store.</p>",
+            "image": "shopify://shop_images/Starship_Auckland_Hospital_Christmas_Show_Love_to_Sing.jpg",
+            "heading": "Share the Joy",
+            "text": "<p>Music creates moments of genuine connection. Whether you're singing in a choir, jamming with friends, or sharing a favourite song, it brings people together in celebration, comfort, and joy.</p>",
             "link": ""
           }
         }
@@ -253,6 +253,7 @@
         "faq_item_8mzBN6",
         "faq_item_993E4e"
       ],
+      "disabled": true,
       "name": "FAQ Accordion",
       "settings": {
         "title": "FAQs",
@@ -278,12 +279,12 @@
       },
       "name": "t:sections.newsletter.name",
       "settings": {
-        "background_top": "#fff",
+        "background_top": "#ffffff",
         "background_bottom": "#790200",
         "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(145, 36, 34, 1) 100%)",
         "media_opacity": 5,
         "image": "shopify://shop_images/hearts-background.png",
-        "text_color": "#fff",
+        "text_color": "#ffffff",
         "title": "Join Our Newsletter",
         "subtitle": "Sign up to our newsletter and we will send you a free song!"
       }

@@ -7,6 +7,7 @@
   - input_attr {String} Data attributes to be added to the input element
   - extra_search_terms {String} Adds extra search terms(tags)
   - type {String} type of result that will be displayed. Accepts: product,page,article
+  - hide_button {Boolean} When true, omits the submit button. Default false.
 
   Usage:
   {% render 'search-form', namespace: 'Main-Search' %}
@@ -18,6 +19,7 @@
   assign form_attr = form_attr | default: false
   assign input_attr = input_attr | default: false
   assign action = action | default:  routes.search_url
+  assign hide_button = hide_button | default: false
 -%}
 
 <form
@@ -47,19 +49,21 @@
     -%}
   </div><!-- /.form-row form-row--double -->
 
-  <div class="form-row">
-    <div>
+  {%- unless hide_button -%}
+    <div class="form-row">
+      <div>
 
-      <button
-        type="submit"
-        class="{{ class }}__button"
-      >
-        <span class="visually-hidden">
-          {{- 'search.submit' | t -}}
-        </span><!-- /.visually-hidden -->
+        <button
+          type="submit"
+          class="{{ class }}__button"
+        >
+          <span class="visually-hidden">
+            {{- 'search.submit' | t -}}
+          </span><!-- /.visually-hidden -->
 
-        {%- render 'icon', icon: 'search' -%}
-      </button>
-    </div>
-  </div><!-- /.form-row -->
+          {%- render 'icon', icon: 'search' -%}
+        </button>
+      </div>
+    </div><!-- /.form-row -->
+  {%- endunless -%}
 </form>

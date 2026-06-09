@@ -13,7 +13,7 @@
       "type": "main-article",
       "settings": {
         "link_label": "Blog",
-        "link_url": "shopify://pages/blog",
+        "link_url": "shopify://blogs/home",
         "newsletter_title": "Join our newsletter",
         "newsletter_subtitle": "Subscribe to receive the latest blog posts and updates directly to your inbox."
       }
@@ -112,6 +112,9 @@
         "large_tiles": false,
         "border_bottom": false,
         "border_top": false,
+        "use_automatic_articles": false,
+        "blog": "",
+        "articles_count": 5,
         "title": "Related Articles",
         "subtitle": "Explore our diverse range of music offerings today!",
         "button_text": "View All",

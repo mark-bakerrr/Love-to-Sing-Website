@@ -80,7 +80,7 @@
           "type": "article",
           "name": "Article",
           "settings": {
-            "article": "christmas-music/set-the-scene-christmas-carols-by-candlelight"
+            "article": "christmas/christmas-carols-by-candlelight"
           },
           "blocks": {}
         },
@@ -88,7 +88,7 @@
           "type": "article",
           "name": "Article",
           "settings": {
-            "article": "christmas-history/the-complete-history-of-jingle-bells"
+            "article": "song-stories/jingle-bells-complete-history"
           },
           "blocks": {}
         },
@@ -96,7 +96,7 @@
           "type": "article",
           "name": "Article",
           "settings": {
-            "article": "christmas-history/what-is-a-carol-anyway"
+            "article": "christmas/what-is-a-christmas-carol"
           },
           "blocks": {}
         },
@@ -120,9 +120,12 @@
       "name": "Featured articles",
       "settings": {
         "hide_if_no_articles": true,
-        "large_tiles": true,
+        "large_tiles": false,
         "border_bottom": false,
         "border_top": false,
+        "use_automatic_articles": false,
+        "blog": "",
+        "articles_count": 5,
         "title": "Featured",
         "subtitle": "from the learning hub",
         "button_text": "",
@@ -284,7 +287,7 @@
           "type": "article",
           "name": "Article",
           "settings": {
-            "article": "christmas-music/35-of-the-best-christian-christmas-songs-of-all-time"
+            "article": "playlists/best-christian-christmas-songs"
           },
           "blocks": {}
         },
@@ -292,7 +295,7 @@
           "type": "article",
           "name": "Article",
           "settings": {
-            "article": "christmas-music/this-little-light-of-mine-with-easy-dance-moves"
+            "article": "playlists/top-150-christmas-songs-and-carols"
           },
           "blocks": {}
         },
@@ -300,7 +303,7 @@
           "type": "article",
           "name": "Article",
           "settings": {
-            "article": "christmas-music/dance-to-christmas-song-jingle-bells-with-easy-choreography"
+            "article": "teaching-resources/skip-counting-lacing-plates"
           },
           "blocks": {}
         },
@@ -308,7 +311,7 @@
           "type": "article",
           "name": "Article",
           "settings": {
-            "article": "christmas-music/the-lyrics-to-amazing-grace-and-the-meaning-of-the-traditional-hymn"
+            "article": "song-stories/amazing-grace-lyrics-and-meaning"
           },
           "blocks": {}
         },
@@ -316,7 +319,7 @@
           "type": "article",
           "name": "Article",
           "settings": {
-            "article": "christmas-music/o-come-all-ye-faithful-the-lyrics-and-the-meaning-of-the-song"
+            "article": "song-stories/o-come-all-ye-faithful-lyrics-and-meaning"
           },
           "blocks": {}
         },
@@ -345,6 +348,9 @@
         "large_tiles": true,
         "border_bottom": false,
         "border_top": false,
+        "use_automatic_articles": false,
+        "blog": "",
+        "articles_count": 5,
         "title": "From the Blog",
         "subtitle": "Explore our diverse range of music offerings today!",
         "button_text": "View All",

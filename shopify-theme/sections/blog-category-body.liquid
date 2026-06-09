@@ -1,0 +1,401 @@
+{{- 'section-blog-category.css' | asset_url | stylesheet_tag -}}
+{{- 'card-featured-article.css' | asset_url | stylesheet_tag -}}
+
+{%- liquid
+  assign _section = section.settings
+  assign blog_ref = blog
+  assign topics = blog_ref.metafields.custom.topics.value
+-%}
+
+{%- assign tag_color = blog_ref.metafields.custom.tag_color | default: '#790200' -%}
+
+<section class="blog-category-body" style="--tag-color: {{ tag_color }};">
+  <div class="container">
+    <div class="blog-category-body__grid">
+
+      {%- comment -%} ======== Main Content — Shelves ======== {%- endcomment -%}
+      <div class="blog-category-body__main">
+
+        {%- comment -%}
+          Render a shelf for each topic_shelf block.
+          Blocks are reorderable in the theme editor.
+          Pillar articles are looked up from the topics metaobject by matching tag.
+        {%- endcomment -%}
+
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'topic_shelf' -%}
+            {%- assign shelf_tag = block.settings.tag -%}
+            {%- assign shelf_title = block.settings.title -%}
+            {%- if shelf_title == blank -%}
+              {%- assign shelf_title = shelf_tag | remove: 'Category_' | remove: 'category_' | replace: '_', ' ' | replace: '-', ' ' -%}
+            {%- endif -%}
+
+            {%- comment -%} Look up pillar from topics metaobject {%- endcomment -%}
+            {%- assign pillar = blank -%}
+            {%- assign topic_article_count = blank -%}
+            {%- if topics != blank -%}
+              {%- for topic in topics -%}
+                {%- if topic.tag == shelf_tag or topic.tag contains shelf_tag or shelf_tag contains topic.tag or topic.title == shelf_title -%}
+                  {%- assign pillar = topic.pillar_article.value -%}
+                  {%- assign topic_article_count = topic.article_count -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+
+            {%- assign shelf_tag_handle = shelf_tag | handle -%}
+
+            <div class="shelf" {{ block.shopify_attributes }}>
+              <div class="shelf__header">
+                <div class="shelf__header-left">
+                  <span class="shelf__accent"></span>
+                  <h2 class="shelf__title h4">{{ shelf_title }}</h2>
+                  {%- if topic_article_count != blank -%}
+                    <span class="shelf__count caption">{{ topic_article_count }} articles</span>
+                  {%- endif -%}
+                </div>
+                {%- if pillar != blank -%}
+                  <a href="{{ pillar.url }}" class="shelf__see-all">See all →</a>
+                {%- else -%}
+                  <a href="{{ blog_ref.url }}/tagged/{{ shelf_tag_handle }}" class="shelf__see-all">See all →</a>
+                {%- endif -%}
+              </div>
+
+              <div class="shelf__cards">
+                {%- assign shelf_count = 0 -%}
+                {%- assign shelf_shown_ids = '' -%}
+                {%- if pillar != blank -%}
+                  {%- assign shelf_shown_ids = pillar.id | append: ',' -%}
+                {%- endif -%}
+
+                {%- comment -%} First: current blog articles {%- endcomment -%}
+                {%- for article_ref in blog_ref.articles -%}
+                  {%- if shelf_count >= 3 -%}{%- break -%}{%- endif -%}
+                  {%- if article_ref.template_suffix == 'pillar' or article_ref.tags contains 'pillar' -%}{%- continue -%}{%- endif -%}
+                  {%- assign shelf_id_check = article_ref.id | append: ',' -%}
+                  {%- if shelf_shown_ids contains shelf_id_check -%}{%- continue -%}{%- endif -%}
+
+                  {%- if article_ref.tags contains shelf_tag -%}
+                    {%- assign shelf_shown_ids = shelf_shown_ids | append: shelf_id_check -%}
+                    {%- render 'card-article', article_ref: article_ref -%}
+                    {%- assign shelf_count = shelf_count | plus: 1 -%}
+                  {%- endif -%}
+                {%- endfor -%}
+
+                {%- comment -%} Second: other blogs' articles {%- endcomment -%}
+                {%- for b in blogs -%}
+                  {%- if shelf_count >= 3 -%}{%- break -%}{%- endif -%}
+                  {%- if b.handle == blog_ref.handle -%}{%- continue -%}{%- endif -%}
+                  {%- for article_ref in b.articles -%}
+                    {%- if shelf_count >= 3 -%}{%- break -%}{%- endif -%}
+                    {%- if article_ref.template_suffix == 'pillar' or article_ref.tags contains 'pillar' -%}{%- continue -%}{%- endif -%}
+                    {%- assign shelf_id_check = article_ref.id | append: ',' -%}
+                    {%- if shelf_shown_ids contains shelf_id_check -%}{%- continue -%}{%- endif -%}
+
+                    {%- if article_ref.tags contains shelf_tag -%}
+                      {%- assign shelf_shown_ids = shelf_shown_ids | append: shelf_id_check -%}
+                      {%- render 'card-article', article_ref: article_ref -%}
+                      {%- assign shelf_count = shelf_count | plus: 1 -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endfor -%}
+              </div>
+              <div class="shelf__cards-fade"></div>
+            </div>
+          {%- endif -%}
+
+          {%- if block.type == 'blog_shelf' -%}
+            {%- assign selected_blog = block.settings.blog -%}
+            {%- if selected_blog != blank -%}
+              {%- assign shelf_title = block.settings.title -%}
+              {%- if shelf_title == blank -%}
+                {%- assign shelf_title = selected_blog.title -%}
+              {%- endif -%}
+              {%- assign articles_count = block.settings.articles_count | default: 3 -%}
+
+              <div class="shelf shelf--slider" data-shelf-slider {{ block.shopify_attributes }}>
+                <div class="shelf__header">
+                  <div class="shelf__header-left">
+                    <span class="shelf__accent"></span>
+                    <h2 class="shelf__title h4">{{ shelf_title }}</h2>
+                  </div>
+                  <a href="{{ selected_blog.url }}" class="shelf__see-all">See all →</a>
+                </div>
+
+                <div class="shelf__slider-wrapper">
+                  <button type="button" class="shelf__nav shelf__nav--prev" aria-label="Previous" disabled>
+                    {%- render 'icon', icon: 'chevron-left' -%}
+                  </button>
+
+                  <div class="shelf__cards shelf__cards--slider">
+                    {%- assign blog_shelf_count = 0 -%}
+                    {%- for article_ref in selected_blog.articles -%}
+                      {%- if blog_shelf_count >= articles_count -%}{%- break -%}{%- endif -%}
+                      {%- if article_ref.template_suffix == 'pillar' or article_ref.tags contains 'pillar' -%}{%- continue -%}{%- endif -%}
+                      {%- render 'card-article', article_ref: article_ref -%}
+                      {%- assign blog_shelf_count = blog_shelf_count | plus: 1 -%}
+                    {%- endfor -%}
+                  </div>
+
+                  <button type="button" class="shelf__nav shelf__nav--next" aria-label="Next">
+                    {%- render 'icon', icon: 'chevron-right' -%}
+                  </button>
+                </div>
+
+                <div class="shelf__cards-fade"></div>
+              </div>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      {%- comment -%} ======== Sidebar ======== {%- endcomment -%}
+      {%- assign sidebar_tag_color = blog_ref.metafields.custom.tag_color | default: '#790200' -%}
+      <aside class="blog-category-body__sidebar" style="--tag-color: {{ sidebar_tag_color }};">
+
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+
+            {%- when 'popular_activities' -%}
+              <div class="sidebar-popular" {{ block.shopify_attributes }}>
+                <h3 class="sidebar-popular__title h5">Popular Activities</h3>
+                {%- assign popular = blog_ref.metafields.custom.popular_articles.value -%}
+                {%- assign articles_limit = block.settings.articles_count | default: 5 -%}
+                {%- assign popular_shown = 0 -%}
+                {%- if popular != blank -%}
+                  {%- for article_ref in popular -%}
+                    {%- if popular_shown >= articles_limit -%}{%- break -%}{%- endif -%}
+                    {%- unless forloop.first -%}
+                      <div class="sidebar-popular__separator"></div>
+                    {%- endunless -%}
+                    <a href="{{ article_ref.url }}" class="sidebar-popular__item">
+                      <span class="sidebar-popular__number">{{ forloop.index }}</span>
+                      <div class="sidebar-popular__content">
+                        <span class="sidebar-popular__name">{{ article_ref.title }}</span>
+                        {%- if article_ref.metafields.custom.reading_time != blank -%}
+                          <span class="sidebar-popular__meta caption">{{ article_ref.metafields.custom.reading_time }}</span>
+                        {%- endif -%}
+                      </div>
+                    </a>
+                    {%- assign popular_shown = popular_shown | plus: 1 -%}
+                  {%- endfor -%}
+                {%- else -%}
+                  {%- for article_ref in blog_ref.articles limit: articles_limit -%}
+                    {%- unless forloop.first -%}
+                      <div class="sidebar-popular__separator"></div>
+                    {%- endunless -%}
+                    <a href="{{ article_ref.url }}" class="sidebar-popular__item">
+                      <span class="sidebar-popular__number">{{ forloop.index }}</span>
+                      <div class="sidebar-popular__content">
+                        <span class="sidebar-popular__name">{{ article_ref.title }}</span>
+                        {%- if article_ref.metafields.custom.reading_time != blank -%}
+                          <span class="sidebar-popular__meta caption">{{ article_ref.metafields.custom.reading_time }}</span>
+                        {%- endif -%}
+                      </div>
+                    </a>
+                  {%- endfor -%}
+                {%- endif -%}
+              </div>
+
+            {%- when 'song_finder' -%}
+              {%- assign finder_bg = blog_ref.metafields.custom.tag_color | default: '#781D1B' -%}
+              <div class="sidebar-song-finder" style="--finder-bg: {{ finder_bg }};" {{ block.shopify_attributes }}>
+                <div class="sidebar-song-finder__header">
+                  <img
+                    src="https://cdn.shopify.com/s/files/1/0053/3505/6418/files/hearts-background.png?v=1759397015"
+                    alt=""
+                    class="sidebar-song-finder__header-overlay"
+                    loading="lazy"
+                  >
+                  <h3 class="sidebar-song-finder__title">Song Finder</h3>
+                </div>
+                <div class="sidebar-song-finder__body">
+                  <p class="sidebar-song-finder__desc">
+                    Find the perfect song for any activity, age group, or occasion.
+                  </p>
+                  {%- comment -%} Song Finder — Live Search {%- endcomment -%}
+                  <predictive-search
+                    class="sidebar-song-finder__search-wrap no-js-hidden"
+                    data-results-limit="5"
+                    data-custom-query="&resources[type]=product&resources[limit]=5&filter.p.tag=song"
+                    data-section-id="predictive-search-song-finder"
+                  >
+                    <span class="sidebar-song-finder__search-icon" aria-hidden="true">{%- render 'icon', icon: 'search' -%}</span>
+                    {%- liquid
+                      capture search_input_attr
+                        echo 'role="combobox" '
+                        echo 'aria-label="Search songs" '
+                        echo 'aria-expanded="false" '
+                        echo 'aria-owns="predictive-search-results-list" '
+                        echo 'aria-controls="predictive-search-results-list" '
+                        echo 'aria-haspopup="listbox" '
+                        echo 'aria-autocomplete="list" '
+                        echo 'autocorrect="off" '
+                        echo 'autocomplete="off" '
+                        echo 'autocapitalize="off" '
+                        echo 'spellcheck="false"'
+                      endcapture
+
+                      render 'form-search', namespace: 'song-finder', input_attr: search_input_attr, class: 'sidebar-song-finder__search', type: 'product', tag: 'song', placeholder: 'Search songs...', hide_button: true
+                    -%}
+
+                    <predictive-search-results class="sidebar-song-finder__results"></predictive-search-results>
+                  </predictive-search>
+
+                  {%- comment -%} Song collection chips from collection_list {%- endcomment -%}
+                  <div class="sidebar-song-finder__chips">
+                    {%- for collection in block.settings.collections -%}
+                      <a href="{{ collection.url }}" class="sidebar-song-finder__chip">{{ collection.title }}</a>
+                    {%- endfor -%}
+                  </div>
+
+                  <a href="/collections/all-songs" class="sidebar-song-finder__cta">
+                    Browse all songs →
+                  </a>
+                </div>
+              </div>
+
+            {%- when 'sidebar_ad' -%}
+              {%- if block.settings.ad_code != blank -%}
+                <div class="sidebar-ad" {{ block.shopify_attributes }}>
+                  {{ block.settings.ad_code }}
+                </div>
+              {%- endif -%}
+
+          {%- endcase -%}
+        {%- endfor -%}
+
+      </aside>
+
+    </div>
+  </div>
+</section>
+
+<script src="{{ 'shelf-slider.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Category Body",
+  "settings": [
+    {
+      "type": "url",
+      "id": "song_finder_url",
+      "label": "Browse all songs URL"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "topic_shelf",
+      "name": "Topic Shelf",
+      "settings": [
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Blog tag",
+          "info": "The blog tag to filter articles by (e.g. 'Category_arts-and-crafts')"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Display title",
+          "info": "Defaults to cleaned tag name if left empty"
+        }
+      ]
+    },
+    {
+      "type": "blog_shelf",
+      "name": "Blog Shelf",
+      "settings": [
+        {
+          "type": "blog",
+          "id": "blog",
+          "label": "Select blog"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Display title",
+          "info": "Defaults to blog title if left empty"
+        },
+        {
+          "type": "range",
+          "id": "articles_count",
+          "min": 3,
+          "max": 8,
+          "step": 1,
+          "default": 3,
+          "label": "Number of articles"
+        }
+      ]
+    },
+    {
+      "type": "song_collection",
+      "name": "Song Collection",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Action Songs for Kids"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "Song books, videos & music"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Link"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    },
+    {
+      "type": "popular_activities",
+      "name": "Popular Activities",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "range",
+          "id": "articles_count",
+          "min": 3,
+          "max": 8,
+          "step": 1,
+          "default": 5,
+          "label": "Number of articles"
+        }
+      ]
+    },
+    {
+      "type": "song_finder",
+      "name": "Song Finder",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "collection_list",
+          "id": "collections",
+          "label": "Song collections",
+          "info": "Select collections to show as chips. Collection titles will be used as labels."
+        }
+      ]
+    },
+    {
+      "type": "sidebar_ad",
+      "name": "Sidebar Ad",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "ad_code",
+          "label": "Ad code (HTML)"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

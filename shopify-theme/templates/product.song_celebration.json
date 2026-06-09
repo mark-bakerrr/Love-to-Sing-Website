@@ -190,7 +190,7 @@
         "blog_handle": "{{ product.metafields.custom.blog_handle.value }}",
         "limit": 3,
         "hide_if_no_articles": true,
-        "large_tiles": true,
+        "large_tiles": false,
         "border_bottom": false,
         "border_top": true,
         "title": "From the Blog",

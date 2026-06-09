@@ -116,7 +116,7 @@
           "type": "article",
           "name": "Article",
           "settings": {
-            "article": "christmas-music/35-of-the-best-christian-christmas-songs-of-all-time"
+            "article": "playlists/best-christian-christmas-songs"
           },
           "blocks": {}
         },
@@ -124,7 +124,7 @@
           "type": "article",
           "name": "Article",
           "settings": {
-            "article": "christmas-music/this-little-light-of-mine-with-easy-dance-moves"
+            "article": "kids-activities/this-little-light-of-mine-dance-moves"
           },
           "blocks": {}
         },
@@ -132,7 +132,7 @@
           "type": "article",
           "name": "Article",
           "settings": {
-            "article": "christmas-music/dance-to-christmas-song-jingle-bells-with-easy-choreography"
+            "article": "kids-activities/jingle-bells-dance-choreography"
           },
           "blocks": {}
         },
@@ -140,7 +140,7 @@
           "type": "article",
           "name": "Article",
           "settings": {
-            "article": "christmas-music/the-lyrics-to-amazing-grace-and-the-meaning-of-the-traditional-hymn"
+            "article": "song-stories/amazing-grace-lyrics-and-meaning"
           },
           "blocks": {}
         },
@@ -148,7 +148,7 @@
           "type": "article",
           "name": "Article",
           "settings": {
-            "article": "christmas-music/o-come-all-ye-faithful-the-lyrics-and-the-meaning-of-the-song"
+            "article": "song-stories/o-come-all-ye-faithful-lyrics-and-meaning"
           },
           "blocks": {}
         },

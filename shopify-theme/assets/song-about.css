@@ -30,6 +30,11 @@
   margin-bottom: 2.4rem;
 }
 
+.song-about__video {
+  margin-top: 1.6rem;
+  margin-bottom: 2.4rem;
+}
+
 .song-about__meta p {
   font-size: var(--fz-s);
   line-height: 1.4;

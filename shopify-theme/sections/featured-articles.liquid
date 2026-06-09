@@ -8,9 +8,45 @@
   # Spacing block
   content_for "block", type: "spacing", id: "featured-products-spacing"
 
+  # Determine article source: automatic or manual blocks
+  assign use_auto = _section.use_automatic_articles
+  assign selected_blog = _section.blog
+  assign articles_limit = _section.articles_count | default: 5
+
+  # Collect articles for rendering
+  assign article_count = 0
+
+  if use_auto and selected_blog != blank
+    # Auto mode: fetch from blog, excluding pillar articles
+    for article in selected_blog.articles
+      if article_count >= articles_limit
+        break
+      endif
+      unless article.template_suffix == 'pillar' or article.tags contains 'pillar'
+        assign article_count = article_count | plus: 1
+      endunless
+    endfor
+  endif
+
+  assign has_auto_articles = false
+  if use_auto and selected_blog != blank and article_count > 0
+    assign has_auto_articles = true
+  endif
+
+  # Capture manual blocks (used as fallback or when auto is OFF)
   capture blocks
     content_for 'blocks'
   endcapture
+
+  # Determine if we have articles to show
+  assign has_manual_blocks = false
+  if _blocks.size > 0
+    assign has_manual_blocks = true
+  endif
+  assign show_articles = false
+  if has_auto_articles or has_manual_blocks
+    assign show_articles = true
+  endif
 -%}
 
 <script src="{{- 'swiper-bundle.min.js' | asset_url -}}" defer="defer" data-theme-script></script>
@@ -62,10 +98,21 @@
       {%- endif -%}
     </div><!-- /.featured-articles__head -->
 
-    {%- if _blocks.size > 0 -%}
+    {%- if show_articles -%}
       <div class="featured-articles__body">
         <div class="featured-articles__grid small-hide medium-hide">
-          {{ blocks }}
+          {%- if has_auto_articles -%}
+            {%- assign rendered_count = 0 -%}
+            {%- for article_ref in selected_blog.articles -%}
+              {%- if rendered_count >= articles_limit -%}{%- break -%}{%- endif -%}
+              {%- unless article_ref.template_suffix == 'pillar' or article_ref.tags contains 'pillar' -%}
+                {%- render 'card-article', article_ref: article_ref -%}
+                {%- assign rendered_count = rendered_count | plus: 1 -%}
+              {%- endunless -%}
+            {%- endfor -%}
+          {%- else -%}
+            {{ blocks }}
+          {%- endif -%}
         </div><!-- /.featured-articles__grid -->
 
         <featured-articles-carousel
@@ -77,7 +124,20 @@
         >
           <div class="swiper" data-slider>
             <div class="swiper-wrapper">
-              {{ blocks }}
+              {%- if has_auto_articles -%}
+                {%- assign rendered_count = 0 -%}
+                {%- for article_ref in selected_blog.articles -%}
+                  {%- if rendered_count >= articles_limit -%}{%- break -%}{%- endif -%}
+                  {%- unless article_ref.template_suffix == 'pillar' or article_ref.tags contains 'pillar' -%}
+                    <div class="swiper-slide">
+                      {%- render 'card-article', article_ref: article_ref -%}
+                    </div>
+                    {%- assign rendered_count = rendered_count | plus: 1 -%}
+                  {%- endunless -%}
+                {%- endfor -%}
+              {%- else -%}
+                {{ blocks }}
+              {%- endif -%}
             </div><!-- /.swiper-wrapper -->
           </div><!-- /.swiper -->
         </featured-articles-carousel><!-- /.featured-articles -->
@@ -113,6 +173,32 @@
       "id": "border_top",
       "label": "Add border top",
       "default": false
+    },
+    {
+      "type": "header",
+      "content": "Article Source"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_automatic_articles",
+      "label": "Use automatic articles",
+      "info": "When enabled, automatically fetch latest articles from selected blog",
+      "default": false
+    },
+    {
+      "type": "blog",
+      "id": "blog",
+      "label": "Select blog",
+      "info": "Articles will be fetched from this blog, excluding pillar articles"
+    },
+    {
+      "type": "range",
+      "id": "articles_count",
+      "label": "Number of articles",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 5
     },
     {
       "type": "header",

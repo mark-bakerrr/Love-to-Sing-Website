@@ -17,6 +17,7 @@
     "social_instagram_link": "#",
     "social_youtube_link": "#",
     "social_linkedin_link": "#",
+    "favicon": "shopify://shop_images/Love_to_Sing_Base_Logo.png",
     "social_tiktok_link": "#",
     "content_for_index": [],
     "blocks": {
@@ -24,6 +25,13 @@
         "type": "shopify://apps/upload-lift/blocks/app-embed/3c98bdcb-7587-4ade-bfe4-7d8af00d05ca",
         "disabled": false,
         "settings": {}
+      },
+      "10767264615385502235": {
+        "type": "shopify://apps/love-to-sing-studio/blocks/blog-blocks-embed/019d28e6-2806-70a0-bdbd-e95fa91f79ff",
+        "disabled": false,
+        "settings": {
+          "enabled": true
+        }
       }
     },
     "color_schemes": {

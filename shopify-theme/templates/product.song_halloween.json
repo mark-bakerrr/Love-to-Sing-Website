@@ -44,6 +44,7 @@
       ],
       "settings": {
         "background_image": "shopify://shop_images/hearts-background.png",
+        "background_opacity": 5,
         "ad_left": "<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8862503277108606\" crossorigin=\"anonymous\"></script>\n<!-- Song Lyric Page Ad -->\n<ins class=\"adsbygoogle\" style=\"display:block\" data-full-width-responsive=\"true\" data-ad-client=\"ca-pub-8862503277108606\" data-ad-slot=\"5186261077\" data-ad-format=\"auto\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script>",
         "ad_right": "<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8862503277108606\" crossorigin=\"anonymous\"></script>\n<!-- Song Lyric Page Ad -->\n<ins class=\"adsbygoogle\" style=\"display:block\" data-full-width-responsive=\"true\" data-ad-client=\"ca-pub-8862503277108606\" data-ad-slot=\"5186261077\" data-ad-format=\"auto\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script>",
         "form_title": "Get Free Lyric Sheet PDF",
@@ -115,6 +116,39 @@
         "content": "{{ product.description }}",
         "aside_title": "Categories",
         "collections": "{{ product.collections }}"
+      }
+    },
+    "featured_articles_qKk6Fr": {
+      "type": "featured-articles",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "disabled": true,
+      "name": "Featured articles",
+      "settings": {
+        "hide_if_no_articles": false,
+        "large_tiles": false,
+        "border_bottom": false,
+        "border_top": false,
+        "use_automatic_articles": true,
+        "blog": "music-and-learning",
+        "articles_count": 3,
+        "title": "From the blog",
+        "subtitle": "",
+        "button_text": "",
+        "button_url": "",
+        "autoplay": false,
+        "autoplay_speed": 5
       }
     },
     "custom_html_kicEzH": {
@@ -301,6 +335,7 @@
     "custom_html_xJpEXA",
     "featured_products_3X66Cw",
     "song_about_mDzcLq",
+    "featured_articles_qKk6Fr",
     "custom_html_kicEzH",
     "videos_C7Cgkr",
     "meta_articles_Ven36Q",

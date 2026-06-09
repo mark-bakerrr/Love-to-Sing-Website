@@ -226,7 +226,24 @@
     "empty_with_terms": "No results found for \"{{ terms }}\"",
     "change_search_terms": "Try changing your search terms.",
     "results_with_count_and_term": "{{ count }} results found for “{{ terms }}”",
-    "submit": "Search"
+    "submit": "Search",
+    "song_scope_title": "Song results for “{{ terms }}”",
+    "results_for": "Results for “{{ terms }}”",
+    "results_count": "{{ count }} results",
+    "refine": "Refine your search",
+    "view_lyrics": "View lyrics",
+    "chip": {
+      "all": "All",
+      "songs": "Songs",
+      "shop": "Shop",
+      "blog": "Blog"
+    },
+    "empty_for_chip": "No {{ type }} results for “{{ terms }}”. Try All to see other matches.",
+    "type_badge": {
+      "song": "Song",
+      "shop": "Shop",
+      "blog": "Blog"
+    }
   },
   "predictive_search": {
     "title_products": "Product Results",

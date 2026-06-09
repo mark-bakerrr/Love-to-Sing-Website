@@ -21,7 +21,7 @@
       "type": "hero-featured-article",
       "name": "Hero featured article",
       "settings": {
-        "article": "christmas-news/how-is-christmas-celebrated-in-new-zealand",
+        "article": "christmas/how-new-zealand-celebrates-christmas",
         "content_color": "#ffffff",
         "tag": "featured",
         "tag_background": "#ec5450",

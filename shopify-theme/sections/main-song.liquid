@@ -25,6 +25,7 @@
     assign class = class | append: 'main-color-' | append: product.metafields.custom.main_color | downcase
   endif
 -%}
+{% render 'song-schema' %}
 <script>console.log({{ product.images[0] | json }});</script>
 {{- 'main-song.css' | asset_url | stylesheet_tag -}}
 <script src="{{- 'save-email.js' | asset_url -}}" defer></script>

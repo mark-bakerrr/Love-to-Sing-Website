@@ -9,32 +9,9 @@
  */
 {
   "sections": {
-    "hero_banner_6EHPcp": {
-      "type": "hero-banner",
-      "name": "t:sections.hero-banner.name",
-      "settings": {
-        "background": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
-        "media_opacity": 5,
-        "image": "shopify://shop_images/hearts-background.png",
-        "video": "",
-        "video_mobile": "",
-        "overlay_color": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
-        "overlay_opacity": 20,
-        "image_overlay_alignment": "center",
-        "image_overlay_width": 60,
-        "eyebrow": "",
-        "content_color": "#ffffff",
-        "title": "Search",
-        "content": "",
-        "button_text": "",
-        "button_url": ""
-      }
-    },
     "banner": {
       "type": "main-search-banner",
-      "settings": {
-        "hide_title": true
-      }
+      "settings": {}
     },
     "main": {
       "type": "main-search",
@@ -51,15 +28,10 @@
           "blocks": {}
         }
       },
-      "settings": {
-        "enable_filters": true,
-        "enable_sorting": true,
-        "products_per_page": 16
-      }
+      "settings": {}
     }
   },
   "order": [
-    "hero_banner_6EHPcp",
     "banner",
     "main"
   ]

@@ -240,6 +240,22 @@ SOFTWARE.
   };
 
   const _addToCartSuccess = function (itemData, addToCartButton, cartForm) {
+    try {
+      document.body.dispatchEvent(new CustomEvent('label:modalcart:afteradditem'));
+      document.body.dispatchEvent(new CustomEvent('cart:open'));
+      document.dispatchEvent(new CustomEvent('cart:build' , {bubbles: true}));
+      document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true, detail: itemData }));
+      const cartLink = document.querySelector('.cart-link');
+      if (cartLink) {
+        cartLink.click();
+      }
+      const cart = document.querySelector('cart-notification') || document.querySelector('cart-drawer');
+      if (cart) {
+        cart.renderContents(itemData);
+      }
+    } catch(error) {
+        console.warn(error);
+    }
     _hideElement(addToCartButton);
     _hideElement($('#single-variant-select-' + itemData.product_id));
     _setText(addToCartButton, Config.labels.added);
@@ -361,7 +377,6 @@ SOFTWARE.
           })
           .then(response => _addToCartSuccess(response, addToCartButton, cartForm))
           .catch(response => {
-
             return response.json()
               .then(resp => _addToCartError(resp, addToCartButton, cartForm));
           });

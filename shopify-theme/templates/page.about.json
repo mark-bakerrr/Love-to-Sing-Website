@@ -56,7 +56,7 @@
             "icon_svg": "<svg width=\"48\" height=\"49\" viewbox=\"0 0 48 49\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M14.4209 30.5L5.32089 14.78C4.92849 14.1017 4.74395 13.3232 4.79017 12.541C4.83639 11.7587 5.11134 11.0073 5.58089 10.38L8.80089 6.1C9.17348 5.60322 9.65661 5.2 10.212 4.92229C10.7675 4.64458 11.3799 4.5 12.0009 4.5H36.0009C36.6219 4.5 37.2343 4.64458 37.7897 4.92229C38.3452 5.2 38.8283 5.60322 39.2009 6.1L42.4009 10.38C42.8735 11.0053 43.152 11.7557 43.2018 12.5379C43.2516 13.3202 43.0705 14.0998 42.6809 14.78L33.5809 30.5\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n<path d=\"M22.0002 24.5004L10.2402 4.90039\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n<path d=\"M26 24.5004L37.76 4.90039\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n<path d=\"M16 14.5H32\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n<path d=\"M24 44.5C29.5228 44.5 34 40.0228 34 34.5C34 28.9772 29.5228 24.5 24 24.5C18.4772 24.5 14 28.9772 14 34.5C14 40.0228 18.4772 44.5 24 44.5Z\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n<path d=\"M24 36.5V32.5H23\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n</svg>",
             "icon_width": 48,
             "heading": "Our Achievements",
-            "text": "<p>We've helped countless artists find their voice and reach their dreams.</p>"
+            "text": "<p>We're the world's top Christmas YouTube channel</p>"
           }
         }
       },
@@ -172,6 +172,29 @@
         "button_url": ""
       }
     },
+    "product_timeline_XMj6nM": {
+      "type": "product-timeline",
+      "disabled": true,
+      "name": "Product Timeline",
+      "settings": {
+        "title": "Our Journey",
+        "subtitle": "",
+        "button_text": "Shop Now",
+        "heading_size": "h2",
+        "text_alignment": "center",
+        "section_background": "#ffffff",
+        "timeline_line_color": "#b91f1c",
+        "dot_color": "#b91f1c",
+        "card_text_color": "#ffffff",
+        "card_border_radius": 12,
+        "image_border_radius": 8,
+        "padding_top": 60,
+        "padding_bottom": 60,
+        "card_gap": 40,
+        "enable_animation": true,
+        "animation_duration": 600
+      }
+    },
     "featured_reviews_zfTxqH": {
       "type": "featured-reviews",
       "blocks": {
@@ -279,6 +302,7 @@
     "richtext_mbafpD",
     "image_and_text_NkXykK",
     "image_and_text_Ybi4jM",
+    "product_timeline_XMj6nM",
     "featured_reviews_zfTxqH",
     "newsletter_banner_wh8yRt"
   ]

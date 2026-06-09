@@ -1,0 +1,105 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero": {
+      "type": "blog-category-hero",
+      "settings": {
+        "featured_article": "",
+        "latest_count": 5,
+        "filter_tag": "",
+        "background": "",
+        "background_image": "shopify://shop_images/hearts-background.png",
+        "image_opacity": 10
+      }
+    },
+    "topics": {
+      "type": "blog-category-topics",
+      "settings": {}
+    },
+    "body": {
+      "type": "blog-category-body",
+      "blocks": {
+        "song_1": {
+          "type": "song_collection",
+          "settings": {
+            "title": "Action Songs for Kids",
+            "subtitle": "Song books, videos & music",
+            "url": ""
+          }
+        },
+        "song_2": {
+          "type": "song_collection",
+          "settings": {
+            "title": "Color Songs for Kids",
+            "subtitle": "Song books, videos & music",
+            "url": ""
+          }
+        },
+        "song_3": {
+          "type": "song_collection",
+          "settings": {
+            "title": "Season Songs for Kids",
+            "subtitle": "Song books, videos & music",
+            "url": ""
+          }
+        }
+      },
+      "block_order": [
+        "song_1",
+        "song_2",
+        "song_3"
+      ],
+      "settings": {
+        "song_finder_url": ""
+      }
+    },
+    "all_articles": {
+      "type": "blog-category-all",
+      "settings": {
+        "heading": "All Articles"
+      }
+    },
+    "newsletter": {
+      "type": "newsletter-banner",
+      "blocks": {
+        "newsletter-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.newsletter.name",
+      "settings": {
+        "background_top": "#ffffff",
+        "background_bottom": "#790200",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "text_color": "#ffffff",
+        "title": "Join Our Newsletter",
+        "subtitle": "Sign up to our newsletter and we will send you a free song!"
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "topics",
+    "body",
+    "all_articles",
+    "newsletter"
+  ]
+}

@@ -19,7 +19,6 @@ SOFTWARE.
 -->
 {% endcomment %}
 
-{% assign now = 'now' | date: '%s' | plus: 0 %}
 
 {% capture trackReleaseDateString %}{{ track.metafields.track.release_date }}{% endcapture %}
 {% assign trackDateParts =  trackReleaseDateString | split: "/" %}
@@ -68,14 +67,6 @@ SOFTWARE.
 
 </style>
 
-{%- if index < 10 -%}
-  {%- assign index = '0' | append: index -%}
-{%- endif -%}
-
-{%- capture track_title -%}
-  <span>{{ index }}.</span> {{ track.title }}
-{%- endcapture -%}
-
 {% if trackOnSale == "true" and previewAvailable == "true" %}
   <a
       class='single-track {{previewClass}} {{availableClass}} js-no-transition'
@@ -84,7 +75,7 @@ SOFTWARE.
       data-preview-link='{{ previewLink | escape }}'
       data-tuning='{{ tuning | escape }}'
       data-bpm='{{ bpm | escape }}'
-      data-title='{% if track.metafields.track.featured_artist_names %}{{ track_title }} (feat. {{track.metafields.track.featured_artist_names}}){% else %}{{ track_title | escape }}{% endif %}'
+      data-title='{% if track.metafields.track.featured_artist_names %}{{ track.title }} (feat. {{track.metafields.track.featured_artist_names}}){% else %}{{ track.title | escape }}{% endif %}'
       data-artist='{{ product.metafields.album.artist_name | escape }}'
       data-album-track-count='{{ product.metafields.album.track_count }}'
       data-price='{{ track.price | money }}'
@@ -97,23 +88,23 @@ SOFTWARE.
         data-preview-link='{{ previewLink | escape }}'
         data-tuning='{{ tuning | escape }}'
         data-bpm='{{ bpm | escape }}'
-        data-title='{% if track.metafields.track.featured_artist_names %}{{ track_title }} (feat. {{track.metafields.track.featured_artist_names}}){% else %}{{ track_title | escape }}{% endif %}'
+        data-title='{% if track.metafields.track.featured_artist_names %}{{ track.title }} (feat. {{track.metafields.track.featured_artist_names}}){% else %}{{ track.title | escape }}{% endif %}'
         data-artist='{{ product.metafields.album.artist_name | escape }}'
         data-album-track-count='{{ product.metafields.album.track_count }}'
         data-price='{{ track.price | money }}'
     >
       {% if trackOnSale == "true" and previewAvailable == "true" %}
         <span class='single-play-icon'>
-          <i class='material-icons'>{% render 'icon-play-outline' %}</i>
+          <i class='material-icons'>play_circle_outline</i>
         </span>
       {% endif %}
     </div>
 
     <div class='single-track-title'>
       {% if track.metafields.track.featured_artist_names %}
-        <span>{{ track_title }} (feat. {{ track.metafields.track.featured_artist_names }})</span>
+        <span>{{ track.title }} (feat. {{ track.metafields.track.featured_artist_names }})</span>
       {% else %}
-        <span>{{ track_title }}</span>
+        <span>{{ track.title }}</span>
       {% endif %}
     </div>
 
@@ -134,7 +125,7 @@ SOFTWARE.
         >
           <div class='single-track-btn'>
             <i class='material-icons single-add-track-to-cart-icon-{{track.id}}'
-            > {%- render 'icon', icon: 'cart' -%}</i
+            >add_shopping_cart</i
             >
             <span>{{ track.price | money }}</span>
           </div>
@@ -149,9 +140,9 @@ SOFTWARE.
         <span style='opacity: .5;'>Track {{ track.metafields.track.track_order }}</span>
       {% else %}
         {% if track.metafields.track.featured_artist_names %}
-          <span>{{ track_title }} (feat. {{ track.metafields.track.featured_artist_names }})</span>
+          <span>{{ track.title }} (feat. {{ track.metafields.track.featured_artist_names }})</span>
         {% else %}
-          <span>{{ track_title }}</span>
+          <span>{{ track.title }}</span>
         {% endif %}
       {% endif %}
     </div>
@@ -165,9 +156,8 @@ SOFTWARE.
       >
         <div class='single-track-btn'>
           <i class='material-icons single-add-track-to-cart-icon-{{track.id}}'
+          >add_shopping_cart</i
           >
-            {%- render 'icon', icon: 'cart' -%}
-          </i>
           <span>{{ track.price | money }}</span>
         </div>
       </div>

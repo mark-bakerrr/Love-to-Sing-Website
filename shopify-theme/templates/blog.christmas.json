@@ -1,0 +1,180 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero": {
+      "type": "blog-category-hero",
+      "settings": {
+        "featured_article": "",
+        "latest_count": 5,
+        "filter_tag": "",
+        "background": "",
+        "background_image": "shopify://shop_images/hearts-background.png",
+        "image_opacity": 10
+      }
+    },
+    "topics": {
+      "type": "blog-category-topics",
+      "settings": {}
+    },
+    "body": {
+      "type": "blog-category-body",
+      "blocks": {
+        "popular_activities_QyHMzC": {
+          "type": "popular_activities",
+          "settings": {
+            "articles_count": 5
+          }
+        },
+        "sidebar_ad_jc9C9n": {
+          "type": "sidebar_ad",
+          "settings": {
+            "ad_code": "<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8862503277108606\" crossorigin=\"anonymous\"></script>\n<!-- Desktop Article Side Column Bottom -->\n<ins class=\"adsbygoogle\" style=\"display:block\" data-ad-client=\"ca-pub-8862503277108606\" data-ad-slot=\"1784865515\" data-ad-format=\"auto\" data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script>"
+          }
+        },
+        "song_finder_jHYNw7": {
+          "type": "song_finder",
+          "settings": {
+            "collections": []
+          }
+        },
+        "sidebar_ad_p8HeL4": {
+          "type": "sidebar_ad",
+          "settings": {
+            "ad_code": "<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8862503277108606\" crossorigin=\"anonymous\"></script>\n<!-- Desktop Article Side Column Bottom -->\n<ins class=\"adsbygoogle\" style=\"display:block\" data-ad-client=\"ca-pub-8862503277108606\" data-ad-slot=\"1784865515\" data-ad-format=\"auto\" data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script>"
+          }
+        },
+        "topic_shelf_BWh8aN": {
+          "type": "topic_shelf",
+          "settings": {
+            "tag": "christmas-history-and-traditions",
+            "title": ""
+          }
+        },
+        "topic_shelf_QPdrzm": {
+          "type": "topic_shelf",
+          "settings": {
+            "tag": "christmas-fun-and-humor",
+            "title": ""
+          }
+        },
+        "topic_shelf_eLrkey": {
+          "type": "topic_shelf",
+          "settings": {
+            "tag": "christmas-around-the-world",
+            "title": ""
+          }
+        },
+        "topic_shelf_6dX36z": {
+          "type": "topic_shelf",
+          "settings": {
+            "tag": "christmas-song-stories",
+            "title": ""
+          }
+        }
+      },
+      "block_order": [
+        "popular_activities_QyHMzC",
+        "sidebar_ad_jc9C9n",
+        "song_finder_jHYNw7",
+        "sidebar_ad_p8HeL4",
+        "topic_shelf_BWh8aN",
+        "topic_shelf_QPdrzm",
+        "topic_shelf_eLrkey",
+        "topic_shelf_6dX36z"
+      ],
+      "settings": {
+        "song_finder_url": ""
+      }
+    },
+    "custom_html_KeUDfq": {
+      "type": "custom-html",
+      "blocks": {
+        "custom-html-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "name": "Advertisment",
+      "settings": {
+        "advertisment": "<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8862503277108606\" crossorigin=\"anonymous\"></script>\n<!-- NEW 2023 Song Lyrics Top of Page -->\n<ins class=\"adsbygoogle\" style=\"display:block\" data-ad-client=\"ca-pub-8862503277108606\" data-ad-slot=\"4802358163\" data-ad-format=\"auto\" data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script>"
+      }
+    },
+    "all_articles": {
+      "type": "blog-category-all",
+      "settings": {
+        "heading": "All Articles"
+      }
+    },
+    "custom_html_Ark89L": {
+      "type": "custom-html",
+      "blocks": {
+        "custom-html-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "name": "Advertisment",
+      "settings": {
+        "advertisment": "<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8862503277108606\" crossorigin=\"anonymous\"></script>\n<!-- NEW 2023 Song Lyrics Top of Page -->\n<ins class=\"adsbygoogle\" style=\"display:block\" data-ad-client=\"ca-pub-8862503277108606\" data-ad-slot=\"4802358163\" data-ad-format=\"auto\" data-full-width-responsive=\"true\"></ins>\n<script>\n     (adsbygoogle = window.adsbygoogle || []).push({});\n</script>"
+      }
+    },
+    "newsletter": {
+      "type": "newsletter-banner",
+      "blocks": {
+        "newsletter-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.newsletter.name",
+      "settings": {
+        "background_top": "#ffffff",
+        "background_bottom": "#790200",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "text_color": "#ffffff",
+        "title": "Join Our Newsletter",
+        "subtitle": "Sign up to our newsletter and we will send you a free song!"
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "topics",
+    "body",
+    "custom_html_KeUDfq",
+    "all_articles",
+    "custom_html_Ark89L",
+    "newsletter"
+  ]
+}

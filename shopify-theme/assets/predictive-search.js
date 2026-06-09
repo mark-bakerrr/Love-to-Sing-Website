@@ -9,6 +9,7 @@ if (!window.customElements.get('predictive-search')) {
         'predictive-search-results',
       );
       this.resultsLimit = this.dataset.resultsLimit || 12;
+      this.sectionId = this.dataset.sectionId || 'predictive-search';
       this.query = this.dataset.customQuery
       || `&${encodeURIComponent(
           'resources[type]',
@@ -110,7 +111,7 @@ if (!window.customElements.get('predictive-search')) {
       fetch(
         `${routes.predictive_search_url}?q=${encodeURIComponent(
           searchTerm,
-        )}${this.query}&section_id=predictive-search`,
+        )}${this.query}&section_id=${this.sectionId}`,
       )
         .then((response) => {
           if (!response.ok) {
@@ -124,7 +125,7 @@ if (!window.customElements.get('predictive-search')) {
         .then((text) => {
           const resultsMarkup = new DOMParser()
             .parseFromString(text, 'text/html')
-            .querySelector('#shopify-section-predictive-search').innerHTML;
+            .querySelector(`#shopify-section-${this.sectionId}`).innerHTML;
           this.cachedResults[queryKey] = resultsMarkup;
           this.renderSearchResults(resultsMarkup);
           this.predictiveSearchResults.classList.add('show');

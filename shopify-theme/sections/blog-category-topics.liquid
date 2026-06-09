@@ -1,0 +1,102 @@
+{{- 'section-blog-category.css' | asset_url | stylesheet_tag -}}
+{{- 'swiper-bundle.min.css' | asset_url | stylesheet_tag -}}
+
+<script src="{{- 'swiper-bundle.min.js' | asset_url -}}" defer="defer" data-theme-script></script>
+<script src="{{- 'topics-slider.js' | asset_url -}}" defer="defer" data-theme-script></script>
+
+{%- liquid
+  assign blog_ref = blog
+  assign topics = blog_ref.metafields.custom.topics.value
+  assign tag_color = blog_ref.metafields.custom.tag_color | default: '#790200'
+
+  assign has_topics = false
+  if topics != blank
+    assign has_topics = true
+  else
+    for tag in blog_ref.all_tags
+      if tag contains 'Category_' or tag contains 'category_'
+        assign has_topics = true
+        break
+      endif
+    endfor
+  endif
+-%}
+
+{%- if has_topics -%}
+<section class="blog-category-topics" style="--tag-color: {{ tag_color }};">
+  <div class="container">
+    <div class="blog-category-topics__header">
+      <span class="shelf__accent"></span>
+      <span class="blog-category-topics__label caption uppercase">Browse by Topic</span>
+      {%- if topics != blank -%}
+        <span class="blog-category-topics__count caption">{{ topics.size }} topics</span>
+      {%- endif -%}
+    </div>
+
+    <topics-slider class="blog-category-topics__slider-wrap">
+      <div class="blog-category-topics__slider swiper is-at-start" data-topics-slider>
+        <div class="swiper-wrapper" role="list">
+          {%- if topics != blank -%}
+            {%- for topic in topics -%}
+              {%- assign topic_tag = topic.tag | default: topic.title | handle -%}
+              {%- assign topic_title = topic.title | default: topic.tag | remove: 'Category_' | remove: 'category_' | replace: '_', ' ' | replace: '-', ' ' -%}
+              <a
+                href="{{ blog_ref.url }}/tagged/{{ topic_tag }}"
+                class="blog-category-topics__chip swiper-slide"
+                role="listitem"
+              >
+                <span class="blog-category-topics__chip-icon">{%- render 'icon', icon: 'music-note-single' -%}</span>
+                <span class="blog-category-topics__chip-label">{{ topic_title }}</span>
+                {%- if topic.article_count != blank -%}
+                  <span class="blog-category-topics__chip-count">{{ topic.article_count }} articles</span>
+                {%- endif -%}
+              </a>
+            {%- endfor -%}
+          {%- else -%}
+            {%- comment -%}
+              Fallback: generate topic chips from blog tags
+            {%- endcomment -%}
+            {%- for tag in blog_ref.all_tags -%}
+              {%- if tag contains 'Category_' or tag contains 'category_' -%}
+                {%- assign clean_tag = tag | remove: 'Category_' | remove: 'category_' | replace: '_', ' ' | replace: '-', ' ' -%}
+                {%- assign tag_handle = tag | handle -%}
+
+                <a
+                  href="{{ blog_ref.url }}/tagged/{{ tag_handle }}"
+                  class="blog-category-topics__chip swiper-slide"
+                  role="listitem"
+                >
+                  <span class="blog-category-topics__chip-icon">{%- render 'icon', icon: 'music-note-single' -%}</span>
+                  <span class="blog-category-topics__chip-label">{{ clean_tag | capitalize }}</span>
+                </a>
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+
+        <span class="blog-category-topics__fade blog-category-topics__fade--left" aria-hidden="true"></span>
+        <span class="blog-category-topics__fade blog-category-topics__fade--right" aria-hidden="true"></span>
+      </div>
+
+      <div class="blog-category-topics__controls">
+        <div class="blog-category-topics__pagination swiper-pagination"></div>
+        <div class="blog-category-topics__arrows">
+          <button type="button" class="blog-category-topics__arrow blog-category-topics__arrow--prev" aria-label="Previous topics">
+            {%- render 'icon', icon: 'chevron-left' -%}
+          </button>
+          <button type="button" class="blog-category-topics__arrow blog-category-topics__arrow--next" aria-label="Next topics">
+            {%- render 'icon', icon: 'chevron-right' -%}
+          </button>
+        </div>
+      </div>
+    </topics-slider>
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Browse by Topic",
+  "settings": []
+}
+{% endschema %}

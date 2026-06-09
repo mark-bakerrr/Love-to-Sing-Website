@@ -10,8 +10,16 @@
   assign blog_ref = blogs[_section.blog_handle]
 
   capture articles
-    for article_ref in blog_ref.articles limit: _section.limit
+    assign articles_shown = 0
+    for article_ref in blog_ref.articles
+      if articles_shown >= _section.limit
+        break
+      endif
+      if article_ref.template_suffix == 'pillar' or article_ref.tags contains 'pillar'
+        continue
+      endif
       content_for 'block', type: 'article', id: 'article', closest.article: article_ref
+      assign articles_shown = articles_shown | plus: 1
     endfor
   endcapture
 -%}

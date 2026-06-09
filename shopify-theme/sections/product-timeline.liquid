@@ -1,0 +1,384 @@
+{%- liquid
+  assign _section = section.settings
+  assign entries = metaobjects.product_timeline.values | sort: 'sort_order.value'
+-%}
+
+{{ 'product-timeline.css' | asset_url | stylesheet_tag }}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    --padding-top: {{ _section.padding_top }}px;
+    --padding-bottom: {{ _section.padding_bottom }}px;
+    --timeline-bg: {{ _section.section_background }};
+    --timeline-line-color: {{ _section.timeline_line_color }};
+    --dot-color: {{ _section.dot_color }};
+    --card-radius: {{ _section.card_border_radius }}px;
+    --image-radius: {{ _section.image_border_radius }}px;
+    --card-gap: {{ _section.card_gap }}px;
+  }
+</style>
+
+<section class="product-timeline" id="shopify-section-{{ section.id }}">
+  <div class="product-timeline__container">
+
+    {%- if _section.title != blank or _section.subtitle != blank -%}
+      <div class="product-timeline__header product-timeline__header--{{ _section.text_alignment }}">
+        {%- if _section.title != blank -%}
+          <{{ _section.heading_size }} class="product-timeline__title" style="text-align: {{ _section.text_alignment }};">
+            {{ _section.title | escape }}
+          </{{ _section.heading_size }}>
+        {%- endif -%}
+        {%- if _section.subtitle != blank -%}
+          <p class="product-timeline__subtitle" style="text-align: {{ _section.text_alignment }};">
+            {{ _section.subtitle | escape }}
+          </p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if entries.size == 0 -%}
+      {%- if request.design_mode -%}
+        <div style="text-align: center; padding: 60px 20px; color: #797979; font-family: var(--font-body-family, 'Nunito', sans-serif);">
+          <p style="font-size: 16px; margin: 0;">Add entries to your <strong>Product Timeline</strong> metaobject to populate this section.</p>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    <div class="product-timeline__track" role="list" aria-label="Product timeline">
+      {%- for entry in entries -%}
+        {%- liquid
+          assign card_color = entry.colour.value | default: _section.dot_color | strip_html | strip
+          assign card_text = _section.card_text_color
+          assign entry_image = entry.product_image.value
+          assign animation_enabled = _section.enable_animation
+          assign animation_duration = _section.animation_duration
+        -%}
+
+        <div
+          class="product-timeline__entry"
+          role="listitem"
+          data-animation="{{ animation_enabled }}"
+          style="transition-duration: {{ animation_duration }}ms;"
+        >
+          <div class="product-timeline__dot" style="background-color: {{ card_color }}; border-color: var(--timeline-bg, #fff);">&nbsp;</div>
+
+          <div
+            class="product-timeline__card"
+            style="background: linear-gradient(135deg, {{ card_color }}d9, {{ card_color }}eb); color: {{ card_text }};"
+          >
+            {%- if entry_image -%}
+              <div class="product-timeline__image-wrapper">
+                <div class="product-timeline__image-bg">
+                  <img
+                    src="{{ entry_image | image_url: width: 100 }}"
+                    alt=""
+                    loading="lazy"
+                    aria-hidden="true"
+                  >
+                </div>
+                <div class="product-timeline__image-fg">
+                  <img
+                    src="{{ entry_image | image_url: width: 400 }}"
+                    alt="{{ entry.product_name.value | escape }}"
+                    loading="lazy"
+                  >
+                </div>
+              </div>
+            {%- endif -%}
+
+            <div class="product-timeline__content">
+              {%- if entry.product_name.value != blank -%}
+                <h3 class="product-timeline__card-title" style="color: {{ card_text }};">
+                  {{ entry.product_name.value | escape }}
+                </h3>
+              {%- endif -%}
+
+              {%- assign product_types = entry.type_of_product.value -%}
+              {%- if entry.year.value != blank or product_types != blank -%}
+                <p class="product-timeline__meta" style="color: {{ card_text }};">
+                  {%- if entry.year.value != blank -%}
+                    {{ entry.year.value | escape }}
+                  {%- endif -%}
+                  {%- if entry.year.value != blank and product_types != blank -%}
+                    <span class="product-timeline__meta-separator">&bull;</span>
+                  {%- endif -%}
+                  {%- if product_types != blank -%}
+                    {%- for type_item in product_types -%}
+                      {{ type_item | escape }}{%- unless forloop.last -%}<span class="product-timeline__meta-separator">&bull;</span>{%- endunless -%}
+                    {%- endfor -%}
+                  {%- endif -%}
+                </p>
+              {%- endif -%}
+
+              {%- if entry.description.value != blank -%}
+                <div class="product-timeline__description" style="color: {{ card_text }};">
+                  {{ entry.description.value | metafield_tag }}
+                </div>
+              {%- endif -%}
+
+              <div class="product-timeline__actions">
+                {%- if entry.linked_product.value -%}
+                  <a href="{{ entry.linked_product.value.url }}" class="product-timeline__cta" style="color: {{ card_color }};">
+                    {{ _section.button_text | escape }}
+                  </a>
+                {%- endif -%}
+
+                {%- if entry.spotify_link.value != blank -%}
+                  <a href="{{ entry.spotify_link.value }}" class="product-timeline__spotify" target="_blank" rel="noopener noreferrer" aria-label="Listen on Spotify">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+                  </a>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+  </div>
+</section>
+
+<script>
+  (function() {
+    var section = document.getElementById('shopify-section-{{ section.id }}');
+    if (!section) return;
+
+    var track = section.querySelector('.product-timeline__track');
+    var dots = section.querySelectorAll('.product-timeline__dot');
+
+    /* Calculate spine height: first dot to last dot (using offsetTop to ignore CSS transforms) */
+    function updateSpineHeight() {
+      if (!track || dots.length < 2) return;
+      var firstDot = dots[0];
+      var lastDot = dots[dots.length - 1];
+      /* offsetTop is relative to offsetParent — walk up to get position relative to track */
+      function getOffsetTopRelativeTo(el, ancestor) {
+        var top = 0;
+        while (el && el !== ancestor) {
+          top += el.offsetTop;
+          el = el.offsetParent;
+        }
+        return top;
+      }
+      var firstCenter = getOffsetTopRelativeTo(firstDot, track) + firstDot.offsetHeight / 2;
+      var lastCenter = getOffsetTopRelativeTo(lastDot, track) + lastDot.offsetHeight / 2;
+      var height = lastCenter - firstCenter;
+      if (height > 0) {
+        track.style.setProperty('--spine-top', firstCenter + 'px');
+        track.style.setProperty('--spine-height', height + 'px');
+      }
+    }
+
+    updateSpineHeight();
+    window.addEventListener('resize', updateSpineHeight);
+
+    var entries = section.querySelectorAll('.product-timeline__entry[data-animation="true"]');
+    if (!entries.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+      entries.forEach(function(entry) {
+        entry.classList.add('is-visible');
+      });
+      return;
+    }
+
+    var observer = new IntersectionObserver(function(observerEntries) {
+      observerEntries.forEach(function(item) {
+        if (item.isIntersecting) {
+          item.target.classList.add('is-visible');
+        } else {
+          item.target.classList.remove('is-visible');
+        }
+      });
+      /* Recalculate after animations may have shifted layout */
+      updateSpineHeight();
+    }, {
+      threshold: 0.2,
+      rootMargin: '0px 0px -50px 0px'
+    });
+
+    entries.forEach(function(entry) {
+      observer.observe(entry);
+    });
+
+    document.addEventListener('shopify:section:unload', function(event) {
+      if (event.target.contains(section)) {
+        observer.disconnect();
+        window.removeEventListener('resize', updateSpineHeight);
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Product Timeline",
+  "tag": "section",
+  "class": "product-timeline-section",
+  "disabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Our Journey"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "section_background",
+      "label": "Section background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "timeline_line_color",
+      "label": "Timeline line color",
+      "default": "#c6c6c6"
+    },
+    {
+      "type": "color",
+      "id": "dot_color",
+      "label": "Dot color",
+      "default": "#B91F1C",
+      "info": "Overridden by each entry's colour field"
+    },
+    {
+      "type": "color",
+      "id": "card_text_color",
+      "label": "Card text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image border radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Card gap",
+      "min": 20,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animation",
+      "label": "Enable scroll animation",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "label": "Animation duration",
+      "min": 200,
+      "max": 1000,
+      "step": 50,
+      "unit": "ms",
+      "default": 600
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Timeline"
+    }
+  ]
+}
+{% endschema %}
