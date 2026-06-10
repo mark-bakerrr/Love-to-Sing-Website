@@ -29,12 +29,18 @@
   </a>
 {%- endcapture -%}
 
+{%- assign music_url = section.settings.music_url -%}
 <santa-tracker
   class="santa-tracker"
   data-departure="{{ departure }}"
   data-route-url="{{ 'santa-route.json' | asset_url }}"
   data-three-js="{{ 'three.min.js' | asset_url }}"
-  data-earth-texture="{{ 'santa-earth.jpg' | asset_url }}"
+  data-earth-day="{{ 'santa-earth.jpg' | asset_url }}"
+  data-earth-night="{{ 'santa-earth-night.png' | asset_url }}"
+  data-earth-clouds="{{ 'santa-earth-clouds.png' | asset_url }}"
+  data-earth-spec="{{ 'santa-earth-spec.jpg' | asset_url }}"
+  {% if music_url != blank %}data-music="{{ music_url }}"{% endif %}
+  data-sound="{{ section.settings.enable_sound }}"
   data-snow="{{ section.settings.enable_snow }}"
 >
   <div data-snow-layer></div>
@@ -108,6 +114,18 @@
   <div class="santa-live" data-state="live" hidden>
     <div class="santa-live__globe" data-globe aria-label="3D globe showing Santa's live position"></div>
 
+    <button
+      class="santa-live__sound"
+      type="button"
+      data-action="toggle-sound"
+      aria-pressed="false"
+      aria-label="Turn sound on"
+      hidden
+    >
+      <span class="santa-live__sound-on" aria-hidden="true">🔊</span>
+      <span class="santa-live__sound-off" aria-hidden="true">🔇</span>
+    </button>
+
     <aside class="santa-live__panel" data-panel aria-label="Santa tracker stats">
       {{ logo_link }}
 
@@ -126,7 +144,11 @@
         </div>
         <div class="santa-live__card">
           <span class="santa-live__card-label">Presents delivered</span>
-          <span class="santa-live__card-value" data-info="presents">0</span>
+          <span class="santa-live__card-value" data-info="presents" data-odometer>0</span>
+        </div>
+        <div class="santa-live__card">
+          <span class="santa-live__card-label">Distance travelled</span>
+          <span class="santa-live__card-value" data-info="distance" data-odometer>0 km</span>
         </div>
       </div>
 
@@ -201,6 +223,23 @@
       "id": "enable_snow",
       "label": "Falling snow",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "Sound & music"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sound",
+      "label": "Enable sound",
+      "default": true,
+      "info": "Shows a 🔊 button on the live tracker. Always starts muted; visitors opt in. Plays sleigh-bell chimes as Santa arrives in each city."
+    },
+    {
+      "type": "url",
+      "id": "music_url",
+      "label": "Background music URL",
+      "info": "Optional. Direct link to an MP3/OGG audio file (upload to Settings → Files, then paste its URL). Loops softly when the visitor turns sound on. Ideally an original Love to Sing instrumental."
     },
     {
       "type": "header",

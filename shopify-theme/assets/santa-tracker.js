@@ -173,6 +173,75 @@
     );
   }
 
+  // Great-circle distance between two lat/lng points, in km
+  function haversineKm(a, b) {
+    var R = 6371;
+    var dLat = toRad(b[0] - a[0]);
+    var dLng = toRad(b[1] - a[1]);
+    var la1 = toRad(a[0]);
+    var la2 = toRad(b[0]);
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+
+  // Sub-solar point (lat/lng where the sun is overhead) for a given instant.
+  // Simplified astronomy — accurate to ~1°, which is plenty for lighting.
+  function subSolarPoint(date) {
+    var d = new Date(date);
+    var start = Date.UTC(d.getUTCFullYear(), 0, 0);
+    var dayOfYear = Math.floor((d.getTime() - start) / 86400000);
+    // Solar declination (deg): peaks ±23.44 at the solstices
+    var decl = -23.44 * Math.cos(toRad((360 / 365) * (dayOfYear + 10)));
+    // Sub-solar longitude: 12:00 UTC ≈ 0°E, moving westward as UTC advances
+    var utcHours = d.getUTCHours() + d.getUTCMinutes() / 60 + d.getUTCSeconds() / 3600;
+    var lng = -15 * (utcHours - 12);
+    while (lng > 180) lng -= 360;
+    while (lng < -180) lng += 360;
+    return { lat: decl, lng: lng };
+  }
+
+  // Day/night earth: blend Blue Marble (lit) with Black Marble city lights
+  // (dark side), plus a subtle ocean specular from the sun.
+  var EARTH_VERT = [
+    'varying vec2 vUv;',
+    'varying vec3 vNormal;',
+    'varying vec3 vWorldPos;',
+    'void main() {',
+    '  vUv = uv;',
+    '  vNormal = normalize(normal);',
+    '  vec4 wp = modelMatrix * vec4(position, 1.0);',
+    '  vWorldPos = wp.xyz;',
+    '  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+    '}',
+  ].join('\n');
+
+  var EARTH_FRAG = [
+    'uniform sampler2D dayTex;',
+    'uniform sampler2D nightTex;',
+    'uniform sampler2D specTex;',
+    'uniform vec3 sunDir;',
+    'varying vec2 vUv;',
+    'varying vec3 vNormal;',
+    'varying vec3 vWorldPos;',
+    'void main() {',
+    '  vec3 n = normalize(vNormal);',
+    '  float sun = dot(n, sunDir);',
+    '  float dayMix = smoothstep(-0.12, 0.30, sun);',
+    '  vec3 day = texture2D(dayTex, vUv).rgb;',
+    '  vec3 night = texture2D(nightTex, vUv).rgb;',
+    '  vec3 cityGlow = night * vec3(1.25, 1.12, 0.75) * 2.4;',
+    '  vec3 col = mix(cityGlow, day, dayMix);',
+    '  float ocean = texture2D(specTex, vUv).r;',
+    '  vec3 viewDir = normalize(cameraPosition - vWorldPos);',
+    '  vec3 refl = reflect(-sunDir, n);',
+    '  float spec = pow(max(dot(viewDir, refl), 0.0), 18.0) * ocean * dayMix;',
+    '  col += vec3(0.9, 0.95, 1.0) * spec * 0.6;',
+    '  col = mix(col, col * vec3(0.55, 0.62, 0.85) + cityGlow * 0.4, (1.0 - dayMix) * 0.5);',
+    '  gl_FragColor = vec4(col, 1.0);',
+    '}',
+  ].join('\n');
+
   class SantaTracker extends HTMLElement {
     connectedCallback() {
       this.departure = Date.parse(this.dataset.departure);
@@ -208,6 +277,13 @@
         });
       }
 
+      this.soundOn = false;
+      var soundBtn = this.querySelector('[data-action="toggle-sound"]');
+      if (soundBtn) {
+        this.soundBtn = soundBtn;
+        soundBtn.addEventListener('click', this.toggleSound.bind(this));
+      }
+
       this.initSnow();
       this.timer = setInterval(this.tick.bind(this), 250);
       this.tick();
@@ -215,7 +291,10 @@
 
     disconnectedCallback() {
       clearInterval(this.timer);
+      clearInterval(this.musicFade);
       if (this.rafId) cancelAnimationFrame(this.rafId);
+      if (this.music) this.music.pause();
+      if (this.onResize) window.removeEventListener('resize', this.onResize);
       if (this.three && this.three.renderer) this.three.renderer.dispose();
     }
 
@@ -342,18 +421,49 @@
       var scene = new THREE.Scene();
       var camera = new THREE.PerspectiveCamera(55, host.clientWidth / host.clientHeight, 0.01, 200);
 
-      // Lights follow the camera so the visible hemisphere is always lit
-      scene.add(new THREE.AmbientLight(0x8899bb, 0.55));
-      var sun = new THREE.DirectionalLight(0xfff3d6, 1.1);
+      // Real sun direction so there's a genuine day/night terminator — Santa
+      // delivers at local midnight, so he flies the dark side over city lights.
+      var sun = new THREE.DirectionalLight(0xfff3d6, 1.2);
       scene.add(sun);
+      scene.add(new THREE.AmbientLight(0x2b3a6b, 0.6)); // lifts the night side slightly
 
-      // Earth — slightly cool-tinted for a Christmas-night feel
-      var earthTex = new THREE.TextureLoader().load(this.dataset.earthTexture);
-      var earth = new THREE.Mesh(
-        new THREE.SphereGeometry(GLOBE_R, 64, 64),
-        new THREE.MeshPhongMaterial({ map: earthTex, color: 0xd2ddff, shininess: 8 })
-      );
+      var loader = new THREE.TextureLoader();
+      var ds = this.dataset;
+      function tex(url) {
+        var t = loader.load(url);
+        t.anisotropy = renderer.capabilities.getMaxAnisotropy
+          ? renderer.capabilities.getMaxAnisotropy() : 1;
+        return t;
+      }
+
+      // Earth — custom day/night shader (Blue Marble + Black Marble city lights)
+      var earthMat = new THREE.ShaderMaterial({
+        uniforms: {
+          dayTex: { value: tex(ds.earthDay) },
+          nightTex: { value: tex(ds.earthNight) },
+          specTex: { value: tex(ds.earthSpec || ds.earthDay) },
+          sunDir: { value: new THREE.Vector3(1, 0, 0) },
+        },
+        vertexShader: EARTH_VERT,
+        fragmentShader: EARTH_FRAG,
+      });
+      var earth = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R, 96, 96), earthMat);
       scene.add(earth);
+
+      // Slowly drifting cloud shell, lit by the real sun (dark on the night side)
+      var clouds = null;
+      if (ds.earthClouds) {
+        clouds = new THREE.Mesh(
+          new THREE.SphereGeometry(GLOBE_R * 1.006, 96, 96),
+          new THREE.MeshPhongMaterial({
+            alphaMap: tex(ds.earthClouds),
+            transparent: true,
+            opacity: 0.85,
+            depthWrite: false,
+          })
+        );
+        scene.add(clouds);
+      }
 
       // Soft atmosphere halo
       var atmosphere = new THREE.Mesh(
@@ -415,6 +525,8 @@
         scene: scene,
         camera: camera,
         sun: sun,
+        earthMat: earthMat,
+        clouds: clouds,
         host: host,
         trailGeo: trailGeo,
         trailPos: trailPos,
@@ -428,6 +540,13 @@
         camInit: false,
       };
       this.visitedCount = 0;
+      this.revealReady = false;
+      this.dispP = null;
+      this.dispD = null;
+      this.buildCumulativeDistance();
+
+      // Reveal the sound button now the globe is up (if sound is enabled)
+      if (this.dataset.sound === 'true' && this.soundBtn) this.soundBtn.hidden = false;
 
       var self = this;
       this.onResize = function () {
@@ -582,8 +701,26 @@
       T.camera.up.lerp(up, 0.06).normalize();
       T.camera.lookAt(T.camLook);
 
-      // Keep the lit hemisphere facing the camera
-      T.sun.position.copy(T.camera.position).multiplyScalar(2);
+      // Real sun direction for this instant → genuine day/night terminator.
+      var ss = subSolarPoint(this.now());
+      var sunDir = latLngToV3(ss.lat, ss.lng, 1).normalize();
+      T.earthMat.uniforms.sunDir.value.copy(sunDir);
+      T.sun.position.copy(sunDir).multiplyScalar(5); // lights the cloud shell
+
+      // Clouds drift slowly westward
+      if (T.clouds) T.clouds.rotation.y = t * 0.000012;
+
+      // Reveal trail + dots for newly visited stops (and chime on arrival).
+      // The first frame may catch up many stops at once (page loaded mid-route)
+      // — stay silent until that initial reveal is done.
+      while (this.visitedCount <= pos.stopIndex) {
+        this.extendTrail(this.visitedCount);
+        if (this.visitedCount > 0 && this.revealReady) this.onCityArrival(this.visitedCount);
+        this.visitedCount++;
+      }
+      this.revealReady = true;
+
+      this.renderOdometer(pos);
 
       this.frameCount = (this.frameCount || 0) + 1;
       if (param('santa_debug') && this.frameCount % 90 === 1) {
@@ -595,12 +732,6 @@
           ' @' + Math.round(r.left) + ',' + Math.round(r.top) +
           ' inDOM ' + document.contains(c) +
           ' | cam ' + T.camera.position.x.toFixed(2) + ',' + T.camera.position.y.toFixed(2) + ',' + T.camera.position.z.toFixed(2));
-      }
-
-      // Reveal trail + dots for newly visited stops
-      while (this.visitedCount <= pos.stopIndex) {
-        this.extendTrail(this.visitedCount);
-        this.visitedCount++;
       }
 
       T.renderer.render(T.scene, T.camera);
@@ -648,6 +779,7 @@
         this.three.dotGeo.setDrawRange(0, 0);
         this.three.camInit = false;
       }
+      this.revealReady = false; // suppress the catch-up chime burst
       this.state = ''; // force a state refresh on next tick
       this.tick();
     }
@@ -659,7 +791,118 @@
         : 'Flying to ' + (pos.next ? pos.next.city : 'the North Pole'));
       this.setInfo('current', pos.current.city + ', ' + pos.current.region);
       this.setInfo('next', pos.next ? pos.next.city + ', ' + pos.next.region : '—');
-      this.setInfo('presents', NUMBER_FORMAT.format(pos.presents));
+    }
+
+    /* ---------- Smooth odometer counters ---------- */
+
+    buildCumulativeDistance() {
+      var stops = this.route.stops;
+      this.cumKm = [0];
+      for (var i = 1; i < stops.length; i++) {
+        this.cumKm[i] = this.cumKm[i - 1] +
+          haversineKm([stops[i - 1].lat, stops[i - 1].lng], [stops[i].lat, stops[i].lng]);
+      }
+    }
+
+    renderOdometer(pos) {
+      // Presents — ease the displayed value up to the route's running total
+      if (this.dispP == null) this.dispP = pos.presents;
+      this.dispP += (pos.presents - this.dispP) * 0.12;
+      if (Math.abs(pos.presents - this.dispP) < 1) this.dispP = pos.presents;
+      this.setInfo('presents', NUMBER_FORMAT.format(Math.round(this.dispP)));
+
+      // Distance — cumulative to the last stop + the leg flown so far
+      var stop = pos.current;
+      var legKm = haversineKm([stop.lat, stop.lng], [pos.lat, pos.lng]);
+      var tgtD = (this.cumKm ? this.cumKm[pos.stopIndex] || 0 : 0) + legKm;
+      if (this.dispD == null) this.dispD = tgtD;
+      this.dispD += (tgtD - this.dispD) * 0.12;
+      this.setInfo('distance', NUMBER_FORMAT.format(Math.round(this.dispD)) + ' km');
+    }
+
+    /* ---------- Audio (synth chimes + optional music loop) ---------- */
+
+    ensureAudio() {
+      if (this.audioCtx) return this.audioCtx;
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      this.audioCtx = new AC();
+      this.masterGain = this.audioCtx.createGain();
+      this.masterGain.gain.value = 0;
+      this.masterGain.connect(this.audioCtx.destination);
+      return this.audioCtx;
+    }
+
+    toggleSound() {
+      var ctx = this.ensureAudio();
+      if (!ctx) return;
+      if (ctx.state === 'suspended') ctx.resume();
+      this.soundOn = !this.soundOn;
+
+      var btn = this.soundBtn;
+      if (btn) {
+        btn.setAttribute('aria-pressed', this.soundOn ? 'true' : 'false');
+        btn.setAttribute('aria-label', this.soundOn ? 'Turn sound off' : 'Turn sound on');
+        btn.classList.toggle('is-on', this.soundOn);
+      }
+
+      var now = ctx.currentTime;
+      this.masterGain.gain.cancelScheduledValues(now);
+      this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
+      this.masterGain.gain.linearRampToValueAtTime(this.soundOn ? 0.7 : 0, now + 0.4);
+
+      if (this.soundOn) {
+        this.startMusic();
+        this.playBell(true); // friendly confirmation chime
+      } else if (this.music) {
+        this.music.pause();
+      }
+    }
+
+    startMusic() {
+      var src = this.dataset.music;
+      if (!src) return;
+      if (!this.music) {
+        this.music = new Audio(src);
+        this.music.loop = true;
+        this.music.volume = 0;
+      }
+      var self = this;
+      this.music.play().then(function () {
+        // gentle fade-in
+        var step = 0;
+        clearInterval(self.musicFade);
+        self.musicFade = setInterval(function () {
+          step++;
+          self.music.volume = Math.min(0.35, step * 0.02);
+          if (self.music.volume >= 0.35) clearInterval(self.musicFade);
+        }, 80);
+      }).catch(function () { /* autoplay/file issues — ignore */ });
+    }
+
+    onCityArrival(idx) {
+      this.playBell(idx % 12 === 0);
+    }
+
+    // Quick sleigh-bell-ish chime synthesised on the fly — no audio asset needed
+    playBell(strong) {
+      if (!this.soundOn || !this.audioCtx) return;
+      var ctx = this.audioCtx;
+      var now = ctx.currentTime;
+      var freqs = strong ? [1318.5, 1760, 2637] : [1567.98, 2093];
+      for (var i = 0; i < freqs.length; i++) {
+        var osc = ctx.createOscillator();
+        var g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freqs[i];
+        g.gain.setValueAtTime(0, now);
+        g.gain.linearRampToValueAtTime(0.22 / (i + 1), now + 0.005);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+        osc.connect(g);
+        g.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.65);
+      }
     }
 
     setInfo(key, value) {

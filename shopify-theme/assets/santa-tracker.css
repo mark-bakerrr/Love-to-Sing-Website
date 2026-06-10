@@ -287,6 +287,45 @@ html.santa-live-active .santa-tracker__inner {
   padding: var(--space-150) var(--space-300);
 }
 
+/* Sound toggle — top-right of the globe */
+.santa-live__sound {
+  position: absolute;
+  z-index: 7;
+  top: var(--space-300);
+  right: var(--space-300);
+  width: 4.4rem;
+  height: 4.4rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  background: rgba(9, 20, 45, 0.6);
+  backdrop-filter: blur(6px);
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.santa-live__sound:hover {
+  background: rgba(9, 20, 45, 0.85);
+  transform: scale(1.06);
+}
+
+/* show 🔇 by default, 🔊 when on */
+.santa-live__sound .santa-live__sound-on {
+  display: none;
+}
+
+.santa-live__sound.is-on .santa-live__sound-on {
+  display: block;
+}
+
+.santa-live__sound.is-on .santa-live__sound-off {
+  display: none;
+}
+
 /* Floating stats banner — tablet/mobile only */
 .santa-live__banner {
   display: none;
