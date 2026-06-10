@@ -178,6 +178,7 @@
       this.departure = Date.parse(this.dataset.departure);
       this.route = null;
       this.three = null;
+      this.loading = false; // re-init cleanly if the editor reattaches the element
       this.replayOffset = null;
       this.state = '';
       this.visitedCount = 0;
@@ -300,13 +301,28 @@
         })
         .catch(function (err) {
           console.error('Santa tracker failed to load', err);
-          self.showError();
+          self.showError(err && (err.message || String(err)));
         });
     }
 
-    showError() {
+    showError(detail) {
       var fallback = this.querySelector('[data-tracker-error]');
       if (fallback) fallback.hidden = false;
+      // ?santa_debug=1 — surface the failure reason on the page for QA
+      if (detail && param('santa_debug')) {
+        if (fallback) {
+          fallback.textContent = 'DEBUG: ' + detail;
+        }
+      }
+    }
+
+    debugNote(msg) {
+      if (!param('santa_debug')) return;
+      var fallback = this.querySelector('[data-tracker-error]');
+      if (fallback) {
+        fallback.hidden = false;
+        fallback.textContent = 'DEBUG: ' + msg;
+      }
     }
 
     initGlobe() {
@@ -424,6 +440,9 @@
       };
       window.addEventListener('resize', this.onResize);
 
+      this.debugNote('init ok — host ' + host.clientWidth + 'x' + host.clientHeight +
+        ', dpr ' + (window.devicePixelRatio || 1) + ', three r' + THREE.REVISION);
+
       this.rafId = requestAnimationFrame(this.renderFrame.bind(this));
     }
 
@@ -497,8 +516,33 @@
     renderFrame(t) {
       this.rafId = requestAnimationFrame(this.renderFrame.bind(this));
       if (this.state !== 'live' || !this.three || !this.route) return;
+      try {
+        this.renderFrameInner(t);
+      } catch (err) {
+        cancelAnimationFrame(this.rafId);
+        console.error('Santa globe render failed', err);
+        this.showError(err && (err.message || String(err)));
+      }
+    }
 
+    renderFrameInner(t) {
       var T = this.three;
+
+      // Self-healing canvas size: the Shopify theme editor (and some theme
+      // scripts) can blow away the canvas buffer size after init, leaving a
+      // 0x0 canvas. Re-sync against the host every frame; skip frames while
+      // the host has no layout box.
+      var hw = T.host.clientWidth;
+      var hh = T.host.clientHeight;
+      if (!hw || !hh) return;
+      if (T.lastW !== hw || T.lastH !== hh || T.renderer.domElement.width === 0) {
+        T.lastW = hw;
+        T.lastH = hh;
+        T.camera.aspect = hw / hh;
+        T.camera.updateProjectionMatrix();
+        T.renderer.setSize(hw, hh);
+      }
+
       var e = this.elapsed();
       var pos = routePosition(this.route, e);
 
@@ -540,6 +584,18 @@
 
       // Keep the lit hemisphere facing the camera
       T.sun.position.copy(T.camera.position).multiplyScalar(2);
+
+      this.frameCount = (this.frameCount || 0) + 1;
+      if (param('santa_debug') && this.frameCount % 90 === 1) {
+        var c = T.renderer.domElement;
+        var r = c.getBoundingClientRect();
+        this.debugNote('frame ' + this.frameCount +
+          ' | draws ' + T.renderer.info.render.calls + ' tris ' + T.renderer.info.render.triangles +
+          ' | canvas ' + c.width + 'x' + c.height + ' rect ' + Math.round(r.width) + 'x' + Math.round(r.height) +
+          ' @' + Math.round(r.left) + ',' + Math.round(r.top) +
+          ' inDOM ' + document.contains(c) +
+          ' | cam ' + T.camera.position.x.toFixed(2) + ',' + T.camera.position.y.toFixed(2) + ',' + T.camera.position.z.toFixed(2));
+      }
 
       // Reveal trail + dots for newly visited stops
       while (this.visitedCount <= pos.stopIndex) {
