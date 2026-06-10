@@ -153,14 +153,25 @@
       <ol class="santa-rail" data-rail aria-label="Santa's route — cities visited and upcoming"></ol>
 
       {%- comment -%} Personalised "Santa reaches you" {%- endcomment -%}
-      <div class="santa-you" data-you>
-        <p class="santa-you__eta" data-info="you-eta">Find your city to see when Santa arrives →</p>
-        <p class="santa-you__city" data-info="you-city" hidden></p>
-        <div class="santa-you__actions">
-          <button class="santa-you__btn" type="button" data-action="locate">📍 My location</button>
-          <select class="santa-you__select" data-city-picker aria-label="Choose your city">
-            <option value="">Choose your city…</option>
-          </select>
+      <div class="santa-you" data-you data-you-state="closed">
+        <button class="santa-you__trigger" type="button" data-action="open-location">
+          📍 Select your location
+        </button>
+
+        <div class="santa-you__panel">
+          <p class="santa-you__prompt">When does Santa reach you?</p>
+          <div class="santa-you__actions">
+            <button class="santa-you__btn" type="button" data-action="locate">📍 Use my location</button>
+            <select class="santa-you__select" data-city-picker aria-label="Choose your city">
+              <option value="">Choose your city…</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="santa-you__result">
+          <p class="santa-you__eta" data-info="you-eta"></p>
+          <p class="santa-you__city" data-info="you-city"></p>
+          <button class="santa-you__change" type="button" data-action="open-location">Change location</button>
         </div>
       </div>
 

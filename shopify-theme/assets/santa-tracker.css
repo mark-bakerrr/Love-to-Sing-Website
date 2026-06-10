@@ -624,15 +624,59 @@ html.santa-live-active .santa-tracker__inner {
   display: none;
 }
 
-/* "Santa reaches you" personalised block */
-.santa-you {
-  display: flex;
+/* "Santa reaches you" personalised block — progressive disclosure */
+.santa-you { display: block; }
+
+/* Full-width trigger (default, no location chosen yet) */
+.santa-you__trigger {
+  display: none;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--radius-m);
+  border: 1px solid rgba(6, 214, 160, 0.45);
+  background: rgba(6, 214, 160, 0.14);
+  color: var(--sp-ink);
+  font-weight: 700;
+  font-size: var(--fz-s);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.santa-you__trigger:hover { background: rgba(6, 214, 160, 0.24); }
+
+/* The selector panel and the result share the festive tinted card */
+.santa-you__panel,
+.santa-you__result {
+  display: none;
   flex-direction: column;
   gap: var(--space-100);
   padding: var(--space-150) var(--space-200);
   border-radius: var(--radius-m);
   background: linear-gradient(120deg, rgba(6, 214, 160, 0.14), rgba(76, 201, 240, 0.12));
   border: 1px solid rgba(6, 214, 160, 0.28);
+}
+
+.santa-you[data-you-state="closed"] .santa-you__trigger { display: block; }
+.santa-you[data-you-state="open"] .santa-you__panel { display: flex; }
+.santa-you[data-you-state="set"] .santa-you__result { display: flex; }
+
+.santa-you__prompt {
+  margin: 0;
+  font-size: var(--fz-t);
+  font-weight: 600;
+  color: var(--sp-ink-soft);
+}
+
+.santa-you__change {
+  align-self: flex-start;
+  margin-top: var(--space-50);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sp-red);
+  font-size: var(--fz-t);
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .santa-you__eta {

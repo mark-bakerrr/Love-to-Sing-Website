@@ -332,6 +332,12 @@
       this.yourStop = null;
       var locateBtn = this.querySelector('[data-action="locate"]');
       if (locateBtn) locateBtn.addEventListener('click', this.locateMe.bind(this));
+
+      // "Select your location" / "Change location" → reveal the selector
+      var openBtns = this.querySelectorAll('[data-action="open-location"]');
+      for (var oi = 0; oi < openBtns.length; oi++) {
+        openBtns[oi].addEventListener('click', function () { self.setYouState('open'); });
+      }
       var picker = this.querySelector('[data-city-picker]');
       if (picker) {
         this.cityPicker = picker;
@@ -1179,9 +1185,13 @@
 
     setYourStop(idx) {
       this.yourStop = this.route.stops[idx];
-      var cityEl = this.querySelector('[data-info="you-city"]');
-      if (cityEl) cityEl.hidden = false;
       this.updateYouCard();
+      this.setYouState('set');
+    }
+
+    setYouState(state) {
+      var y = this.querySelector('[data-you]');
+      if (y) y.setAttribute('data-you-state', state);
     }
 
     updateYouCard() {
