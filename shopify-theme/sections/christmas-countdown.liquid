@@ -108,9 +108,9 @@
   <div class="santa-live" data-state="live" hidden>
     <div class="santa-live__globe" data-globe aria-label="3D globe showing Santa's live position"></div>
 
-    {{ logo_link }}
-
     <aside class="santa-live__panel" data-panel aria-label="Santa tracker stats">
+      {{ logo_link }}
+
       <h1 class="santa-live__panel-title h4">{{ section.settings.title_live | escape }}</h1>
 
       <p class="santa-live__status" data-info="status" aria-live="polite">Santa is on his way…</p>

@@ -60,6 +60,19 @@ html.santa-live-active {
   overflow: hidden;
 }
 
+/* hide the fixed site header during the immersive globe so its logo/nav
+   doesn't float over the tracker — restored for countdown/post states */
+html.santa-live-active .header,
+html.santa-live-active .announcement-bar {
+  display: none;
+}
+
+/* the countdown container (and its own logo) is irrelevant during the
+   live globe — hide it so only the panel logo shows */
+html.santa-live-active .santa-tracker__inner {
+  display: none;
+}
+
 /* centre the active state in the space between logo and bottom edge */
 .santa-tracker__inner > [data-state]:not([hidden]) {
   margin-block: auto;
@@ -195,17 +208,15 @@ html.santa-live-active {
   height: 100%;
 }
 
-.santa-live .santa-tracker__logo {
-  position: absolute;
-  top: var(--space-300);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 6;
-  margin: 0;
+/* Logo lives once, centred at the top of the stats panel */
+.santa-live__panel .santa-tracker__logo {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 var(--space-300);
 }
 
-.santa-live .santa-tracker__logo img {
-  max-width: 110px;
+.santa-live__panel .santa-tracker__logo img {
+  max-width: 150px;
   height: auto;
 }
 
