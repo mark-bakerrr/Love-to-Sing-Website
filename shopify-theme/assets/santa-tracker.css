@@ -46,8 +46,36 @@
 .santa-tracker__inner {
   position: relative;
   z-index: 2;
-  padding-block: var(--space-900) var(--space-1000);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100svh;
+  /* clear the fixed site header, then breathing room above the logo */
+  padding-block: calc(var(--header-top-position, 7.4rem) + var(--space-300)) var(--space-500);
   text-align: center;
+}
+
+/* centre the active state in the space between logo and bottom edge */
+.santa-tracker__inner > [data-state]:not([hidden]) {
+  margin-block: auto;
+}
+
+.santa-tracker__logo {
+  display: inline-flex;
+  justify-content: center;
+  margin-bottom: var(--space-400);
+  text-decoration: none;
+}
+
+.santa-tracker__logo img {
+  display: block;
+  height: auto;
+}
+
+.santa-tracker__logo-text {
+  color: var(--c-neutral-50);
+  margin: 0;
 }
 
 .santa-tracker__eyebrow {
@@ -315,7 +343,11 @@
 
 @media screen and (max-width: 749px) {
   .santa-tracker__inner {
-    padding-block: var(--space-600) var(--space-700);
+    padding-block: calc(var(--header-top-position, 6.4rem) + var(--space-200)) var(--space-400);
+  }
+
+  .santa-tracker__logo img {
+    max-width: 140px;
   }
 
   .santa-countdown {

@@ -21,6 +21,23 @@
   <div data-snow-layer></div>
 
   <div class="santa-tracker__inner container">
+    <a class="santa-tracker__logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }} — home">
+      {%- if section.settings.logo != blank -%}
+        {%- assign logo_width = section.settings.logo_width | default: 180 -%}
+        {%- assign logo_width_2x = logo_width | times: 2 -%}
+        <img
+          srcset="{{ section.settings.logo | image_url: width: logo_width }} 1x, {{ section.settings.logo | image_url: width: logo_width_2x }} 2x"
+          src="{{ section.settings.logo | image_url: width: logo_width }}"
+          alt="{{ section.settings.logo.alt | default: shop.name | escape }}"
+          width="{{ logo_width }}"
+          height="{{ logo_width | divided_by: section.settings.logo.aspect_ratio | round }}"
+          loading="eager"
+        >
+      {%- else -%}
+        <span class="santa-tracker__logo-text h3">{{ shop.name }}</span>
+      {%- endif -%}
+    </a>
+
     {%- comment -%} State A: counting down to lift-off {%- endcomment -%}
     <div data-state="pre" hidden>
       {%- if section.settings.eyebrow_pre != blank -%}
@@ -123,6 +140,26 @@
 {
   "name": "Christmas Countdown",
   "settings": [
+    {
+      "type": "header",
+      "content": "Logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image",
+      "info": "Shown centred at the top of the page and linked to the homepage. Falls back to the store name if blank."
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "label": "Logo width",
+      "min": 80,
+      "max": 320,
+      "step": 10,
+      "unit": "px",
+      "default": 180
+    },
     {
       "type": "header",
       "content": "Schedule"
