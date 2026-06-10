@@ -10,33 +10,37 @@
   assign cta_url = section.settings.cta_url | default: '/collections/song-christmas'
 -%}
 
+{%- capture logo_link -%}
+  <a class="santa-tracker__logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }} — home">
+    {%- if section.settings.logo != blank -%}
+      {%- assign logo_width = section.settings.logo_width | default: 180 -%}
+      {%- assign logo_width_2x = logo_width | times: 2 -%}
+      <img
+        srcset="{{ section.settings.logo | image_url: width: logo_width }} 1x, {{ section.settings.logo | image_url: width: logo_width_2x }} 2x"
+        src="{{ section.settings.logo | image_url: width: logo_width }}"
+        alt="{{ section.settings.logo.alt | default: shop.name | escape }}"
+        width="{{ logo_width }}"
+        height="{{ logo_width | divided_by: section.settings.logo.aspect_ratio | round }}"
+        loading="eager"
+      >
+    {%- else -%}
+      <span class="santa-tracker__logo-text h3">{{ shop.name }}</span>
+    {%- endif -%}
+  </a>
+{%- endcapture -%}
+
 <santa-tracker
   class="santa-tracker"
   data-departure="{{ departure }}"
   data-route-url="{{ 'santa-route.json' | asset_url }}"
-  data-leaflet-js="{{ 'leaflet.min.js' | asset_url }}"
-  data-leaflet-css="{{ 'leaflet.min.css' | asset_url }}"
+  data-three-js="{{ 'three.min.js' | asset_url }}"
+  data-earth-texture="{{ 'santa-earth.jpg' | asset_url }}"
   data-snow="{{ section.settings.enable_snow }}"
 >
   <div data-snow-layer></div>
 
   <div class="santa-tracker__inner container">
-    <a class="santa-tracker__logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }} — home">
-      {%- if section.settings.logo != blank -%}
-        {%- assign logo_width = section.settings.logo_width | default: 180 -%}
-        {%- assign logo_width_2x = logo_width | times: 2 -%}
-        <img
-          srcset="{{ section.settings.logo | image_url: width: logo_width }} 1x, {{ section.settings.logo | image_url: width: logo_width_2x }} 2x"
-          src="{{ section.settings.logo | image_url: width: logo_width }}"
-          alt="{{ section.settings.logo.alt | default: shop.name | escape }}"
-          width="{{ logo_width }}"
-          height="{{ logo_width | divided_by: section.settings.logo.aspect_ratio | round }}"
-          loading="eager"
-        >
-      {%- else -%}
-        <span class="santa-tracker__logo-text h3">{{ shop.name }}</span>
-      {%- endif -%}
-    </a>
+    {{ logo_link }}
 
     {%- comment -%} State A: counting down to lift-off {%- endcomment -%}
     <div data-state="pre" hidden>
@@ -74,39 +78,6 @@
       {%- endif -%}
     </div>
 
-    {%- comment -%} State B: Santa is flying — live map {%- endcomment -%}
-    <div data-state="live" hidden>
-      <h1 class="santa-tracker__title h2">{{ section.settings.title_live | escape }}</h1>
-
-      <p class="santa-live__status" data-info="status" aria-live="polite">Santa is on his way…</p>
-
-      <div class="santa-live__map-wrap">
-        <div class="santa-live__map" data-map></div>
-        <button class="santa-live__follow" type="button" data-action="follow" hidden>
-          🎅 Follow Santa
-        </button>
-      </div>
-
-      <p data-tracker-error hidden>
-        Ho ho ho — the map elves are having trouble! Santa is still flying; try refreshing the page.
-      </p>
-
-      <div class="santa-live__cards">
-        <div class="santa-live__card">
-          <span class="santa-live__card-label">Last stop</span>
-          <span class="santa-live__card-value" data-info="current">North Pole</span>
-        </div>
-        <div class="santa-live__card">
-          <span class="santa-live__card-label">Next stop</span>
-          <span class="santa-live__card-value" data-info="next">…</span>
-        </div>
-        <div class="santa-live__card">
-          <span class="santa-live__card-label">Presents delivered</span>
-          <span class="santa-live__card-value" data-info="presents">0</span>
-        </div>
-      </div>
-    </div>
-
     {%- comment -%} State C: Christmas Day — all presents delivered {%- endcomment -%}
     <div data-state="post" hidden>
       <div class="santa-post__emoji" aria-hidden="true">🎅🎄✨</div>
@@ -132,6 +103,54 @@
       <p>Turn on JavaScript to see the countdown and follow Santa around the world!</p>
     </noscript>
   </div><!-- /.santa-tracker__inner -->
+
+  {%- comment -%} State B: Santa is flying — full-page 3D globe chase cam {%- endcomment -%}
+  <div class="santa-live" data-state="live" hidden>
+    <div class="santa-live__globe" data-globe aria-label="3D globe showing Santa's live position"></div>
+
+    {{ logo_link }}
+
+    <aside class="santa-live__panel" data-panel aria-label="Santa tracker stats">
+      <h1 class="santa-live__panel-title h4">{{ section.settings.title_live | escape }}</h1>
+
+      <p class="santa-live__status" data-info="status" aria-live="polite">Santa is on his way…</p>
+
+      <div class="santa-live__cards">
+        <div class="santa-live__card">
+          <span class="santa-live__card-label">Last stop</span>
+          <span class="santa-live__card-value" data-info="current">North Pole</span>
+        </div>
+        <div class="santa-live__card">
+          <span class="santa-live__card-label">Next stop</span>
+          <span class="santa-live__card-value" data-info="next">…</span>
+        </div>
+        <div class="santa-live__card">
+          <span class="santa-live__card-label">Presents delivered</span>
+          <span class="santa-live__card-value" data-info="presents">0</span>
+        </div>
+      </div>
+
+      {%- if section.settings.cta_label != blank -%}
+        <a class="santa-tracker__cta santa-live__cta" href="{{ cta_url }}">{{ section.settings.cta_label | escape }} 🎄</a>
+      {%- endif -%}
+    </aside>
+
+    <button
+      class="santa-live__banner"
+      type="button"
+      data-action="toggle-panel"
+      aria-expanded="false"
+      aria-label="Show Santa tracker stats"
+    >
+      <span aria-hidden="true">🎅</span>
+      <span data-info="status">Santa is on his way…</span>
+      <span class="santa-live__banner-chevron" aria-hidden="true">▲</span>
+    </button>
+
+    <p class="santa-live__error" data-tracker-error hidden>
+      Ho ho ho — the globe elves are having trouble! Santa is still flying; try refreshing the page.
+    </p>
+  </div><!-- /.santa-live -->
 </santa-tracker>
 
 <script src="{{ 'santa-tracker.js' | asset_url }}" defer="defer"></script>

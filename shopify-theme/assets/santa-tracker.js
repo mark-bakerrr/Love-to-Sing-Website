@@ -1,10 +1,14 @@
 /**
- * Santa Tracker — countdown + live route playback.
+ * Santa Tracker — countdown + live 3D globe playback.
  *
  * Like the NORAD / Google trackers, there is no live data: Santa follows a
  * pre-generated route (santa-route.json) on a fixed UTC schedule, and the
  * client interpolates his position from the current time. Times in the route
  * are offsets (seconds) from the departure instant set on the section.
+ *
+ * The live view is a three.js globe with a chase camera flying behind the
+ * sleigh. Stats live in a side panel (desktop) or a tap-to-open sheet
+ * (tablet/mobile).
  *
  * QA helpers (query params):
  *   ?santa_time=2026-12-24T11:30:00Z  — pretend it is that moment (time still flows)
@@ -113,7 +117,7 @@
     };
   }
 
-  // Unwrap longitudes so the trail polyline never jumps across the date line
+  // Unwrap longitudes so a 2D trail polyline never jumps across the date line
   function unwrapLngs(stops) {
     var out = [stops[0].lng];
     for (var i = 1; i < stops.length; i++) {
@@ -133,19 +137,12 @@
   }
   if (typeof window === 'undefined' || customElements.get('santa-tracker')) return;
 
-  var SLEIGH_SVG =
-    '<svg viewBox="0 0 64 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-    '<g fill="none">' +
-    '<path d="M4 26 q4 8 14 8 h28 q10 0 14 -10 l-4 0 q-3 7 -10 7 h-28 q-7 0 -10 -5 z" fill="#B91F1C"/>' +
-    '<path d="M10 26 h34 l4 -8 h-30 q-6 0 -8 8 z" fill="#EC5450"/>' +
-    '<rect x="20" y="10" width="9" height="9" rx="2" fill="#3F7A45"/>' +
-    '<rect x="23.5" y="10" width="2" height="9" fill="#FACC55"/>' +
-    '<circle cx="40" cy="13" r="5" fill="#FDEFEF"/>' +
-    '<path d="M35 13 a5 5 0 0 1 10 0 z" fill="#B91F1C"/>' +
-    '<circle cx="46" cy="9" r="1.6" fill="#FACC55"/>' +
-    '</g></svg>';
-
   var NUMBER_FORMAT = new Intl.NumberFormat();
+
+  var GLOBE_R = 1;          // earth radius (scene units)
+  var FLY_ALT = 1.03;       // sleigh altitude
+  var TRAIL_ALT = 1.012;    // trail / stop dots altitude
+  var ARC_STEPS = 10;       // line segments per route leg
 
   function param(name) {
     try {
@@ -165,29 +162,25 @@
     });
   }
 
-  function loadStylesheet(href) {
-    return new Promise(function (resolve, reject) {
-      var l = document.createElement('link');
-      l.rel = 'stylesheet';
-      l.href = href;
-      l.onload = resolve;
-      l.onerror = reject;
-      document.head.appendChild(l);
-    });
+  // Standard three.js equirectangular mapping (lng 0 faces -X)
+  function latLngToV3(lat, lng, r) {
+    var phi = toRad(90 - lat);
+    var theta = toRad(lng + 180);
+    return new THREE.Vector3(
+      -r * Math.sin(phi) * Math.cos(theta),
+      r * Math.cos(phi),
+      r * Math.sin(phi) * Math.sin(theta)
+    );
   }
 
   class SantaTracker extends HTMLElement {
     connectedCallback() {
       this.departure = Date.parse(this.dataset.departure);
       this.route = null;
-      this.map = null;
-      this.marker = null;
-      this.trail = null;
-      this.follow = true;
+      this.three = null;
       this.replayOffset = null;
       this.state = '';
       this.visitedCount = 0;
-      this.stopDots = [];
 
       // QA time controls
       var fakeTime = param('santa_time');
@@ -203,10 +196,15 @@
 
       var replayBtn = this.querySelector('[data-action="replay"]');
       if (replayBtn) replayBtn.addEventListener('click', this.startReplay.bind(this));
-      var followBtn = this.querySelector('[data-action="follow"]');
-      if (followBtn) {
-        this.followBtn = followBtn;
-        followBtn.addEventListener('click', this.enableFollow.bind(this));
+
+      var toggleBtn = this.querySelector('[data-action="toggle-panel"]');
+      if (toggleBtn) {
+        var self = this;
+        toggleBtn.addEventListener('click', function () {
+          var live = self.panels.live;
+          var open = live.classList.toggle('is-panel-open');
+          toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
       }
 
       this.initSnow();
@@ -216,6 +214,8 @@
 
     disconnectedCallback() {
       clearInterval(this.timer);
+      if (this.rafId) cancelAnimationFrame(this.rafId);
+      if (this.three && this.three.renderer) this.three.renderer.dispose();
     }
 
     now() {
@@ -252,11 +252,13 @@
         for (var key in this.panels) {
           if (this.panels[key]) this.panels[key].hidden = key !== state;
         }
+        // The full-page globe hides the page scrollbar while live
+        document.documentElement.classList.toggle('santa-live-active', state === 'live');
         if (state === 'live') this.setupLive();
       }
 
       if (state === 'pre') this.renderCountdown(-e);
-      if (state === 'live' && this.route && this.map) this.renderLive(e);
+      if (state === 'live' && this.route) this.updateStats(e);
     }
 
     /* ---------- Countdown ---------- */
@@ -282,7 +284,7 @@
       }
     }
 
-    /* ---------- Live tracker ---------- */
+    /* ---------- Live tracker (three.js globe) ---------- */
 
     setupLive() {
       if (this.loading) return;
@@ -290,134 +292,325 @@
       var self = this;
       Promise.all([
         fetch(this.dataset.routeUrl).then(function (r) { return r.json(); }),
-        loadStylesheet(this.dataset.leafletCss),
-        loadScript(this.dataset.leafletJs),
+        window.THREE ? Promise.resolve() : loadScript(this.dataset.threeJs),
       ])
         .then(function (results) {
           self.route = results[0];
-          self.unwrapped = unwrapLngs(self.route.stops);
-          self.initMap();
+          self.initGlobe();
         })
         .catch(function (err) {
           console.error('Santa tracker failed to load', err);
-          var fallback = self.querySelector('[data-tracker-error]');
-          if (fallback) fallback.hidden = false;
+          self.showError();
         });
     }
 
-    initMap() {
-      var mapEl = this.querySelector('[data-map]');
-      if (!mapEl || !window.L) return;
-      var first = this.route.stops[0];
-
-      this.map = L.map(mapEl, {
-        center: [first.lat, this.unwrapped[0]],
-        zoom: 4,
-        minZoom: 2,
-        maxZoom: 8,
-        worldCopyJump: false,
-        zoomControl: true,
-        attributionControl: true,
-      });
-
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-      }).addTo(this.map);
-
-      this.trail = L.polyline([], {
-        color: '#FACC55',
-        weight: 2,
-        opacity: 0.8,
-        dashArray: '1 7',
-      }).addTo(this.map);
-
-      this.marker = L.marker([first.lat, this.unwrapped[0]], {
-        icon: L.divIcon({
-          className: 'santa-sleigh-icon',
-          html: '<div class="santa-sleigh-icon__inner">' + SLEIGH_SVG + '</div>',
-          iconSize: [64, 40],
-          iconAnchor: [32, 20],
-        }),
-        interactive: false,
-        zIndexOffset: 1000,
-      }).addTo(this.map);
-
-      // Dragging the map pauses "follow Santa" mode
-      var self = this;
-      this.map.on('dragstart', function () {
-        self.follow = false;
-        if (self.followBtn) self.followBtn.hidden = false;
-      });
+    showError() {
+      var fallback = this.querySelector('[data-tracker-error]');
+      if (fallback) fallback.hidden = false;
     }
 
-    enableFollow() {
-      this.follow = true;
-      if (this.followBtn) this.followBtn.hidden = true;
+    initGlobe() {
+      var host = this.querySelector('[data-globe]');
+      if (!host || !window.THREE) return this.showError();
+
+      var renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      } catch (e) {
+        return this.showError(); // no WebGL — keep the stats panel, lose the globe
+      }
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(host.clientWidth, host.clientHeight);
+      host.appendChild(renderer.domElement);
+
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(55, host.clientWidth / host.clientHeight, 0.01, 200);
+
+      // Lights follow the camera so the visible hemisphere is always lit
+      scene.add(new THREE.AmbientLight(0x8899bb, 0.55));
+      var sun = new THREE.DirectionalLight(0xfff3d6, 1.1);
+      scene.add(sun);
+
+      // Earth — slightly cool-tinted for a Christmas-night feel
+      var earthTex = new THREE.TextureLoader().load(this.dataset.earthTexture);
+      var earth = new THREE.Mesh(
+        new THREE.SphereGeometry(GLOBE_R, 64, 64),
+        new THREE.MeshPhongMaterial({ map: earthTex, color: 0xd2ddff, shininess: 8 })
+      );
+      scene.add(earth);
+
+      // Soft atmosphere halo
+      var atmosphere = new THREE.Mesh(
+        new THREE.SphereGeometry(GLOBE_R * 1.05, 64, 64),
+        new THREE.MeshBasicMaterial({
+          color: 0x5c8dff,
+          transparent: true,
+          opacity: 0.16,
+          side: THREE.BackSide,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        })
+      );
+      scene.add(atmosphere);
+
+      // Star field
+      var starCount = 1500;
+      var starPos = new Float32Array(starCount * 3);
+      for (var i = 0; i < starCount; i++) {
+        var u = Math.random() * 2 - 1; // uniform point on a sphere shell
+        var th = Math.random() * Math.PI * 2;
+        var s = Math.sqrt(1 - u * u);
+        var r = 30 + Math.random() * 50;
+        starPos[i * 3] = r * s * Math.cos(th);
+        starPos[i * 3 + 1] = r * u;
+        starPos[i * 3 + 2] = r * s * Math.sin(th);
+      }
+      var starGeo = new THREE.BufferGeometry();
+      starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+      scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({
+        color: 0xffffff, size: 0.35, sizeAttenuation: true, transparent: true, opacity: 0.85,
+      })));
+
+      // Golden trail of visited legs (preallocated, revealed via draw range)
+      var maxTrail = (this.route.stops.length - 1) * ARC_STEPS + 1;
+      var trailPos = new Float32Array(maxTrail * 3);
+      var trailGeo = new THREE.BufferGeometry();
+      trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+      trailGeo.setDrawRange(0, 0);
+      var trail = new THREE.Line(trailGeo, new THREE.LineBasicMaterial({
+        color: 0xfacc55, transparent: true, opacity: 0.85,
+      }));
+      scene.add(trail);
+
+      // Visited stop dots
+      var dotPos = new Float32Array(this.route.stops.length * 3);
+      var dotGeo = new THREE.BufferGeometry();
+      dotGeo.setAttribute('position', new THREE.BufferAttribute(dotPos, 3));
+      dotGeo.setDrawRange(0, 0);
+      scene.add(new THREE.Points(dotGeo, new THREE.PointsMaterial({
+        color: 0xfacc55, size: 0.02, sizeAttenuation: true,
+      })));
+
+      var sleigh = this.buildSleigh();
+      scene.add(sleigh);
+
+      this.three = {
+        renderer: renderer,
+        scene: scene,
+        camera: camera,
+        sun: sun,
+        host: host,
+        trailGeo: trailGeo,
+        trailPos: trailPos,
+        trailCount: 0,
+        dotGeo: dotGeo,
+        dotPos: dotPos,
+        dotCount: 0,
+        sleigh: sleigh,
+        lastForward: new THREE.Vector3(0, 0, 1),
+        camLook: new THREE.Vector3(),
+        camInit: false,
+      };
+      this.visitedCount = 0;
+
+      var self = this;
+      this.onResize = function () {
+        var w = self.three.host.clientWidth;
+        var h = self.three.host.clientHeight;
+        if (!w || !h) return;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      };
+      window.addEventListener('resize', this.onResize);
+
+      this.rafId = requestAnimationFrame(this.renderFrame.bind(this));
+    }
+
+    // Low-poly sleigh + reindeer built from primitives, facing +Z (direction of travel)
+    buildSleigh() {
+      var g = new THREE.Group();
+      var red = new THREE.MeshPhongMaterial({ color: 0xc92a26, shininess: 30 });
+      var darkRed = new THREE.MeshPhongMaterial({ color: 0x8f1714 });
+      var gold = new THREE.MeshPhongMaterial({ color: 0xfacc55, emissive: 0x7a5c10 });
+      var green = new THREE.MeshPhongMaterial({ color: 0x3f7a45 });
+      var skin = new THREE.MeshPhongMaterial({ color: 0xffe3c4 });
+      var white = new THREE.MeshPhongMaterial({ color: 0xfdefef });
+      var brown = new THREE.MeshPhongMaterial({ color: 0x8a5a33 });
+
+      // Sleigh body
+      var body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.28, 1.15), red);
+      body.position.y = 0.16;
+      g.add(body);
+      var back = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.26, 0.12), darkRed);
+      back.position.set(0, 0.4, -0.5);
+      g.add(back);
+
+      // Runners
+      [-0.26, 0.26].forEach(function (x) {
+        var runner = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.05, 1.5), gold);
+        runner.position.set(x, -0.04, 0.05);
+        g.add(runner);
+      });
+
+      // Santa (body, head, hat)
+      var santa = new THREE.Mesh(new THREE.SphereGeometry(0.17, 16, 12), red);
+      santa.position.set(0, 0.4, -0.22);
+      g.add(santa);
+      var head = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 12), skin);
+      head.position.set(0, 0.58, -0.22);
+      g.add(head);
+      var hat = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.16, 12), red);
+      hat.position.set(0, 0.7, -0.22);
+      g.add(hat);
+      var bobble = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), white);
+      bobble.position.set(0, 0.79, -0.22);
+      g.add(bobble);
+
+      // Present sack
+      var sack = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 10), green);
+      sack.position.set(0, 0.36, 0.18);
+      sack.scale.y = 1.15;
+      g.add(sack);
+
+      // Reindeer pairs out front
+      [0.85, 1.35].forEach(function (z) {
+        [-0.18, 0.18].forEach(function (x) {
+          var deerBody = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.34), brown);
+          deerBody.position.set(x, 0.12, z);
+          g.add(deerBody);
+          var deerHead = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 0.12), brown);
+          deerHead.position.set(x, 0.24, z + 0.2);
+          g.add(deerHead);
+        });
+      });
+      // Rudolph's nose on the lead-left reindeer
+      var nose = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8),
+        new THREE.MeshPhongMaterial({ color: 0xff3b30, emissive: 0xb00000 }));
+      nose.position.set(-0.18, 0.24, 1.62);
+      g.add(nose);
+
+      g.scale.setScalar(0.05);
+      return g;
+    }
+
+    renderFrame(t) {
+      this.rafId = requestAnimationFrame(this.renderFrame.bind(this));
+      if (this.state !== 'live' || !this.three || !this.route) return;
+
+      var T = this.three;
+      var e = this.elapsed();
+      var pos = routePosition(this.route, e);
+
+      var p = latLngToV3(pos.lat, pos.lng, GLOBE_R * FLY_ALT);
+      var up = p.clone().normalize();
+
+      // Direction of travel: where will Santa be shortly?
+      var lookAheadSec = this.replayOffset !== null ? 5 : 60;
+      var aheadPos = routePosition(this.route, Math.min(e + lookAheadSec, this.routeDuration() - 0.01));
+      var aheadP = latLngToV3(aheadPos.lat, aheadPos.lng, GLOBE_R * FLY_ALT);
+      var forward = aheadP.clone().sub(p);
+      forward.sub(up.clone().multiplyScalar(forward.dot(up))); // keep tangent to globe
+      if (forward.lengthSq() < 1e-8) forward.copy(T.lastForward);
+      forward.normalize();
+      T.lastForward.copy(forward);
+
+      // Sleigh: sit on the path with a gentle bob
+      var bob = Math.sin(t / 500) * 0.004;
+      T.sleigh.position.copy(p).addScaledVector(up, bob);
+      T.sleigh.up.copy(up);
+      var facing = p.clone().add(forward);
+      T.sleigh.lookAt(facing);
+
+      // Chase camera: behind and above, looking past the sleigh
+      var desired = p.clone().addScaledVector(forward, -0.45).addScaledVector(up, 0.22);
+      if (desired.length() < GLOBE_R * 1.04) desired.setLength(GLOBE_R * 1.04);
+      var look = p.clone().addScaledVector(forward, 0.35);
+
+      if (!T.camInit) {
+        T.camera.position.copy(desired);
+        T.camLook.copy(look);
+        T.camInit = true;
+      } else {
+        T.camera.position.lerp(desired, 0.06);
+        T.camLook.lerp(look, 0.08);
+      }
+      T.camera.up.lerp(up, 0.06).normalize();
+      T.camera.lookAt(T.camLook);
+
+      // Keep the lit hemisphere facing the camera
+      T.sun.position.copy(T.camera.position).multiplyScalar(2);
+
+      // Reveal trail + dots for newly visited stops
+      while (this.visitedCount <= pos.stopIndex) {
+        this.extendTrail(this.visitedCount);
+        this.visitedCount++;
+      }
+
+      T.renderer.render(T.scene, T.camera);
+    }
+
+    extendTrail(stopIndex) {
+      var T = this.three;
+      var stops = this.route.stops;
+      var s = stops[stopIndex];
+
+      if (stopIndex === 0) {
+        var v0 = latLngToV3(s.lat, s.lng, GLOBE_R * TRAIL_ALT);
+        T.trailPos[0] = v0.x; T.trailPos[1] = v0.y; T.trailPos[2] = v0.z;
+        T.trailCount = 1;
+      } else {
+        var prev = stops[stopIndex - 1];
+        for (var i = 1; i <= ARC_STEPS; i++) {
+          var ll = slerp([prev.lat, prev.lng], [s.lat, s.lng], i / ARC_STEPS);
+          var v = latLngToV3(ll[0], ll[1], GLOBE_R * TRAIL_ALT);
+          var o = T.trailCount * 3;
+          T.trailPos[o] = v.x; T.trailPos[o + 1] = v.y; T.trailPos[o + 2] = v.z;
+          T.trailCount++;
+        }
+      }
+      T.trailGeo.attributes.position.needsUpdate = true;
+      T.trailGeo.setDrawRange(0, T.trailCount);
+
+      if (stopIndex > 0 && stopIndex < stops.length - 1) {
+        var dv = latLngToV3(s.lat, s.lng, GLOBE_R * TRAIL_ALT);
+        var d = T.dotCount * 3;
+        T.dotPos[d] = dv.x; T.dotPos[d + 1] = dv.y; T.dotPos[d + 2] = dv.z;
+        T.dotCount++;
+        T.dotGeo.attributes.position.needsUpdate = true;
+        T.dotGeo.setDrawRange(0, T.dotCount);
+      }
     }
 
     startReplay() {
       this.replayOffset = Date.now();
       this.visitedCount = 0;
-      if (this.trail) this.trail.setLatLngs([]);
-      this.stopDots.forEach(function (dot) { dot.remove(); });
-      this.stopDots = [];
+      if (this.three) {
+        this.three.trailCount = 0;
+        this.three.trailGeo.setDrawRange(0, 0);
+        this.three.dotCount = 0;
+        this.three.dotGeo.setDrawRange(0, 0);
+        this.three.camInit = false;
+      }
       this.state = ''; // force a state refresh on next tick
       this.tick();
     }
 
-    renderLive(elapsed) {
+    updateStats(elapsed) {
       var pos = routePosition(this.route, elapsed);
-      var lng = this.markerLng(pos);
-
-      this.marker.setLatLng([pos.lat, lng]);
-      var inner = this.marker.getElement() && this.marker.getElement().querySelector('.santa-sleigh-icon__inner');
-      if (inner) inner.classList.toggle('is-eastbound', pos.headingEast);
-
-      if (this.follow) this.map.panTo([pos.lat, lng], { animate: true, duration: 0.25 });
-
-      // Extend the trail with newly visited stops
-      while (this.visitedCount <= pos.stopIndex) {
-        var s = this.route.stops[this.visitedCount];
-        this.trail.addLatLng([s.lat, this.unwrapped[this.visitedCount]]);
-        if (this.visitedCount > 0 && this.visitedCount < this.route.stops.length - 1) {
-          this.stopDots.push(L.circleMarker([s.lat, this.unwrapped[this.visitedCount]], {
-            radius: 3, color: '#FACC55', fillColor: '#FACC55', fillOpacity: 0.9, weight: 1,
-          }).addTo(this.map));
-        }
-        this.visitedCount++;
-      }
-
       this.setInfo('status', pos.status === 'delivering'
         ? 'Delivering presents in ' + pos.current.city + '!'
-        : 'Flying to ' + pos.next.city);
+        : 'Flying to ' + (pos.next ? pos.next.city : 'the North Pole'));
       this.setInfo('current', pos.current.city + ', ' + pos.current.region);
       this.setInfo('next', pos.next ? pos.next.city + ', ' + pos.next.region : '—');
       this.setInfo('presents', NUMBER_FORMAT.format(pos.presents));
     }
 
-    markerLng(pos) {
-      // Use the unwrapped longitude of the surrounding leg so marker and trail agree
-      var fromLng = this.unwrapped[pos.stopIndex];
-      if (pos.status !== 'flying') return fromLng;
-      var toLng = this.unwrapped[Math.min(pos.stopIndex + 1, this.unwrapped.length - 1)];
-      // Re-derive flight fraction from the wrapped lng relative to the leg
-      var span = toLng - fromLng;
-      if (Math.abs(span) < 1e-9) return fromLng;
-      var wrappedFrom = pos.current.lng;
-      var d = pos.lng - wrappedFrom;
-      if (d > 180) d -= 360;
-      if (d < -180) d += 360;
-      var wrappedSpan = pos.next.lng - wrappedFrom;
-      if (wrappedSpan > 180) wrappedSpan -= 360;
-      if (wrappedSpan < -180) wrappedSpan += 360;
-      if (Math.abs(wrappedSpan) < 1e-9) return fromLng;
-      return fromLng + (d / wrappedSpan) * span;
-    }
-
     setInfo(key, value) {
-      var el = this.querySelector('[data-info="' + key + '"]');
-      if (el && el.textContent !== value) el.textContent = value;
+      var els = this.querySelectorAll('[data-info="' + key + '"]');
+      for (var i = 0; i < els.length; i++) {
+        if (els[i].textContent !== value) els[i].textContent = value;
+      }
     }
 
     /* ---------- Snow ---------- */
