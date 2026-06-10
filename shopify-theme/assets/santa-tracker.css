@@ -188,6 +188,28 @@ html.santa-live-active .santa-tracker__inner {
   transform: translateY(-2px);
 }
 
+/* Small copyright, bottom-right, shown in every state and on every device */
+.santa-copyright {
+  position: absolute;
+  z-index: 8;
+  right: var(--space-200);
+  bottom: var(--space-100);
+  margin: 0;
+  font-size: 0.62rem;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.55);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+@media screen and (max-width: 749px) {
+  .santa-copyright {
+    font-size: 0.55rem;
+    right: var(--space-150);
+  }
+}
+
 /* ---------- Live tracker (full-page 3D globe) ---------- */
 
 .santa-live {
