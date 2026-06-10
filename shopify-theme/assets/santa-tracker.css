@@ -195,6 +195,17 @@ html.santa-live-active .santa-tracker__inner {
   inset: 0;
   z-index: 4;
   overflow: hidden;
+
+  /* Candy Cane Pop palette — bright, light, festive */
+  --sp-bg: rgba(255, 248, 240, 0.92);
+  --sp-ink: #0f5132;                 /* evergreen primary text */
+  --sp-ink-soft: rgba(15, 81, 50, 0.52);
+  --sp-line: rgba(15, 81, 50, 0.16);
+  --sp-red: #ef476f;                 /* coral candy red */
+  --sp-green: #06d6a0;               /* holly mint */
+  --sp-gold: #ffd166;                /* sunny gold */
+  --sp-amber: #f08c00;               /* deeper gold for text/rings on cream */
+  --sp-sky: #4cc9f0;
 }
 
 .santa-live__globe {
@@ -224,10 +235,11 @@ html.santa-live-active .santa-tracker__inner {
   padding: var(--space-250) var(--space-300);
   transition: width 0.3s ease;
   border-radius: var(--radius-l);
-  background: linear-gradient(180deg, rgba(11, 22, 48, 0.82), rgba(8, 16, 38, 0.78));
-  border: 1px solid rgba(250, 204, 85, 0.16);
+  background: var(--sp-bg);
+  border: 1px solid rgba(239, 71, 111, 0.18);
   backdrop-filter: blur(12px);
-  box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.55);
+  box-shadow: 0 1.6rem 4rem rgba(20, 30, 60, 0.4);
+  color: var(--sp-ink);
   text-align: left;
 }
 
@@ -242,12 +254,12 @@ html.santa-live-active .santa-tracker__inner {
   display: grid;
   place-items: center;
   padding: 0;
-  border: 1px solid rgba(250, 204, 85, 0.16);
+  border: 1px solid rgba(239, 71, 111, 0.18);
   border-left: 0;
   border-radius: 0 var(--radius-m) var(--radius-m) 0;
-  background: rgba(11, 22, 48, 0.82);
+  background: var(--sp-bg);
   backdrop-filter: blur(12px);
-  color: var(--c-neutral-50);
+  color: var(--sp-red);
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
@@ -325,7 +337,7 @@ html.santa-live-active .santa-tracker__inner {
   font-weight: 800;
   font-size: var(--fz-m);
   line-height: 1.1;
-  color: var(--c-neutral-50);
+  color: var(--sp-ink);
   font-variant-numeric: tabular-nums;
 }
 
@@ -333,7 +345,11 @@ html.santa-live-active .santa-tracker__inner {
   font-size: 0.6rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: rgba(205, 221, 255, 0.6);
+  color: var(--sp-ink-soft);
+}
+
+.santa-live__panel .santa-tracker__logo-text {
+  color: var(--sp-ink);
 }
 
 .santa-live__panel .santa-tracker__logo {
@@ -352,7 +368,8 @@ html.santa-live-active .santa-tracker__inner {
   align-items: center;
   padding: var(--space-50) var(--space-200);
   border-radius: 99rem;
-  background: var(--c-red-500);
+  background: var(--sp-red);
+  color: #fff;
   font-size: var(--fz-s);
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -370,7 +387,7 @@ html.santa-live-active .santa-tracker__inner {
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: rgba(250, 204, 85, 0.4) transparent;
+  scrollbar-color: rgba(6, 214, 160, 0.5) transparent;
   -webkit-overflow-scrolling: touch;
   /* fade the list at the top and bottom edges */
   -webkit-mask-image: linear-gradient(180deg, transparent, #000 11%, #000 89%, transparent);
@@ -379,7 +396,7 @@ html.santa-live-active .santa-tracker__inner {
 
 .santa-rail::-webkit-scrollbar { width: 4px; }
 .santa-rail::-webkit-scrollbar-thumb {
-  background: rgba(250, 204, 85, 0.4);
+  background: rgba(6, 214, 160, 0.5);
   border-radius: 99rem;
 }
 
@@ -402,14 +419,15 @@ html.santa-live-active .santa-tracker__inner {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: rgba(255, 255, 255, 0.13);
+  background: var(--sp-line);
 }
 .santa-rail__row:first-child::before { top: 50%; }
 .santa-rail__row:last-child::before { bottom: 50%; }
 
+/* travelled route thread glows holly-green */
 .santa-rail__row.is-visited::before,
 .santa-rail__row.is-current::before {
-  background: linear-gradient(180deg, rgba(250, 204, 85, 0.85), rgba(250, 204, 85, 0.55));
+  background: linear-gradient(180deg, var(--sp-green), rgba(6, 214, 160, 0.6));
 }
 
 .santa-rail__node {
@@ -418,8 +436,8 @@ html.santa-live-active .santa-tracker__inner {
   width: 0.62rem;
   height: 0.62rem;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  background: transparent;
+  border: 2px solid var(--sp-line);
+  background: #fff;
   z-index: 1;
   transition: all 0.3s ease;
 }
@@ -430,39 +448,38 @@ html.santa-live-active .santa-tracker__inner {
   font-weight: 600;
   font-size: var(--fz-s);
   line-height: 1.15;
-  color: var(--c-blue-100);
+  color: var(--sp-ink);
 }
 
 .santa-rail__region {
   grid-column: 2;
   grid-row: 2;
   font-size: var(--fz-t);
-  color: rgba(205, 221, 255, 0.55);
+  color: var(--sp-ink-soft);
 }
 
 /* state: already visited */
-.santa-rail__row.is-visited { opacity: 0.62; }
+.santa-rail__row.is-visited { opacity: 0.72; }
 .santa-rail__row.is-visited .santa-rail__node {
-  background: var(--c-yellow-300);
-  border-color: var(--c-yellow-300);
+  background: var(--sp-green);
+  border-color: var(--sp-green);
 }
 
 /* state: upcoming */
 .santa-rail__row.is-upcoming { opacity: 0.5; }
-.santa-rail__row.is-next { opacity: 0.95; }
+.santa-rail__row.is-next { opacity: 1; }
 .santa-rail__row.is-next .santa-rail__node {
-  border-color: var(--c-yellow-300);
+  border-color: var(--sp-amber);
 }
-.santa-rail__row.is-next .santa-rail__city { color: var(--c-neutral-50); }
 
 /* state: where Santa is right now */
 .santa-rail__row.is-current { opacity: 1; }
 .santa-rail__row.is-current .santa-rail__node {
   width: 0.85rem;
   height: 0.85rem;
-  background: var(--c-red-500);
-  border-color: #ffd9d7;
-  box-shadow: 0 0 0 4px rgba(201, 42, 38, 0.3), 0 0 14px rgba(255, 90, 85, 0.8);
+  background: var(--sp-red);
+  border-color: #fff;
+  box-shadow: 0 0 0 4px rgba(239, 71, 111, 0.25), 0 0 14px rgba(239, 71, 111, 0.7);
 }
 .santa-rail__row.is-current.is-delivering .santa-rail__node {
   animation: santa-pulse 1.4s ease-in-out infinite;
@@ -471,15 +488,15 @@ html.santa-live-active .santa-tracker__inner {
   font-family: var(--font-heading-family);
   font-weight: 800;
   font-size: var(--fz-m);
-  color: var(--c-neutral-50);
+  color: var(--sp-red);
 }
 .santa-rail__row.is-current.is-delivering .santa-rail__city::after {
   content: 'NOW';
   margin-left: var(--space-100);
-  padding: 0.05em 0.4em;
+  padding: 0.05em 0.45em;
   border-radius: 99rem;
-  background: var(--c-yellow-300);
-  color: var(--c-black-900);
+  background: var(--sp-red);
+  color: #fff;
   font-family: system-ui, sans-serif;
   font-size: 0.6rem;
   font-weight: 800;
@@ -490,10 +507,10 @@ html.santa-live-active .santa-tracker__inner {
 .santa-rail__row.is-next .santa-rail__city::after {
   content: 'NEXT';
   margin-left: var(--space-100);
-  padding: 0.05em 0.4em;
+  padding: 0.05em 0.45em;
   border-radius: 99rem;
-  border: 1px solid rgba(250, 204, 85, 0.7);
-  color: var(--c-yellow-300);
+  background: rgba(6, 214, 160, 0.16);
+  color: #07795c;
   font-family: system-ui, sans-serif;
   font-size: 0.58rem;
   font-weight: 800;
@@ -502,8 +519,8 @@ html.santa-live-active .santa-tracker__inner {
 }
 
 @keyframes santa-pulse {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(201, 42, 38, 0.3), 0 0 14px rgba(255, 90, 85, 0.8); }
-  50% { box-shadow: 0 0 0 7px rgba(201, 42, 38, 0.12), 0 0 20px rgba(255, 90, 85, 0.95); }
+  0%, 100% { box-shadow: 0 0 0 4px rgba(239, 71, 111, 0.25), 0 0 14px rgba(239, 71, 111, 0.7); }
+  50% { box-shadow: 0 0 0 7px rgba(239, 71, 111, 0.1), 0 0 20px rgba(239, 71, 111, 0.9); }
 }
 
 /* ---------- Stat footer ---------- */
@@ -513,7 +530,7 @@ html.santa-live-active .santa-tracker__inner {
   grid-template-columns: 1fr 1fr;
   gap: var(--space-150);
   padding-top: var(--space-150);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--sp-line);
 }
 
 .santa-stat { display: flex; flex-direction: column; }
@@ -523,26 +540,28 @@ html.santa-live-active .santa-tracker__inner {
   font-weight: 800;
   font-size: 1.15rem;
   line-height: 1.1;
-  color: var(--c-yellow-300);
+  color: var(--sp-red);
   font-variant-numeric: tabular-nums;
 }
+
+.santa-stat:nth-child(2) .santa-stat__num { color: var(--sp-amber); }
 
 .santa-stat__label {
   font-size: 0.62rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: rgba(205, 221, 255, 0.6);
+  color: var(--sp-ink-soft);
 }
-
-.santa-stat--clock { margin-left: auto; text-align: right; }
-.santa-stat--clock .santa-stat__num { color: var(--c-neutral-50); }
 
 .santa-live__cta {
   margin-top: 0;
   align-self: flex-start;
   font-size: var(--fz-s);
   padding: var(--space-150) var(--space-300);
+  background: var(--sp-red);
+  color: #fff;
 }
+.santa-live__cta:hover { background: #d63864; }
 
 /* Sound toggle — top-right of the globe */
 .santa-live__sound {
@@ -590,8 +609,8 @@ html.santa-live-active .santa-tracker__inner {
   gap: var(--space-100);
   padding: var(--space-150) var(--space-200);
   border-radius: var(--radius-m);
-  background: linear-gradient(120deg, rgba(201, 42, 38, 0.32), rgba(63, 122, 69, 0.24));
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(120deg, rgba(6, 214, 160, 0.14), rgba(76, 201, 240, 0.12));
+  border: 1px solid rgba(6, 214, 160, 0.28);
 }
 
 .santa-you__eta {
@@ -600,14 +619,14 @@ html.santa-live-active .santa-tracker__inner {
   font-weight: 700;
   font-size: var(--fz-s);
   line-height: 1.2;
-  color: var(--c-neutral-50);
+  color: var(--sp-ink);
   font-variant-numeric: tabular-nums;
 }
 
 .santa-you__city {
   margin: 0;
   font-size: var(--fz-t);
-  color: var(--c-yellow-300);
+  color: var(--sp-red);
   font-weight: 700;
 }
 
@@ -622,9 +641,9 @@ html.santa-live-active .santa-tracker__inner {
   font-size: var(--fz-t);
   padding: 0.3rem 0.6rem;
   border-radius: 99rem;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--c-neutral-50);
+  border: 1px solid rgba(15, 81, 50, 0.25);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--sp-ink);
   cursor: pointer;
 }
 
@@ -665,8 +684,8 @@ html.santa-live-active .santa-tracker__inner {
   padding: var(--space-150) var(--space-400);
   border: 0;
   border-radius: 99rem;
-  background: var(--c-red-500);
-  color: var(--c-neutral-50);
+  background: var(--sp-red);
+  color: #fff;
   font-weight: 700;
   font-size: var(--fz-s);
   white-space: nowrap;
