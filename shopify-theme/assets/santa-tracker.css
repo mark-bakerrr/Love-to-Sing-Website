@@ -440,9 +440,9 @@ html.santa-live-active .santa-tracker__inner {
 /* ---------- Stat footer ---------- */
 
 .santa-live__foot {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-100) var(--space-300);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-150);
   padding-top: var(--space-150);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
