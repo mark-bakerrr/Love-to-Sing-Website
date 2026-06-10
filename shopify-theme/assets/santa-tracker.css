@@ -208,17 +208,7 @@ html.santa-live-active .santa-tracker__inner {
   height: 100%;
 }
 
-/* Logo lives once, centred at the top of the stats panel */
-.santa-live__panel .santa-tracker__logo {
-  display: flex;
-  justify-content: center;
-  margin: 0 0 var(--space-300);
-}
-
-.santa-live__panel .santa-tracker__logo img {
-  max-width: 150px;
-  height: auto;
-}
+/* ---------- Compact stats panel ("flight log") ---------- */
 
 .santa-live__panel {
   position: absolute;
@@ -226,63 +216,230 @@ html.santa-live-active .santa-tracker__inner {
   left: var(--space-400);
   top: 50%;
   transform: translateY(-50%);
-  width: min(32rem, calc(100vw - 2 * var(--space-400)));
-  padding: var(--space-400);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-200);
+  width: min(23rem, calc(100vw - 2 * var(--space-400)));
+  max-height: min(40rem, calc(100vh - 3rem));
+  padding: var(--space-250) var(--space-300);
   border-radius: var(--radius-l);
-  background: rgba(9, 20, 45, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.5);
+  background: linear-gradient(180deg, rgba(11, 22, 48, 0.82), rgba(8, 16, 38, 0.78));
+  border: 1px solid rgba(250, 204, 85, 0.16);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.55);
   text-align: left;
 }
 
-.santa-live__panel-title {
-  margin: 0 0 var(--space-150);
-  color: var(--c-neutral-50);
+.santa-live__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-150);
+}
+
+.santa-live__panel .santa-tracker__logo {
+  display: block;
+  margin: 0;
+}
+
+.santa-live__panel .santa-tracker__logo img {
+  max-width: 104px;
+  height: auto;
 }
 
 .santa-live__status {
-  display: inline-block;
-  margin-bottom: var(--space-300);
-  padding: var(--space-100) var(--space-300);
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  padding: var(--space-50) var(--space-200);
   border-radius: 99rem;
   background: var(--c-red-500);
   font-size: var(--fz-s);
   font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
-.santa-live__cards {
+/* ---------- Itinerary rail ---------- */
+
+.santa-rail {
+  position: relative; /* offset parent for row offsetTop → correct auto-scroll */
+  flex: 1 1 auto;
+  min-height: 11rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(250, 204, 85, 0.4) transparent;
+  -webkit-overflow-scrolling: touch;
+  /* fade the list at the top and bottom edges */
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 11%, #000 89%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 11%, #000 89%, transparent);
+}
+
+.santa-rail::-webkit-scrollbar { width: 4px; }
+.santa-rail::-webkit-scrollbar-thumb {
+  background: rgba(250, 204, 85, 0.4);
+  border-radius: 99rem;
+}
+
+.santa-rail__row {
+  position: relative;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-150);
+  grid-template-columns: 1.3rem 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: var(--space-150);
+  padding: 0.42rem 0;
+  transition: opacity 0.4s ease;
 }
 
-.santa-live__card {
-  padding: var(--space-200);
-  border-radius: var(--radius-m);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+/* the connecting route thread, drawn behind the nodes */
+.santa-rail__row::before {
+  content: '';
+  position: absolute;
+  left: 0.6rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.13);
+}
+.santa-rail__row:first-child::before { top: 50%; }
+.santa-rail__row:last-child::before { bottom: 50%; }
+
+.santa-rail__row.is-visited::before,
+.santa-rail__row.is-current::before {
+  background: linear-gradient(180deg, rgba(250, 204, 85, 0.85), rgba(250, 204, 85, 0.55));
 }
 
-.santa-live__card-label {
-  display: block;
-  font-size: var(--fz-t);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+.santa-rail__node {
+  grid-row: 1 / 3;
+  justify-self: center;
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.santa-rail__city {
+  grid-column: 2;
+  grid-row: 1;
+  font-weight: 600;
+  font-size: var(--fz-s);
+  line-height: 1.15;
   color: var(--c-blue-100);
-  margin-bottom: var(--space-50);
 }
 
-.santa-live__card-value {
+.santa-rail__region {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: var(--fz-t);
+  color: rgba(205, 221, 255, 0.55);
+}
+
+/* state: already visited */
+.santa-rail__row.is-visited { opacity: 0.62; }
+.santa-rail__row.is-visited .santa-rail__node {
+  background: var(--c-yellow-300);
+  border-color: var(--c-yellow-300);
+}
+
+/* state: upcoming */
+.santa-rail__row.is-upcoming { opacity: 0.5; }
+.santa-rail__row.is-next { opacity: 0.95; }
+.santa-rail__row.is-next .santa-rail__node {
+  border-color: var(--c-yellow-300);
+}
+.santa-rail__row.is-next .santa-rail__city { color: var(--c-neutral-50); }
+
+/* state: where Santa is right now */
+.santa-rail__row.is-current { opacity: 1; }
+.santa-rail__row.is-current .santa-rail__node {
+  width: 0.85rem;
+  height: 0.85rem;
+  background: var(--c-red-500);
+  border-color: #ffd9d7;
+  box-shadow: 0 0 0 4px rgba(201, 42, 38, 0.3), 0 0 14px rgba(255, 90, 85, 0.8);
+}
+.santa-rail__row.is-current.is-delivering .santa-rail__node {
+  animation: santa-pulse 1.4s ease-in-out infinite;
+}
+.santa-rail__row.is-current .santa-rail__city {
   font-family: var(--font-heading-family);
-  font-size: var(--fz-l, 2rem);
-  font-weight: 700;
+  font-weight: 800;
+  font-size: var(--fz-m);
+  color: var(--c-neutral-50);
+}
+.santa-rail__row.is-current.is-delivering .santa-rail__city::after {
+  content: 'NOW';
+  margin-left: var(--space-100);
+  padding: 0.05em 0.4em;
+  border-radius: 99rem;
+  background: var(--c-yellow-300);
+  color: var(--c-black-900);
+  font-family: system-ui, sans-serif;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+}
+
+.santa-rail__row.is-next .santa-rail__city::after {
+  content: 'NEXT';
+  margin-left: var(--space-100);
+  padding: 0.05em 0.4em;
+  border-radius: 99rem;
+  border: 1px solid rgba(250, 204, 85, 0.7);
+  color: var(--c-yellow-300);
+  font-family: system-ui, sans-serif;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+}
+
+@keyframes santa-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(201, 42, 38, 0.3), 0 0 14px rgba(255, 90, 85, 0.8); }
+  50% { box-shadow: 0 0 0 7px rgba(201, 42, 38, 0.12), 0 0 20px rgba(255, 90, 85, 0.95); }
+}
+
+/* ---------- Stat footer ---------- */
+
+.santa-live__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-100) var(--space-300);
+  padding-top: var(--space-150);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.santa-stat { display: flex; flex-direction: column; }
+
+.santa-stat__num {
+  font-family: var(--font-heading-family);
+  font-weight: 800;
+  font-size: 1.15rem;
+  line-height: 1.1;
   color: var(--c-yellow-300);
   font-variant-numeric: tabular-nums;
 }
 
+.santa-stat__label {
+  font-size: 0.62rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(205, 221, 255, 0.6);
+}
+
+.santa-stat--clock { margin-left: auto; text-align: right; }
+.santa-stat--clock .santa-stat__num { color: var(--c-neutral-50); }
+
 .santa-live__cta {
-  margin-top: var(--space-300);
+  margin-top: 0;
+  align-self: flex-start;
   font-size: var(--fz-s);
   padding: var(--space-150) var(--space-300);
 }
@@ -327,41 +484,43 @@ html.santa-live-active .santa-tracker__inner {
 }
 
 /* "Santa reaches you" personalised block */
-.santa-live__you {
+.santa-you {
   display: flex;
   flex-direction: column;
   gap: var(--space-100);
-  margin-bottom: var(--space-300);
-  padding: var(--space-250) var(--space-200);
+  padding: var(--space-150) var(--space-200);
   border-radius: var(--radius-m);
-  background: linear-gradient(135deg, rgba(201, 42, 38, 0.35), rgba(63, 122, 69, 0.28));
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(120deg, rgba(201, 42, 38, 0.32), rgba(63, 122, 69, 0.24));
+  border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
-.santa-live__you-eta {
+.santa-you__eta {
+  margin: 0;
   font-family: var(--font-heading-family);
   font-weight: 700;
-  font-size: var(--fz-m);
+  font-size: var(--fz-s);
+  line-height: 1.2;
   color: var(--c-neutral-50);
+  font-variant-numeric: tabular-nums;
 }
 
-.santa-live__you-city {
-  font-size: var(--fz-s);
+.santa-you__city {
+  margin: 0;
+  font-size: var(--fz-t);
   color: var(--c-yellow-300);
   font-weight: 700;
 }
 
-.santa-live__you-actions {
+.santa-you__actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-100);
-  margin-top: var(--space-50);
 }
 
-.santa-live__you-btn,
-.santa-live__you-select {
+.santa-you__btn,
+.santa-you__select {
   font-size: var(--fz-t);
-  padding: var(--space-100) var(--space-150);
+  padding: 0.3rem 0.6rem;
   border-radius: 99rem;
   border: 1px solid rgba(255, 255, 255, 0.25);
   background: rgba(255, 255, 255, 0.1);
@@ -369,20 +528,9 @@ html.santa-live-active .santa-tracker__inner {
   cursor: pointer;
 }
 
-.santa-live__you-select {
+.santa-you__select {
   border-radius: var(--radius-m);
   max-width: 100%;
-}
-
-.santa-live__clock {
-  font-size: var(--fz-t);
-  color: var(--c-blue-100);
-}
-
-.santa-live__clock [data-info] {
-  font-variant-numeric: tabular-nums;
-  color: var(--c-neutral-50);
-  font-weight: 700;
 }
 
 /* Follow Santa button — shown only in free-orbit mode */
@@ -401,50 +549,6 @@ html.santa-live-active .santa-tracker__inner {
   font-size: var(--fz-s);
   cursor: pointer;
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
-}
-
-/* Journey timeline scrubber */
-.santa-live__timeline {
-  position: absolute;
-  z-index: 7;
-  left: 50%;
-  bottom: var(--space-300);
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: var(--space-150);
-  width: min(60rem, calc(100vw - 2 * var(--space-400)));
-  padding: var(--space-150) var(--space-250);
-  border-radius: 99rem;
-  background: rgba(9, 20, 45, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(8px);
-}
-
-.santa-live__scrub {
-  flex: 1;
-  accent-color: var(--c-red-500);
-  cursor: pointer;
-}
-
-.santa-live__golive {
-  flex: none;
-  padding: var(--space-50) var(--space-200);
-  border: 0;
-  border-radius: 99rem;
-  background: var(--c-red-500);
-  color: var(--c-neutral-50);
-  font-weight: 700;
-  font-size: var(--fz-t);
-  cursor: pointer;
-}
-
-/* On tablet/mobile the bottom sheet + banner sit low, so lift the timeline */
-@media screen and (max-width: 989px) {
-  .santa-live__timeline {
-    bottom: 6.4rem;
-    width: calc(100vw - 2 * var(--space-300));
-  }
 }
 
 /* Floating stats banner — tablet/mobile only */
@@ -504,12 +608,13 @@ html.santa-live-active .santa-tracker__inner {
     top: auto;
     bottom: 8.6rem;
     transform: translate(-50%, calc(100% + 16rem));
-    width: min(44rem, calc(100vw - var(--space-300)));
-    max-height: calc(100vh - 16rem);
-    overflow-y: auto;
+    width: min(40rem, calc(100vw - var(--space-300)));
+    max-height: min(70vh, calc(100vh - 12rem));
     transition: transform 0.35s ease;
-    text-align: center;
+    text-align: left;
   }
+
+  .santa-rail { max-height: 38vh; }
 
   .santa-live.is-panel-open .santa-live__panel {
     transform: translate(-50%, 0);
@@ -583,7 +688,8 @@ html.santa-live-active .santa-tracker__inner {
   .santa-snowflake,
   .santa-tracker::before,
   .santa-tracker::after,
-  .santa-countdown__value.is-ticking {
+  .santa-countdown__value.is-ticking,
+  .santa-rail__row.is-current.is-delivering .santa-rail__node {
     animation: none;
   }
 }

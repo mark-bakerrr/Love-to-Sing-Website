@@ -162,6 +162,11 @@
     });
   }
 
+  var HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) { return HTML_ESCAPES[c]; });
+  }
+
   // Standard three.js equirectangular mapping (lng 0 faces -X)
   function latLngToV3(lat, lng, r) {
     var phi = toRad(90 - lat);
@@ -298,15 +303,6 @@
         });
       }
 
-      // Timeline scrubber
-      this.setupScrubber();
-
-      var goLive = this.querySelector('[data-action="golive"]');
-      if (goLive) {
-        this.goLiveBtn = goLive;
-        goLive.addEventListener('click', this.goLive.bind(this));
-      }
-
       this.initSnow();
       this.timer = setInterval(this.tick.bind(this), 250);
       this.tick();
@@ -331,8 +327,6 @@
     }
 
     elapsed() {
-      // While the user holds the scrubber, time is frozen at the dragged point
-      if (this.scrubbing) return this.scrubElapsed;
       var e = (this.now() - this.departure) / 1000;
       if (this.replayOffset !== null) {
         // Replay: fly the whole 25h route in ~90 seconds
@@ -367,9 +361,9 @@
       if (state === 'pre') this.renderCountdown(-e);
       if (state === 'live' && this.route) {
         this.updateStats(e);
+        this.updateRail(e);
         this.updateYouCard();
         this.updateLocalClock();
-        this.updateScrubber(e);
       }
     }
 
@@ -416,6 +410,7 @@
         .then(function (route) {
           self.route = route;
           self.populateCityPicker();
+          self.buildRail();
           self.initGlobe();
         })
         .catch(function (err) {
@@ -883,6 +878,7 @@
         this.three.camInit = false;
       }
       this.revealReady = false; // suppress the catch-up chime burst
+      this.railCurrent = -1; // force the rail to repaint
       this.state = ''; // force a state refresh on next tick
       this.tick();
     }
@@ -890,66 +886,70 @@
     updateStats(elapsed) {
       var pos = routePosition(this.route, elapsed);
       this.setInfo('status', pos.status === 'delivering'
-        ? 'Delivering presents in ' + pos.current.city + '!'
+        ? 'Delivering in ' + pos.current.city + ' 🎁'
         : 'Flying to ' + (pos.next ? pos.next.city : 'the North Pole'));
-      this.setInfo('current', pos.current.city + ', ' + pos.current.region);
-      this.setInfo('next', pos.next ? pos.next.city + ', ' + pos.next.region : '—');
     }
 
-    /* ---------- Timeline scrubber ---------- */
+    /* ---------- Live itinerary rail ---------- */
 
-    setupScrubber() {
-      var scrub = this.querySelector('[data-scrub]');
-      if (!scrub) return;
-      this.scrub = scrub;
+    buildRail() {
+      var rail = this.querySelector('[data-rail]');
+      if (!rail || !this.route) return;
+      this.rail = rail;
+      var stops = this.route.stops;
+      var frag = document.createDocumentFragment();
+      this.railRows = [];
+      for (var i = 0; i < stops.length; i++) {
+        var s = stops[i];
+        var li = document.createElement('li');
+        li.className = 'santa-rail__row';
+        li.innerHTML =
+          '<span class="santa-rail__node" aria-hidden="true"></span>' +
+          '<span class="santa-rail__city">' + escapeHtml(s.city) + '</span>' +
+          '<span class="santa-rail__region">' + escapeHtml(s.region) + '</span>';
+        frag.appendChild(li);
+        this.railRows.push(li);
+      }
+      rail.appendChild(frag);
+      this.railCurrent = -1;
+
+      // Manual scroll pauses auto-follow for a few seconds
       var self = this;
-
-      function frac() { return parseInt(scrub.value, 10) / parseInt(scrub.max, 10); }
-
-      var begin = function () {
-        self.scrubbing = true;
-        clearTimeout(self.idleReturn);
-        self.scrubElapsed = frac() * self.routeDuration();
-        self.tick();
-      };
-      var move = function () {
-        if (!self.scrubbing) return;
-        self.scrubElapsed = frac() * self.routeDuration();
-        self.tick();
-      };
-      var end = function () {
-        if (!self.scrubbing) return;
-        self.scrubbing = false;
-        // Commit the scrubbed point and let playback continue from there
-        self.timeBase = self.departure + self.scrubElapsed * 1000;
-        self.timeBaseAt = Date.now();
-        self.manualTime = true;
-        if (self.goLiveBtn) self.goLiveBtn.hidden = false;
-      };
-
-      // pointer + keyboard/touch all funnel through input/change
-      scrub.addEventListener('pointerdown', begin);
-      scrub.addEventListener('input', function () {
-        if (!self.scrubbing) begin();
-        else move();
-      });
-      scrub.addEventListener('pointerup', end);
-      scrub.addEventListener('change', end);
+      rail.addEventListener('scroll', function () {
+        if (self.railAutoScrolling) return;
+        self.railManualUntil = Date.now() + 6000;
+      }, { passive: true });
     }
 
-    updateScrubber(e) {
-      if (!this.scrub || this.scrubbing) return;
-      var frac = Math.max(0, Math.min(1, e / this.routeDuration()));
-      this.scrub.value = Math.round(frac * parseInt(this.scrub.max, 10));
-    }
+    updateRail(elapsed) {
+      if (!this.railRows) return;
+      var pos = routePosition(this.route, elapsed);
+      var cur = pos.stopIndex;
+      if (cur === this.railCurrent) return; // only re-paint when Santa moves on
+      this.railCurrent = cur;
 
-    goLive() {
-      this.scrubbing = false;
-      this.manualTime = false;
-      this.timeBase = this.baseTimeBase; // back to real time (or the QA santa_time)
-      this.timeBaseAt = Date.now();
-      if (this.goLiveBtn) this.goLiveBtn.hidden = true;
-      this.tick();
+      var nextIdx = pos.next ? Math.min(cur + 1, this.railRows.length - 1) : cur;
+      for (var i = 0; i < this.railRows.length; i++) {
+        var row = this.railRows[i];
+        var cls = 'santa-rail__row';
+        if (i < cur) cls += ' is-visited';
+        else if (i === cur) cls += pos.status === 'delivering' ? ' is-current is-delivering' : ' is-current';
+        else if (i === nextIdx) cls += ' is-next';
+        else cls += ' is-upcoming';
+        if (row.className !== cls) row.className = cls;
+      }
+
+      // Auto-scroll the current city to the middle, unless the user just scrolled
+      if (Date.now() < (this.railManualUntil || 0)) return;
+      var target = this.railRows[cur];
+      if (target && this.rail) {
+        var top = target.offsetTop - this.rail.clientHeight / 2 + target.offsetHeight / 2;
+        this.railAutoScrolling = true;
+        this.rail.scrollTo({ top: top, behavior: 'smooth' });
+        var self = this;
+        clearTimeout(this.railScrollClear);
+        this.railScrollClear = setTimeout(function () { self.railAutoScrolling = false; }, 700);
+      }
     }
 
     /* ---------- Personalisation: your city + local clock ---------- */

@@ -128,44 +128,40 @@
     </button>
 
     <aside class="santa-live__panel" data-panel aria-label="Santa tracker stats">
-      {{ logo_link }}
+      <header class="santa-live__head">
+        {{ logo_link }}
+        <p class="santa-live__status" data-info="status" aria-live="polite">Santa is on his way…</p>
+      </header>
 
-      <h1 class="santa-live__panel-title h4">{{ section.settings.title_live | escape }}</h1>
+      {%- comment -%} Live itinerary rail — auto-scrolls as Santa flies {%- endcomment -%}
+      <ol class="santa-rail" data-rail aria-label="Santa's route — cities visited and upcoming"></ol>
 
-      <p class="santa-live__status" data-info="status" aria-live="polite">Santa is on his way…</p>
-
-      {%- comment -%} Personalised "Santa reaches you" block {%- endcomment -%}
-      <div class="santa-live__you" data-you>
-        <span class="santa-live__card-label">Santa reaches you</span>
-        <span class="santa-live__you-eta" data-info="you-eta">Pick your city to see when Santa arrives</span>
-        <span class="santa-live__you-city" data-info="you-city" hidden></span>
-        <div class="santa-live__you-actions">
-          <button class="santa-live__you-btn" type="button" data-action="locate">📍 Use my location</button>
-          <select class="santa-live__you-select" data-city-picker aria-label="Choose your city">
+      {%- comment -%} Personalised "Santa reaches you" {%- endcomment -%}
+      <div class="santa-you" data-you>
+        <p class="santa-you__eta" data-info="you-eta">Find your city to see when Santa arrives →</p>
+        <p class="santa-you__city" data-info="you-city" hidden></p>
+        <div class="santa-you__actions">
+          <button class="santa-you__btn" type="button" data-action="locate">📍 My location</button>
+          <select class="santa-you__select" data-city-picker aria-label="Choose your city">
             <option value="">Choose your city…</option>
           </select>
         </div>
-        <span class="santa-live__clock"><span class="santa-live__card-label">Your local time</span> <span data-info="local-clock">—</span></span>
       </div>
 
-      <div class="santa-live__cards">
-        <div class="santa-live__card">
-          <span class="santa-live__card-label">Last stop</span>
-          <span class="santa-live__card-value" data-info="current">North Pole</span>
+      <footer class="santa-live__foot">
+        <div class="santa-stat">
+          <span class="santa-stat__num" data-info="presents" data-odometer>0</span>
+          <span class="santa-stat__label">presents delivered</span>
         </div>
-        <div class="santa-live__card">
-          <span class="santa-live__card-label">Next stop</span>
-          <span class="santa-live__card-value" data-info="next">…</span>
+        <div class="santa-stat">
+          <span class="santa-stat__num" data-info="distance" data-odometer>0 km</span>
+          <span class="santa-stat__label">travelled</span>
         </div>
-        <div class="santa-live__card">
-          <span class="santa-live__card-label">Presents delivered</span>
-          <span class="santa-live__card-value" data-info="presents" data-odometer>0</span>
+        <div class="santa-stat santa-stat--clock">
+          <span class="santa-stat__num" data-info="local-clock">—</span>
+          <span class="santa-stat__label">your local time</span>
         </div>
-        <div class="santa-live__card">
-          <span class="santa-live__card-label">Distance travelled</span>
-          <span class="santa-live__card-value" data-info="distance" data-odometer>0 km</span>
-        </div>
-      </div>
+      </footer>
 
       {%- if section.settings.cta_label != blank -%}
         <a class="santa-tracker__cta santa-live__cta" href="{{ cta_url }}">{{ section.settings.cta_label | escape }} 🎄</a>
@@ -180,21 +176,6 @@
     >
       🎅 Follow Santa
     </button>
-
-    {%- comment -%} Journey timeline scrubber {%- endcomment -%}
-    <div class="santa-live__timeline" data-timeline>
-      <input
-        class="santa-live__scrub"
-        type="range"
-        min="0"
-        max="1000"
-        value="0"
-        step="1"
-        data-scrub
-        aria-label="Scrub Santa's journey"
-      >
-      <button class="santa-live__golive" type="button" data-action="golive" hidden>● Live</button>
-    </div>
 
     <button
       class="santa-live__banner"
