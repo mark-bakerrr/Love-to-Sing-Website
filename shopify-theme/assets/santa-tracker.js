@@ -782,21 +782,26 @@
         // User is steering — let OrbitControls own the camera
         T.controls.update();
       } else {
-        // Chase camera: behind and above, looking past the sleigh
-        var desired = p.clone().addScaledVector(forward, -0.45).addScaledVector(up, 0.22);
-        if (desired.length() < GLOBE_R * 1.04) desired.setLength(GLOBE_R * 1.04);
-        var look = p.clone().addScaledVector(forward, 0.35);
+        // Chase camera locked BEHIND Santa's heading. The up vector is the
+        // local vertical (set every frame, so the horizon never tilts), and
+        // the camera sits along the *smoothed* travel direction — so when
+        // Santa banks north the whole globe rolls north with him, instead of
+        // appearing to spin on a fixed axis.
+        if (!T.smoothFwd) T.smoothFwd = forward.clone();
+        else T.smoothFwd.lerp(forward, 0.08).normalize();
+        var sf = T.smoothFwd;
+
+        var desired = p.clone().addScaledVector(sf, -0.5).addScaledVector(up, 0.34);
+        if (desired.length() < GLOBE_R * 1.05) desired.setLength(GLOBE_R * 1.05);
 
         if (!T.camInit) {
           T.camera.position.copy(desired);
-          T.camLook.copy(look);
           T.camInit = true;
         } else {
-          T.camera.position.lerp(desired, 0.06);
-          T.camLook.lerp(look, 0.08);
+          T.camera.position.lerp(desired, 0.1);
         }
-        T.camera.up.lerp(up, 0.06).normalize();
-        T.camera.lookAt(T.camLook);
+        T.camera.up.copy(up); // local vertical → level horizon, no roll lag
+        T.camera.lookAt(p.clone().addScaledVector(sf, 0.5).addScaledVector(up, -0.1));
       }
 
       // Real sun direction for this instant → genuine day/night terminator.
