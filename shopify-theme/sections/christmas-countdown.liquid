@@ -129,7 +129,13 @@
 
     <aside class="santa-live__panel" data-panel aria-label="Santa tracker stats">
       <header class="santa-live__head">
-        {{ logo_link }}
+        <div class="santa-live__topbar">
+          {{ logo_link }}
+          <div class="santa-live__clock">
+            <span class="santa-live__clock-time" data-info="local-clock">—</span>
+            <span class="santa-live__clock-label">your local time</span>
+          </div>
+        </div>
         <p class="santa-live__status" data-info="status" aria-live="polite">Santa is on his way…</p>
       </header>
 
@@ -156,10 +162,6 @@
         <div class="santa-stat">
           <span class="santa-stat__num" data-info="distance" data-odometer>0 km</span>
           <span class="santa-stat__label">travelled</span>
-        </div>
-        <div class="santa-stat santa-stat--clock">
-          <span class="santa-stat__num" data-info="local-clock">—</span>
-          <span class="santa-stat__label">your local time</span>
         </div>
       </footer>
 
