@@ -264,12 +264,12 @@
         post: this.querySelector('[data-state="post"]'),
       };
 
+      var self = this;
       var replayBtn = this.querySelector('[data-action="replay"]');
       if (replayBtn) replayBtn.addEventListener('click', this.startReplay.bind(this));
 
       var toggleBtn = this.querySelector('[data-action="toggle-panel"]');
       if (toggleBtn) {
-        var self = this;
         toggleBtn.addEventListener('click', function () {
           var live = self.panels.live;
           var open = live.classList.toggle('is-panel-open');
@@ -284,6 +284,29 @@
         soundBtn.addEventListener('click', this.toggleSound.bind(this));
       }
 
+      // Personalisation: location + city picker
+      this.baseTimeBase = this.timeBase; // for "Go Live" to restore QA time too
+      this.yourStop = null;
+      var locateBtn = this.querySelector('[data-action="locate"]');
+      if (locateBtn) locateBtn.addEventListener('click', this.locateMe.bind(this));
+      var picker = this.querySelector('[data-city-picker]');
+      if (picker) {
+        this.cityPicker = picker;
+        picker.addEventListener('change', function () {
+          var idx = parseInt(picker.value, 10);
+          if (!isNaN(idx)) self.setYourStop(idx);
+        });
+      }
+
+      // Timeline scrubber
+      this.setupScrubber();
+
+      var goLive = this.querySelector('[data-action="golive"]');
+      if (goLive) {
+        this.goLiveBtn = goLive;
+        goLive.addEventListener('click', this.goLive.bind(this));
+      }
+
       this.initSnow();
       this.timer = setInterval(this.tick.bind(this), 250);
       this.tick();
@@ -295,6 +318,8 @@
       if (this.rafId) cancelAnimationFrame(this.rafId);
       if (this.music) this.music.pause();
       if (this.onResize) window.removeEventListener('resize', this.onResize);
+      clearTimeout(this.idleReturn);
+      if (this.three && this.three.controls) this.three.controls.dispose();
       if (this.three && this.three.renderer) this.three.renderer.dispose();
     }
 
@@ -306,6 +331,8 @@
     }
 
     elapsed() {
+      // While the user holds the scrubber, time is frozen at the dragged point
+      if (this.scrubbing) return this.scrubElapsed;
       var e = (this.now() - this.departure) / 1000;
       if (this.replayOffset !== null) {
         // Replay: fly the whole 25h route in ~90 seconds
@@ -338,7 +365,12 @@
       }
 
       if (state === 'pre') this.renderCountdown(-e);
-      if (state === 'live' && this.route) this.updateStats(e);
+      if (state === 'live' && this.route) {
+        this.updateStats(e);
+        this.updateYouCard();
+        this.updateLocalClock();
+        this.updateScrubber(e);
+      }
     }
 
     /* ---------- Countdown ---------- */
@@ -370,12 +402,20 @@
       if (this.loading) return;
       this.loading = true;
       var self = this;
-      Promise.all([
-        fetch(this.dataset.routeUrl).then(function (r) { return r.json(); }),
-        window.THREE ? Promise.resolve() : loadScript(this.dataset.threeJs),
-      ])
-        .then(function (results) {
-          self.route = results[0];
+      var loadThree = window.THREE ? Promise.resolve() : loadScript(this.dataset.threeJs);
+      loadThree
+        .then(function () {
+          // OrbitControls depends on THREE being present, so load it after three
+          if (self.dataset.orbitJs && !(window.THREE && THREE.OrbitControls)) {
+            return loadScript(self.dataset.orbitJs).catch(function () { /* optional */ });
+          }
+        })
+        .then(function () {
+          return fetch(self.dataset.routeUrl).then(function (r) { return r.json(); });
+        })
+        .then(function (route) {
+          self.route = route;
+          self.populateCityPicker();
           self.initGlobe();
         })
         .catch(function (err) {
@@ -559,10 +599,68 @@
       };
       window.addEventListener('resize', this.onResize);
 
+      this.setupControls();
+
       this.debugNote('init ok — host ' + host.clientWidth + 'x' + host.clientHeight +
-        ', dpr ' + (window.devicePixelRatio || 1) + ', three r' + THREE.REVISION);
+        ', dpr ' + (window.devicePixelRatio || 1) + ', three r' + THREE.REVISION +
+        ', orbit ' + (!!(window.THREE && THREE.OrbitControls)));
 
       this.rafId = requestAnimationFrame(this.renderFrame.bind(this));
+    }
+
+    /* ---------- Drag-to-orbit + Follow Santa ---------- */
+
+    setupControls() {
+      var T = this.three;
+      this.freeMode = false;
+      if (!(window.THREE && THREE.OrbitControls)) return;
+
+      var controls = new THREE.OrbitControls(T.camera, T.renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.rotateSpeed = 0.5;
+      controls.enablePan = false;
+      controls.minDistance = GLOBE_R * 1.05;
+      controls.maxDistance = GLOBE_R * 6;
+      controls.target.set(0, 0, 0);
+      // Stays enabled so it can detect the drag that flips us into free mode;
+      // the chase branch simply ignores it (never calls update()) until then.
+      T.controls = controls;
+
+      var self = this;
+      var followBtn = this.querySelector('[data-action="follow"]');
+      if (followBtn) {
+        this.followBtn = followBtn;
+        followBtn.addEventListener('click', function () { self.exitFreeMode(); });
+      }
+
+      // Any drag on the globe switches to free-orbit; idle returns to follow
+      controls.addEventListener('start', function () {
+        clearTimeout(self.idleReturn);
+        self.enterFreeMode();
+      });
+      controls.addEventListener('end', function () {
+        clearTimeout(self.idleReturn);
+        self.idleReturn = setTimeout(function () { self.exitFreeMode(); }, 9000);
+      });
+    }
+
+    enterFreeMode() {
+      var T = this.three;
+      if (!T || !T.controls || this.freeMode) return;
+      this.freeMode = true;
+      T.camera.up.set(0, 1, 0);
+      T.controls.update();
+      if (this.followBtn) this.followBtn.hidden = false;
+    }
+
+    exitFreeMode() {
+      var T = this.three;
+      if (!T) return;
+      clearTimeout(this.idleReturn);
+      this.freeMode = false;
+      T.camInit = true; // lerp smoothly back to the chase position
+      if (this.followBtn) this.followBtn.hidden = true;
     }
 
     // Low-poly sleigh + reindeer built from primitives, facing +Z (direction of travel)
@@ -685,21 +783,26 @@
       var facing = p.clone().add(forward);
       T.sleigh.lookAt(facing);
 
-      // Chase camera: behind and above, looking past the sleigh
-      var desired = p.clone().addScaledVector(forward, -0.45).addScaledVector(up, 0.22);
-      if (desired.length() < GLOBE_R * 1.04) desired.setLength(GLOBE_R * 1.04);
-      var look = p.clone().addScaledVector(forward, 0.35);
-
-      if (!T.camInit) {
-        T.camera.position.copy(desired);
-        T.camLook.copy(look);
-        T.camInit = true;
+      if (this.freeMode && T.controls) {
+        // User is steering — let OrbitControls own the camera
+        T.controls.update();
       } else {
-        T.camera.position.lerp(desired, 0.06);
-        T.camLook.lerp(look, 0.08);
+        // Chase camera: behind and above, looking past the sleigh
+        var desired = p.clone().addScaledVector(forward, -0.45).addScaledVector(up, 0.22);
+        if (desired.length() < GLOBE_R * 1.04) desired.setLength(GLOBE_R * 1.04);
+        var look = p.clone().addScaledVector(forward, 0.35);
+
+        if (!T.camInit) {
+          T.camera.position.copy(desired);
+          T.camLook.copy(look);
+          T.camInit = true;
+        } else {
+          T.camera.position.lerp(desired, 0.06);
+          T.camLook.lerp(look, 0.08);
+        }
+        T.camera.up.lerp(up, 0.06).normalize();
+        T.camera.lookAt(T.camLook);
       }
-      T.camera.up.lerp(up, 0.06).normalize();
-      T.camera.lookAt(T.camLook);
 
       // Real sun direction for this instant → genuine day/night terminator.
       var ss = subSolarPoint(this.now());
@@ -791,6 +894,142 @@
         : 'Flying to ' + (pos.next ? pos.next.city : 'the North Pole'));
       this.setInfo('current', pos.current.city + ', ' + pos.current.region);
       this.setInfo('next', pos.next ? pos.next.city + ', ' + pos.next.region : '—');
+    }
+
+    /* ---------- Timeline scrubber ---------- */
+
+    setupScrubber() {
+      var scrub = this.querySelector('[data-scrub]');
+      if (!scrub) return;
+      this.scrub = scrub;
+      var self = this;
+
+      function frac() { return parseInt(scrub.value, 10) / parseInt(scrub.max, 10); }
+
+      var begin = function () {
+        self.scrubbing = true;
+        clearTimeout(self.idleReturn);
+        self.scrubElapsed = frac() * self.routeDuration();
+        self.tick();
+      };
+      var move = function () {
+        if (!self.scrubbing) return;
+        self.scrubElapsed = frac() * self.routeDuration();
+        self.tick();
+      };
+      var end = function () {
+        if (!self.scrubbing) return;
+        self.scrubbing = false;
+        // Commit the scrubbed point and let playback continue from there
+        self.timeBase = self.departure + self.scrubElapsed * 1000;
+        self.timeBaseAt = Date.now();
+        self.manualTime = true;
+        if (self.goLiveBtn) self.goLiveBtn.hidden = false;
+      };
+
+      // pointer + keyboard/touch all funnel through input/change
+      scrub.addEventListener('pointerdown', begin);
+      scrub.addEventListener('input', function () {
+        if (!self.scrubbing) begin();
+        else move();
+      });
+      scrub.addEventListener('pointerup', end);
+      scrub.addEventListener('change', end);
+    }
+
+    updateScrubber(e) {
+      if (!this.scrub || this.scrubbing) return;
+      var frac = Math.max(0, Math.min(1, e / this.routeDuration()));
+      this.scrub.value = Math.round(frac * parseInt(this.scrub.max, 10));
+    }
+
+    goLive() {
+      this.scrubbing = false;
+      this.manualTime = false;
+      this.timeBase = this.baseTimeBase; // back to real time (or the QA santa_time)
+      this.timeBaseAt = Date.now();
+      if (this.goLiveBtn) this.goLiveBtn.hidden = true;
+      this.tick();
+    }
+
+    /* ---------- Personalisation: your city + local clock ---------- */
+
+    populateCityPicker() {
+      if (!this.cityPicker || !this.route) return;
+      var stops = this.route.stops;
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < stops.length; i++) {
+        var s = stops[i];
+        if (s.city === 'North Pole') continue; // not a delivery stop
+        var opt = document.createElement('option');
+        opt.value = String(i);
+        opt.textContent = s.city + ', ' + s.region;
+        frag.appendChild(opt);
+      }
+      this.cityPicker.appendChild(frag);
+    }
+
+    locateMe() {
+      var self = this;
+      if (!navigator.geolocation) return;
+      var btn = this.querySelector('[data-action="locate"]');
+      if (btn) btn.textContent = 'Locating…';
+      navigator.geolocation.getCurrentPosition(
+        function (p) { self.setNearestStop(p.coords.latitude, p.coords.longitude); if (btn) btn.textContent = '📍 Use my location'; },
+        function () { if (btn) btn.textContent = '📍 Location unavailable — pick below'; },
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 }
+      );
+    }
+
+    setNearestStop(lat, lng) {
+      var stops = this.route.stops;
+      var best = -1, bestD = Infinity;
+      for (var i = 0; i < stops.length; i++) {
+        if (stops[i].city === 'North Pole') continue;
+        var d = haversineKm([lat, lng], [stops[i].lat, stops[i].lng]);
+        if (d < bestD) { bestD = d; best = i; }
+      }
+      if (best >= 0) {
+        this.setYourStop(best);
+        if (this.cityPicker) this.cityPicker.value = String(best);
+      }
+    }
+
+    setYourStop(idx) {
+      this.yourStop = this.route.stops[idx];
+      var cityEl = this.querySelector('[data-info="you-city"]');
+      if (cityEl) cityEl.hidden = false;
+      this.updateYouCard();
+    }
+
+    updateYouCard() {
+      if (!this.yourStop) return;
+      var arrival = this.departure + this.yourStop.t * 1000; // route times are real seconds
+      var delta = (arrival - this.now()) / 1000;
+      this.setInfo('you-city', this.yourStop.city + ', ' + this.yourStop.region);
+      if (delta > 0) {
+        this.setInfo('you-eta', 'Santa reaches you in ' + this.formatHMS(delta));
+      } else {
+        var when = new Date(arrival).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        this.setInfo('you-eta', '🎁 Santa visited you at ' + when + '!');
+      }
+    }
+
+    updateLocalClock() {
+      var el = this.querySelector('[data-info="local-clock"]');
+      if (!el) return;
+      el.textContent = new Date(this.now()).toLocaleTimeString([], {
+        hour: 'numeric', minute: '2-digit', second: '2-digit',
+      });
+    }
+
+    formatHMS(seconds) {
+      var s = Math.floor(seconds);
+      var h = Math.floor(s / 3600);
+      var m = Math.floor((s % 3600) / 60);
+      var sec = s % 60;
+      function pad(n) { return String(n).padStart(2, '0'); }
+      return (h > 0 ? h + 'h ' : '') + pad(m) + 'm ' + pad(sec) + 's';
     }
 
     /* ---------- Smooth odometer counters ---------- */

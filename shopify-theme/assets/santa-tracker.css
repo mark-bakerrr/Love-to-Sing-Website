@@ -326,6 +326,127 @@ html.santa-live-active .santa-tracker__inner {
   display: none;
 }
 
+/* "Santa reaches you" personalised block */
+.santa-live__you {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-100);
+  margin-bottom: var(--space-300);
+  padding: var(--space-250) var(--space-200);
+  border-radius: var(--radius-m);
+  background: linear-gradient(135deg, rgba(201, 42, 38, 0.35), rgba(63, 122, 69, 0.28));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.santa-live__you-eta {
+  font-family: var(--font-heading-family);
+  font-weight: 700;
+  font-size: var(--fz-m);
+  color: var(--c-neutral-50);
+}
+
+.santa-live__you-city {
+  font-size: var(--fz-s);
+  color: var(--c-yellow-300);
+  font-weight: 700;
+}
+
+.santa-live__you-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-100);
+  margin-top: var(--space-50);
+}
+
+.santa-live__you-btn,
+.santa-live__you-select {
+  font-size: var(--fz-t);
+  padding: var(--space-100) var(--space-150);
+  border-radius: 99rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--c-neutral-50);
+  cursor: pointer;
+}
+
+.santa-live__you-select {
+  border-radius: var(--radius-m);
+  max-width: 100%;
+}
+
+.santa-live__clock {
+  font-size: var(--fz-t);
+  color: var(--c-blue-100);
+}
+
+.santa-live__clock [data-info] {
+  font-variant-numeric: tabular-nums;
+  color: var(--c-neutral-50);
+  font-weight: 700;
+}
+
+/* Follow Santa button — shown only in free-orbit mode */
+.santa-live__follow {
+  position: absolute;
+  z-index: 7;
+  top: var(--space-300);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-150) var(--space-400);
+  border: 0;
+  border-radius: 99rem;
+  background: var(--c-yellow-300);
+  color: var(--c-black-900);
+  font-weight: 700;
+  font-size: var(--fz-s);
+  cursor: pointer;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+}
+
+/* Journey timeline scrubber */
+.santa-live__timeline {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  bottom: var(--space-300);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-150);
+  width: min(60rem, calc(100vw - 2 * var(--space-400)));
+  padding: var(--space-150) var(--space-250);
+  border-radius: 99rem;
+  background: rgba(9, 20, 45, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.santa-live__scrub {
+  flex: 1;
+  accent-color: var(--c-red-500);
+  cursor: pointer;
+}
+
+.santa-live__golive {
+  flex: none;
+  padding: var(--space-50) var(--space-200);
+  border: 0;
+  border-radius: 99rem;
+  background: var(--c-red-500);
+  color: var(--c-neutral-50);
+  font-weight: 700;
+  font-size: var(--fz-t);
+  cursor: pointer;
+}
+
+/* On tablet/mobile the bottom sheet + banner sit low, so lift the timeline */
+@media screen and (max-width: 989px) {
+  .santa-live__timeline {
+    bottom: 6.4rem;
+    width: calc(100vw - 2 * var(--space-300));
+  }
+}
+
 /* Floating stats banner — tablet/mobile only */
 .santa-live__banner {
   display: none;
