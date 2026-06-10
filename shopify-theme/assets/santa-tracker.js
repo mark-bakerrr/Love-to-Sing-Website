@@ -309,6 +309,17 @@
         });
       }
 
+      var collapseBtn = this.querySelector('[data-action="collapse-panel"]');
+      if (collapseBtn) {
+        var panelEl = this.querySelector('[data-panel]');
+        collapseBtn.addEventListener('click', function () {
+          var collapsed = panelEl.classList.toggle('is-collapsed');
+          collapseBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+          collapseBtn.setAttribute('aria-label', collapsed ? 'Expand panel' : 'Collapse panel');
+          self.railCurrent = -1; // re-centre the rail at the new size
+        });
+      }
+
       this.soundOn = false;
       var soundBtn = this.querySelector('[data-action="toggle-sound"]');
       if (soundBtn) {

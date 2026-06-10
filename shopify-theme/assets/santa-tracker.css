@@ -219,15 +219,84 @@ html.santa-live-active .santa-tracker__inner {
   display: flex;
   flex-direction: column;
   gap: var(--space-200);
-  width: min(23rem, calc(100vw - 2 * var(--space-400)));
+  width: min(18rem, calc(100vw - 2 * var(--space-400)));
   max-height: min(40rem, calc(100vh - 3rem));
   padding: var(--space-250) var(--space-300);
+  transition: width 0.3s ease;
   border-radius: var(--radius-l);
   background: linear-gradient(180deg, rgba(11, 22, 48, 0.82), rgba(8, 16, 38, 0.78));
   border: 1px solid rgba(250, 204, 85, 0.16);
   backdrop-filter: blur(12px);
   box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.55);
   text-align: left;
+}
+
+/* Collapse / expand tab on the panel's right edge */
+.santa-live__collapse {
+  position: absolute;
+  top: 50%;
+  right: -1.5rem;
+  transform: translateY(-50%);
+  width: 1.5rem;
+  height: 4rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(250, 204, 85, 0.16);
+  border-left: 0;
+  border-radius: 0 var(--radius-m) var(--radius-m) 0;
+  background: rgba(11, 22, 48, 0.82);
+  backdrop-filter: blur(12px);
+  color: var(--c-neutral-50);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.santa-live__collapse-icon {
+  transition: transform 0.3s ease;
+}
+
+.santa-live__panel.is-collapsed .santa-live__collapse-icon {
+  transform: rotate(180deg);
+}
+
+/* Collapsed: just the logo + a compact city list */
+.santa-live__panel.is-collapsed {
+  width: min(11.5rem, calc(100vw - 2 * var(--space-400)));
+}
+
+.santa-live__panel.is-collapsed .santa-live__clock,
+.santa-live__panel.is-collapsed .santa-live__status,
+.santa-live__panel.is-collapsed .santa-you,
+.santa-live__panel.is-collapsed .santa-live__foot,
+.santa-live__panel.is-collapsed .santa-live__cta {
+  display: none;
+}
+
+.santa-live__panel.is-collapsed .santa-rail__row {
+  padding: 0.28rem 0;
+}
+
+.santa-live__panel.is-collapsed .santa-rail__city {
+  font-size: var(--fz-t);
+}
+
+.santa-live__panel.is-collapsed .santa-rail__region {
+  font-size: 0.6rem;
+}
+
+.santa-live__panel.is-collapsed .santa-rail__row.is-current .santa-rail__city {
+  font-size: var(--fz-s);
+}
+
+.santa-live__panel.is-collapsed .santa-rail__city::after,
+.santa-live__panel.is-collapsed .santa-rail__row.is-current.is-delivering .santa-rail__city::after {
+  display: none; /* hide NOW/NEXT pills in the narrow view */
+}
+
+.santa-live__panel.is-collapsed .santa-tracker__logo img {
+  max-width: 84px;
 }
 
 .santa-live__head {
@@ -646,6 +715,8 @@ html.santa-live-active .santa-tracker__inner {
   }
 
   .santa-rail { max-height: 38vh; }
+
+  .santa-live__collapse { display: none; } /* sheet uses the banner toggle instead */
 
   .santa-live.is-panel-open .santa-live__panel {
     transform: translate(-50%, 0);
