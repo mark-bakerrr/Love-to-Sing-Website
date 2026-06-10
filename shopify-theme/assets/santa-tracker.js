@@ -167,6 +167,24 @@
     return String(s).replace(/[&<>"']/g, function (c) { return HTML_ESCAPES[c]; });
   }
 
+  // Soft round sprite so stars/sparkles render as glowing dots, not squares
+  var _discTex = null;
+  function discTexture() {
+    if (_discTex) return _discTex;
+    var c = document.createElement('canvas');
+    c.width = c.height = 64;
+    var x = c.getContext('2d');
+    var g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.25, 'rgba(255,255,255,0.85)');
+    g.addColorStop(0.55, 'rgba(255,255,255,0.25)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = g;
+    x.fillRect(0, 0, 64, 64);
+    _discTex = new THREE.CanvasTexture(c);
+    return _discTex;
+  }
+
   // Standard three.js equirectangular mapping (lng 0 faces -X)
   function latLngToV3(lat, lng, r) {
     var phi = toRad(90 - lat);
@@ -232,17 +250,26 @@
     'void main() {',
     '  vec3 n = normalize(vNormal);',
     '  float sun = dot(n, sunDir);',
-    '  float dayMix = smoothstep(-0.12, 0.30, sun);',
     '  vec3 day = texture2D(dayTex, vUv).rgb;',
-    '  vec3 night = texture2D(nightTex, vUv).rgb;',
-    '  vec3 cityGlow = night * vec3(1.25, 1.12, 0.75) * 2.4;',
-    '  vec3 col = mix(cityGlow, day, dayMix);',
+    '  vec3 lights = texture2D(nightTex, vUv).rgb;',
+    // crisp, bright daylight (lifted like the NORAD globe)
+    '  day = pow(day, vec3(0.88)) * 1.18;',
+    // night side stays a VISIBLE cool-blue moonlit world (never black) + warm city lights
+    '  vec3 nightBase = day * vec3(0.40, 0.55, 1.0) * 0.55;',
+    '  vec3 cityGlow = lights * vec3(1.35, 1.15, 0.78) * 1.7;',
+    '  vec3 nightCol = nightBase + cityGlow;',
+    // soft, wide terminator so most of the disc reads bright and easy on the eyes
+    '  float dayMix = smoothstep(-0.25, 0.35, sun);',
+    '  vec3 col = mix(nightCol, day, dayMix);',
+    // ocean sun-glint on the lit side
     '  float ocean = texture2D(specTex, vUv).r;',
     '  vec3 viewDir = normalize(cameraPosition - vWorldPos);',
     '  vec3 refl = reflect(-sunDir, n);',
-    '  float spec = pow(max(dot(viewDir, refl), 0.0), 18.0) * ocean * dayMix;',
-    '  col += vec3(0.9, 0.95, 1.0) * spec * 0.6;',
-    '  col = mix(col, col * vec3(0.55, 0.62, 0.85) + cityGlow * 0.4, (1.0 - dayMix) * 0.5);',
+    '  float spec = pow(max(dot(viewDir, refl), 0.0), 20.0) * ocean * dayMix;',
+    '  col += vec3(0.85, 0.92, 1.0) * spec * 0.45;',
+    // gentle fresnel atmosphere brightening at the limb
+    '  float fres = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0);',
+    '  col += vec3(0.35, 0.55, 0.95) * fres * 0.5;',
     '  gl_FragColor = vec4(col, 1.0);',
     '}',
   ].join('\n');
@@ -454,13 +481,16 @@
       host.appendChild(renderer.domElement);
 
       var scene = new THREE.Scene();
-      var camera = new THREE.PerspectiveCamera(55, host.clientWidth / host.clientHeight, 0.01, 200);
+      var camera = new THREE.PerspectiveCamera(60, host.clientWidth / host.clientHeight, 0.01, 200);
 
       // Real sun direction so there's a genuine day/night terminator — Santa
       // delivers at local midnight, so he flies the dark side over city lights.
       var sun = new THREE.DirectionalLight(0xfff3d6, 1.2);
+      sun.intensity = 1.4;
+      sun.color.setHex(0xfff4e0);
       scene.add(sun);
-      scene.add(new THREE.AmbientLight(0x2b3a6b, 0.6)); // lifts the night side slightly
+      scene.add(new THREE.AmbientLight(0x4a5f9e, 0.95)); // bright, cool fill so models read clearly
+      scene.add(new THREE.HemisphereLight(0xbcd4ff, 0x1a2748, 0.55));
 
       var loader = new THREE.TextureLoader();
       var ds = this.dataset;
@@ -500,13 +530,13 @@
         scene.add(clouds);
       }
 
-      // Soft atmosphere halo
+      // Soft atmosphere halo (brighter blue rim)
       var atmosphere = new THREE.Mesh(
-        new THREE.SphereGeometry(GLOBE_R * 1.05, 64, 64),
+        new THREE.SphereGeometry(GLOBE_R * 1.06, 64, 64),
         new THREE.MeshBasicMaterial({
-          color: 0x5c8dff,
+          color: 0x6ba6ff,
           transparent: true,
-          opacity: 0.16,
+          opacity: 0.28,
           side: THREE.BackSide,
           blending: THREE.AdditiveBlending,
           depthWrite: false,
@@ -514,23 +544,46 @@
       );
       scene.add(atmosphere);
 
-      // Star field
-      var starCount = 1500;
-      var starPos = new Float32Array(starCount * 3);
-      for (var i = 0; i < starCount; i++) {
-        var u = Math.random() * 2 - 1; // uniform point on a sphere shell
-        var th = Math.random() * Math.PI * 2;
-        var s = Math.sqrt(1 - u * u);
-        var r = 30 + Math.random() * 50;
-        starPos[i * 3] = r * s * Math.cos(th);
-        starPos[i * 3 + 1] = r * u;
-        starPos[i * 3 + 2] = r * s * Math.sin(th);
+      // Star field — bright white pinpoints + twinkling gold sparkle stars
+      function sphereStars(count, rMin, rMax) {
+        var pos = new Float32Array(count * 3);
+        for (var i = 0; i < count; i++) {
+          var u = Math.random() * 2 - 1;
+          var th = Math.random() * Math.PI * 2;
+          var s = Math.sqrt(1 - u * u);
+          var r = rMin + Math.random() * (rMax - rMin);
+          pos[i * 3] = r * s * Math.cos(th);
+          pos[i * 3 + 1] = r * u;
+          pos[i * 3 + 2] = r * s * Math.sin(th);
+        }
+        var geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        return geo;
       }
-      var starGeo = new THREE.BufferGeometry();
-      starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-      scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({
-        color: 0xffffff, size: 0.35, sizeAttenuation: true, transparent: true, opacity: 0.85,
+      var disc = discTexture();
+      scene.add(new THREE.Points(sphereStars(1500, 30, 80), new THREE.PointsMaterial({
+        color: 0xffffff, size: 0.5, sizeAttenuation: true, transparent: true,
+        opacity: 0.95, map: disc, depthWrite: false,
       })));
+      var goldStarMat = new THREE.PointsMaterial({
+        color: 0xffe08a, size: 1.1, sizeAttenuation: true, transparent: true,
+        opacity: 0.9, map: disc, blending: THREE.AdditiveBlending, depthWrite: false,
+      });
+      scene.add(new THREE.Points(sphereStars(120, 28, 70), goldStarMat));
+
+      // Trailing gold "magic dust" behind the sleigh
+      var SP = 70;
+      var sparklePos = new Float32Array(SP * 3);
+      var sparkleCol = new Float32Array(SP * 3);
+      var sparkleGeo = new THREE.BufferGeometry();
+      sparkleGeo.setAttribute('position', new THREE.BufferAttribute(sparklePos, 3));
+      sparkleGeo.setAttribute('color', new THREE.BufferAttribute(sparkleCol, 3));
+      var sparkle = new THREE.Points(sparkleGeo, new THREE.PointsMaterial({
+        size: 0.04, vertexColors: true, transparent: true, map: disc,
+        blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
+      }));
+      sparkle.frustumCulled = false;
+      scene.add(sparkle);
 
       // Golden trail of visited legs (preallocated, revealed via draw range)
       var maxTrail = (this.route.stops.length - 1) * ARC_STEPS + 1;
@@ -570,6 +623,12 @@
         dotPos: dotPos,
         dotCount: 0,
         sleigh: sleigh,
+        goldStarMat: goldStarMat,
+        sparkleGeo: sparkleGeo,
+        sparklePos: sparklePos,
+        sparkleCol: sparkleCol,
+        sparkleHead: 0,
+        sparkleCount: SP,
         lastForward: new THREE.Vector3(0, 0, 1),
         camLook: new THREE.Vector3(),
         camInit: false,
@@ -658,70 +717,151 @@
       if (this.followBtn) this.followBtn.hidden = true;
     }
 
-    // Low-poly sleigh + reindeer built from primitives, facing +Z (direction of travel)
+    // Santa's sleigh + an 8-reindeer team in harness, built from primitives.
+    // Faces +Z (direction of travel); the team strings out ahead of the sleigh.
     buildSleigh() {
       var g = new THREE.Group();
-      var red = new THREE.MeshPhongMaterial({ color: 0xc92a26, shininess: 30 });
-      var darkRed = new THREE.MeshPhongMaterial({ color: 0x8f1714 });
-      var gold = new THREE.MeshPhongMaterial({ color: 0xfacc55, emissive: 0x7a5c10 });
-      var green = new THREE.MeshPhongMaterial({ color: 0x3f7a45 });
-      var skin = new THREE.MeshPhongMaterial({ color: 0xffe3c4 });
-      var white = new THREE.MeshPhongMaterial({ color: 0xfdefef });
-      var brown = new THREE.MeshPhongMaterial({ color: 0x8a5a33 });
+      var legs = [];
 
-      // Sleigh body
-      var body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.28, 1.15), red);
-      body.position.y = 0.16;
-      g.add(body);
-      var back = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.26, 0.12), darkRed);
-      back.position.set(0, 0.4, -0.5);
-      g.add(back);
+      var M = {
+        red: new THREE.MeshPhongMaterial({ color: 0xd12f2a, shininess: 60, specular: 0x552020 }),
+        darkRed: new THREE.MeshPhongMaterial({ color: 0x8f1714 }),
+        gold: new THREE.MeshPhongMaterial({ color: 0xffce4d, emissive: 0x6e5210, shininess: 90, specular: 0xffffff }),
+        green: new THREE.MeshPhongMaterial({ color: 0x3f8a4d }),
+        skin: new THREE.MeshPhongMaterial({ color: 0xffd9b3 }),
+        white: new THREE.MeshPhongMaterial({ color: 0xfdfdfd }),
+        belt: new THREE.MeshPhongMaterial({ color: 0x2a2a2a, shininess: 40 }),
+        fur: new THREE.MeshPhongMaterial({ color: 0x9c6b3f }),
+        furLight: new THREE.MeshPhongMaterial({ color: 0xc89a6a }),
+        antler: new THREE.MeshPhongMaterial({ color: 0xe6d4ad }),
+        hoof: new THREE.MeshPhongMaterial({ color: 0x3a2a1c }),
+        nose: new THREE.MeshPhongMaterial({ color: 0xff3b30, emissive: 0xd11b10, shininess: 100 }),
+      };
+      function mesh(geo, mat, x, y, z) {
+        var m = new THREE.Mesh(geo, mat);
+        m.position.set(x || 0, y || 0, z || 0);
+        return m;
+      }
 
-      // Runners
+      /* ---- Sleigh ---- */
+      var sleigh = new THREE.Group();
+      // hull
+      var hull = mesh(new THREE.BoxGeometry(0.52, 0.34, 0.82), M.red, 0, 0.2, -0.1);
+      sleigh.add(hull);
+      // swept-up front
+      var front = mesh(new THREE.BoxGeometry(0.52, 0.5, 0.26), M.red, 0, 0.34, 0.34);
+      front.rotation.x = -0.6;
+      sleigh.add(front);
+      var curl = mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.54, 16, 1, false, 0, Math.PI), M.red, 0, 0.5, 0.48);
+      curl.rotation.z = Math.PI / 2;
+      sleigh.add(curl);
+      // high back
+      sleigh.add(mesh(new THREE.BoxGeometry(0.52, 0.42, 0.1), M.red, 0, 0.42, -0.48));
+      // gold trim along the top rails
       [-0.26, 0.26].forEach(function (x) {
-        var runner = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.05, 1.5), gold);
-        runner.position.set(x, -0.04, 0.05);
-        g.add(runner);
+        sleigh.add(mesh(new THREE.BoxGeometry(0.04, 0.05, 0.95), M.gold, x, 0.37, -0.05));
       });
+      // runners (curved up at the front)
+      [-0.24, 0.24].forEach(function (x) {
+        sleigh.add(mesh(new THREE.BoxGeometry(0.05, 0.05, 1.15), M.gold, x, -0.02, 0));
+        var tip = mesh(new THREE.BoxGeometry(0.05, 0.05, 0.3), M.gold, x, 0.06, 0.6);
+        tip.rotation.x = -0.7;
+        sleigh.add(tip);
+        sleigh.add(mesh(new THREE.BoxGeometry(0.04, 0.16, 0.04), M.gold, x, 0.08, 0.32));
+      });
+      // present sack with a gold star
+      var sack = mesh(new THREE.SphereGeometry(0.2, 14, 12), M.green, 0, 0.4, -0.18);
+      sack.scale.set(1, 1.15, 1);
+      sleigh.add(sack);
+      sleigh.add(mesh(new THREE.IcosahedronGeometry(0.05, 0), M.gold, 0.1, 0.56, -0.1));
 
-      // Santa (body, head, hat)
-      var santa = new THREE.Mesh(new THREE.SphereGeometry(0.17, 16, 12), red);
-      santa.position.set(0, 0.4, -0.22);
-      g.add(santa);
-      var head = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 12), skin);
-      head.position.set(0, 0.58, -0.22);
-      g.add(head);
-      var hat = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.16, 12), red);
-      hat.position.set(0, 0.7, -0.22);
-      g.add(hat);
-      var bobble = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), white);
-      bobble.position.set(0, 0.79, -0.22);
-      g.add(bobble);
+      /* ---- Santa ---- */
+      var santa = new THREE.Group();
+      santa.add(mesh(new THREE.SphereGeometry(0.18, 16, 14), M.red, 0, 0.46, -0.12));
+      santa.add(mesh(new THREE.BoxGeometry(0.34, 0.07, 0.34), M.belt, 0, 0.42, -0.12)); // belt
+      santa.add(mesh(new THREE.BoxGeometry(0.08, 0.08, 0.02), M.gold, 0, 0.42, 0.06)); // buckle
+      santa.add(mesh(new THREE.SphereGeometry(0.11, 16, 14), M.skin, 0, 0.66, -0.1)); // head
+      var beard = mesh(new THREE.SphereGeometry(0.1, 14, 12), M.white, 0, 0.62, -0.02);
+      beard.scale.set(1, 1.1, 0.7);
+      santa.add(beard);
+      santa.add(mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.05, 16), M.white, 0, 0.73, -0.1)); // hat brim
+      santa.add(mesh(new THREE.ConeGeometry(0.11, 0.22, 16), M.red, 0, 0.86, -0.12)); // hat
+      var bobble = mesh(new THREE.SphereGeometry(0.045, 10, 10), M.white, 0, 0.97, -0.12);
+      santa.add(bobble);
+      sleigh.add(santa);
+      g.add(sleigh);
 
-      // Present sack
-      var sack = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 10), green);
-      sack.position.set(0, 0.36, 0.18);
-      sack.scale.y = 1.15;
-      g.add(sack);
-
-      // Reindeer pairs out front
-      [0.85, 1.35].forEach(function (z) {
-        [-0.18, 0.18].forEach(function (x) {
-          var deerBody = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.34), brown);
-          deerBody.position.set(x, 0.12, z);
-          g.add(deerBody);
-          var deerHead = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 0.12), brown);
-          deerHead.position.set(x, 0.24, z + 0.2);
-          g.add(deerHead);
+      /* ---- Reindeer ---- */
+      function makeReindeer(rudolph) {
+        var r = new THREE.Group();
+        var body = mesh(new THREE.BoxGeometry(0.16, 0.17, 0.4), M.fur, 0, 0, 0);
+        body.geometry.translate(0, 0, 0);
+        r.add(body);
+        r.add(mesh(new THREE.SphereGeometry(0.11, 12, 10), M.fur, 0, 0.01, 0.2)); // chest
+        r.add(mesh(new THREE.BoxGeometry(0.13, 0.1, 0.34), M.furLight, 0, -0.06, 0)); // belly
+        // neck + head
+        var neck = mesh(new THREE.BoxGeometry(0.09, 0.18, 0.09), M.fur, 0, 0.12, 0.24);
+        neck.rotation.x = -0.5;
+        r.add(neck);
+        var head = mesh(new THREE.BoxGeometry(0.11, 0.12, 0.15), M.fur, 0, 0.24, 0.32);
+        r.add(head);
+        r.add(mesh(new THREE.BoxGeometry(0.07, 0.07, 0.08), M.furLight, 0, 0.21, 0.42)); // muzzle
+        r.add(mesh(new THREE.SphereGeometry(rudolph ? 0.04 : 0.025, 10, 10), rudolph ? M.nose : M.hoof, 0, 0.21, 0.47));
+        // ears
+        [-0.06, 0.06].forEach(function (x) {
+          r.add(mesh(new THREE.BoxGeometry(0.03, 0.05, 0.02), M.furLight, x, 0.3, 0.3));
         });
-      });
-      // Rudolph's nose on the lead-left reindeer
-      var nose = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8),
-        new THREE.MeshPhongMaterial({ color: 0xff3b30, emissive: 0xb00000 }));
-      nose.position.set(-0.18, 0.24, 1.62);
-      g.add(nose);
+        // antlers (a main prong + one branch each side)
+        [-0.05, 0.05].forEach(function (x) {
+          var a = mesh(new THREE.CylinderGeometry(0.012, 0.018, 0.18, 6), M.antler, x, 0.36, 0.3);
+          a.rotation.x = -0.3; a.rotation.z = x > 0 ? -0.3 : 0.3;
+          r.add(a);
+          var b = mesh(new THREE.CylinderGeometry(0.008, 0.012, 0.09, 6), M.antler, x * 1.8, 0.43, 0.31);
+          b.rotation.z = x > 0 ? -0.8 : 0.8;
+          r.add(b);
+        });
+        // tail
+        r.add(mesh(new THREE.BoxGeometry(0.05, 0.07, 0.04), M.furLight, 0, 0.04, -0.21));
+        // 4 legs (pivot at hip so they can gallop)
+        [[-0.07, 0.16], [0.07, 0.16], [-0.07, -0.14], [0.07, -0.14]].forEach(function (c) {
+          var hip = new THREE.Group();
+          hip.position.set(c[0], -0.08, c[1]);
+          var leg = mesh(new THREE.BoxGeometry(0.04, 0.2, 0.04), M.fur, 0, -0.1, 0);
+          hip.add(leg);
+          hip.add(mesh(new THREE.BoxGeometry(0.045, 0.04, 0.06), M.hoof, 0, -0.2, 0.01));
+          r.add(hip);
+          legs.push(hip);
+        });
+        return r;
+      }
 
-      g.scale.setScalar(0.05);
+      // 4 pairs strung out ahead; Rudolph leads front-left
+      var rows = [1.0, 1.7, 2.4, 3.1];
+      for (var ri = 0; ri < rows.length; ri++) {
+        [-0.22, 0.22].forEach(function (x) {
+          var isRudolph = (ri === rows.length - 1 && x < 0);
+          var deer = makeReindeer(isRudolph);
+          deer.position.set(x, 0.06, rows[ri]);
+          g.add(deer);
+        });
+      }
+
+      // reins: two lines from the sleigh up to the lead pair
+      var reinMat = new THREE.LineBasicMaterial({ color: 0x6b4a2a, transparent: true, opacity: 0.85 });
+      [-0.2, 0.2].forEach(function (x) {
+        var pts = [
+          new THREE.Vector3(x * 0.9, 0.34, 0.45),
+          new THREE.Vector3(x, 0.16, 1.0),
+          new THREE.Vector3(x, 0.16, 1.7),
+          new THREE.Vector3(x, 0.16, 2.4),
+          new THREE.Vector3(x, 0.18, 3.1),
+        ];
+        var lg = new THREE.BufferGeometry().setFromPoints(pts);
+        g.add(new THREE.Line(lg, reinMat));
+      });
+
+      g.userData.legs = legs;
+      g.scale.setScalar(0.055);
       return g;
     }
 
@@ -778,6 +918,16 @@
       var facing = p.clone().add(forward);
       T.sleigh.lookAt(facing);
 
+      // Galloping reindeer legs
+      var legs = T.sleigh.userData.legs;
+      if (legs) {
+        for (var li = 0; li < legs.length; li++) {
+          // diagonal pairs swing together; legs 0,3 vs 1,2
+          var phase = (li === 0 || li === 3) ? 0 : Math.PI;
+          legs[li].rotation.x = Math.sin(t / 90 + phase) * 0.5;
+        }
+      }
+
       if (this.freeMode && T.controls) {
         // User is steering — let OrbitControls own the camera
         T.controls.update();
@@ -791,7 +941,16 @@
         else T.smoothFwd.lerp(forward, 0.08).normalize();
         var sf = T.smoothFwd;
 
-        var desired = p.clone().addScaledVector(sf, -0.5).addScaledVector(up, 0.34);
+        // Hero chase: close behind, a little above, and slightly over the
+        // shoulder so Santa + the full reindeer team read in profile, with the
+        // bright globe curving below. The side offset is in Santa's local frame
+        // so it rotates with his heading (stays a consistent over-the-shoulder).
+        var right = T.rightVec || (T.rightVec = new THREE.Vector3());
+        right.crossVectors(sf, up).normalize();
+        var desired = p.clone()
+          .addScaledVector(sf, -0.42)
+          .addScaledVector(up, 0.2)
+          .addScaledVector(right, 0.16);
         if (desired.length() < GLOBE_R * 1.05) desired.setLength(GLOBE_R * 1.05);
 
         if (!T.camInit) {
@@ -801,8 +960,29 @@
           T.camera.position.lerp(desired, 0.1);
         }
         T.camera.up.copy(up); // local vertical → level horizon, no roll lag
-        T.camera.lookAt(p.clone().addScaledVector(sf, 0.5).addScaledVector(up, -0.1));
+        T.camera.lookAt(p.clone().addScaledVector(sf, 0.3).addScaledVector(up, -0.01));
       }
+
+      // Trailing gold magic dust behind the sleigh
+      if (T.sparklePos) {
+        var hp = (Math.sin(t * 12.9898) * 43758.5453) % 1; // cheap deterministic jitter
+        var h = T.sparkleHead;
+        var jitterUp = (hp - 0.5) * 0.03;
+        var sp = p.clone().addScaledVector(up, 0.004 + jitterUp).addScaledVector(forward, -0.02);
+        T.sparklePos[h * 3] = sp.x + ((t * 0.7 % 1) - 0.5) * 0.02;
+        T.sparklePos[h * 3 + 1] = sp.y;
+        T.sparklePos[h * 3 + 2] = sp.z;
+        T.sparkleCol[h * 3] = 1.0; T.sparkleCol[h * 3 + 1] = 0.82; T.sparkleCol[h * 3 + 2] = 0.35;
+        for (var si = 0; si < T.sparkleCount; si++) {
+          T.sparkleCol[si * 3] *= 0.95; T.sparkleCol[si * 3 + 1] *= 0.95; T.sparkleCol[si * 3 + 2] *= 0.95;
+        }
+        T.sparkleHead = (h + 1) % T.sparkleCount;
+        T.sparkleGeo.attributes.position.needsUpdate = true;
+        T.sparkleGeo.attributes.color.needsUpdate = true;
+      }
+
+      // Gentle twinkle on the gold sparkle stars
+      if (T.goldStarMat) T.goldStarMat.opacity = 0.7 + Math.sin(t / 600) * 0.25;
 
       // Real sun direction for this instant → genuine day/night terminator.
       var ss = subSolarPoint(this.now());
