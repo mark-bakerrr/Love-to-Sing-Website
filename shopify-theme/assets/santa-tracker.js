@@ -515,20 +515,8 @@
       var earth = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R, 96, 96), earthMat);
       scene.add(earth);
 
-      // Slowly drifting cloud shell, lit by the real sun (dark on the night side)
+      // Clouds removed — they obscured the continents and city lights.
       var clouds = null;
-      if (ds.earthClouds) {
-        clouds = new THREE.Mesh(
-          new THREE.SphereGeometry(GLOBE_R * 1.006, 96, 96),
-          new THREE.MeshPhongMaterial({
-            alphaMap: tex(ds.earthClouds),
-            transparent: true,
-            opacity: 0.85,
-            depthWrite: false,
-          })
-        );
-        scene.add(clouds);
-      }
 
       // Soft atmosphere halo (brighter blue rim)
       var atmosphere = new THREE.Mesh(
@@ -990,8 +978,6 @@
       T.earthMat.uniforms.sunDir.value.copy(sunDir);
       T.sun.position.copy(sunDir).multiplyScalar(5); // lights the cloud shell
 
-      // Clouds drift slowly westward
-      if (T.clouds) T.clouds.rotation.y = t * 0.000012;
 
       // Reveal trail + dots for newly visited stops (and chime on arrival).
       // The first frame may catch up many stops at once (page loaded mid-route)
