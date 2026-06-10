@@ -192,17 +192,21 @@ This is what makes people feel it's *for them* — and what Google nails.
 
 ## 5. Phased roadmap
 
-**Phase 1 — "Looks/feels premium" (quick wins, low risk)**
-1. Day/night Earth shader + city lights (biggest visual payoff).
-2. Animated clouds + specular oceans + bloom on Rudolph/lights.
-3. Original looping music + mute toggle + arrival bell SFX.
-4. Smooth odometer counters for presents/distance.
+**Phase 1 — "Looks/feels premium" (quick wins, low risk)** — ✅ SHIPPED
+1. ✅ Day/night Earth shader + city lights (driven by a real sub‑solar point;
+   Santa flies the midnight terminator over the lit cities).
+2. ✅ Animated clouds + specular oceans + cool night tint. (Bloom deferred —
+   needs post‑processing modules not in the core three.js build we self‑host.)
+3. ✅ Looping music (URL setting) + mute‑by‑default 🔊 toggle + synth arrival bells.
+4. ✅ Smooth odometer for presents + new Distance‑travelled stat.
 
-**Phase 2 — "It's about me" (personalisation + interactivity)**
-5. Geolocation → your city → live "Santa reaches you in…" + local clock.
-6. Draggable/free‑orbit globe + "Follow Santa" snap‑back.
-7. Timeline scrubber to scrub the whole journey.
-8. Click‑a‑city cards (local time, arrival, fun fact).
+**Phase 2 — "It's about me" (personalisation + interactivity)** — ✅ SHIPPED
+5. ✅ Geolocation (nearest delivery stop) + 200‑city picker fallback → live
+   "Santa reaches you in HH:MM:SS" / "visited at" + live local clock.
+6. ✅ Draggable free‑orbit globe (OrbitControls) + "Follow Santa" + 9s idle snap‑back.
+7. ✅ Timeline scrubber — drag to scrub the whole journey, play‑from‑there, "● Live".
+8. ⏳ Click‑a‑city cards (local time, arrival, fun fact) — deferred; the city
+   picker covers most of the value. Good first task for the next pass.
 
 **Phase 3 — "Most epic" (depth + reach)**
 9. glTF sleigh + 8 reindeer + particle trail.
