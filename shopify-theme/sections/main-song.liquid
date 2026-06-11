@@ -115,18 +115,44 @@
             {%- endif -%}
           {%- endcomment -%}
 
-          <div class="main-song__actions">
+          <div class="main-song__actions main-song__actions--shop">
             <button
               type="button"
-              class="button button--full"
+              class="button button--full main-song__cta"
               data-lts-shop-trigger
               aria-haspopup="dialog"
               aria-expanded="false"
             >
-              <span>{% render 'icon-cart' %}{{ 'song.get_the_music' | t }}</span>
+              <span>{% render 'icon-cart' %}{{ 'song.get_the_music' | t }}<span class="main-song__cta-price">&nbsp;&mdash; {{ 'song.from_price' | t }}</span></span>
             </button>
-            <p class="main-song__actions-note" style="margin-top: .5rem; font-size: .85rem; opacity: .72; text-align: center;">{{ 'song.get_the_music_note' | t }}</p>
+            <p class="main-song__actions-note">{{ 'song.get_the_music_note' | t }}</p>
           </div><!-- /.main-song__actions -->
+          {%- comment -%} Styles for the shop-drawer CTA above — remove together with it. {%- endcomment -%}
+          {%- style -%}
+            .main-song__actions--shop .main-song__cta,
+            .main-song__actions--shop .main-song__actions-note {
+              grid-column: 1 / -1;
+            }
+            .main-song__actions--shop .main-song__cta,
+            .main-song__actions--shop .main-song__cta span {
+              font-size: 1.6rem;
+            }
+            .main-song__cta-price {
+              font-weight: 400;
+              opacity: 0.85;
+            }
+            .main-song__actions-note {
+              font-size: 1.3rem;
+              letter-spacing: 0.02em;
+              opacity: 0.75;
+              text-align: center;
+            }
+            @media (max-width: 767px) {
+              .main-song__actions--shop .main-song__cta span {
+                font-size: 1.6rem;
+              }
+            }
+          {%- endstyle -%}
         </div><!-- /.main-song__info -->
       </div><!-- /.main-song__grid -->
     </div><!-- /.container -->
