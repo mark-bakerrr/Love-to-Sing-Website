@@ -123,7 +123,7 @@
               aria-haspopup="dialog"
               aria-expanded="false"
             >
-              <span>{% render 'icon-cart' %}{{ 'song.get_the_music' | t }}<span class="main-song__cta-price">&nbsp;&mdash; {{ 'song.from_price' | t }}</span></span>
+              <span><span class="main-song__cta-label">{% render 'icon-cart' %}{{ 'song.get_the_music' | t }}</span><span class="main-song__cta-price">&nbsp;&mdash; {{ 'song.from_price' | t }}</span></span>
             </button>
             <p class="main-song__actions-note">{{ 'song.get_the_music_note' | t }}</p>
           </div><!-- /.main-song__actions -->
@@ -137,9 +137,30 @@
             .main-song__actions--shop .main-song__cta span {
               font-size: 1.6rem;
             }
+            /* Label and price are atomic units: when the column is too narrow
+               for one line, the price wraps below as a whole, centered —
+               never mid-word. */
+            .main-song__actions--shop .main-song__cta span {
+              flex-wrap: wrap;
+              justify-content: center;
+              row-gap: 0;
+              line-height: 1.4;
+            }
+            .main-song__cta-label {
+              display: inline-flex;
+              align-items: center;
+              gap: 1.2rem;
+              white-space: nowrap;
+            }
             .main-song__cta-price {
               font-weight: 400;
               opacity: 0.85;
+              white-space: nowrap;
+            }
+            /* Balance the video against a taller info column on tablet widths
+               (it otherwise top-aligns and the CTA lands well below it). */
+            .main-song__media {
+              align-self: center;
             }
             .main-song__actions-note {
               font-size: 1.3rem;

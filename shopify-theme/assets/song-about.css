@@ -9,13 +9,13 @@
   padding: 6.4rem;
   border-radius: var(--radius-m);
 
+  /* Stack at the same breakpoint the padding tightens: below 1024px the
+     categories aside is far shorter than the content, leaving a dead white
+     column to the right of the video. */
   @media (max-width: 1023px) {
+    grid-template-columns: 1fr;
     padding: 3.2rem;
     gap: 4rem;
-  }
-
-  @media (max-width: 767px) {
-    grid-template-columns: 1fr;
   }
 }
 
