@@ -11,8 +11,10 @@
   assign thumbnail = product.images[0] | image_url: width: 1080
   assign description = product.description
 
-  assign album = product.metafields.custom.album_product.value
-  assign video_purchase_url = product.metafields.my_fields.video_purchase_url
+  # WS3: `album` / `video_purchase_url` assigns removed — the shop drawer
+  # replaced the buttons that used them. To revert, restore these assigns:
+  #   album = product.metafields.custom.album_product.value
+  #   video_purchase_url = product.metafields.my_fields.video_purchase_url
   assign pdf_file = product.metafields.custom.pdf_lyric_sheet_download | file_url
   assign pdf = pdf_file | default: product.metafields.global.pdf
   assign lyrics = product.metafields.my_fields.song_lyrics
@@ -91,27 +93,40 @@
             </p><!-- /.main-song__description -->
           {%- endif -%}
 
-          {%- if album != blank or video_purchase_url != blank -%}
-            <div class="main-song__actions">
-              {%- if album != blank -%}
-                <a href="{{- album.url -}}" class="button button--full">
-                  <span>
-                    {% render 'icon-cart' %}
+          {%- comment -%}
+            WS3 shop drawer (epic #158): the album / buy-video buttons are
+            replaced by a single "Get the music" trigger that opens the shop
+            drawer (Shop Drawer app embed must be enabled for this theme).
+            Original buttons preserved below for instant revert.
 
-                    {{- 'song.buy_album' | t -}}
-                  </span>
-                </a><!-- /.button -->
-              {%- endif -%}
+            {%- if album != blank or video_purchase_url != blank -%}
+              <div class="main-song__actions">
+                {%- if album != blank -%}
+                  <a href="{{- album.url -}}" class="button button--full">
+                    <span>{% render 'icon-cart' %}{{- 'song.buy_album' | t -}}</span>
+                  </a>
+                {%- endif -%}
+                {%- if video_purchase_url != blank -%}
+                  <a href="{{- video_purchase_url -}}" class="button button--secondary button--full">
+                    <span>{{- 'song.buy_video_song' | t -}}</span>
+                  </a>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          {%- endcomment -%}
 
-              {%- if video_purchase_url != blank -%}
-                <a href="{{- video_purchase_url -}}" class="button button--secondary button--full">
-                  <span>
-                    {{- 'song.buy_video_song' | t -}}
-                  </span>
-                </a><!-- /.button button--secondary -->
-              {%- endif -%}
-            </div><!-- /.main-song__actions -->
-          {%- endif -%}
+          <div class="main-song__actions">
+            <button
+              type="button"
+              class="button button--full"
+              data-lts-shop-trigger
+              aria-haspopup="dialog"
+              aria-expanded="false"
+            >
+              <span>{% render 'icon-cart' %}{{ 'song.get_the_music' | t }}</span>
+            </button>
+            <p class="main-song__actions-note" style="margin-top: .5rem; font-size: .85rem; opacity: .72; text-align: center;">{{ 'song.get_the_music_note' | t }}</p>
+          </div><!-- /.main-song__actions -->
         </div><!-- /.main-song__info -->
       </div><!-- /.main-song__grid -->
     </div><!-- /.container -->
