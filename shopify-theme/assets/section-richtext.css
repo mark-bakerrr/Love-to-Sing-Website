@@ -1,0 +1,62 @@
+/* ------------------------------------------------------------ *\
+  section-richtext
+\* ------------------------------------------------------------ */
+
+.section-richtext--border-top {
+  border-top: 1px solid var(--c-neutral-200);
+}
+
+.section-richtext--border-bottom {
+  border-bottom: 1px solid var(--c-neutral-200);
+}
+
+.section-richtext .section__eyebrow {
+  font-weight: 700;
+  font-size: var(--fz-r);
+  margin-bottom: 4rem;
+}
+
+.section-richtext .section__title {
+  color: inherit;
+  max-width: 113rem;
+}
+
+.section-richtext.center .section__title {
+  margin-inline: auto;
+}
+
+.section-richtext.right .section__title {
+  margin-left: auto;
+}
+
+.section-richtext .container {
+  position: relative;
+}
+
+.section-richtext .section__decoration {
+  position: absolute;
+  left: 18.3%;
+  top: -6.8rem;
+  width: 7rem;
+}
+
+.section-richtext .section__decoration svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.section-richtext .section__decoration--bottom-right {
+  top: auto;
+  bottom: -6rem;
+  left: auto;
+  right: 17%;
+
+  svg {
+    rotate: 64deg;
+  }
+}
+
+.section-richtext .section__decoration.small {
+  width: 5rem;
+}

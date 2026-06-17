@@ -1,0 +1,33 @@
+<nav class="breadcrumbs" role="navigation" aria-label="{{- 'general.breadcrumbs.label' | t -}}">
+  <ul class="list-unstyled list-flex" role="list">
+    <li>
+      <a href="{{- routes.root_url -}}" class="inline-unstyled-link link-hover-fade">
+        {{- 'general.breadcrumbs.home' | t -}}
+      </a>
+    </li>
+
+    <li>
+      <i>
+        {%- render 'icon', icon: 'chevron-right' -%}
+      </i>
+    </li>
+
+    {%- if product and collection -%}
+      <li>
+        <a href="{{- collection.url -}}" class="inline-unstyled-link link-hover-fade">
+          {{- collection.title | escape -}}
+        </a>
+      </li>
+
+      <li>
+        <i>
+          {%- render 'icon', icon: 'chevron-right' -%}
+        </i>
+      </li>
+    {%- endif -%}
+
+    <li>
+      <span>{{- page_title | escape -}}</span>
+    </li>
+  </ul>
+</nav>

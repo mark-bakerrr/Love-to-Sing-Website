@@ -1,0 +1,172 @@
+{%- comment -%}
+  Accepts:
+
+  - menu {Linklist}
+{%- endcomment -%}
+
+<header-drawer class="header-drawer large-up-hide" data-breakpoint="990">
+  <details id="Details-menu-drawer-container" class="header-drawer__container">
+    <summary class="header-drawer__button focus-inset" aria-label="{{- 'accessibility.menu' | t -}}">
+      {%- render 'icon', icon: 'burger' -%}
+    </summary><!-- /.header-drawer__button focus-inset -->
+
+    <div class="header-drawer__content" id="menu-drawer" tabindex="-1">
+      <div class="header-drawer__inner">
+        <div class="header-drawer__head">
+          <button
+            class="button-reset"
+            header-drawer="close-button"
+          >
+            <span class="visually-hidden">
+              {{- 'accessibility.close' | t -}}
+            </span><!-- /.visually-hidden -->
+
+            {%- render 'icon-close' -%}
+          </button><!-- /.button-reset -->
+
+          {%- if shop.customer_accounts_enabled -%}
+            <div class="header-drawer__header-utils">
+              <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" class="header__utils-link full-unstyled-link focus-inset" title="{%- if customer -%}{{ 'accessibility.account' | t }}{%- else -%}{{ 'accessibility.sign_in' | t }}{%- endif -%}">
+                {%- render 'icon', icon: 'user' -%}
+              </a>
+            </div><!-- /.header-drawer__header-utils -->
+          {%- endif -%}
+        </div><!-- /.header-drawer__head -->
+
+        <div class="header-drawer__search">
+          <predictive-search class="no-js-hidden header-drawer__predictive-search">
+            <div class="header-drawer__predictive-search-wrapper motion-reduce">
+              {%-
+                liquid
+                capture search_input_attr
+                  echo 'role="combobox" '
+                  echo 'aria-expanded="false" '
+                  echo 'aria-owns="predictive-search-results-list" '
+                  echo 'aria-controls="predictive-search-results-list" '
+                  echo 'aria-haspopup="listbox" '
+                  echo 'aria-autocomplete="list" '
+                  echo 'autocorrect="off" '
+                  echo 'autocomplete="off" '
+                  echo 'autocapitalize="off" '
+                  echo 'spellcheck="false"'
+                endcapture
+
+                render 'form-search', namespace: 'Header', input_attr: search_input_attr, class: 'header-drawer__search-form'
+              -%}
+
+              <predictive-search-results class="header-drawer__search-results"></predictive-search-results>
+            </div>
+          </predictive-search>
+        </div><!-- /.header-drawer__search -->
+
+        <nav class="header-drawer__nav">
+          <ul class="header-drawer__menu list-unstyled" role="list">
+            {%- for link in menu.links -%}
+              <li class="header-drawer__menu-item">
+                {%- if link.links.size > 0 -%}
+                  <details id="Details-menu-drawer-menu-item-{{- forloop.index -}}">
+                    <summary class="header-drawer__link focus-inset{% if link.child_active %} is-current{% endif %}">
+                      <span>
+                        {{- link.title | escape -}}
+                      </span>
+
+                      <i>
+                        {%- render 'icon', icon: 'chevron-right' -%}
+                      </i>
+                    </summary>
+
+                    <div class="header-drawer__submenu" id="link-{{- link.title | handle -}}" tabindex="-1">
+                      <ul class="header-drawer__menu list-unstyled" role="list" tabindex="-1">
+                        <li>
+                          <button
+                            class="button-reset header-drawer__submenu-close"
+                            header-drawer="close-submenu"
+                          >
+                            <i>
+                              {%- render 'icon', icon: 'chevron-left' -%}
+                            </i>
+
+                            <span>
+                              {{- 'accessibility.back' | t -}}
+                            </span>
+                          </button><!-- /.header-drawer__submenu-close -->
+                        </li>
+
+                        <li>
+                          <p class="header-drawer__submenu-title">
+                            {{- link.title | escape -}}
+                          </p><!-- /.header-drawer__submenu-title -->
+                        </li>
+
+                        {%- for child_link in link.links -%}
+                          <li class="header-drawer__submenu-item">
+                            {%- if child_link.links.size > 0 -%}
+                              <details id="Details-menu-drawer-submenu-{{- forloop.index -}}">
+                                <summary class="header-drawer__link focus-inset">
+                                  <span>
+                                    {{- child_link.title | escape -}}
+                                  </span>
+
+                                  <i>
+                                    {%- render 'icon', icon: 'chevron-right' -%}
+                                  </i>
+                                </summary>
+
+                                <div class="header-drawer__submenu" id="childlink-{{- child_link.title | handle -}}">
+                                  <ul class="header-drawer__menu list-unstyled" role="list" tabindex="-1">
+                                    <li>
+                                      <button
+                                        class="button-reset header-drawer__submenu-close"
+                                        header-drawer="close-submenu"
+                                      >
+                                        <i>
+                                          {%- render 'icon', icon: 'chevron-left' -%}
+                                        </i>
+
+                                        <span>
+                                          {{- 'accessibility.back' | t -}}
+                                        </span>
+                                      </button><!-- /.header-drawer__submenu-close -->
+                                    </li>
+
+                                    <li>
+                                      <p class="header-drawer__submenu-title">
+                                        {{- child_link.title | escape -}}
+                                      </p><!-- /.header-drawer__submenu-title -->
+                                    </li>
+
+                                    {%- for grand_child_link in child_link.links -%}
+                                      <li class="header-drawer__submenu-item">
+                                        <a href="{{- grand_child_link.url -}}" class="header-drawer__link full-unstyled-link focus-inset{% if grand_child_link.current %} is-current{% endif %}"{% if grand_child_link.current %} aria-current="page"{% endif %}>
+                                          {{- grand_child_link.title | escape -}}
+                                        </a>
+                                      </li><!-- /.header-drawer__submenu-item -->
+                                    {%- endfor -%}
+                                  </ul><!-- /.header-drawer__menu list-unstyled -->
+                                </div><!-- /.header-drawer__submenu -->
+                              </details>
+                            {%- else -%}
+                              <a href="{{- child_link.url -}}" class="header-drawer__link full-unstyled-link focus-inset{% if child_link.current %} is-current{% endif %}"{% if child_link.current %} aria-current="page"{% endif %}>
+                                {{- child_link.title | escape -}}
+                              </a>
+                            {%- endif -%}
+                          </li><!-- /.header-drawer__submenu-item -->
+                        {%- endfor -%}
+                      </ul><!-- /.header-drawer__menu list-unstyled -->
+                    </div><!-- /.header-drawer__submenu -->
+                  </details>
+                {%- else -%}
+                  <a
+                    href="{{- link.url -}}"
+                    class="header-drawer__link full-unstyled-link focus-inset{% if link.current %} is-current{% endif %}"
+                    {% if link.current %}aria-current="page"{% endif %}
+                  >{{- link.title | escape -}}</a>
+                {%- endif -%}
+              </li><!-- /.header-drawer__menu-item -->
+            {%- endfor -%}
+          </ul><!-- /.header-drawer__menu list-unstyled -->
+        </nav><!-- /.header-drawer__nav -->
+      </div><!-- /.header-drawer__inner -->
+    </div><!-- /#menu-drawer.header-drawer__content -->
+  </details><!-- /#Details-menu-drawer-container.header-drawer__container -->
+</header-drawer><!-- /.header-drawer large-up-hide -->

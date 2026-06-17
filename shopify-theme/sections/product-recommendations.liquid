@@ -1,0 +1,93 @@
+{%- liquid
+  assign _section = section.settings
+
+  # Spacing block
+  content_for "block", type: "spacing", id: "recommendations-spacing"
+
+  capture classes
+    if _section.border_bottom
+      echo ' section-border-bottom'
+    endif
+
+    if _section.border_top
+      echo ' section-border-top'
+    endif
+  endcapture
+-%}
+
+<section class="{{- classes -}}">
+  <product-recommendations
+    class="block"
+    data-url="{{- routes.product_recommendations_url -}}?section_id={{- section.id -}}&product_id={{- product.id -}}&limit={{- section.settings.products_count -}}&intent=related"
+  >
+    {%- assign resources = nil -%}
+    {%- if recommendations.performed and recommendations.products_count > 0 -%}
+      {%- assign resources = recommendations.products -%}
+    {%- endif -%}
+    {%- render 'products-feed',
+      style: 'recommendations',
+      resources: resources,
+      subtitle: section.settings.subtitle,
+      title: section.settings.title,
+      button_text: section.settings.button_text,
+      button_url: section.settings.button_url,
+      heading_size: 'h4',
+      products_count: section.settings.products_count
+    -%}
+  </product-recommendations>
+</section>
+
+<script src="{{- 'product-recommendations.js' | asset_url -}}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "t:sections.product-recommendations.name",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "border_top",
+      "label": "Add border to top",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "border_bottom",
+      "label": "Add border to bottom",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:sections.product-recommendations.settings.title.label",
+      "default": "You may also like"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle"
+    },
+    {
+      "type": "range",
+      "id": "products_count",
+      "label": "t:sections.product-recommendations.settings.products_count.label",
+      "min": 4,
+      "max": 10,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "t:sections.product-recommendations.settings.button_text.label",
+      "default": "Shop all"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "t:sections.product-recommendations.settings.button_url.label",
+      "default": "/collections/all"
+    }
+  ]
+}
+{% endschema %}
+

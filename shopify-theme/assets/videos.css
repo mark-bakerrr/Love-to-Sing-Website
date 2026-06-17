@@ -1,0 +1,9 @@
+.videos__head {
+  padding-bottom: var(--space-800);
+}
+
+.videos__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-600) var(--space-400);
+}

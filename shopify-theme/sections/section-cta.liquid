@@ -1,0 +1,104 @@
+{%- liquid
+  echo 'section-cta.css' | asset_url | stylesheet_tag
+
+  assign _section = section.settings
+  assign _blocks = section.blocks
+
+  # Styles
+  capture styles
+    echo '--color: ' | append: _section.text_color | append: ';'
+  endcapture
+
+  # Render spacing block
+  content_for "block", type: "spacing", id: "cta-spacing"
+-%}
+
+<section
+  class="cta"
+  style="{{ styles }}"
+>
+  <div class="container">
+    <div
+      class="cta__inner"
+      style="background: {{ _section.background_content }};"
+    >
+      {%- render 'background-media',
+        image: _section.image,
+        mobile_image: _section.image_mobile,
+        media_opacity: _section.media_opacity,
+        class: 'cta',
+      -%}
+
+      {%- if _section.title != blank -%}
+        <h2 class="h4 cta__title">
+          {{ _section.title }}
+        </h2><!-- /.h4 cta__title -->
+      {%- endif -%}
+
+      <div class="cta__actions">
+        {% content_for "block", type: "button", id: "cta-button-1" %}
+        {% content_for "block", type: "button", id: "cta-button-2" %}
+      </div><!-- /.cta__actions -->
+    </div><!-- /.cta__inner -->
+  </div><!-- /.container -->
+</section><!-- /.cta -->
+
+{% schema %}
+  {
+    "name": "Section CTA",
+    "settings": [
+      {
+        "type": "range",
+        "id": "media_opacity",
+        "label": "Media opacity",
+        "unit": "%",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "default": 5
+      },
+      {
+        "type": "image_picker",
+        "id": "image",
+        "label": "Content image"
+      },
+      {
+        "type": "image_picker",
+        "id": "image_mobile",
+        "label": "Content mobile image"
+      },
+      {
+        "type": "color_background",
+        "id": "background_content",
+        "label": "Content background",
+        "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+      },
+      {
+        "type": "header",
+        "content": "Content"
+      },
+      {
+        "type": "color",
+        "id": "text_color",
+        "label": "Text color",
+        "default": "#fff"
+      },
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Heading",
+        "default": "Don’t worry about copyright issues—purchase one of our music licenses for your church or school."
+      },
+    ],
+    "disabled_on": {
+      "groups": ["header"]
+    },
+    "presets": [
+      {
+        "name": "Section CTA",
+        "settings": {
+        }
+      }
+    ]
+  }
+{% endschema %}

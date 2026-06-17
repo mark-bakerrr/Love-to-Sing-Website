@@ -1,0 +1,55 @@
+/* ------------------------------------------------------------ *\
+  Section featured articles
+\* ------------------------------------------------------------ */
+
+.featured-articles {
+  overflow: hidden;
+}
+
+.featured-articles.border-bottom {
+  border-bottom: 1px solid var(--c-neutral-200);
+}
+
+.featured-articles.border-top {
+  border-top: 1px solid var(--c-neutral-200);
+}
+
+.featured-articles.hide-if-to-articles:not(:has(.card-article)) {
+  display: none;
+}
+
+.featured-articles__head {
+  padding-bottom: var(--space-800);
+}
+
+@media (max-width: 989px) {
+  .featured-articles__head {
+    padding-bottom: var(--space-400);
+  }
+}
+
+.featured-articles__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-600) var(--space-400);
+}
+
+.featured-articles__grid > * {
+  flex: 0 0 calc(33.333% - var(--space-400) * 2 / 3);
+}
+
+.large-tiles .featured-articles__grid > *:nth-child(-n+2) {
+  flex: 0 0 calc(50% - var(--space-400) / 2);
+}
+
+.large-tiles .featured-articles__grid > *:nth-child(n+3) {
+  flex: 0 0 calc(33.333% - var(--space-400) * 2 / 3);
+}
+
+.featured-articles-carousel {
+  display: block;
+}
+
+.featured-articles-carousel :is(.swiper, .swiper-wrapper) {
+  overflow: visible;
+}

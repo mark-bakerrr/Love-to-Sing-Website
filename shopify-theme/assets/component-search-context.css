@@ -1,0 +1,194 @@
+.search-context {
+  position: relative;
+  background: var(--c-red-500, #b91f1c);
+  color: #fff;
+  overflow: hidden;
+  padding-block: calc(var(--header-height, 9rem) + 1.6rem) 1.6rem;
+}
+
+.search-context__bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.search-context__bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Floating hearts decoration --------------------------------------- */
+.search-context__hearts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.search-context__heart {
+  position: absolute;
+  color: #fff;
+  opacity: 0.18;
+  will-change: transform, opacity;
+  animation: heart-drift 9s ease-in-out infinite;
+}
+
+.search-context__heart svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.search-context__heart:nth-child(1) { top: 22%; left: 4%;  width: 3.2rem; animation-delay: 0s;   }
+.search-context__heart:nth-child(2) { top: 60%; left: 11%; width: 2.4rem; animation-delay: 1.4s; opacity: 0.14; }
+.search-context__heart:nth-child(3) { top: 18%; left: 38%; width: 2.8rem; animation-delay: 2.8s; opacity: 0.12; }
+.search-context__heart:nth-child(4) { top: 70%; left: 50%; width: 2.0rem; animation-delay: 4.2s; opacity: 0.20; }
+.search-context__heart:nth-child(5) { top: 30%; left: 73%; width: 3.0rem; animation-delay: 0.7s; opacity: 0.16; }
+.search-context__heart:nth-child(6) { top: 65%; left: 88%; width: 2.6rem; animation-delay: 3.1s; opacity: 0.14; }
+
+@keyframes heart-drift {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50%      { transform: translateY(-6px) rotate(4deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-context__heart { animation: none; }
+}
+
+/* Content ----------------------------------------------------------- */
+.search-context__inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2.4rem;
+}
+
+.search-context__title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  color: #fff;
+}
+
+.search-context__heading {
+  color: #fff;
+  font-size: clamp(2rem, 2vw + 1rem, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.search-context__heading-mark {
+  display: inline-block;
+  margin-inline-start: 0.4rem;
+  color: #fff;
+  opacity: 0.55;
+  font-size: 0.7em;
+  vertical-align: 0.15em;
+  transform-origin: center;
+}
+
+.search-context__count {
+  color: #fff;
+  opacity: 0.85;
+  font-size: 1.4rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Refine input --------------------------------------------------- */
+.search-context__refine {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(24rem, 30vw, 36rem);
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 999px;
+  box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.search-context__refine:focus-within {
+  box-shadow: 0 0.6rem 1.8rem rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
+}
+
+.search-context__refine-input {
+  flex: 1 1 auto;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #111;
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 500;
+  padding: 1rem 0.4rem 1rem 1.8rem;
+  border-radius: 999px;
+  min-width: 0;
+}
+
+.search-context__refine-input::placeholder {
+  color: rgba(17, 17, 17, 0.45);
+}
+
+.search-context__refine-button {
+  flex: 0 0 auto;
+  width: 3.6rem;
+  height: 3.6rem;
+  margin-inline-end: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #111;
+  transition: color 0.15s, transform 0.15s, background 0.15s;
+}
+
+.search-context__refine-button:hover {
+  color: #000;
+  background: rgba(17, 17, 17, 0.06);
+}
+
+.search-context__refine-button:active {
+  transform: scale(0.94);
+}
+
+.search-context__refine-button svg {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+@media screen and (max-width: 749px) {
+  .search-context {
+    padding-block: calc(var(--header-height, 7rem) + 1.2rem) 1.2rem;
+  }
+
+  .search-context__inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.2rem;
+  }
+
+  .search-context__refine {
+    width: 100%;
+  }
+
+  .search-context__heart { display: none; }
+  .search-context__heart:nth-child(1),
+  .search-context__heart:nth-child(4),
+  .search-context__heart:nth-child(5) { display: block; }
+}
+</content>
+</invoke>

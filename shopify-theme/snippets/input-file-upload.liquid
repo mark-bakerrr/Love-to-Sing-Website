@@ -1,0 +1,251 @@
+{%- comment -%}
+  File Uploader Snippet
+
+  Accepts:
+  - id: (Required) A unique ID for the component, used for the <label>.
+  - label_text: (Optional) The text for the external <label> element.
+  - form_field_name: (Required) The 'name' attribute for the file input. E.g., 'properties[custom_photo]'
+
+  {%- render 'file-uploader',
+    id: 'custom-photo-upload',
+    label_text: 'Default',
+    form_field_name: 'properties[Custom Photo]',
+  -%}
+{%- endcomment -%}
+
+<style>
+  .file-uploader {
+    --uploader-padding: 2.5rem 1rem;
+    --uploader-border-color: var(--c-neutral-300);
+    --uploader-border-color-hover: var(--c-neutral-500);
+    --uploader-border-color-dragging: var(--c-neutral-500);
+    --uploader-border-radius: var(--radius-m);
+    --uploader-icon-size: 3.2rem;
+    --uploader-icon-margin-bottom: 0.8rem;
+    --uploader-title-color: var(--c-neutral-950);
+    --uploader-subtitle-color: var(--c-neutral-500);
+  }
+
+  .file-uploader__wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .file-uploader__label-text {
+    color: var(--c-neutral-950);
+    margin-bottom: 0.8rem;
+    font-size: var(--fz-r);
+  }
+
+  .file-uploader__dropzone {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: var(--uploader-padding);
+    border: 1px solid var(--uploader-border-color);
+    border-radius: var(--uploader-border-radius);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .file-uploader__dropzone:hover {
+    border-color: var(--uploader-border-color-hover);
+  }
+
+  .file-uploader__dropzone.is-dragging-over {
+    border-style: dashed;
+    border-color: var(--uploader-border-color-dragging);
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+
+  .file-uploader__icon {
+    width: var(--uploader-icon-size);
+    height: var(--uploader-icon-size);
+    margin-bottom: var(--uploader-icon-margin-bottom);
+    color: var(--c-neutral-950);
+    margin-inline: auto;
+  }
+
+  .file-uploader__icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .file-uploader__title {
+    color: var(--uploader-title-color);
+    font-size: var(--fz-r);
+    margin: 0;
+  }
+
+  .file-uploader__subtitle {
+    font-size: var(--fz-s);
+    color: var(--uploader-subtitle-color);
+    margin-top: 0.4rem;
+  }
+
+  .file-uploader__file-name {
+    font-weight: 500;
+    font-style: italic;
+    color: var(--c-neutral-950);
+  }
+
+  .file-uploader__content--error {
+    color: var(--c-red-600);
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+</style>
+
+<file-uploader class="file-uploader">
+  <div class="file-uploader__wrapper">
+    {%- if label_text != blank -%}
+      <label for="{{ id }}" class="file-uploader__label-text">{{ label_text }}</label>
+    {%- endif -%}
+
+    <label for="{{ id }}" class="file-uploader__dropzone">
+      <div class="file-uploader__content file-uploader__content--initial">
+        <div class="file-uploader__icon">
+          {%- render 'icon', icon: 'upload' -%}
+        </div>
+
+        <div class="file-uploader__entry">
+          <p class="file-uploader__title">
+            {{ 'general.file_upload.title' | t }}
+          </p>
+
+          <p class="file-uploader__subtitle">
+            {{ 'general.file_upload.subtitle' | t }}
+          </p>
+        </div><!-- /.file-uploader__entry -->
+      </div>
+
+      <div class="file-uploader__content file-uploader__content--selected" hidden>
+        <p class="file-uploader__file-count"></p>
+
+        <ul class="file-uploader__file-list"></ul>
+      </div>
+
+      <div class="file-uploader__content file-uploader__content--error" hidden>
+        <p class="file-uploader__error-message">{{ 'general.file_upload.error' | t }}</p>
+      </div>
+
+      <input
+        id="{{ id }}"
+        type="file"
+        name="{{ form_field_name }}"
+        accept="image/*"
+        multiple
+        hidden
+      >
+    </label>
+  </div><!-- /.file-uploader__wrapper -->
+</file-uploader>
+
+<script>
+  if (!customElements.get('file-uploader')) {
+    customElements.define('file-uploader', class FileUploader extends HTMLElement {
+      constructor() {
+        super();
+        this.dropzone = this.querySelector('.file-uploader__dropzone');
+        this.input = this.querySelector('input[type="file"]');
+        this.initialContentEntry = this.querySelector('.file-uploader__content--initial .file-uploader__entry');
+        this.selectedContent = this.querySelector('.file-uploader__content--selected');
+        this.fileCountDisplay = this.querySelector('.file-uploader__file-count');
+        this.fileNameList = this.querySelector('.file-uploader__file-list');
+        this.errorContent = this.querySelector('.file-uploader__content--error');
+        this.fileNameDisplay = this.querySelector('.file-uploader__file-name');
+
+        this.setupListeners();
+      }
+
+      setupListeners() {
+        this.dropzone.addEventListener('dragover', this.handleDragOver.bind(this));
+        this.dropzone.addEventListener('dragleave', this.handleDragLeave.bind(this));
+        this.dropzone.addEventListener('drop', this.handleDrop.bind(this));
+        this.input.addEventListener('change', this.handleChange.bind(this));
+      }
+
+      handleDragOver(event) {
+        event.preventDefault();
+        this.dropzone.classList.add('is-dragging-over');
+      }
+
+      handleDragLeave() {
+        this.dropzone.classList.remove('is-dragging-over');
+      }
+
+      handleDrop(event) {
+        event.preventDefault();
+        this.dropzone.classList.remove('is-dragging-over');
+        const files = event.dataTransfer.files;
+
+        if (files.length) {
+          this.input.files = files;
+          this.input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+
+      handleChange(event) {
+        const files = event.target.files;
+
+        if (!files || files.length === 0) {
+          this.resetDisplay();
+          return;
+        }
+
+        const acceptedTypes = this.input.getAttribute('accept');
+
+        for (const file of files) {
+          const isImage = file.type.startsWith('image/');
+
+          if (acceptedTypes.includes('image/*') && !isImage) {
+            this.showError();
+            return;
+          }
+        }
+
+        this.updateDisplay(files);
+      }
+
+      updateDisplay(files) {
+        this.fileNameList.innerHTML = ''; // Clear previous list
+
+        if (files.length === 1) {
+          this.fileCountDisplay.textContent = '1 file selected:';
+        } else {
+          this.fileCountDisplay.textContent = `${files.length} files selected:`;
+        }
+
+        for (const file of files) {
+          const listItem = document.createElement('li');
+          listItem.textContent = file.name;
+          this.fileNameList.appendChild(listItem);
+        }
+
+        this.initialContentEntry.hidden = true;
+        this.errorContent.hidden = true;
+        this.selectedContent.hidden = false;
+      }
+
+      showError() {
+        this.input.value = '';
+        this.initialContentEntry.hidden = true;
+        this.selectedContent.hidden = true;
+        this.errorContent.hidden = false;
+
+        setTimeout(() => this.resetDisplay(), 3000);
+      }
+
+      resetDisplay() {
+        this.input.value = '';
+        this.selectedContent.hidden = true;
+        this.errorContent.hidden = true;
+        this.initialContentEntry.hidden = false;
+      }
+    });
+  }
+</script>

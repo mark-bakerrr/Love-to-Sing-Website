@@ -1,0 +1,83 @@
+{% comment %}
+    Renders an article card
+    Accepts:
+    - article_ref: {Object} Article Liquid object
+    Usage:
+    {%- render 'card-article', article_ref: blog.articles[0] -%}
+{% endcomment %}
+
+{%- liquid
+  assign reading_time = article_ref.metafields.custom.reading_time
+  assign blog_handle = article_ref.url | split: '/' | slice: 2 | first
+  assign parent_blog = blogs[blog_handle]
+-%}
+
+{%- if article_ref != empty -%}
+  <article class="card-article">
+    <div class="card-article__media media media--16-9">
+      <span class="visually-hidden">{{- article_ref.title | escape -}}</span>
+
+      {%-
+        liquid
+        if article_ref.image
+          render 'image', image: article_ref.image
+        else
+          echo 'image' | placeholder_svg_tag
+        endif
+      -%}
+    </div>
+
+    <div class="card-article__body">
+      <div class="card-article__meta">
+        {%- if parent_blog != blank -%}
+          <span
+            class="card-article__blog tag"
+            style="--tag-background: {{ parent_blog.metafields.custom.tag_color }};"
+          >
+            {{ parent_blog.title }}
+          </span><!-- /.card-article__blog -->
+        {%- endif -%}
+
+        {%- if reading_time != blank -%}
+          <p class="card-article__time">
+            {{ reading_time }}
+          </p><!-- /.card-article__time -->
+        {%- endif -%}
+      </div><!-- /.card-article__meta -->
+
+      {% comment %} {%- if article_ref.tags.size > 0 and blog -%}
+        <ul class="card-article__tags list-unstyled caption uppercase color-subdued flex">
+          {%- for tag in article_ref.tags -%}
+            <li class="card-article__tag">
+              {%- assign tag_handle = tag | handle -%}
+              <a href="{{- blog.url | append: '/tagged/' | append: tag_handle -}}" class="full-unstyled-link">
+                {% unless forloop.first %},{% endunless %} {{- tag -}}
+              </a>
+            </li><!-- ./card-article__tag -->
+          {%- endfor -%}
+        </ul><!-- /.card-article__tags list-unstyled caption uppercase color-subdued -->
+      {%- endif -%} {% endcomment %}
+
+      <h3 class="card-article__title h5">
+        {{- article_ref.title | escape | capitalize -}}
+      </h3><!-- /.card-article__title caption -->
+
+      {%- if article_ref.excerpt != blank -%}
+        <div
+          class="card-article__entry"
+          title="{{- article_ref.excerpt -}}"
+        >
+          {{- article_ref.excerpt -}}
+        </div><!-- /.card-article__entry -->
+      {%- endif -%}
+
+      <div class="card-article__actions">
+        {%- liquid
+          assign label = 'blog.read_more' | t
+
+          render 'button', type: 'link', href: article_ref.url, style: 'text', value: label, icon_position: 'right'
+        -%}
+      </div><!-- /.card-article__actions -->
+    </div><!-- /.card-article__body -->
+  </article><!-- /.card-article -->
+{%- endif -%}

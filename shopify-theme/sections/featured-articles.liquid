@@ -1,0 +1,269 @@
+{%- liquid
+  echo 'swiper-bundle.min.css' | asset_url | stylesheet_tag
+  echo 'section-featured-articles.css' | asset_url | stylesheet_tag
+
+  assign _section = section.settings
+  assign _blocks = section.blocks
+
+  # Spacing block
+  content_for "block", type: "spacing", id: "featured-products-spacing"
+
+  # Determine article source: automatic or manual blocks
+  assign use_auto = _section.use_automatic_articles
+  assign selected_blog = _section.blog
+  assign articles_limit = _section.articles_count | default: 5
+
+  # Collect articles for rendering
+  assign article_count = 0
+
+  if use_auto and selected_blog != blank
+    # Auto mode: fetch from blog, excluding pillar articles
+    for article in selected_blog.articles
+      if article_count >= articles_limit
+        break
+      endif
+      unless article.template_suffix == 'pillar' or article.tags contains 'pillar'
+        assign article_count = article_count | plus: 1
+      endunless
+    endfor
+  endif
+
+  assign has_auto_articles = false
+  if use_auto and selected_blog != blank and article_count > 0
+    assign has_auto_articles = true
+  endif
+
+  # Capture manual blocks (used as fallback or when auto is OFF)
+  capture blocks
+    content_for 'blocks'
+  endcapture
+
+  # Determine if we have articles to show
+  assign has_manual_blocks = false
+  if _blocks.size > 0
+    assign has_manual_blocks = true
+  endif
+  assign show_articles = false
+  if has_auto_articles or has_manual_blocks
+    assign show_articles = true
+  endif
+-%}
+
+<script src="{{- 'swiper-bundle.min.js' | asset_url -}}" defer="defer" data-theme-script></script>
+<script src="{{- 'featured-articles-carousel.js' | asset_url -}}" defer="defer" data-theme-script></script>
+
+<section
+  class="
+    featured-articles
+    {% if _section.border_bottom %}
+      border-bottom
+    {% endif %}
+    {% if _section.border_top %}
+      border-top
+    {% endif %}
+    {% if _section.large_tiles %}
+      large-tiles
+    {% endif %}
+    {% if _section.hide_if_no_articles %}
+      hide-if-to-articles
+    {% endif %}
+  "
+>
+  <div class="container">
+    <div class="featured-articles__head section-header-with-actions">
+      <div class="featured-articles__content">
+        {%- if _section.title != blank -%}
+          <h2 class="featured-articles__title">
+            {{- _section.title -}}
+          </h2><!-- /.featured-articles__title -->
+        {%- endif -%}
+
+        {%- if _section.subtitle != blank -%}
+          <p class="featured-articles__subtitle">
+            {{ _section.subtitle }}
+          </p>
+        {%- endif -%}
+      </div><!-- /.featured-articles__content -->
+
+      {%- if _section.button_text != blank and _section.button_url != blank -%}
+        <div class="featured-articles__links">
+          {%- render 'button',
+            type: 'link',
+            href: _section.button_url,
+            value: _section.button_text,
+            style: 'secondary,sm',
+            icon_position: 'right'
+          -%}
+        </div><!-- /.featured-articles__actions -->
+      {%- endif -%}
+    </div><!-- /.featured-articles__head -->
+
+    {%- if show_articles -%}
+      <div class="featured-articles__body">
+        <div class="featured-articles__grid small-hide medium-hide">
+          {%- if has_auto_articles -%}
+            {%- assign rendered_count = 0 -%}
+            {%- for article_ref in selected_blog.articles -%}
+              {%- if rendered_count >= articles_limit -%}{%- break -%}{%- endif -%}
+              {%- unless article_ref.template_suffix == 'pillar' or article_ref.tags contains 'pillar' -%}
+                {%- render 'card-article', article_ref: article_ref -%}
+                {%- assign rendered_count = rendered_count | plus: 1 -%}
+              {%- endunless -%}
+            {%- endfor -%}
+          {%- else -%}
+            {{ blocks }}
+          {%- endif -%}
+        </div><!-- /.featured-articles__grid -->
+
+        <featured-articles-carousel
+          class="featured-articles-carousel large-up-hide"
+          {% if _section.autoplay %}
+            data-autoplay
+            data-autoplay-speed="{{ _section.autoplay_speed | times: 1000 }}"
+          {% endif %}
+        >
+          <div class="swiper" data-slider>
+            <div class="swiper-wrapper">
+              {%- if has_auto_articles -%}
+                {%- assign rendered_count = 0 -%}
+                {%- for article_ref in selected_blog.articles -%}
+                  {%- if rendered_count >= articles_limit -%}{%- break -%}{%- endif -%}
+                  {%- unless article_ref.template_suffix == 'pillar' or article_ref.tags contains 'pillar' -%}
+                    <div class="swiper-slide">
+                      {%- render 'card-article', article_ref: article_ref -%}
+                    </div>
+                    {%- assign rendered_count = rendered_count | plus: 1 -%}
+                  {%- endunless -%}
+                {%- endfor -%}
+              {%- else -%}
+                {{ blocks }}
+              {%- endif -%}
+            </div><!-- /.swiper-wrapper -->
+          </div><!-- /.swiper -->
+        </featured-articles-carousel><!-- /.featured-articles -->
+      </div><!-- /.featured-articles__body -->
+    {%- endif -%}
+  </div><!-- /.container -->
+</section><!-- /.featured-products -->
+
+{% schema %}
+{
+  "name": "Featured articles",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "hide_if_no_articles",
+      "label": "Hide if no articles are visible",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "large_tiles",
+      "label": "Enable large tiles",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "border_bottom",
+      "label": "Add border bottom",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "border_top",
+      "label": "Add border top",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Article Source"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_automatic_articles",
+      "label": "Use automatic articles",
+      "info": "When enabled, automatically fetch latest articles from selected blog",
+      "default": false
+    },
+    {
+      "type": "blog",
+      "id": "blog",
+      "label": "Select blog",
+      "info": "Articles will be fetched from this blog, excluding pillar articles"
+    },
+    {
+      "type": "range",
+      "id": "articles_count",
+      "label": "Number of articles",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:sections.featured-products.settings.title.label",
+      "default": "Heading goes here"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "t:sections.featured-products.settings.subtitle.label",
+      "default": "Subtitle goes here"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Label"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Slider"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "t:sections.featured-products.settings.autoplay.label",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "t:sections.featured-products.settings.autoplay_speed.label",
+      "unit": "s",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "default": 5
+    },
+  ],
+  "max_blocks": 5,
+  "blocks": [
+    {
+      "type": "article",
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header"]
+  },
+  "presets": [
+    {
+      "name": "Featured articles"
+    }
+  ]
+}
+{% endschema %}

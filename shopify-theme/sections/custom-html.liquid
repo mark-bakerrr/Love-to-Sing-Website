@@ -1,0 +1,43 @@
+{%- liquid
+  # Spacing block
+  content_for "block", type: "spacing", id: "custom-html-spacing"
+
+  assign advertisment = section.settings.advertisment
+-%}
+
+{%- if advertisment != blank -%}
+  <section class="custom-html">
+    <div class="custom-html__inner container container--narrow">
+      {{ advertisment }}
+    </div><!-- /.custom-html__inner -->
+  </section><!-- /.custom-html -->
+{%- endif -%}
+
+{% stylesheet %}
+  .custom-html {
+    padding-block: 2.4rem;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Custom HTML",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "advertisment",
+      "label": "Paste your script here"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom HTML",
+      "settings": {}
+    },
+    {
+      "name": "Advertisment",
+      "settings": {}
+    }
+  ]
+}
+{% endschema %}

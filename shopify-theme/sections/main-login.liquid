@@ -1,0 +1,180 @@
+{{- 'customer.css' | asset_url | stylesheet_tag -}}
+
+<div
+  class="section-login"
+  style="--background: {{ section.settings.background }};"
+>
+  <div class="form-customer form-customer--recover" id="recover">
+    <div class="container container--narrow">
+      <div class="section-login__content">
+        <div class="form__head center">
+          <h1 class="h3 form__title">
+            {{- 'customer.recover_password.title' | t -}}
+          </h1><!-- /.h3 form__title -->
+
+          <p class="form__subtitle color-subdued">
+            {{- 'customer.recover_password.subtitle' | t -}}
+          </p><!-- /.form__subtitle color-subdued -->
+        </div><!-- /.form__head center -->
+
+        <div class="form__body">
+          {%- form 'recover_customer_password' -%}
+            {%- assign recover_success = form.posted_successfully? -%}
+
+            <div class="form-row">
+              {%-
+                liquid
+                assign label = 'customer.recover_password.email' | t
+                assign placeholder = 'customer.recover_password.email_placeholder' | t
+                assign error = ''
+                assign has_error = false
+                capture attr
+                  echo 'autocorrect="off"'
+                  echo 'autocapitalize="off"'
+                  echo 'autocomplete="email"'
+                  if form.errors
+                    assign error = form.errors.messages['form']
+                    assign has_error = true
+                    echo 'autofocus'
+                  endif
+                endcapture
+                render 'text-input', id: 'RecoverEmail', label: label, type: 'email', name: 'email', placeholder: placeholder, attr: attr, message: error, has_error: has_error
+                assign label = nil
+                assign placeholder = nil
+                assign attr = nil
+                assign error = nil
+                assign has_error = nil
+              -%}
+            </div><!-- /.form-row -->
+
+            <div class="form-row center">
+              <div>
+                {%- assign value = 'customer.recover_password.submit' | t -%}
+                {%- render 'button', type: 'submit', value: value -%}
+                {%- assign value = nil -%}
+              </div>
+            </div><!-- /.form-row center -->
+
+            <div class="form-row center">
+              <div>
+                <a href="#login" class="link">{{- 'customer.recover_password.cancel' | t -}}</a>
+              </div>
+            </div><!-- /.form-row center -->
+          {%- endform -%}
+        </div><!-- /.form__body -->
+      </div><!-- /.section-login__content -->
+    </div><!-- /.container container--narrow -->
+  </div><!-- /#recover.form-customer form-customer--recover -->
+
+  <div class="form-customer form-customer--login" id="login">
+    <div class="container container--narrow">
+      <div class="section-login__content">
+        <div class="form__head center">
+          <h1 class="h3 form__title">
+            {{- 'customer.login.title' | t -}}
+          </h1><!-- /.h3 form__title -->
+
+          {%- if recover_success == true -%}
+            <p class="form__subtitle color-subdued" tabindex="-1" autofocus>
+              {{- 'customer.recover_password.success' | t -}}
+            </p><!-- /.form__subtitle color-subdued -->
+          {%- endif -%}
+        </div><!-- /.form__head center -->
+
+        <div class="form__body">
+          {%- form 'customer_login', novalidate: 'novalidate' -%}
+            {%- if form.errors -%}
+              <div class="color-red">
+                {{- form.errors | default_errors -}}
+              </div><!-- /.color-red -->
+            {%- endif -%}
+
+            <div class="form-row">
+              {%-
+                liquid
+                assign label = 'customer.login.email' | t
+                assign placeholder = 'customer.login.email_placeholder' | t
+                assign has_error = false
+                capture attr
+                  echo 'autocorrect="off"'
+                  echo 'autocapitalize="off"'
+                  echo 'autocomplete="email"'
+                  if form.errors contains 'form'
+                    assign has_error = true
+                  endif
+                endcapture
+                render 'text-input', id: 'CustomerEmail', label: label, type: 'email', name: 'customer[email]', placeholder: placeholder, attr: attr, message: error, has_error: has_error
+                assign label = nil
+                assign placeholder = nil
+                assign attr = nil
+                assign has_error = nil
+              -%}
+            </div><!-- /.form-row -->
+
+            <div class="form-row">
+              {%-
+                liquid
+                assign label = 'customer.login.password' | t
+                assign placeholder = 'customer.login.password_placeholder' | t
+                assign has_error = false
+                capture attr
+                  echo 'autocomplete="current-password"'
+                  if form.errors contains 'form'
+                    assign has_error = true
+                  endif
+                endcapture
+                render 'text-input', id: 'CustomerPassword', label: label, type: 'password', name: 'customer[password]', placeholder: placeholder, attr: attr, message: error, has_error: has_error
+                assign label = nil
+                assign placeholder = nil
+                assign attr = nil
+                assign has_error = nil
+              -%}
+            </div><!-- /.form-row -->
+
+            <div class="form-row">
+              <div>
+                <a href="#recover" class="link">{{- 'customer.login.forgot_password' | t -}}</a>
+              </div>
+            </div><!-- /.form-row -->
+
+            <div class="form-row center">
+              <div>
+                {%- assign value = 'customer.login.submit' | t -%}
+                {%- render 'button', type: 'submit', value: value -%}
+                {%- assign value = nil -%}
+              </div>
+            </div><!-- /.form-row center -->
+
+            <div class="form-row center">
+              <div>
+                <a href="{{- routes.account_register_url -}}" class="link">{{- 'customer.login.create_account' | t -}}</a>
+              </div>
+            </div><!-- /.form-row center -->
+          {%- endform -%}
+        </div><!-- /.form__body -->
+      </div><!-- /.section-login__content -->
+    </div><!-- /.container container--narrow -->
+  </div><!-- /#login.form-customer form-customer--login -->
+</div><!-- /.section-login -->
+
+{% schema %}
+  {
+    "name": "Login",
+    "settings": [
+      {
+        "type": "color_background",
+        "id": "background",
+        "label": "Background",
+        "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+      },
+
+    ],
+    "presets": [
+      {
+        "name": "Login",
+        "settings": {
+        }
+      }
+    ]
+  }
+{% endschema %}

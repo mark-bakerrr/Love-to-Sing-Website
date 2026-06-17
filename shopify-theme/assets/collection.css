@@ -1,0 +1,128 @@
+.section-collection {
+  overflow: visible;
+  border-bottom: 1px solid var(--c-neutral-200);
+}
+
+@media (max-width: 989px) {
+  .section-collection .hero-banner-search__charts:has(.facets-mobile[open]) {
+    z-index: var(--z-modals);
+  }
+}
+
+.collection-facets--bar {
+  padding: 0;
+}
+
+.collection-grid-container {
+  flex: 1;
+}
+
+.section-collection .collection__grid {
+  gap: 4rem 2rem;
+}
+
+.collection__load-more {
+  margin-top: 4.8rem;
+  display: flex;
+  justify-content: center;
+}
+
+.section-collection .collection-facets--bar {
+  margin-bottom: 4.8rem;
+}
+
+.section-collection .facets__form {
+  justify-content: flex-end;
+  gap: 1.6rem;
+}
+
+@media (max-width: 989px) {
+  .section-collection .facets__form {
+    flex-wrap: wrap;
+  }
+}
+
+.section-collection .facets__sort {
+  margin-left: 0;
+}
+
+/* Filters */
+.section-collection .facets__sort .select-input__label {
+  margin-right: 0;
+  font-size: var(--fz-s);
+}
+
+.section-collection .facets__sort .dropdown__button {
+  font-size: var(--fz-s);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  padding-top: 0.4rem;
+
+  svg {
+    line-height: 0;
+  }
+}
+
+.section-collection .facets__sort summary span {
+  margin-left: 1.2rem;
+}
+
+.section-collection .facets__sort .dropdown__icon {
+  margin-left: 0.4rem;
+  line-height: 0;
+}
+
+.section-collection .dropdown__list {
+  box-shadow: 0 .4rem 4rem #00000015;
+  border-radius: var(--radius-m);
+}
+
+@media (min-width: 990px) {
+  .section-collection .facets-mobile {
+    position: relative;
+  }
+
+  .section-collection .facets-mobile__wrapper {
+    position: absolute;
+    width: 40rem;
+    top: 100%;
+    right: 0;
+    left: unset;
+    bottom: unset;
+    height: auto;
+    box-shadow: 0 .4rem 4rem #00000015;
+    border-radius: var(--radius-m);
+  }
+
+  .section-collection .facets-mobile__wrapper .facets-mobile__title {
+    display: none;
+  }
+}
+
+.section-collection .facets-active {
+  justify-content: flex-end;
+}
+
+.facets__content-left {
+  flex: 1;
+}
+
+.section-collection .section-collection__content {
+  font-size: var(--fz-l);
+}
+
+.section-collection .facets__content-left:has(.section-collection__title, .section-collection__content) {
+  align-self: flex-end;
+}
+
+@media (max-width: 989px) {
+  .section-collection .facets__content-left:has(.section-collection__title, .section-collection__content) {
+    width: 100%;
+  }
+}
+
+.section-collection .facets__content-left .facets__count {
+  color: var(--c-neutral-500);
+  font-size: var(--fz-s);
+}

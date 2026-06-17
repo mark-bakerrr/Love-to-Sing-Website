@@ -1,0 +1,191 @@
+{%- liquid
+  assign _section = section.settings
+  content_for "block", type: "spacing", id: "richtext-spacing"
+
+  echo 'section-richtext.css' | asset_url | stylesheet_tag
+
+  capture classes
+    echo 'section-richtext'
+    echo _section.text_align | prepend: ' '
+
+    if _section.add_decorations
+      echo ' section--with-decorations'
+    endif
+    if _section.border_top
+      echo ' section-richtext--border-top'
+    endif
+
+    if _section.border_bottom
+      echo ' section-richtext--border-bottom'
+    endif
+  endcapture
+-%}
+
+{%- if _section.eyebrow != blank
+    or _section.title != blank
+    or _section.content != blank
+    or _section.button_text != blank and _section.button_url != blank -%}
+  <section class="{{ classes }}">
+    <div class="container container--full-{{ _section.text_align }}">
+      {%- if _section.add_decorations -%}
+        <div class="section__decoration section__decoration--top-left small-hide">
+          {%- render 'icon', icon: 'heart-with-note' -%}
+        </div>
+
+        <div class="section__decoration section__decoration--bottom-right small small-hide">
+          {%- render 'icon', icon: 'heart-with-note' -%}
+        </div>
+      {%- endif -%}
+
+      {%- if _section.eyebrow != blank
+        or _section.title != blank -%}
+        <header class="section__head">
+          <div class="container">
+            {%- if _section.eyebrow -%}
+              <p
+                class="section__eyebrow"
+                style="color: {{ _section.eyebrow_color }};"
+              >
+                {{- _section.eyebrow | escape -}}
+              </p><!-- /.section__pre-title -->
+            {%- endif -%}
+
+            {%- if _section.title -%}
+              <h2 class="section__title h1">
+                {{- _section.title | escape -}}
+              </h2><!-- /.section__title -->
+            {%- endif -%}
+          </div><!-- /.container -->
+        </header><!-- /.section__head -->
+      {%- endif -%}
+
+      <div class="section__content">
+        <div class="container">
+          {%- if _section.content != blank -%}
+            <div class="section__body">
+              {{- _section.content -}}
+            </div><!-- /.section__body -->
+          {%- endif -%}
+
+          {%- if _section.button_text != blank
+              and _section.button_url != blank -%}
+            <div class="section__actions">
+              {%- render 'button',
+                type: 'link',
+                style: 'outlined',
+                value: _section.button_text,
+                href: _section.button_url -%}
+            </div><!-- /.section__actions -->
+          {%- endif -%}
+        </div><!-- /.container -->
+      </div><!-- /.section__content -->
+    </div><!-- /.container -->
+  </section><!-- /.section -->
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:sections.richtext.name",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "add_decorations",
+      "label": "Add decorative elements",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "border_top",
+      "label": "Add border top",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "border_bottom",
+      "label": "Add border bottom",
+      "default": false
+    },
+    {
+      "type": "color_background",
+      "id": "background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "t:sections.richtext.settings.text_align.label",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.richtext.settings.text_align.options.left.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.richtext.settings.text_align.options.center.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.richtext.settings.text_align.options.right.label"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "eyebrow goes here"
+    },
+    {
+      "type": "color",
+      "id": "eyebrow_color",
+      "label": "Eyebrow color",
+      "default": "#B91F1C",
+      "visible_if": "{{ section.settings.eyebrow != blank }}"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:sections.richtext.settings.title.label",
+      "default": "Heading goes here"
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "t:sections.richtext.settings.content.label",
+      "default": "<p>Content text goes here</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "t:sections.richtext.settings.button_text.label",
+      "default": "Link text"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "t:sections.richtext.settings.button_url.label",
+      "default": "/"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header"]
+  },
+  "presets": [
+    {
+      "name": "t:sections.richtext.name"
+    }
+  ]
+}
+{% endschema %}

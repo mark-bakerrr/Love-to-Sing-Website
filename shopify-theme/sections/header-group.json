@@ -1,0 +1,120 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "header",
+  "name": "t:sections.groups.header.name",
+  "sections": {
+    "header": {
+      "type": "header",
+      "blocks": {
+        "custom_template_logo_d4EbpF": {
+          "type": "custom_template_logo",
+          "settings": {
+            "title": "collection.song-kids\ncollection\nproduct.song_kids",
+            "logo": "shopify://shop_images/Love_to_Sing_Base_Logo.png"
+          }
+        },
+        "custom_template_logo_NPCeKr": {
+          "type": "custom_template_logo",
+          "settings": {
+            "title": "collection.song-celebration\nproduct.song_celebration",
+            "logo": "shopify://shop_images/Celebration_Logo.png"
+          }
+        },
+        "custom_template_logo_bA9Xdc": {
+          "type": "custom_template_logo",
+          "settings": {
+            "title": "product.song_christmas\ncollection.song-christmas"
+          }
+        },
+        "custom_template_logo_4Lp77c": {
+          "type": "custom_template_logo",
+          "settings": {
+            "title": "collection.song-halloween\nproduct.song_halloween",
+            "logo": "shopify://shop_images/LTS_Logo_Halloween_Final.png"
+          }
+        },
+        "custom_color_scheme_YXaibp": {
+          "type": "custom_color_scheme",
+          "settings": {
+            "title": "collection.song\ncollection\nproduct.song_christmas",
+            "color_scheme": "primary"
+          }
+        },
+        "custom_color_scheme_EzaUNw": {
+          "type": "custom_color_scheme",
+          "settings": {
+            "title": "collection.song-celebration\nproduct.song_celebration",
+            "color_scheme": "scheme-9ae3eb4c-1c34-4199-afec-5bed8dc0fdb1"
+          }
+        },
+        "custom_color_scheme_yMfyF7": {
+          "type": "custom_color_scheme",
+          "settings": {
+            "title": "collection.song-halloween\nproduct.song_halloween",
+            "color_scheme": "scheme-4cfb1a8d-ac82-4df1-bde3-fa577b070d6e"
+          }
+        },
+        "custom_color_scheme_rpwLU7": {
+          "type": "custom_color_scheme",
+          "settings": {
+            "title": "collection.song-kids\nproduct.song_kids",
+            "color_scheme": "secondary"
+          }
+        },
+        "mega_menu_LmdURY": {
+          "type": "mega_menu",
+          "settings": {
+            "title": "Songs",
+            "mega_menu": "songs"
+          }
+        },
+        "mega_menu_AMPcdh": {
+          "type": "mega_menu",
+          "settings": {
+            "title": "Shop",
+            "mega_menu": "shop"
+          }
+        },
+        "solid_header_zXUe4i": {
+          "type": "solid_header",
+          "settings": {
+            "title": "blog\narticle\nproduct\nproduct.song_lyrics\nproduct.song_christmas\nproduct.celebration-song-lyrics\nproduct.song_halloween\nproduct.song_kids\nproduct.video_download\nproduct.licenses\nproduct.single.album\ncollection\npage\npage.ai-content-studio"
+          }
+        }
+      },
+      "block_order": [
+        "custom_template_logo_d4EbpF",
+        "custom_template_logo_NPCeKr",
+        "custom_template_logo_bA9Xdc",
+        "custom_template_logo_4Lp77c",
+        "custom_color_scheme_YXaibp",
+        "custom_color_scheme_EzaUNw",
+        "custom_color_scheme_yMfyF7",
+        "custom_color_scheme_rpwLU7",
+        "mega_menu_LmdURY",
+        "mega_menu_AMPcdh",
+        "solid_header_zXUe4i"
+      ],
+      "settings": {
+        "logo": "shopify://shop_images/Love_to_Sing_Base_Logo.png",
+        "logo_svg_code": "",
+        "logo_width": 108,
+        "logo_width_mobile": 76,
+        "menu_mobile": "dev-menu-mobile",
+        "menu": "dev-menu",
+        "main_colors": "primary"
+      }
+    }
+  },
+  "order": [
+    "header"
+  ]
+}

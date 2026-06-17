@@ -1,0 +1,29 @@
+{%- liquid
+  assign _block = block.settings
+  assign article_ref = _block.article
+
+  if article_ref != blank
+    unless article_ref.template_suffix == 'pillar' or article_ref.tags contains 'pillar'
+      render 'card-article', article_ref: article_ref
+    endunless
+  endif
+-%}
+
+{% schema %}
+  {
+    "name": "Article",
+    "settings": [
+      {
+        "type": "article",
+        "id": "article",
+        "label": "Article"
+      },
+    ],
+    "presets": [
+      {
+        "name": "Article",
+        "settings": {}
+      }
+    ]
+  }
+{% endschema %}

@@ -1,0 +1,363 @@
+{%- liquid
+  echo 'santa-tracker.css' | asset_url | stylesheet_tag
+
+  assign year = section.settings.year | default: 2026
+  assign departure = section.settings.departure_override
+  if departure == blank
+    assign departure = year | append: '-12-24T10:00:00Z'
+  endif
+
+  assign cta_url = section.settings.cta_url | default: '/collections/song-christmas'
+-%}
+
+{%- capture logo_link -%}
+  <a class="santa-tracker__logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }} — home">
+    {%- if section.settings.logo != blank -%}
+      {%- assign logo_width = section.settings.logo_width | default: 180 -%}
+      {%- assign logo_width_2x = logo_width | times: 2 -%}
+      <img
+        srcset="{{ section.settings.logo | image_url: width: logo_width }} 1x, {{ section.settings.logo | image_url: width: logo_width_2x }} 2x"
+        src="{{ section.settings.logo | image_url: width: logo_width }}"
+        alt="{{ section.settings.logo.alt | default: shop.name | escape }}"
+        width="{{ logo_width }}"
+        height="{{ logo_width | divided_by: section.settings.logo.aspect_ratio | round }}"
+        loading="eager"
+      >
+    {%- else -%}
+      <span class="santa-tracker__logo-text h3">{{ shop.name }}</span>
+    {%- endif -%}
+  </a>
+{%- endcapture -%}
+
+{%- assign music_url = section.settings.music_url -%}
+<santa-tracker
+  class="santa-tracker"
+  data-departure="{{ departure }}"
+  data-route-url="{{ 'santa-route.json' | asset_url }}"
+  data-three-js="{{ 'three.min.js' | asset_url }}"
+  data-orbit-js="{{ 'orbit-controls.js' | asset_url }}"
+  data-earth-day="{{ 'santa-earth.jpg' | asset_url }}"
+  data-earth-night="{{ 'santa-earth-night.png' | asset_url }}"
+  data-earth-clouds="{{ 'santa-earth-clouds.png' | asset_url }}"
+  data-earth-spec="{{ 'santa-earth-spec.jpg' | asset_url }}"
+  {% if music_url != blank %}data-music="{{ music_url }}"{% endif %}
+  data-sound="{{ section.settings.enable_sound }}"
+  data-snow="{{ section.settings.enable_snow }}"
+>
+  <div data-snow-layer></div>
+
+  <div class="santa-tracker__inner container">
+    {{ logo_link }}
+
+    {%- comment -%} State A: counting down to lift-off {%- endcomment -%}
+    <div data-state="pre" hidden>
+      {%- if section.settings.eyebrow_pre != blank -%}
+        <p class="santa-tracker__eyebrow">{{ section.settings.eyebrow_pre | escape }}</p>
+      {%- endif -%}
+
+      <h1 class="santa-tracker__title h1">{{ section.settings.title_pre | escape }}</h1>
+
+      {%- if section.settings.subtitle_pre != blank -%}
+        <p class="santa-tracker__subtitle">{{ section.settings.subtitle_pre | escape }}</p>
+      {%- endif -%}
+
+      <div class="santa-countdown" role="timer" aria-label="Countdown until Santa takes off">
+        <div class="santa-countdown__unit">
+          <span class="santa-countdown__value" data-unit="days">–</span>
+          <span class="santa-countdown__label">Days</span>
+        </div>
+        <div class="santa-countdown__unit">
+          <span class="santa-countdown__value" data-unit="hours">–</span>
+          <span class="santa-countdown__label">Hours</span>
+        </div>
+        <div class="santa-countdown__unit">
+          <span class="santa-countdown__value" data-unit="minutes">–</span>
+          <span class="santa-countdown__label">Minutes</span>
+        </div>
+        <div class="santa-countdown__unit">
+          <span class="santa-countdown__value" data-unit="seconds">–</span>
+          <span class="santa-countdown__label">Seconds</span>
+        </div>
+      </div>
+
+      {%- if section.settings.cta_label != blank -%}
+        <a class="santa-tracker__cta" href="{{ cta_url }}">{{ section.settings.cta_label | escape }} 🎄</a>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} State C: Christmas Day — all presents delivered {%- endcomment -%}
+    <div data-state="post" hidden>
+      <div class="santa-post__emoji" aria-hidden="true">🎅🎄✨</div>
+
+      <h1 class="santa-tracker__title h1">{{ section.settings.title_post | escape }}</h1>
+
+      {%- if section.settings.subtitle_post != blank -%}
+        <p class="santa-tracker__subtitle">{{ section.settings.subtitle_post | escape }}</p>
+      {%- endif -%}
+
+      <div class="santa-post__actions">
+        <button class="santa-post__replay" type="button" data-action="replay">
+          ↻ Replay Santa’s journey
+        </button>
+
+        {%- if section.settings.cta_label != blank -%}
+          <a class="santa-tracker__cta" href="{{ cta_url }}">{{ section.settings.cta_label | escape }} 🎄</a>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <noscript>
+      <p>Turn on JavaScript to see the countdown and follow Santa around the world!</p>
+    </noscript>
+  </div><!-- /.santa-tracker__inner -->
+
+  {%- comment -%} State B: Santa is flying — full-page 3D globe chase cam {%- endcomment -%}
+  <div class="santa-live" data-state="live" hidden>
+    <div class="santa-live__globe" data-globe aria-label="3D globe showing Santa's live position"></div>
+
+    <button
+      class="santa-live__sound"
+      type="button"
+      data-action="toggle-sound"
+      aria-pressed="false"
+      aria-label="Turn sound on"
+      hidden
+    >
+      <span class="santa-live__sound-on" aria-hidden="true">🔊</span>
+      <span class="santa-live__sound-off" aria-hidden="true">🔇</span>
+    </button>
+
+    <aside class="santa-live__panel" data-panel aria-label="Santa tracker stats">
+      <button
+        class="santa-live__collapse"
+        type="button"
+        data-action="collapse-panel"
+        aria-expanded="true"
+        aria-label="Collapse panel"
+      >
+        <span class="santa-live__collapse-icon" aria-hidden="true">‹</span>
+      </button>
+
+      <header class="santa-live__head">
+        <div class="santa-live__topbar">
+          {{ logo_link }}
+          <div class="santa-live__clock">
+            <span class="santa-live__clock-time" data-info="local-clock">—</span>
+            <span class="santa-live__clock-label">your local time</span>
+          </div>
+        </div>
+        <p class="santa-live__status" data-info="status" aria-live="polite">Santa is on his way…</p>
+      </header>
+
+      {%- comment -%} Live itinerary rail — auto-scrolls as Santa flies {%- endcomment -%}
+      <ol class="santa-rail" data-rail aria-label="Santa's route — cities visited and upcoming"></ol>
+
+      {%- comment -%} Personalised "Santa reaches you" {%- endcomment -%}
+      <div class="santa-you" data-you data-you-state="closed">
+        <button class="santa-you__trigger" type="button" data-action="open-location">
+          📍 Select your location
+        </button>
+
+        <div class="santa-you__panel">
+          <p class="santa-you__prompt">When does Santa reach you?</p>
+          <div class="santa-you__actions">
+            <button class="santa-you__btn" type="button" data-action="locate">📍 Use my location</button>
+            <select class="santa-you__select" data-city-picker aria-label="Choose your city">
+              <option value="">Choose your city…</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="santa-you__result">
+          <p class="santa-you__eta" data-info="you-eta"></p>
+          <p class="santa-you__city" data-info="you-city"></p>
+          <button class="santa-you__change" type="button" data-action="open-location">Change location</button>
+        </div>
+      </div>
+
+      <footer class="santa-live__foot">
+        <div class="santa-stat">
+          <span class="santa-stat__num" data-info="presents" data-odometer>0</span>
+          <span class="santa-stat__label">presents delivered</span>
+        </div>
+        <div class="santa-stat">
+          <span class="santa-stat__num" data-info="distance" data-odometer>0 km</span>
+          <span class="santa-stat__label">travelled</span>
+        </div>
+      </footer>
+
+      {%- if section.settings.cta_label != blank -%}
+        <a class="santa-tracker__cta santa-live__cta" href="{{ cta_url }}">{{ section.settings.cta_label | escape }} 🎄</a>
+      {%- endif -%}
+    </aside>
+
+    <button
+      class="santa-live__follow"
+      type="button"
+      data-action="follow"
+      hidden
+    >
+      🎅 Follow Santa
+    </button>
+
+    <button
+      class="santa-live__banner"
+      type="button"
+      data-action="toggle-panel"
+      aria-expanded="false"
+      aria-label="Show Santa tracker stats"
+    >
+      <span aria-hidden="true">🎅</span>
+      <span data-info="status">Santa is on his way…</span>
+      <span class="santa-live__banner-chevron" aria-hidden="true">▲</span>
+    </button>
+
+    <p class="santa-live__error" data-tracker-error hidden>
+      Ho ho ho — the globe elves are having trouble! Santa is still flying; try refreshing the page.
+    </p>
+  </div><!-- /.santa-live -->
+
+  <p class="santa-copyright">Copyright of Love to Sing {{ 'now' | date: '%Y' }} &copy; www.lovetosing.com</p>
+</santa-tracker>
+
+<script src="{{ 'santa-tracker.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Christmas Countdown",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image",
+      "info": "Shown centred at the top of the page and linked to the homepage. Falls back to the store name if blank."
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "label": "Logo width",
+      "min": 80,
+      "max": 320,
+      "step": 10,
+      "unit": "px",
+      "default": 180
+    },
+    {
+      "type": "header",
+      "content": "Schedule"
+    },
+    {
+      "type": "number",
+      "id": "year",
+      "label": "Christmas year",
+      "default": 2026,
+      "info": "Santa departs the North Pole at 10:00 UTC on 24 December (11pm in New Zealand) and flies for 25 hours, following midnight around the world. Bump this each year — no other changes needed."
+    },
+    {
+      "type": "text",
+      "id": "departure_override",
+      "label": "Departure override (advanced)",
+      "info": "Optional full UTC datetime, e.g. 2026-12-24T10:00:00Z. Leave blank to use the year above. Handy for testing: set it a few minutes ahead to watch lift-off."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_snow",
+      "label": "Falling snow",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Sound & music"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sound",
+      "label": "Enable sound",
+      "default": true,
+      "info": "Shows a 🔊 button on the live tracker. Always starts muted; visitors opt in. Plays sleigh-bell chimes as Santa arrives in each city."
+    },
+    {
+      "type": "url",
+      "id": "music_url",
+      "label": "Background music URL",
+      "info": "Optional. Direct link to an MP3/OGG audio file (upload to Settings → Files, then paste its URL). Loops softly when the visitor turns sound on. Ideally an original Love to Sing instrumental."
+    },
+    {
+      "type": "header",
+      "content": "Before lift-off (countdown)"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow_pre",
+      "label": "Eyebrow",
+      "default": "Ho ho ho!"
+    },
+    {
+      "type": "text",
+      "id": "title_pre",
+      "label": "Heading",
+      "default": "Counting down to Christmas"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle_pre",
+      "label": "Subheading",
+      "default": "Santa takes off from the North Pole on Christmas Eve — and Aotearoa New Zealand is one of his very first stops! Come back to follow his sleigh live around the world."
+    },
+    {
+      "type": "header",
+      "content": "While Santa is flying"
+    },
+    {
+      "type": "text",
+      "id": "title_live",
+      "label": "Heading",
+      "default": "Santa is on his way!"
+    },
+    {
+      "type": "header",
+      "content": "Christmas Day"
+    },
+    {
+      "type": "text",
+      "id": "title_post",
+      "label": "Heading",
+      "default": "Merry Christmas!"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle_post",
+      "label": "Subheading",
+      "default": "Santa has delivered all the presents and is back at the North Pole having a well-earned rest. Merry Christmas from Love to Sing!"
+    },
+    {
+      "type": "header",
+      "content": "Call to action"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button label",
+      "default": "Sing our Christmas songs"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Button link",
+      "info": "Defaults to the Christmas songs collection."
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "presets": [
+    {
+      "name": "Christmas Countdown"
+    }
+  ]
+}
+{% endschema %}

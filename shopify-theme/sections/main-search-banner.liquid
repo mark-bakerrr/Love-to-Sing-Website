@@ -1,0 +1,67 @@
+{%- liquid
+  assign is_song_scope = false
+  assign clean_terms = search.terms
+  if search.terms contains 'tag:song'
+    assign is_song_scope = true
+    assign clean_terms = search.terms | remove: 'tag:song' | strip
+  endif
+-%}
+
+{{- 'component-search-context.css' | asset_url | stylesheet_tag -}}
+
+{%- if search.performed -%}
+  <script src="{{- 'gsap.min.js' | asset_url -}}" defer="defer"></script>
+  <script src="{{- 'search-delight.js' | asset_url -}}" defer="defer"></script>
+
+  <section class="search-context" data-search-context>
+    <div class="search-context__bg" aria-hidden="true">
+      {%- render 'image', image: 'shopify://shop_images/hearts-background.png' -%}
+    </div>
+
+    <div class="search-context__hearts" aria-hidden="true" data-search-hearts>
+      <span class="search-context__heart">{%- render 'icon', icon: 'heart-with-note' -%}</span>
+      <span class="search-context__heart">{%- render 'icon', icon: 'heart-with-note' -%}</span>
+      <span class="search-context__heart">{%- render 'icon', icon: 'heart-with-note' -%}</span>
+      <span class="search-context__heart">{%- render 'icon', icon: 'heart-with-note' -%}</span>
+      <span class="search-context__heart">{%- render 'icon', icon: 'heart-with-note' -%}</span>
+      <span class="search-context__heart">{%- render 'icon', icon: 'heart-with-note' -%}</span>
+    </div>
+
+    <div class="container search-context__inner">
+      <div class="search-context__title">
+        <h1 class="search-context__heading">
+          {%- if is_song_scope -%}
+            {{- 'search.song_scope_title' | t: terms: clean_terms -}}
+          {%- else -%}
+            {{- 'search.results_for' | t: terms: clean_terms -}}
+          {%- endif -%}
+        </h1>
+        <p class="search-context__count"
+           aria-live="off"
+           data-count-target="{{- search.results_count -}}"
+           data-count-template="{{- 'search.results_count' | t: count: '%%COUNT%%' | escape -}}">
+          {{- 'search.results_count' | t: count: search.results_count -}}
+        </p>
+      </div>
+      <form action="{{- routes.search_url -}}" method="get" class="search-context__refine" role="search">
+        <input
+          type="search"
+          name="q"
+          value="{{- clean_terms | escape -}}"
+          placeholder="{{- 'search.refine' | t -}}"
+          aria-label="{{- 'search.refine' | t -}}"
+          class="search-context__refine-input"
+        />
+        <button type="submit" class="search-context__refine-button" aria-label="{{- 'search.submit' | t -}}">
+          {%- render 'icon', icon: 'search' -%}
+        </button>
+      </form>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+  {
+    "name": "Search banner"
+  }
+{% endschema %}

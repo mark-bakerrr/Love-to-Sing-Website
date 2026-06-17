@@ -1,0 +1,120 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "footer",
+  "name": "t:sections.groups.footer.name",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "custom_color_scheme_x8prrc": {
+          "type": "custom_color_scheme",
+          "settings": {
+            "title": "collection.song-celebration\nproduct.song_celebration",
+            "color_scheme": "scheme-9ae3eb4c-1c34-4199-afec-5bed8dc0fdb1"
+          }
+        },
+        "custom_color_scheme_J8U9kX": {
+          "type": "custom_color_scheme",
+          "settings": {
+            "title": "collection.song-kids\nproduct.song_kids",
+            "color_scheme": "secondary"
+          }
+        },
+        "custom_color_scheme_ewhyVn": {
+          "type": "custom_color_scheme",
+          "settings": {
+            "title": "collection.song-halloween\nproduct.song_halloween",
+            "color_scheme": "scheme-4cfb1a8d-ac82-4df1-bde3-fa577b070d6e"
+          }
+        },
+        "custom_template_logo_HgMdTj": {
+          "type": "custom_template_logo",
+          "settings": {
+            "title": "collection.song-celebration\nproduct.song_celebration",
+            "logo": "shopify://shop_images/Celebration_Logo.png"
+          }
+        },
+        "custom_template_logo_U9ppLH": {
+          "type": "custom_template_logo",
+          "settings": {
+            "title": "collection.song-halloween\nproduct.song_halloween",
+            "logo": "shopify://shop_images/LTS_Logo_Halloween_Final.png"
+          }
+        },
+        "custom_template_logo_myBgMy": {
+          "type": "custom_template_logo",
+          "settings": {
+            "title": "product.song_kids",
+            "logo": "shopify://shop_images/Love_to_Sing_Base_Logo.png"
+          }
+        },
+        "custom_template_logo_F93gJ3": {
+          "type": "custom_template_logo",
+          "settings": {
+            "title": "collection.song-christmas"
+          }
+        },
+        "menu_col_pqE3N4": {
+          "type": "menu_col",
+          "settings": {
+            "heading": "Shop",
+            "menu": "footer_shop"
+          }
+        },
+        "menu_col_KTGTnP": {
+          "type": "menu_col",
+          "settings": {
+            "heading": "About",
+            "menu": "footer_songs"
+          }
+        },
+        "menu_col_WnrJbc": {
+          "type": "menu_col",
+          "settings": {
+            "heading": "Channels",
+            "menu": "footer_youtube_channels"
+          }
+        },
+        "menu_col_iD8TAz": {
+          "type": "menu_col",
+          "settings": {
+            "heading": "Listen",
+            "menu": "footer_listen"
+          }
+        }
+      },
+      "block_order": [
+        "custom_color_scheme_x8prrc",
+        "custom_color_scheme_J8U9kX",
+        "custom_color_scheme_ewhyVn",
+        "custom_template_logo_HgMdTj",
+        "custom_template_logo_U9ppLH",
+        "custom_template_logo_myBgMy",
+        "custom_template_logo_F93gJ3",
+        "menu_col_pqE3N4",
+        "menu_col_KTGTnP",
+        "menu_col_WnrJbc",
+        "menu_col_iD8TAz"
+      ],
+      "settings": {
+        "logo": "shopify://shop_images/Love_to_Sing_Base_Logo.png",
+        "Logo_width": 95,
+        "Logo_width_mobile": 95,
+        "content": "Connecting the world through music",
+        "copyright": "© 2026 Love to Sing Ltd. All rights reserved.",
+        "menu_bar": "footer-bar-menu"
+      }
+    }
+  },
+  "order": [
+    "footer"
+  ]
+}

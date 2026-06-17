@@ -1,0 +1,32 @@
+.section-login {
+  padding: 16rem 0 8rem;
+  background: var(--background);
+}
+
+.section-login__content {
+  background-color: var(--c-neutral-50);
+  border-radius: var(--radius-m);
+  padding: 4rem;
+}
+
+#recover,
+#login {
+  scroll-margin: 10rem;
+}
+
+#recover {
+  display: none;
+}
+
+#recover:target {
+  display: block;
+}
+
+#recover:target ~ #login {
+  display: none;
+}
+
+.form-customer .form__body {
+  max-width: 50rem;
+  margin: 0 auto;
+}

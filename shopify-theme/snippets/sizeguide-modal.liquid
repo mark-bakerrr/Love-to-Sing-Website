@@ -1,0 +1,38 @@
+{{- 'sizeguide.css' | asset_url | stylesheet_tag -}}
+
+<modal-dialog id="SizeguideModal" class="sizeguide">
+  <div
+    class="sizeguide__dialog"
+    role="dialog"
+    tabindex="-1"
+    aria-label="{{- 'password.password_modal.title' | t -}}"
+    aria-modal="true"
+  >
+    <button
+      id="ModalClose-SizeguideModal"
+      type="button"
+      class="sizeguide__close"
+      aria-label="{{- 'accessibility.close' | t -}}"
+    >{% render 'icon-close' %}</button>
+
+    <div class="sizeguide__content" role="document" aria-label="{{- 'password.password_modal.title' | t -}}" tabindex="0">
+      <div class="container container--narrow">
+        <h2 class="sizeguide__title">
+          {{- sizeguide.title | escape | newline_to_br -}}
+        </h2><!-- /.sizeguide__title -->
+
+        {%- if sizeguide.content != blank -%}
+          <div class="sizeguide__richtext rte">
+            {{- sizeguide.content | metafield_tag -}}
+          </div><!-- /.sizeguide__richtext -->
+        {%- endif -%}
+
+        {%- if sizeguide.image != blank -%}
+          <div class="sizeguide__image">
+            {{- sizeguide.image | image_url: width: 1024 | image_tag -}}
+          </div><!-- /.sizeguide__image -->
+        {%- endif -%}
+      </div><!-- /.container container--narrow -->
+    </div><!-- /.sizeguide__content -->
+  </div><!-- /.sizeguide__wrapper -->
+</modal-dialog>

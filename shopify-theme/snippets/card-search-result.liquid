@@ -1,0 +1,79 @@
+{%- comment -%}
+  Renders a single search-results row.
+  Accepts:
+  - result {Object}: a Shopify search result (product or article)
+  Emits a row keyed by data-result-type for client-side chip filtering.
+{%- endcomment -%}
+
+{%- liquid
+  assign type_key = ''
+  if result.object_type == 'product' and result.tags contains 'song'
+    assign type_key = 'song'
+  elsif result.object_type == 'product'
+    assign type_key = 'shop'
+  elsif result.object_type == 'article'
+    assign type_key = 'blog'
+  endif
+-%}
+
+{%- if type_key == 'song' -%}
+  {%- assign color = 'red' -%}
+  {%- if result.metafields.custom.main_color != blank -%}
+    {%- assign color = result.metafields.custom.main_color | downcase -%}
+  {%- endif -%}
+  <a href="{{- result.url -}}" class="search-result search-result--song main-color-{{ color }}" data-result-type="song">
+    <span class="search-result__thumb search-result__thumb--icon" aria-hidden="true">
+      {%- render 'icon', icon: 'music-note-single' -%}
+    </span>
+    <span class="search-result__body">
+      <span class="search-result__title">{{- result.title | escape -}}</span>
+    </span>
+    <span class="search-result__badge">{{- 'search.type_badge.song' | t -}}</span>
+  </a>
+{%- endif -%}
+
+{%- if type_key == 'shop' -%}
+  <a href="{{- result.url -}}" class="search-result search-result--shop" data-result-type="shop">
+    <span class="search-result__thumb">
+      {%- if result.featured_image -%}
+        {%- render 'image', image: result.featured_image, width: 160, height: 160 -%}
+      {%- else -%}
+        <span aria-hidden="true">{%- render 'icon', icon: 'heart-with-note' -%}</span>
+      {%- endif -%}
+    </span>
+    <span class="search-result__body">
+      <span class="search-result__title">{{- result.title | escape -}}</span>
+      <span class="search-result__meta">
+        {%- if result.compare_at_price > result.price -%}
+          <s class="search-result__compare">{{- result.compare_at_price | money -}}</s>
+        {%- endif -%}
+        <span class="search-result__price">{{- result.price | money -}}</span>
+      </span>
+    </span>
+    <span class="search-result__badge">{{- 'search.type_badge.shop' | t -}}</span>
+  </a>
+{%- endif -%}
+
+{%- if type_key == 'blog' -%}
+  <a href="{{- result.url -}}" class="search-result search-result--blog" data-result-type="blog">
+    <span class="search-result__thumb">
+      {%- if result.image -%}
+        {%- render 'image', image: result.image, width: 160, height: 160 -%}
+      {%- else -%}
+        <span aria-hidden="true">{%- render 'icon', icon: 'heart-with-note' -%}</span>
+      {%- endif -%}
+    </span>
+    <span class="search-result__body">
+      <span class="search-result__title">{{- result.title | escape -}}</span>
+      <span class="search-result__meta">
+        {{- result.blog.title | escape -}} &middot; {{- result.published_at | date: '%b %-d, %Y' -}}
+      </span>
+      {%- if result.excerpt_or_content != blank -%}
+        <span class="search-result__excerpt">
+          {{- result.excerpt_or_content | strip_html | truncate: 140 -}}
+        </span>
+      {%- endif -%}
+    </span>
+    <span class="search-result__badge">{{- 'search.type_badge.blog' | t -}}</span>
+  </a>
+{%- endif -%}

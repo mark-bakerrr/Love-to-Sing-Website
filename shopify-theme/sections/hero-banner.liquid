@@ -1,0 +1,281 @@
+{%- liquid
+  assign video = section.settings.video | default: nil
+  assign video_mobile = section.settings.video_mobile | default: video
+  assign _section = section.settings
+
+  echo 'section-hero-banner.css' | asset_url | stylesheet_tag
+-%}
+
+{%- if _section.title != blank
+    or _section.content != blank
+    or _section.link_text != blank and _section.link_url != blank
+-%}
+  <section
+    class="hero-banner flex flex--justify-center center"
+    style="background: {{ _section.background }};"
+  >
+    <div class="container">
+      <div
+        class="hero__background"
+        style="opacity: {{ _section.media_opacity | divided_by: 100.0 }};"
+      >
+        {%- if video != blank -%}
+          {%- assign video_title = video.alt | default: _section.title -%}
+          <div class="media media--16-9 hero__media media--transparent small-hide">
+            {% render 'external-video', video: video, title: video_title %}
+          </div><!-- /.media -->
+
+          <div class="media media--16-9 hero__media media--transparent large-up-hide medium-hide">
+            {% render 'external-video', video: video_mobile, title: video_title %}
+          </div><!-- /.media -->
+        {%- else -%}
+          <div class="media media--16-9 hero__media media--transparent">
+            {%-
+              liquid
+              if _section.image != blank
+                assign image_mobile = _section.image_mobile | default: _section.image
+                render 'image', image: _section.image, class: 'small-hide'
+                render 'image', image: image_mobile, class: 'medium-hide large-up-hide'
+              else
+                echo 'image' | placeholder_svg_tag: 'placeholder-svg'
+              endif
+            -%}
+          </div><!-- /.media -->
+        {%- endif -%}
+      </div><!-- /.hero__background -->
+
+      {%- if _section.overlay_color != blank and _section.overlay_opacity > 0 -%}
+        {%- assign overlay_opacity = _section.overlay_opacity | divided_by: 100.0 -%}
+        <div class="hero__overlay" style="background: {{ _section.overlay_color }}; opacity: {{ overlay_opacity }};"></div><!-- /.hero__overlay -->
+      {%- endif -%}
+
+      <div class="hero__inner">
+        <div
+          class="hero__content"
+          style="--color: {{ _section.content_color }};"
+        >
+          {%- comment -%} Content {%- endcomment -%}
+          {%- if _section.eyebrow != blank -%}
+            <h3 class="hero__eyebrow h2">
+              {{- _section.eyebrow | escape -}}
+            </h3><!-- /.hero__eyebrow -->
+          {%- endif -%}
+
+          {%- if _section.title != blank -%}
+            <h3 class="hero__title h1">
+              {{- _section.title | newline_to_br -}}
+            </h3><!-- /.hero__title -->
+          {%- endif -%}
+
+          {%- if _section.content != blank -%}
+            <div class="hero__body">
+              {{- _section.content -}}
+            </div><!-- /.hero__body -->
+          {%- endif -%}
+
+          {%- if _section.button_text != blank and _section.button_url != blank -%}
+            {%- render 'button',
+              type: 'link',
+              style: 'secondary',
+              value: _section.button_text,
+              href: _section.button_url -%}
+          {%- endif -%}
+        </div><!-- /.hero__content -->
+
+        {%- if _section.image_aside != blank or _section.image_aside != blank -%}
+          <div class="hero__content-media">
+            {%- if _section.image_aside != blank -%}
+              <div class="hero__content-image-aside">
+                <div class="media media--transparent">
+                  {%- render 'image', image: _section.image_aside -%}
+                </div><!-- /.media -->
+              </div><!-- /.hero__content-image-aside -->
+            {%- endif -%}
+
+            {%- if _section.image_overlay != blank -%}
+              <div
+                class="hero__content-image-overlay"
+                style="
+                  --width: {{ _section.image_overlay_width }}%;
+                  justify-content: {% if _section.image_overlay_alignment == 'left' %}flex-start{% elsif _section.image_overlay_alignment == 'right' %}flex-end{% else %}center{% endif %};
+                "
+              >
+                <div class="media media--transparent media--aspect-ratio">
+                  {%- render 'image', image: _section.image_overlay -%}
+                </div><!-- /.media -->
+              </div><!-- /.hero__content-image-aside -->
+            {%- endif -%}
+          </div><!-- /.hero__content-media -->
+        {%- endif -%}
+      </div><!-- /.hero__inner -->
+    </div><!-- /.container -->
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:sections.hero-banner.name",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "color_background",
+      "id": "background",
+      "label": "Background",
+      "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:sections.hero-banner.settings.background_paragraph.content"
+    },
+    {
+      "type": "range",
+      "id": "media_opacity",
+      "label": "Media opacity",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 100
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:sections.hero-banner.settings.image.desktop.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "t:sections.hero-banner.settings.image.mobile.label",
+      "info": "t:sections.hero-banner.settings.image.mobile.info"
+    },
+    {
+      "type": "video_url",
+      "id": "video",
+      "accept": [
+        "youtube",
+        "vimeo"
+      ],
+      "info": "t:sections.hero-banner.settings.video.desktop.info",
+      "label": "t:sections.hero-banner.settings.video.desktop.label"
+    },
+    {
+      "type": "video_url",
+      "id": "video_mobile",
+      "accept": [
+        "youtube",
+        "vimeo"
+      ],
+      "label": "t:sections.hero-banner.settings.video.mobile.label",
+      "info": "t:sections.hero-banner.settings.video.mobile.info"
+    },
+    {
+      "type": "color_background",
+      "id": "overlay_color",
+      "label": "t:sections.hero-banner.settings.background_overlay.color.label",
+      "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "t:sections.hero-banner.settings.background_overlay.opacity.label",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_aside",
+      "label": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_overlay",
+      "label": "Overlay Image"
+    },
+    {
+      "type": "select",
+      "id": "image_overlay_alignment",
+      "label": "Image overlay alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center",
+      "visible_if": "{{ section.settings.image_overlay != blank }}"
+    },
+    {
+      "type": "range",
+      "id": "image_overlay_width",
+      "min": 20,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Image overlay width",
+      "default": 60,
+      "visible_if": "{{ section.settings.image_overlay != blank }}"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow"
+    },
+    {
+      "type": "color",
+      "id": "content_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "t:sections.hero-banner.settings.title.label",
+      "default": "Heading goes here"
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "t:sections.hero-banner.settings.content.label",
+      "default": "<p>Content text goes here</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "t:sections.hero-banner.settings.button_text.label",
+      "default": "Link text"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "t:sections.hero-banner.settings.button_url.label",
+      "default": "/"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header"]
+  },
+  "presets": [
+    {
+      "name": "t:sections.hero-banner.name"
+    }
+  ]
+}
+{% endschema %}

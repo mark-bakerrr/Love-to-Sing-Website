@@ -1,0 +1,191 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {
+        "title": "",
+        "subtitle": ""
+      }
+    },
+    "hero_featured_article_HHggGg": {
+      "type": "hero-featured-article",
+      "name": "Hero featured article",
+      "settings": {
+        "article": "christmas/how-new-zealand-celebrates-christmas",
+        "content_color": "#ffffff",
+        "tag": "featured",
+        "tag_background": "#ec5450",
+        "tag_color": "#ffffff",
+        "background": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "video": "",
+        "video_mobile": "",
+        "overlay_color": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "overlay_opacity": 20
+      }
+    },
+    "meta_articles_Etx3UE": {
+      "type": "meta-articles",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        },
+        "article": {
+          "type": "article",
+          "static": true,
+          "settings": {
+            "article": "{{ closest.article }}"
+          },
+          "blocks": {}
+        }
+      },
+      "name": "Featured blog",
+      "settings": {
+        "blog_handle": "christmas-news",
+        "limit": 3,
+        "hide_if_no_articles": false,
+        "large_tiles": true,
+        "border_bottom": false,
+        "border_top": false,
+        "title": "Christmas news",
+        "subtitle": "all the latest Christmas news straight to you!",
+        "button_text": "read all",
+        "button_url": "shopify://blogs/christmas-news",
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "meta_articles_PNQcyi": {
+      "type": "meta-articles",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        },
+        "article": {
+          "type": "article",
+          "static": true,
+          "settings": {
+            "article": "{{ closest.article }}"
+          },
+          "blocks": {}
+        }
+      },
+      "name": "Featured blog",
+      "settings": {
+        "blog_handle": "kids-music",
+        "limit": 3,
+        "hide_if_no_articles": false,
+        "large_tiles": true,
+        "border_bottom": false,
+        "border_top": false,
+        "title": "Kid's music and learning activities",
+        "subtitle": "We have tons of resources and lessons plans!",
+        "button_text": "read all",
+        "button_url": "shopify://blogs/kids-music",
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "meta_articles_Cbtdai": {
+      "type": "meta-articles",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        },
+        "article": {
+          "type": "article",
+          "static": true,
+          "settings": {
+            "article": "{{ closest.article }}"
+          },
+          "blocks": {}
+        }
+      },
+      "name": "Featured blog",
+      "settings": {
+        "blog_handle": "christmas-history",
+        "limit": 3,
+        "hide_if_no_articles": false,
+        "large_tiles": true,
+        "border_bottom": false,
+        "border_top": false,
+        "title": "Christmas History",
+        "subtitle": "Learn all there is to know about Christmas",
+        "button_text": "Read all",
+        "button_url": "shopify://blogs/christmas-history",
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "newsletter_banner_ybCqyq": {
+      "type": "newsletter-banner",
+      "blocks": {
+        "newsletter-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_top_mobile": 0,
+            "spacing_bottom_mobile": 0
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.newsletter.name",
+      "settings": {
+        "background_top": "#ffffff",
+        "background_bottom": "#790200",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "text_color": "#ffffff",
+        "title": "Join Our Newsletter",
+        "subtitle": "Sign up to our newsletter and we will send you a free song!"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "hero_featured_article_HHggGg",
+    "meta_articles_Etx3UE",
+    "meta_articles_PNQcyi",
+    "meta_articles_Cbtdai",
+    "newsletter_banner_ybCqyq"
+  ]
+}

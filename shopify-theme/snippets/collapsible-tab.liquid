@@ -1,0 +1,29 @@
+{% comment %}
+  Accepts:
+    - icon {Image}
+    - title {Text}
+    - content {Richtext}
+
+  Usage:
+    {% render 'collapsible-tab', icon: icon, title: title, content: content %}
+{% endcomment %}
+
+<collapsible-tab class="collapsible-tab {%- if open_by_default %} is-active{%- endif -%}">
+  <a href="#" class="collapsible-tab__head bold" js-head>
+    {%- if icon != blank -%}
+      <i>
+        {{- icon -}}
+      </i>
+    {%- endif -%}
+
+    {{- title | escape -}}
+
+    {% render 'icon-chevron-down' %}
+  </a><!-- /.collapsible-tab__head -->
+
+  <div class="collapsible-tab__body">
+    <div class="collapsible-tab__body-inner rte">
+      {{- content -}}
+    </div><!-- /.collapsible-tab__body-inner -->
+  </div><!-- /.collapsible-tab__body -->
+</collapsible-tab>

@@ -1,0 +1,220 @@
+{%- comment -%}
+  Renders a megamenu products section
+  Accepts:
+  - _collection: {Object} Collection Liquid object
+  - has_button_1: {Boolean} Whether to show button 1
+  - button_label_1: {String} Button 1 label
+  - button_link_1: {String} Button 1 link
+  - has_button_2: {Boolean} Whether to show button 2
+  - button_label_2: {String} Button 2 label
+  - button_link_2: {String} Button 2 link
+  - button_2_menu: {String} Button 2 menu index to show button 2
+  - add_search: {Boolean} Whether to add a search form
+  Usage:
+  {%- render 'megamenu-products', _collection: collection, has_button_1: true, button_label_1: 'View all', button_link_1: collection.url, add_search: true -%}
+{%- endcomment -%}
+
+{%- if item_collection_count == 1 -%}
+  <div
+    class="megamenu__products"
+    megamenu="products-container"
+  >
+    {%- liquid
+      # Find if product has tag 'song' or 'ebook' and render the appropriate number of products
+      assign first_product = _collection.products | first
+      assign products_limit = 6
+      assign grid_cols = 6
+
+      if first_product.tags contains 'song'
+        assign products_limit = 18
+        assign grid_cols = 3
+      elsif first_product.tags contains 'ebook'
+        assign products_limit = 4
+        assign grid_cols = 4
+      endif
+    -%}
+
+    <ul
+      class="megamenu__products-list list-unstyled"
+      style="--grid-cols: {{ grid_cols }};"
+    >
+      {%- for product in _collection.products limit: products_limit -%}
+        <li class="megamenu__product">
+          {%- liquid
+            if product.tags contains 'song'
+              render 'card-product-song', product_ref: product
+
+            elsif product.tags contains 'ebook'
+              render 'card-product', product_ref: product, media_aspect: 'portrait'
+            else
+
+              render 'card-product', product_ref: product
+            endif
+          -%}
+        </li><!-- /.megamenu__sublinks-item -->
+      {%- endfor -%}
+    </ul><!-- /.megamenu__sublinks list-unstyled -->
+
+    {%- if has_button_1 or add_search -%}
+      <div class="megamenu__products-actions">
+        {%- liquid
+          if has_button_1
+            render 'button', type: 'link', style: 'secondary', icon_position: 'right', value: button_label_1, href: button_link_1
+          endif
+        -%}
+
+        {%- if add_search -%}
+          {%- assign namespace = item.title | handleize | prepend: 'megamenu-' -%}
+          <div class="megamenu__products-search form-search">
+            {%- liquid
+              assign placeholder = 'search.placeholder_songs' | t
+              capture search_input_attr
+                echo 'role="combobox" '
+                echo 'aria-autocomplete="list" '
+                echo 'autocorrect="off" '
+                echo 'autocomplete="off" '
+                echo 'autocapitalize="off" '
+                echo 'spellcheck="false"'
+              endcapture
+
+              if first_product.tags contains 'song'
+                assign tag = 'song'
+
+              elsif product.tags contains 'ebook'
+                assign tag = 'ebook'
+              endif
+
+              render 'form-search', namespace: namespace, input_attr: search_input_attr, class: 'megamenu__search-form', placeholder: placeholder, extra_search_terms: extra_terms, type: 'product',  tag: tag,
+            -%}
+          </div><!-- /.megamenu__products-search -->
+        {%- endif -%}
+      </div><!-- /.megamenu__products-actions -->
+    {%- endif -%}
+  </div><!-- /.megamenu__products -->
+
+{%- elsif item_collection_count > 1 -%}
+  <div
+    class="megamenu__submenu"
+    megamenu="submenu"
+  >
+    <ul class="megamenu__submenu-links list-unstyled">
+      {%- for sub_item in item_collection_list.value -%}
+        <li
+          class="megamenu__submenu-item{% if forloop.first %} is-active{% endif %}"
+          megamenu="submenu-item"
+        >
+          <a
+            href="{{ sub_item.link }}"
+            class="megamenu__sublink full-unstyled-link focus-inset"
+            {% if sub_item.link == link.url %}
+              aria-current="page"
+            {% endif %}
+          >
+            <span>
+              {{ sub_item.title }}
+            </span>
+
+            {%- if sub_item.products_count > 0 -%}
+              <i>
+                {%- render 'icon', icon: 'chevron-right' -%}
+              </i>
+            {%- endif -%}
+          </a>
+
+          {%- assign _collection = sub_item -%}
+
+          <div
+            class="megamenu__products"
+            megamenu="products-container"
+          >
+            {%- liquid
+              # Find if product has tag 'song' or 'ebook' and render the appropriate number of products
+              assign first_product = _collection.products | first
+              assign products_limit = 4
+              assign grid_cols = 4
+
+              if first_product.tags contains 'song'
+                assign products_limit = 12
+                assign grid_cols = 2
+              endif
+            -%}
+
+            <ul
+              class="megamenu__products-list list-unstyled"
+              style="--grid-cols: {{ grid_cols }};"
+            >
+              {%- for product in _collection.products limit: products_limit -%}
+                <li class="megamenu__product">
+                  {%- liquid
+                    if product.tags contains 'song'
+                      render 'card-product-song', product_ref: product
+
+                    elsif product.tags contains 'ebook'
+                      render 'card-product', product_ref: product, media_aspect: 'portrait'
+                    else
+
+                      render 'card-product', product_ref: product
+                    endif
+                  -%}
+                </li><!-- /.megamenu__sublinks-item -->
+              {%- endfor -%}
+            </ul><!-- /.megamenu__sublinks list-unstyled -->
+
+            {%- if has_button_2 and forloop.index == button_2_menu -%}
+              <div class="megamenu__products-actions">
+                {%- liquid
+                  if has_button_2
+                    render 'button', type: 'link', style: 'secondary,sm', icon_position: 'right', value: button_label_2, href: button_link_2
+                  endif
+                -%}
+
+                {% comment %} {%- if add_search -%}
+                  {%- assign namespace = item.title | handleize | prepend: 'megamenu-' -%}
+
+                  <div class="megamenu__products-search form-search">
+                    {%- liquid
+                      assign placeholder = 'search.placeholder_songs' | t
+                      capture search_input_attr
+                        echo 'role="combobox" '
+                        echo 'aria-autocomplete="list" '
+                        echo 'autocorrect="off" '
+                        echo 'autocomplete="off" '
+                        echo 'autocapitalize="off" '
+                        echo 'spellcheck="false"'
+                      endcapture
+
+                      render 'form-search', namespace: namespace, input_attr: search_input_attr, class: 'megamenu__search-form', placeholder: placeholder
+                    -%}
+                  </div><!-- /.megamenu__products-search -->
+                {%- endif -%} {% endcomment %}
+              </div><!-- /.megamenu__products-actions -->
+            {%- endif -%}
+
+            {%- if has_button_3 and forloop.index == button_3_menu -%}
+              <div class="megamenu__products-actions">
+                {%- liquid
+                  if has_button_3
+                    render 'button', type: 'link', style: 'secondary,sm', icon_position: 'right', value: button_label_3, href: button_link_3
+                  endif
+                -%}
+              </div><!-- /.megamenu__products-actions -->
+            {%- endif -%}
+          </div><!-- /.megamenu__products -->
+        </li><!-- /.megamenu__sublinks-item -->
+      {%- endfor -%}
+    </ul><!-- /.megamenu__sublinks list-unstyled -->
+
+    {%- if has_button_1 -%}
+      <div
+        class="megamenu__submenu-actions"
+        megamenu="submenu-actions"
+      >
+        {%- liquid
+          if has_button_1
+            render 'button', type: 'link', style: 'secondary,sm', icon_position: 'right', value: button_label_1, href: button_link_1
+          endif
+        -%}
+      </div><!-- /.megamenu__submenu-actions -->
+    {%- endif -%}
+  </div><!-- /.megamenu__submenu -->
+{%- endif -%}

@@ -1,0 +1,19 @@
+.button-text {
+  text-align: center;
+}
+
+.button-text__subtitle {
+  font-size: var(--fz-l);
+
+  @media (max-width: 989px) {
+    font-size: var(--fz-r);
+  }
+}
+
+.button-text__subtitle:not(:first-child) {
+  margin-top: 0.8rem;
+}
+
+.button-text__actions:not(:first-child) {
+  margin-top: 2.4rem;
+}

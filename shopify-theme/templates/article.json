@@ -1,0 +1,161 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-article",
+      "settings": {
+        "link_label": "Blog",
+        "link_url": "shopify://blogs/home",
+        "newsletter_title": "Join our newsletter",
+        "newsletter_subtitle": "Subscribe to receive the latest blog posts and updates directly to your inbox."
+      }
+    },
+    "meta_articles_xmUDf3": {
+      "type": "meta-articles",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        },
+        "article": {
+          "type": "article",
+          "static": true,
+          "settings": {
+            "article": "{{ closest.article }}"
+          },
+          "blocks": {}
+        }
+      },
+      "name": "Featured blog",
+      "settings": {
+        "blog_handle": "blog",
+        "limit": 3,
+        "hide_if_no_articles": true,
+        "large_tiles": true,
+        "border_bottom": false,
+        "border_top": false,
+        "title": "You might also like",
+        "subtitle": "",
+        "button_text": "View all blogs",
+        "button_url": "shopify://blogs/blog",
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "related-articles": {
+      "type": "related-articles",
+      "disabled": true,
+      "settings": {}
+    },
+    "featured_articles_fif38N": {
+      "type": "featured-articles",
+      "blocks": {
+        "article_hFzCwn": {
+          "type": "article",
+          "name": "Article",
+          "settings": {
+            "article": "{{ closest.article.metafields.custom.related_article_1.value }}"
+          },
+          "blocks": {}
+        },
+        "article_XyK9LC": {
+          "type": "article",
+          "name": "Article",
+          "settings": {
+            "article": "{{ closest.article.metafields.custom.related_article_2.value }}"
+          },
+          "blocks": {}
+        },
+        "article_6wt8kY": {
+          "type": "article",
+          "name": "Article",
+          "settings": {
+            "article": "{{ closest.article.metafields.custom.related_article_3.value }}"
+          },
+          "blocks": {}
+        },
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "article_hFzCwn",
+        "article_XyK9LC",
+        "article_6wt8kY"
+      ],
+      "name": "Featured articles",
+      "settings": {
+        "hide_if_no_articles": true,
+        "large_tiles": false,
+        "border_bottom": false,
+        "border_top": false,
+        "use_automatic_articles": false,
+        "blog": "",
+        "articles_count": 5,
+        "title": "Related Articles",
+        "subtitle": "Explore our diverse range of music offerings today!",
+        "button_text": "View All",
+        "button_url": "shopify://pages/blog",
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    },
+    "newsletter_banner_iDJBef": {
+      "type": "newsletter-banner",
+      "blocks": {
+        "newsletter-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_top_mobile": 0,
+            "spacing_bottom_mobile": 0
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.newsletter.name",
+      "settings": {
+        "background_top": "#ffffff",
+        "background_bottom": "#790200",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "text_color": "#ffffff",
+        "title": "Join Our Newsletter",
+        "subtitle": "Sign up to our newsletter and we will send you a free song!"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "meta_articles_xmUDf3",
+    "related-articles",
+    "featured_articles_fif38N",
+    "newsletter_banner_iDJBef"
+  ]
+}

@@ -1,0 +1,162 @@
+<style>
+  #shopify-section-{{ section.id }} {
+    --padding-top: {{ section.settings.padding_top }}px;
+    --padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .faq-section {
+    padding-top: var(--padding-top);
+    padding-bottom: var(--padding-bottom);
+    background-color: #fff;
+    padding: var(--padding-top) 0 var(--padding-bottom);
+  }
+
+  .faq-grid {
+    display: grid;
+    grid-template-columns: 1fr 59.8rem;
+    gap: 4rem;
+    align-items: flex-start;
+  }
+
+  .faq-title {
+    margin-bottom: 2.5rem;
+  }
+
+  .faq-subtitle {
+    line-height: 1.4;
+    font-size: var(--fz-l);
+    max-width: 59.8rem;
+  }
+
+  .faq-accordion-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 989px) {
+    .faq-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+</style>
+
+{{- 'faq-item.css' | asset_url | stylesheet_tag -}}
+
+<div class="faq-section">
+  <div class="container">
+    <div class="faq-grid">
+      <div class="faq-text-column">
+        {%- if section.settings.title != blank -%}
+          <h2 class="faq-title">
+            {{ section.settings.title }}
+          </h2>
+        {%- endif -%}
+
+        {%- if section.settings.subtitle != blank -%}
+          <div class="faq-subtitle rte">
+            {{ section.settings.subtitle }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="faq-accordion-column">
+        {%- assign is_open = true -%}
+
+        {%- for block in section.blocks -%}
+          {% render 'faq-item', block: block, is_open: true %}
+
+          {%- assign is_open = false -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "FAQ Accordion",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "FAQs"
+    },
+    {
+      "type": "richtext",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "<p>Find answers to your most pressing questions about our products and services.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq_item",
+      "name": "FAQ Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Question",
+          "default": "What is a license?"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer",
+          "default": "<p>A music license grants permission to use copyrighted music legally. It ensures that the rights of the creators are respected. Different licenses apply depending on the intended use.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ Accordion",
+      "blocks": [
+        {
+          "type": "faq_item"
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "heading": "Do I need one?"
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "heading": "How to obtain licenses?"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
