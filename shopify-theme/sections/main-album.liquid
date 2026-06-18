@@ -640,7 +640,9 @@
 
   @media (max-width: 767px) {
     .lts-album {
-      padding-block: var(--header-top-position, 5.6rem) 4rem;
+      /* No top padding — the head owns the header offset so the hearts run to
+         the very top here too (matches the base rule). */
+      padding-block: 0 4rem;
     }
 
     .lts-album__head {
