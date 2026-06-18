@@ -171,7 +171,7 @@
     --lts-album-surface-warm: var(--c-main-50);
     --lts-album-border: rgba(52, 35, 24, 0.12);
     --lts-album-muted: color-mix(in srgb, var(--color-paragraphs), transparent 32%);
-    --lts-album-shadow: 0 2.4rem 6rem rgba(45, 11, 10, 0.2);
+    --lts-album-shadow: 0 1rem 2.8rem rgba(45, 11, 10, 0.08);
     position: relative;
     overflow: hidden;
     /* No top padding on the section — the red+hearts head owns all top spacing
@@ -186,7 +186,7 @@
   .lts-album__head {
     position: relative;
     color: var(--lts-album-hero-text);
-    padding-block: calc(8rem + var(--header-top-position, 7.4rem)) 20rem;
+    padding-block: calc(8rem + var(--header-top-position, 7.4rem)) 9rem;
     background: linear-gradient(180deg, var(--c-main-500) 0%, var(--c-main-600) 100%);
     isolation: isolate;
   }
@@ -217,21 +217,6 @@
     height: 100%;
     object-fit: cover;
     opacity: var(--opacity);
-  }
-
-  .lts-album__head::after {
-    content: '';
-    position: absolute;
-    inset-inline: 0;
-    bottom: -0.1rem;
-    z-index: 1;
-    height: 14rem;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.72) 64%, #ffffff 100%);
-    -webkit-backdrop-filter: blur(0.5rem);
-    backdrop-filter: blur(0.5rem);
-    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000000 30%, #000000 100%);
-    mask-image: linear-gradient(180deg, transparent 0%, #000000 30%, #000000 100%);
-    pointer-events: none;
   }
 
   .lts-album__hero {
@@ -389,7 +374,7 @@
   .lts-album__tracks {
     position: relative;
     z-index: 2;
-    margin-top: -10rem;
+    margin-top: -3rem;
     border: 0.1rem solid var(--lts-album-border);
     border-radius: var(--radius-m);
     color: var(--color-paragraphs);
