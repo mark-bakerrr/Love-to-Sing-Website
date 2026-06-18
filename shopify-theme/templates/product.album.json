@@ -2,7 +2,10 @@
   "sections": {
     "main": {
       "type": "main-album",
-      "settings": {}
+      "settings": {
+        "background_image": "shopify://shop_images/hearts-background.png",
+        "background_opacity": 5
+      }
     }
   },
   "order": ["main"]
