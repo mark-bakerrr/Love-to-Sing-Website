@@ -1,0 +1,144 @@
+{%- comment -%}
+  Love to Sing — Album product page (Phase 8 / WS4).
+
+  A clean, LTS-native album page. Deliberately contains NO Single Music
+  dependencies (no single-base/single-music assets, jQuery, album.* metafields,
+  collection-based tracklist, or single ajaxify) — those caused the
+  "Cannot find bundle" error and the unwanted quantity selector.
+
+  Buying is handled by the "Get the music" shop drawer (Shop Drawer app embed,
+  which activates on product templates whose suffix contains "album"). The
+  drawer fetches the album payload from the app proxy and shows the tracklist +
+  per-track / whole-album purchase. The full on-page tracklist player (and a
+  display that scales to 50-track albums) lands with WS5.
+{%- endcomment -%}
+
+{%- assign bg = section.settings.background_image -%}
+
+<section
+  class="main-album"
+  itemscope
+  itemtype="http://schema.org/Product"
+  {% if bg != blank %}style="--main-album-bg: url({{ bg | image_url: width: 1600 }});"{% endif %}
+>
+  <div class="page-width main-album__inner">
+    <meta itemprop="url" content="{{ shop.url }}{{ product.url }}">
+    <meta itemprop="image" content="{{ product.featured_image | image_url: width: 1200 }}">
+    <meta itemprop="priceCurrency" content="{{ shop.currency }}">
+
+    {%- comment -%} Artwork {%- endcomment -%}
+    <div class="main-album__art">
+      {%- if product.featured_image != blank -%}
+        <img
+          src="{{ product.featured_image | image_url: width: 900 }}"
+          srcset="{{ product.featured_image | image_url: width: 450 }} 450w, {{ product.featured_image | image_url: width: 900 }} 900w"
+          sizes="(min-width: 750px) 40vw, 90vw"
+          width="{{ product.featured_image.width }}"
+          height="{{ product.featured_image.height }}"
+          alt="{{ product.featured_image.alt | default: product.title | escape }}"
+          loading="eager"
+        >
+      {%- else -%}
+        <div class="main-album__art-placeholder" aria-hidden="true">♪</div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Info + buy {%- endcomment -%}
+    <div class="main-album__info">
+      <p class="main-album__eyebrow">{{ 'album.label' | t | default: 'Album' }}</p>
+      <h1 class="main-album__title" itemprop="name">{{ product.title }}</h1>
+
+      <p class="main-album__price">
+        <span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+          <meta itemprop="price" content="{{ product.price | divided_by: 100.0 }}">
+          <link itemprop="availability" href="http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}">
+          {{ product.price | money }}
+        </span>
+        {%- if product.compare_at_price > product.price -%}
+          <s class="main-album__price-was">{{ product.compare_at_price | money }}</s>
+        {%- endif -%}
+      </p>
+
+      {%- comment -%}
+        Single "Get the music" trigger — opens the shop drawer (same pattern as
+        the song page). The drawer renders the album card + tracklist + buy.
+      {%- endcomment -%}
+      <div class="main-album__actions">
+        <button
+          type="button"
+          class="button button--full main-album__cta"
+          data-lts-shop-trigger
+          aria-haspopup="dialog"
+          aria-expanded="false"
+        >
+          <span>{% render 'icon-cart' %}&nbsp;{{ 'album.get_the_music' | t | default: 'Get the music' }}</span>
+        </button>
+        <p class="main-album__actions-note">
+          {{ 'album.get_the_music_note' | t | default: 'Stream previews · buy any track or the whole album' }}
+        </p>
+      </div>
+
+      {%- if product.description != blank -%}
+        <div class="main-album__description rte" itemprop="description">
+          {{ product.description }}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{%- style -%}
+  .main-album { position: relative; padding: 4rem 0; }
+  .main-album__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 4rem;
+    align-items: start;
+  }
+  .main-album__art img,
+  .main-album__art-placeholder {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  }
+  .main-album__art-placeholder {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 6rem; color: rgba(0,0,0,.25); background: rgba(0,0,0,.04);
+  }
+  .main-album__eyebrow {
+    text-transform: uppercase; letter-spacing: .08em; font-size: 1.2rem;
+    font-weight: 600; opacity: .6; margin: 0 0 .5rem;
+  }
+  .main-album__title { font-size: 3.2rem; line-height: 1.1; margin: 0 0 1rem; }
+  .main-album__price { font-size: 2rem; font-weight: 600; margin: 0 0 1.5rem; }
+  .main-album__price-was { opacity: .5; font-weight: 400; margin-left: .5rem; }
+  .main-album__actions { margin: 0 0 2rem; max-width: 30rem; }
+  .main-album__cta { font-size: 1.6rem; }
+  .main-album__actions-note { font-size: 1.3rem; opacity: .7; margin: .6rem 0 0; text-align: center; }
+  .main-album__description { font-size: 1.5rem; line-height: 1.6; }
+  @media (max-width: 749px) {
+    .main-album__inner { grid-template-columns: 1fr; gap: 2rem; }
+    .main-album__title { font-size: 2.4rem; }
+  }
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Album (Love to Sing)",
+  "tag": "section",
+  "class": "section section--main-album",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image (optional)"
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    { "name": "Album (Love to Sing)" }
+  ]
+}
+{% endschema %}
