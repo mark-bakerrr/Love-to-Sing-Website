@@ -3,8 +3,8 @@
 
   const PLAY_LABEL = '\u25b6';
   const PAUSE_LABEL = '\u23f8';
-  const CART_LABEL = '\ud83d\uded2 Add';
-  const ADDED_LABEL = 'Added \u2713';
+  const CART_ICON = '<span class="lts-album-track__add-icon lts-album-track__add-icon--cart" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="14" viewBox="0 0 15 14"><path d="M0,2.5A.5.5,0,0,1,.5,2H2a.5.5,0,0,1,.485.379L2.89,4H14.5a.5.5,0,0,1,.485.621l-1.5,6A.5.5,0,0,1,13,11H4a.5.5,0,0,1-.485-.379L1.61,3H.5A.5.5,0,0,1,0,2.5ZM3.14,5l1.25,5h8.22l1.25-5ZM5,13a1,1,0,1,0,1,1A1,1,0,0,0,5,13ZM3,14a2,2,0,1,1,2,2A2,2,0,0,1,3,14Zm9-1a1,1,0,1,0,1,1A1,1,0,0,0,12,13Zm-2,1a2,2,0,1,1,2,2A2,2,0,0,1,10,14Z" transform="translate(0 -2)"/></svg></span>';
+  const CHECK_ICON = '<span class="lts-album-track__add-icon lts-album-track__add-icon--check" aria-hidden="true">\u2713</span>';
 
   const previewCache = new Map();
   const audio = new Audio();
@@ -136,6 +136,20 @@
     element.classList.toggle('is-error', Boolean(isError));
   }
 
+  function setTrackProgress(row, progress) {
+    if (!row) return;
+
+    const clamped = Math.max(0, Math.min(100, progress || 0));
+    row.style.setProperty('--track-progress', `${clamped}%`);
+  }
+
+  function updatePlaybackProgress() {
+    if (!currentRow || !currentTrackId || audio.paused) return;
+
+    const duration = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 30;
+    setTrackProgress(currentRow, (audio.currentTime / duration) * 100);
+  }
+
   async function fetchJson(url, options) {
     const response = await fetch(url, Object.assign({ headers: { Accept: 'application/json' } }, options));
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -177,7 +191,10 @@
       currentButton.setAttribute('aria-label', currentButton.dataset.playLabel || 'Play preview');
     }
 
-    if (currentRow) currentRow.classList.remove('is-playing');
+    if (currentRow) {
+      currentRow.classList.remove('is-playing');
+      setTrackProgress(currentRow, 0);
+    }
 
     currentButton = null;
     currentRow = null;
@@ -213,6 +230,7 @@
       button.textContent = PAUSE_LABEL;
       button.setAttribute('aria-label', button.dataset.pauseLabel || 'Pause preview');
       row.classList.add('is-playing');
+      setTrackProgress(row, 0);
       setStatus(status, '', false);
     } catch (error) {
       console.warn('Preview failed.', error);
@@ -239,29 +257,38 @@
     });
   }
 
-  function buttonAdded(button, originalLabel) {
-    button.textContent = ADDED_LABEL;
+  function setTrackAddMarkup(button) {
+    if (!button || button.querySelector('.lts-album-track__add-icon')) return;
+    button.innerHTML = `${CART_ICON}${CHECK_ICON}`;
+  }
+
+  function buttonAdded(button) {
+    setTrackAddMarkup(button);
+    button.classList.remove('is-loading');
+    button.classList.add('is-added');
 
     window.setTimeout(() => {
-      button.textContent = originalLabel;
+      button.classList.remove('is-added');
       button.disabled = false;
     }, reducedMotion ? 900 : 1400);
   }
 
   async function handleTrackAdd(button, status) {
     const variantId = button.dataset.variantId;
-    const originalLabel = button.dataset.originalLabel || CART_LABEL;
 
     button.disabled = true;
-    button.textContent = 'Adding...';
+    setTrackAddMarkup(button);
+    button.classList.remove('is-added');
+    button.classList.add('is-loading');
     setStatus(status, '', false);
 
     try {
       await addToCart(variantId);
-      buttonAdded(button, originalLabel);
+      buttonAdded(button);
     } catch (error) {
       console.warn('Add track failed.', error);
-      button.textContent = originalLabel;
+      setTrackAddMarkup(button);
+      button.classList.remove('is-loading', 'is-added');
       button.disabled = false;
       setStatus(status, 'Could not add track. Please try again.', true);
     }
@@ -308,7 +335,7 @@
       const meta = hasPreview ? '30s preview' : 'Preview coming soon';
 
       return `
-        <li class="lts-album-track${disabledClass}" data-track-row>
+        <li class="lts-album-track${disabledClass}" data-track-row style="--track-progress: 0%;">
           <span class="lts-album-track__number">${index + 1}</span>
           <button
             type="button"
@@ -323,6 +350,10 @@
           <span class="lts-album-track__title">
             ${escapeHtml(title)}
             <span class="lts-album-track__meta">${escapeHtml(meta)}</span>
+            <span class="lts-album-track__progress" aria-hidden="true">
+              <span class="lts-album-track__progress-fill"></span>
+              <span class="lts-album-track__progress-dot"></span>
+            </span>
           </span>
           <span class="lts-album-track__price">${escapeHtml(price)}</span>
           <button
@@ -330,10 +361,10 @@
             class="lts-album-track__add"
             data-track-add
             data-variant-id="${escapeHtml(version.variantId || '')}"
-            data-original-label="${escapeHtml(CART_LABEL)}"
+            data-original-label="${escapeHtml(addLabel)}"
             aria-label="${escapeHtml(addLabel)}"
             ${addDisabled}
-          >${CART_LABEL}</button>
+          >${CART_ICON}${CHECK_ICON}</button>
         </li>
       `;
     }).join('');
@@ -397,6 +428,7 @@
     applyAccent(root, null);
 
     audio.preload = 'auto';
+    audio.addEventListener('timeupdate', updatePlaybackProgress);
     audio.addEventListener('ended', resetPlayback);
     audio.addEventListener('pause', () => {
       if (audio.ended) resetPlayback();
