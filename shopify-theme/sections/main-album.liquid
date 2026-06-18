@@ -174,7 +174,10 @@
     --lts-album-shadow: 0 2.4rem 6rem rgba(45, 11, 10, 0.2);
     position: relative;
     overflow: hidden;
-    padding-block: var(--header-top-position, 7.4rem) 6.4rem;
+    /* No top padding on the section — the red+hearts head owns all top spacing
+       so the background runs to the very top of the page (behind the header)
+       with no white gap. The head clears the header via its own padding-top. */
+    padding-block: 0 6.4rem;
     color: var(--color-paragraphs);
     background: var(--lts-album-surface);
     isolation: isolate;
@@ -183,7 +186,7 @@
   .lts-album__head {
     position: relative;
     color: var(--lts-album-hero-text);
-    padding-block: 8rem 20rem;
+    padding-block: calc(8rem + var(--header-top-position, 7.4rem)) 20rem;
     background: linear-gradient(180deg, var(--c-main-500) 0%, var(--c-main-600) 100%);
     isolation: isolate;
   }
@@ -191,16 +194,6 @@
   .lts-album__head > .container {
     position: relative;
     z-index: 2;
-  }
-
-  .template:not(:has(.shopify-section-group-header-group .header--solid)) {
-    .lts-album {
-      padding-top: 0;
-    }
-
-    .lts-album__head {
-      padding-top: calc(8rem + var(--header-top-position, 7.4rem));
-    }
   }
 
   .lts-album__head .main-song__background {
@@ -274,7 +267,6 @@
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
-    border: 0.8rem solid rgba(255, 255, 255, 0.88);
     border-radius: var(--radius-m);
     background: var(--lts-album-surface-warm);
     box-shadow: 0 2rem 5rem rgba(37, 24, 16, 0.28);
@@ -404,13 +396,6 @@
     background: var(--lts-album-surface);
     box-shadow: var(--lts-album-shadow);
     overflow: hidden;
-  }
-
-  .lts-album__tracks::before {
-    content: '';
-    display: block;
-    height: 0.6rem;
-    background: linear-gradient(90deg, var(--c-main-500), var(--c-main-600));
   }
 
   .lts-album__tracks-head {
