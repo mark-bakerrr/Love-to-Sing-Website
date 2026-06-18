@@ -1,126 +1,421 @@
-{%- comment -%}
-  Love to Sing — Album product page (Phase 8 / WS4).
-
-  A clean, LTS-native album page. Deliberately contains NO Single Music
-  dependencies (no single-base/single-music assets, jQuery, album.* metafields,
-  collection-based tracklist, or single ajaxify) — those caused the
-  "Cannot find bundle" error and the unwanted quantity selector.
-
-  Buying is handled by the "Get the music" shop drawer (Shop Drawer app embed,
-  which activates on product templates whose suffix contains "album"). The
-  drawer fetches the album payload from the app proxy and shows the tracklist +
-  per-track / whole-album purchase. The full on-page tracklist player (and a
-  display that scales to 50-track albums) lands with WS5.
-{%- endcomment -%}
-
 {%- assign bg = section.settings.background_image -%}
+{%- assign album_variant = product.selected_or_first_available_variant -%}
 
 <section
-  class="main-album"
+  id="lts-album-{{ section.id }}"
+  class="lts-album"
   itemscope
   itemtype="http://schema.org/Product"
-  {% if bg != blank %}style="--main-album-bg: url({{ bg | image_url: width: 1600 }});"{% endif %}
+  {% if bg != blank %}style="--lts-album-bg: url({{ bg | image_url: width: 1800 }});"{% endif %}
 >
-  <div class="page-width main-album__inner">
+  <div class="lts-album__background" aria-hidden="true"></div>
+
+  <div class="page-width lts-album__inner">
     <meta itemprop="url" content="{{ shop.url }}{{ product.url }}">
-    <meta itemprop="image" content="{{ product.featured_image | image_url: width: 1200 }}">
+    {%- if product.featured_image != blank -%}
+      <meta itemprop="image" content="{{ product.featured_image | image_url: width: 1200 }}">
+    {%- endif -%}
     <meta itemprop="priceCurrency" content="{{ shop.currency }}">
 
-    {%- comment -%} Artwork {%- endcomment -%}
-    <div class="main-album__art">
-      {%- if product.featured_image != blank -%}
-        <img
-          src="{{ product.featured_image | image_url: width: 900 }}"
-          srcset="{{ product.featured_image | image_url: width: 450 }} 450w, {{ product.featured_image | image_url: width: 900 }} 900w"
-          sizes="(min-width: 750px) 40vw, 90vw"
-          width="{{ product.featured_image.width }}"
-          height="{{ product.featured_image.height }}"
-          alt="{{ product.featured_image.alt | default: product.title | escape }}"
-          loading="eager"
-        >
-      {%- else -%}
-        <div class="main-album__art-placeholder" aria-hidden="true">♪</div>
-      {%- endif -%}
-    </div>
-
-    {%- comment -%} Info + buy {%- endcomment -%}
-    <div class="main-album__info">
-      <p class="main-album__eyebrow">{{ 'album.label' | t | default: 'Album' }}</p>
-      <h1 class="main-album__title" itemprop="name">{{ product.title }}</h1>
-
-      <p class="main-album__price">
-        <span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-          <meta itemprop="price" content="{{ product.price | divided_by: 100.0 }}">
-          <link itemprop="availability" href="http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}">
-          {{ product.price | money }}
-        </span>
-        {%- if product.compare_at_price > product.price -%}
-          <s class="main-album__price-was">{{ product.compare_at_price | money }}</s>
+    <div class="lts-album__hero">
+      <div class="lts-album__art">
+        {%- if product.featured_image != blank -%}
+          <img
+            src="{{ product.featured_image | image_url: width: 900 }}"
+            srcset="{{ product.featured_image | image_url: width: 450 }} 450w, {{ product.featured_image | image_url: width: 700 }} 700w, {{ product.featured_image | image_url: width: 900 }} 900w"
+            sizes="(min-width: 990px) 34vw, (min-width: 750px) 42vw, 88vw"
+            width="{{ product.featured_image.width }}"
+            height="{{ product.featured_image.height }}"
+            alt="{{ product.featured_image.alt | default: product.title | escape }}"
+            loading="eager"
+          >
+        {%- else -%}
+          <div class="lts-album__art-placeholder" aria-hidden="true">&#9835;</div>
         {%- endif -%}
-      </p>
-
-      {%- comment -%}
-        Single "Get the music" trigger — opens the shop drawer (same pattern as
-        the song page). The drawer renders the album card + tracklist + buy.
-      {%- endcomment -%}
-      <div class="main-album__actions">
-        <button
-          type="button"
-          class="button button--full main-album__cta"
-          data-lts-shop-trigger
-          aria-haspopup="dialog"
-          aria-expanded="false"
-        >
-          <span>{% render 'icon-cart' %}&nbsp;{{ 'album.get_the_music' | t | default: 'Get the music' }}</span>
-        </button>
-        <p class="main-album__actions-note">
-          {{ 'album.get_the_music_note' | t | default: 'Stream previews · buy any track or the whole album' }}
-        </p>
       </div>
 
-      {%- if product.description != blank -%}
-        <div class="main-album__description rte" itemprop="description">
-          {{ product.description }}
+      <div class="lts-album__details">
+        <p class="lts-album__eyebrow">Album</p>
+        <h1 class="lts-album__title h1" itemprop="name">{{ product.title | escape }}</h1>
+
+        <p class="lts-album__price">
+          <span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+            <meta itemprop="price" content="{{ product.price | divided_by: 100.0 }}">
+            <link itemprop="availability" href="http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}">
+            {{ product.price | money }}
+          </span>
+          {%- if product.compare_at_price > product.price -%}
+            <s class="lts-album__price-was">{{ product.compare_at_price | money }}</s>
+          {%- endif -%}
+        </p>
+
+        {%- if product.description != blank -%}
+          <div class="lts-album__description rte" itemprop="description">
+            {{ product.description }}
+          </div>
+        {%- endif -%}
+
+        <div class="lts-album__actions">
+          <button
+            id="lts-album-add"
+            type="button"
+            class="button lts-album__add"
+            data-lts-album-add
+            {% unless album_variant.available %}disabled{% endunless %}
+          >
+            <span>Add album &mdash; {{ product.price | money }}</span>
+          </button>
+          <p id="lts-album-add-status" class="lts-album__add-status" role="status" aria-live="polite"></p>
         </div>
-      {%- endif -%}
+      </div>
+    </div>
+
+    <div class="lts-album__tracks" aria-labelledby="lts-album-tracklist-heading">
+      <div class="lts-album__tracks-head">
+        <h2 id="lts-album-tracklist-heading" class="lts-album__tracks-title h3">Tracklist</h2>
+        <p id="lts-album-tracklist-status" class="lts-album__tracks-status" role="status" aria-live="polite">Loading tracklist...</p>
+      </div>
+      <ol
+        id="lts-album-tracklist"
+        class="lts-album-tracklist"
+        data-lts-album-tracklist
+      ></ol>
     </div>
   </div>
 </section>
 
-{%- style -%}
-  .main-album { position: relative; padding: 4rem 0; }
-  .main-album__inner {
-    display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    gap: 4rem;
-    align-items: start;
+<script id="lts-album-ctx" type="application/json">
+  {
+    "apiBase": "/apps/lts-studio",
+    "handle": {{ product.handle | json }},
+    "albumTitle": {{ product.title | json }},
+    "albumVariantId": {{ album_variant.id | json }},
+    "albumPrice": {{ product.price | json }},
+    "currency": {{ cart.currency.symbol | default: cart.currency.iso_code | json }},
+    "sectionId": {{ section.id | json }}
   }
-  .main-album__art img,
-  .main-album__art-placeholder {
+</script>
+<script src="{{ 'album-player.js' | asset_url }}" defer></script>
+
+{%- style -%}
+  .lts-album {
+    --lts-album-accent: #b91f1c;
+    --lts-album-accent-contrast: #ffffff;
+    --lts-album-surface: rgba(255, 252, 247, 0.92);
+    --lts-album-surface-strong: #fff8ed;
+    --lts-album-border: rgba(52, 35, 24, 0.12);
+    --lts-album-shadow: 0 2.4rem 6rem rgba(61, 38, 25, 0.12);
+    position: relative;
+    overflow: hidden;
+    padding-block: calc(var(--header-top-position, 7.4rem) + 4rem) 6.4rem;
+    color: var(--color-paragraphs);
+    isolation: isolate;
+  }
+
+  .lts-album__background {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 249, 239, 0.96)),
+      var(--lts-album-bg, linear-gradient(145deg, #fff5e5 0%, #f7ebe4 52%, #fffaf5 100%));
+    background-size: cover;
+    background-position: center;
+  }
+
+  .lts-album__inner {
+    display: grid;
+    gap: 2.4rem;
+  }
+
+  .lts-album__hero {
+    display: grid;
+    grid-template-columns: minmax(20rem, 36rem) minmax(0, 1fr);
+    gap: clamp(2.4rem, 5vw, 5.6rem);
+    align-items: end;
+    padding: clamp(2rem, 4vw, 4rem);
+    border: 0.1rem solid var(--lts-album-border);
+    border-radius: var(--radius-l);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.7), var(--lts-album-surface));
+    box-shadow: var(--lts-album-shadow);
+  }
+
+  .lts-album__art {
+    max-width: 100%;
+  }
+
+  .lts-album__art img,
+  .lts-album__art-placeholder {
+    display: block;
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
-    border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    border-radius: var(--radius-m);
+    background: var(--lts-album-surface-strong);
+    box-shadow: 0 1.8rem 4rem rgba(37, 24, 16, 0.2);
   }
-  .main-album__art-placeholder {
-    display: flex; align-items: center; justify-content: center;
-    font-size: 6rem; color: rgba(0,0,0,.25); background: rgba(0,0,0,.04);
+
+  .lts-album__art-placeholder {
+    display: grid;
+    place-items: center;
+    font-size: 7rem;
+    color: color-mix(in srgb, var(--lts-album-accent), #ffffff 34%);
   }
-  .main-album__eyebrow {
-    text-transform: uppercase; letter-spacing: .08em; font-size: 1.2rem;
-    font-weight: 600; opacity: .6; margin: 0 0 .5rem;
+
+  .lts-album__details {
+    min-width: 0;
   }
-  .main-album__title { font-size: 3.2rem; line-height: 1.1; margin: 0 0 1rem; }
-  .main-album__price { font-size: 2rem; font-weight: 600; margin: 0 0 1.5rem; }
-  .main-album__price-was { opacity: .5; font-weight: 400; margin-left: .5rem; }
-  .main-album__actions { margin: 0 0 2rem; max-width: 30rem; }
-  .main-album__cta { font-size: 1.6rem; }
-  .main-album__actions-note { font-size: 1.3rem; opacity: .7; margin: .6rem 0 0; text-align: center; }
-  .main-album__description { font-size: 1.5rem; line-height: 1.6; }
+
+  .lts-album__eyebrow {
+    margin: 0 0 0.8rem;
+    font-size: var(--fz-s);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    color: var(--lts-album-accent);
+    text-transform: uppercase;
+  }
+
+  .lts-album__title {
+    max-width: 12ch;
+    margin: 0;
+    color: var(--color-headings);
+    overflow-wrap: break-word;
+  }
+
+  .lts-album__price {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    align-items: baseline;
+    margin: 1.2rem 0 0;
+    font-size: var(--fz-h6);
+    font-weight: 700;
+    color: var(--color-headings);
+  }
+
+  .lts-album__price-was {
+    font-size: var(--fz-t);
+    font-weight: 400;
+    opacity: 0.55;
+  }
+
+  .lts-album__description {
+    max-width: 68rem;
+    margin-top: 1.6rem;
+    font-size: var(--fz-s);
+    line-height: 1.65;
+  }
+
+  .lts-album__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    align-items: center;
+    margin-top: 2.4rem;
+  }
+
+  .lts-album__add {
+    min-width: min(100%, 26rem);
+    color: var(--lts-album-accent-contrast);
+    background: var(--lts-album-accent);
+  }
+
+  .lts-album__add::after {
+    background: color-mix(in srgb, var(--lts-album-accent), #000000 16%);
+  }
+
+  .lts-album__add span {
+    justify-content: center;
+  }
+
+  .lts-album__add-status {
+    min-height: 1.6rem;
+    margin: 0;
+    font-size: var(--fz-xs);
+    color: var(--color-paragraphs);
+  }
+
+  .lts-album__tracks {
+    border: 0.1rem solid var(--lts-album-border);
+    border-radius: var(--radius-l);
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 1.2rem 3rem rgba(61, 38, 25, 0.08);
+    overflow: hidden;
+  }
+
+  .lts-album__tracks-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem 1.6rem;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 1.6rem 2rem;
+    border-bottom: 0.1rem solid var(--lts-album-border);
+  }
+
+  .lts-album__tracks-title {
+    margin: 0;
+    color: var(--color-headings);
+  }
+
+  .lts-album__tracks-status {
+    margin: 0;
+    font-size: var(--fz-xs);
+    color: color-mix(in srgb, var(--color-paragraphs), transparent 24%);
+  }
+
+  .lts-album-tracklist {
+    max-height: min(72rem, 72dvh);
+    margin: 0;
+    padding: 0.4rem 0;
+    list-style: none;
+    overflow: auto;
+    scrollbar-color: var(--lts-album-accent) transparent;
+  }
+
+  .lts-album-track {
+    display: grid;
+    grid-template-columns: 3.2rem 4.4rem minmax(0, 1fr) minmax(5.6rem, auto) minmax(7.6rem, auto);
+    gap: 0.8rem;
+    align-items: center;
+    min-height: 5.6rem;
+    padding: 0.7rem 1.2rem;
+    border-bottom: 0.1rem solid rgba(52, 35, 24, 0.08);
+    transition: background-color var(--duration-default) linear;
+  }
+
+  .lts-album-track:last-child {
+    border-bottom: 0;
+  }
+
+  .lts-album-track:hover,
+  .lts-album-track.is-playing {
+    background: color-mix(in srgb, var(--lts-album-accent), transparent 92%);
+  }
+
+  .lts-album-track.is-unavailable {
+    opacity: 0.56;
+  }
+
+  .lts-album-track__number {
+    font-size: var(--fz-xs);
+    font-weight: 700;
+    color: color-mix(in srgb, var(--color-paragraphs), transparent 30%);
+    text-align: center;
+  }
+
+  .lts-album-track__play {
+    display: grid;
+    place-items: center;
+    width: 3.6rem;
+    height: 3.6rem;
+    padding: 0;
+    border: 0.1rem solid color-mix(in srgb, var(--lts-album-accent), transparent 62%);
+    border-radius: 999rem;
+    color: var(--lts-album-accent);
+    background: #ffffff;
+    cursor: pointer;
+  }
+
+  .lts-album-track__play[disabled],
+  .lts-album-track__add[disabled] {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .lts-album-track__title {
+    min-width: 0;
+    font-size: var(--fz-s);
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--color-headings);
+    overflow-wrap: break-word;
+  }
+
+  .lts-album-track__meta {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: var(--fz-xs);
+    font-weight: 400;
+    color: color-mix(in srgb, var(--color-paragraphs), transparent 30%);
+  }
+
+  .lts-album-track__price {
+    font-size: var(--fz-xs);
+    font-weight: 700;
+    color: var(--color-headings);
+    white-space: nowrap;
+  }
+
+  .lts-album-track__add {
+    min-width: 7.6rem;
+    min-height: 3.6rem;
+    padding: 0.8rem 1.2rem;
+    border: 0;
+    border-radius: 999rem;
+    font: inherit;
+    font-size: var(--fz-xs);
+    font-weight: 800;
+    color: var(--lts-album-accent-contrast);
+    background: var(--lts-album-accent);
+    cursor: pointer;
+  }
+
+  .lts-album-tracklist__empty {
+    margin: 0;
+    padding: 2.4rem 2rem;
+    font-size: var(--fz-s);
+    color: var(--color-paragraphs);
+  }
+
   @media (max-width: 749px) {
-    .main-album__inner { grid-template-columns: 1fr; gap: 2rem; }
-    .main-album__title { font-size: 2.4rem; }
+    .lts-album {
+      padding-block: calc(var(--header-top-position, 5.6rem) + 2.4rem) 4rem;
+    }
+
+    .lts-album__hero {
+      grid-template-columns: 1fr;
+      align-items: start;
+      padding: 1.6rem;
+    }
+
+    .lts-album__art {
+      width: min(100%, 34rem);
+      margin-inline: auto;
+    }
+
+    .lts-album__title {
+      max-width: 100%;
+    }
+
+    .lts-album__actions {
+      align-items: stretch;
+    }
+
+    .lts-album__add {
+      width: 100%;
+    }
+
+    .lts-album-tracklist {
+      max-height: min(62rem, 68dvh);
+    }
+
+    .lts-album-track {
+      grid-template-columns: 2.4rem 3.8rem minmax(0, 1fr) minmax(6.8rem, auto);
+      gap: 0.6rem;
+      padding-inline: 0.8rem;
+    }
+
+    .lts-album-track__price {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lts-album-track {
+      transition-duration: 0.01ms;
+    }
   }
 {%- endstyle -%}
 
