@@ -153,6 +153,24 @@
     return data.url;
   }
 
+  // Warm a track ahead of the click so playback starts instantly: fetch the
+  // signed URL (cached) and pull the small 30s clip into the browser cache.
+  // Each track is warmed at most once per session.
+  const warmedTracks = new Set();
+  const warmAudio = new Audio();
+  warmAudio.preload = 'auto';
+
+  function prefetchPreview(apiBase, trackId) {
+    if (!trackId || warmedTracks.has(trackId)) return;
+    warmedTracks.add(trackId);
+    getPreviewUrl(apiBase, trackId)
+      .then((url) => {
+        // The click reuses this same signed URL and plays from cache.
+        try { warmAudio.src = url; warmAudio.load(); } catch (_) {}
+      })
+      .catch(() => { warmedTracks.delete(trackId); }); // allow a retry later
+  }
+
   function resetPlayback() {
     if (currentButton) {
       currentButton.textContent = PLAY_LABEL;
@@ -349,6 +367,12 @@
       }
 
       renderRows(tracklist, shop.versions, ctx, status);
+
+      // Preload the first few tracks so the top of the list plays instantly,
+      // including on touch/keyboard where there's no hover to trigger warming.
+      shop.versions
+        .slice(0, 4)
+        .forEach((version) => prefetchPreview(ctx.apiBase, version.trackId));
     } catch (error) {
       console.warn('Album tracklist failed.', error);
       renderEmpty(tracklist, status);
@@ -372,7 +396,7 @@
     albumVariantId = ctx.albumVariantId;
     applyAccent(root, null);
 
-    audio.preload = 'none';
+    audio.preload = 'auto';
     audio.addEventListener('ended', resetPlayback);
     audio.addEventListener('pause', () => {
       if (audio.ended) resetPlayback();
@@ -398,6 +422,18 @@
         handleTrackAdd(addButton, trackStatus);
       }
     });
+
+    // Warm a track's preview the moment the user hovers/focuses its play
+    // button, so the click itself has nothing to wait for.
+    const prefetchFromEvent = (event) => {
+      const btn =
+        event.target instanceof Element
+          ? event.target.closest('[data-track-preview]')
+          : null;
+      if (btn && tracklist.contains(btn)) prefetchPreview(ctx.apiBase, btn.dataset.trackId);
+    };
+    tracklist.addEventListener('pointerover', prefetchFromEvent);
+    tracklist.addEventListener('focusin', prefetchFromEvent);
 
     loadAlbum(ctx, root, tracklist, trackStatus, albumButton);
   });
