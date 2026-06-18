@@ -435,6 +435,24 @@
     tracklist.addEventListener('pointerover', prefetchFromEvent);
     tracklist.addEventListener('focusin', prefetchFromEvent);
 
-    loadAlbum(ctx, root, tracklist, trackStatus, albumButton);
+    // If the tracklist was server-rendered (lts.album_tracklist metafield), the
+    // rows are already in the DOM and instant — the delegated click/hover
+    // handlers above already enhance them, so skip the client fetch and just
+    // warm the first few previews. Fall back to fetching when there are no rows.
+    const ssrRows = tracklist.querySelectorAll('[data-track-row]');
+    if (ssrRows.length > 0) {
+      let warmed = 0;
+      for (const row of ssrRows) {
+        if (warmed >= 4) break;
+        const btn = row.querySelector('[data-track-preview]');
+        const tid = btn && btn.dataset.trackId;
+        if (tid) {
+          prefetchPreview(ctx.apiBase, tid);
+          warmed += 1;
+        }
+      }
+    } else {
+      loadAlbum(ctx, root, tracklist, trackStatus, albumButton);
+    }
   });
 })();

@@ -76,13 +76,58 @@
     <div class="lts-album__tracks" aria-labelledby="lts-album-tracklist-heading">
       <div class="lts-album__tracks-head">
         <h2 id="lts-album-tracklist-heading" class="lts-album__tracks-title h3">Tracklist</h2>
-        <p id="lts-album-tracklist-status" class="lts-album__tracks-status" role="status" aria-live="polite">Loading tracklist...</p>
+        {%- comment -%} Tracklist is server-rendered from the lts.album_tracklist
+            metafield (written on sync) so it appears instantly; album-player.js
+            then enhances these rows (previews, add-to-cart). If the metafield is
+            absent it falls back to fetching the payload client-side. {%- endcomment -%}
+        {%- assign album_tracks = product.metafields.lts.album_tracklist.value -%}
+        <p id="lts-album-tracklist-status" class="lts-album__tracks-status" role="status" aria-live="polite">
+          {%- if album_tracks and album_tracks.size > 0 -%}
+            {{ album_tracks.size }} {% if album_tracks.size == 1 %}track{% else %}tracks{% endif %}
+          {%- else -%}Loading tracklist...{%- endif -%}
+        </p>
       </div>
       <ol
         id="lts-album-tracklist"
         class="lts-album-tracklist"
         data-lts-album-tracklist
-      ></ol>
+      >
+        {%- if album_tracks and album_tracks.size > 0 -%}
+          {%- for track in album_tracks -%}
+            {%- assign t_available = true -%}
+            {%- if track.available == false -%}{%- assign t_available = false -%}{%- endif -%}
+            {%- assign t_has_preview = false -%}
+            {%- if track.trackId != blank -%}{%- assign t_has_preview = true -%}{%- endif -%}
+            <li class="lts-album-track{% unless t_available %} is-unavailable{% endunless %}" data-track-row>
+              <span class="lts-album-track__number">{{ forloop.index }}</span>
+              <button
+                type="button"
+                class="lts-album-track__play"
+                data-track-preview
+                data-track-id="{{ track.trackId | escape }}"
+                data-play-label="Play preview for {{ track.title | escape }}"
+                data-pause-label="Pause preview for {{ track.title | escape }}"
+                aria-label="{% if t_has_preview %}Play preview for {{ track.title | escape }}{% else %}Preview unavailable for {{ track.title | escape }}{% endif %}"
+                {% unless t_has_preview and t_available %}disabled{% endunless %}
+              >&#9654;</button>
+              <span class="lts-album-track__title">
+                {{ track.title | escape }}
+                <span class="lts-album-track__meta">{% if t_has_preview %}30s preview{% else %}Preview coming soon{% endif %}</span>
+              </span>
+              <span class="lts-album-track__price">{{ track.priceCents | money }}</span>
+              <button
+                type="button"
+                class="lts-album-track__add"
+                data-track-add
+                data-variant-id="{{ track.variantId | escape }}"
+                data-original-label="&#128722; Add"
+                aria-label="{% if t_available %}Add {{ track.title | escape }} to cart{% else %}{{ track.title | escape }} unavailable{% endif %}"
+                {% unless t_available and track.variantId != blank %}disabled{% endunless %}
+              >&#128722; Add</button>
+            </li>
+          {%- endfor -%}
+        {%- endif -%}
+      </ol>
     </div>
   </div>
 </section>
