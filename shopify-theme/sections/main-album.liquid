@@ -157,26 +157,29 @@
       </ol><!-- /.lts-album-tracklist -->
     </div><!-- /.lts-album__tracks -->
   </div><!-- /.container -->
-
-  <div class="lts-album__sticky" data-lts-album-sticky aria-hidden="true">
-    <div class="container lts-album__sticky-inner">
-      <div class="lts-album__sticky-id">
-        {%- if product.featured_image != blank -%}
-          <img class="lts-album__sticky-art" src="{{ product.featured_image | image_url: width: 96 }}" width="48" height="48" alt="" loading="lazy">
-        {%- endif -%}
-        <span class="lts-album__sticky-title">{{ product.title | escape }}</span>
-      </div>
-      <button
-        type="button"
-        class="button lts-album__sticky-add"
-        data-lts-album-sticky-add
-        {% unless album_variant.available %}disabled{% endunless %}
-      >
-        <span>{% render 'icon-cart' %} Add album &mdash; {{ product.price | money }}</span>
-      </button>
-    </div>
-  </div><!-- /.lts-album__sticky -->
 </section>
+
+{%- comment -%} Sticky add-album bar lives OUTSIDE the section: the .lts-album
+  wrapper uses overflow:hidden + isolation, which can clip a position:fixed child.
+{%- endcomment -%}
+<div class="lts-album__sticky" data-lts-album-sticky aria-hidden="true">
+  <div class="container lts-album__sticky-inner">
+    <div class="lts-album__sticky-id">
+      {%- if product.featured_image != blank -%}
+        <img class="lts-album__sticky-art" src="{{ product.featured_image | image_url: width: 96 }}" width="48" height="48" alt="" loading="lazy">
+      {%- endif -%}
+      <span class="lts-album__sticky-title">{{ product.title | escape }}</span>
+    </div>
+    <button
+      type="button"
+      class="button lts-album__sticky-add"
+      data-lts-album-sticky-add
+      {% unless album_variant.available %}disabled{% endunless %}
+    >
+      <span>{% render 'icon-cart' %} Add album &mdash; {{ product.price | money }}</span>
+    </button>
+  </div>
+</div><!-- /.lts-album__sticky -->
 
 <script id="lts-album-ctx" type="application/json">
   {
@@ -345,23 +348,30 @@
   }
 
   .lts-album__meta {
-    margin: 1.2rem 0 0;
-    font-size: var(--fz-s);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 1.6rem 0 0;
+    font-size: var(--fz-m);
+    font-weight: 600;
+    line-height: 1.25;
     color: inherit;
-    opacity: 0.85;
   }
 
   .lts-album__meta span:not(:first-child)::before {
     content: "·";
-    padding: 0 0.8rem;
-    opacity: 0.6;
+    padding: 0 1rem;
+    font-weight: 400;
+    opacity: 0.45;
   }
 
   .lts-album__formats {
-    margin: 0.4rem 0 0;
+    margin: 0.8rem 0 0;
     font-size: var(--fz-s);
+    font-weight: 600;
+    letter-spacing: 0.01em;
     color: inherit;
-    opacity: 0.62;
+    opacity: 0.72;
   }
 
   /* Sticky "Add album" bar — appears once the hero CTA scrolls out of view. */
