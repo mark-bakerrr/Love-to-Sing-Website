@@ -42,28 +42,12 @@
       }
     },
     "main": {
-      "type": "main-collection",
-      "blocks": {
-        "main-collection": {
-          "type": "spacing",
-          "static": true,
-          "settings": {
-            "spacing_top": 80,
-            "spacing_bottom": 40,
-            "spacing_top_mobile": 40,
-            "spacing_bottom_mobile": 40
-          },
-          "blocks": {}
-        }
-      },
+      "type": "main-collection-albums",
       "settings": {
-        "product_aspect_ratio": "1-1",
-        "filters_right_side": "content",
         "heading": "Buy Love to Sing Albums",
-        "content": "Explore all Love to Sing albums to take with you on your device",
-        "enable_filters": false,
-        "enable_sorting": true,
-        "products_per_page": 20
+        "intro": "Explore all Love to Sing albums — instant MP3 downloads to take anywhere.",
+        "products_per_page": 48,
+        "empty_text": "New albums are on their way."
       }
     },
     "featured_reviews_NgPk9X": {
