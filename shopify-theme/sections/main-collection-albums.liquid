@@ -208,9 +208,11 @@
     color: var(--ac-accent);
   }
 
+  /* The record rises UP out of its own sleeve (not sideways into the next
+     album, which looked off). Stays within its column, clearly in front. */
   .album-card:hover .album-card__disc,
   .album-card:focus-within .album-card__disc {
-    transform: translateX(30%) rotate(10deg);
+    transform: translate(6%, -18%) rotate(-5deg);
   }
   .album-card:hover .album-card__sleeve,
   .album-card:focus-within .album-card__sleeve {

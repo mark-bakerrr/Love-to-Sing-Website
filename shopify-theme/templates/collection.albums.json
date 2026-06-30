@@ -20,25 +20,12 @@
       }
     },
     "hero_banner_C6zNKp": {
-      "type": "hero-banner",
-      "name": "t:sections.hero-banner.name",
+      "type": "album-collection-hero",
       "settings": {
-        "background": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
-        "media_opacity": 5,
-        "image": "shopify://shop_images/hearts-background.png",
-        "video": "",
-        "video_mobile": "",
-        "overlay_color": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
-        "overlay_opacity": 20,
-        "image_aside": "shopify://shop_images/hero-albums-fan.png",
-        "image_overlay_alignment": "center",
-        "image_overlay_width": 82,
         "eyebrow": "Buy Music Albums",
-        "content_color": "#ffffff",
         "title": "Share the joy of Love to Sing Music",
-        "content": "<p>Take our music offline by purchasing one of our mp3 albums!</p>",
-        "button_text": "",
-        "button_url": ""
+        "content": "<p>Take our music offline — every album as instant MP3 downloads.</p>",
+        "cover_count": 5
       }
     },
     "main": {
