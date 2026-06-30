@@ -12,8 +12,26 @@
   assign covers = collection.products | where: 'featured_image'
 -%}
 
-<section class="album-hero" data-section-id="{{ section.id }}">
-  <span class="album-hero__bg" aria-hidden="true" style="background-image: url({{ 'hearts-background.png' | asset_url }});"></span>
+<section
+  class="album-hero"
+  data-section-id="{{ section.id }}"
+  style="background: {{ s.background }}; --content: {{ s.content_color | default: '#ffffff' }};"
+>
+  {%- comment -%} Background treatment mirrors the Hero Banner: bg colour → image at media_opacity → overlay. {%- endcomment -%}
+  {%- if s.image != blank -%}
+    <span
+      class="album-hero__media"
+      aria-hidden="true"
+      style="background-image: url({{ s.image | image_url: width: 2200 }}); opacity: {{ s.media_opacity | default: 5 | divided_by: 100.0 }};"
+    ></span>
+  {%- endif -%}
+  {%- if s.overlay_color != blank and s.overlay_opacity > 0 -%}
+    <span
+      class="album-hero__overlay"
+      aria-hidden="true"
+      style="background: {{ s.overlay_color }}; opacity: {{ s.overlay_opacity | divided_by: 100.0 }};"
+    ></span>
+  {%- endif -%}
 
   <div class="album-hero__inner">
     <div class="album-hero__copy">
@@ -51,26 +69,30 @@
 
 {%- style -%}
   .album-hero {
-    --ah-red: var(--c-main-500, #b91f1c);
-    --ah-red-deep: var(--c-main-600, #781d1b);
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    background: radial-gradient(120% 120% at 70% 20%, var(--ah-red) 0%, var(--ah-red-deep) 100%);
-    color: #fff;
+    /* background colour comes from the section setting (inline style) */
+    color: var(--content, #fff);
   }
-  .album-hero__bg {
+  /* Background image layer (hearts) — sits over the bg colour at media_opacity. */
+  .album-hero__media {
     position: absolute;
     inset: 0;
-    z-index: -1;
-    /* one covering instance — repeating tiled it into a visible grid */
+    z-index: 0;
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
-    opacity: 0.16;
-    mix-blend-mode: screen;
+  }
+  /* Tint overlay over the image, under the content. */
+  .album-hero__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
   }
   .album-hero__inner {
+    position: relative;
+    z-index: 2;
     width: min(120rem, 100% - 4rem);
     margin-inline: auto;
     display: grid;
@@ -89,11 +111,11 @@
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.82);
+    color: color-mix(in srgb, var(--content, #fff), transparent 18%);
   }
   .album-hero__title {
     margin: 0;
-    color: #fff; /* theme sets a dark heading colour on h1/h2 — force white on red */
+    color: var(--content, #fff); /* theme sets a dark heading colour on h1/h2 — override */
     font-size: clamp(3.2rem, 5vw, 5.4rem);
     font-weight: 800;
     line-height: 1.04;
@@ -104,7 +126,7 @@
     margin: 1.6rem 0 0;
     font-size: var(--fz-r, 1.6rem);
     line-height: 1.6;
-    color: rgba(255, 255, 255, 0.9);
+    color: color-mix(in srgb, var(--content, #fff), transparent 10%);
     max-width: 42ch;
   }
 
@@ -166,6 +188,30 @@
 {
   "name": "Album hero",
   "settings": [
+    { "type": "header", "content": "Background" },
+    {
+      "type": "color_background",
+      "id": "background",
+      "label": "Background colour",
+      "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+    },
+    {
+      "type": "range", "id": "media_opacity", "label": "Background image opacity",
+      "unit": "%", "min": 0, "max": 100, "step": 1, "default": 5
+    },
+    { "type": "image_picker", "id": "image", "label": "Background image" },
+    {
+      "type": "color_background",
+      "id": "overlay_color",
+      "label": "Overlay colour",
+      "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+    },
+    {
+      "type": "range", "id": "overlay_opacity", "label": "Overlay opacity",
+      "unit": "%", "min": 0, "max": 100, "step": 1, "default": 20
+    },
+    { "type": "color", "id": "content_color", "label": "Text colour", "default": "#ffffff" },
+    { "type": "header", "content": "Content" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Buy Music Albums" },
     { "type": "text", "id": "title", "label": "Title", "default": "Share the joy of Love to Sing Music" },
     { "type": "richtext", "id": "content", "label": "Text", "default": "<p>Take our music offline — every album as instant MP3 downloads.</p>" },
