@@ -107,6 +107,7 @@
   .cart-drawer__head--hearts {
     position: relative;
     isolation: isolate;
+    overflow: hidden;
     padding: 2rem;
     background: linear-gradient(180deg, var(--c-main-500, #b91f1c) 0%, var(--c-main-600, #781d1b) 100%);
     color: #fff;
@@ -116,15 +117,17 @@
     inset: 0;
     z-index: -1;
     background-repeat: repeat;
-    background-size: 32rem auto;
-    opacity: 0.12;
+    background-position: center;
+    background-size: 15rem auto; /* small enough to tile fully across the drawer width */
+    opacity: 0.2;
     mix-blend-mode: screen;
   }
   .cart-drawer__head-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 1.2rem;
+    /* X is absolutely pinned top-right, so leave room for it */
+    padding-right: 3.2rem;
   }
   .cart-drawer__head--hearts .cart-drawer__title {
     display: flex;
@@ -149,15 +152,26 @@
     line-height: 1;
   }
   .cart-drawer__head--hearts .cart-drawer__close {
+    position: absolute;
+    top: 1.4rem;
+    right: 1.6rem;
+    z-index: 1;
     display: inline-flex;
+    padding: 0.4rem;
     color: #fff;
     background: transparent;
     border: none;
     cursor: pointer;
-    opacity: 0.85;
+    opacity: 0.9;
     transition: opacity 150ms ease;
   }
   .cart-drawer__head--hearts .cart-drawer__close:hover { opacity: 1; }
+  /* icon-close path has no fill attr -> defaults to black; force white */
+  .cart-drawer__head--hearts .cart-drawer__close svg {
+    width: 1.7rem;
+    height: 1.7rem;
+    fill: #fff;
+  }
 
   /* ── Extras (upsell / cross-sell) ────────────────────────────────────── */
   .cart-extras {
@@ -228,7 +242,8 @@
     transition: transform 120ms ease, background 150ms ease;
   }
   .cart-upsell__add:hover { transform: translateY(-1px); }
-  .cart-upsell__add svg { width: 1.6rem; height: 1.6rem; }
+  /* icon-cart path has no fill attr -> defaults to black; force white on the red button */
+  .cart-upsell__add svg { width: 1.6rem; height: 1.6rem; fill: #fff; }
   .cart-upsell__add-check { display: none; font-size: 1.6rem; line-height: 1; }
   .cart-upsell__add.is-added { background: var(--success, #2e7d32); }
   .cart-upsell__add.is-added svg { display: none; }
