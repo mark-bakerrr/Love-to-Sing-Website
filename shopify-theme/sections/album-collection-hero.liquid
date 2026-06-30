@@ -32,7 +32,6 @@
 
     {%- if covers.size > 0 -%}
       <div class="album-hero__stage" aria-hidden="true">
-        <span class="album-hero__vinyl"></span>
         <ul class="album-hero__fan" style="--count: {{ covers.size | at_most: max }};">
           {%- for product in covers limit: max -%}
             <li class="album-hero__cover" style="--n: {{ forloop.index0 }};">
@@ -64,9 +63,11 @@
     position: absolute;
     inset: 0;
     z-index: -1;
-    background-repeat: repeat;
-    background-size: 26rem auto;
-    opacity: 0.14;
+    /* one covering instance — repeating tiled it into a visible grid */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    opacity: 0.16;
     mix-blend-mode: screen;
   }
   .album-hero__inner {
@@ -114,23 +115,6 @@
     place-items: center;
     min-height: 30rem;
   }
-  .album-hero__vinyl {
-    position: absolute;
-    width: 18rem; height: 18rem;
-    right: 8%;
-    border-radius: 50%;
-    background:
-      radial-gradient(circle, #f4ede6 0 15%, var(--ah-red) 15% 24%, rgba(43,28,22,0.92) 24% 25%, #191210 25% 100%);
-    box-shadow: 0 1.6rem 3.2rem rgba(0,0,0,0.34);
-    transform: translateX(34%);
-    z-index: 1;
-  }
-  .album-hero__vinyl::after {
-    content: '';
-    position: absolute; inset: 14%;
-    border-radius: 50%;
-    background: repeating-radial-gradient(circle, transparent 0 0.35rem, rgba(255,255,255,0.05) 0.35rem 0.5rem);
-  }
   .album-hero__fan {
     list-style: none;
     margin: 0; padding: 0;
@@ -167,7 +151,6 @@
     .album-hero__copy { max-width: none; margin-inline: auto; }
     .album-hero__text { margin-inline: auto; }
     .album-hero__stage { order: 2; min-height: 24rem; }
-    .album-hero__vinyl { width: 14rem; height: 14rem; }
     .album-hero__fan { width: 13rem; height: 13rem; }
   }
   @media (prefers-reduced-motion: reduce) {
