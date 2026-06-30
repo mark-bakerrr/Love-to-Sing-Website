@@ -76,15 +76,15 @@
     color: var(--content, #fff);
   }
   /* Background image layer (hearts) — sits over the bg colour at media_opacity.
-     Screen blend lightens the hearts so they read clearly on the deep red. */
+     Full-width natural scale (not cover-zoom) keeps the heart pattern legible at
+     a low opacity, matching the video-downloads hero. Normal blend, no screen. */
   .album-hero__media {
     position: absolute;
     inset: 0;
     z-index: 0;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: cover;
-    mix-blend-mode: screen;
+    background-size: 100% auto;
   }
   /* Tint overlay over the image, under the content. */
   .album-hero__overlay {
@@ -199,7 +199,7 @@
     },
     {
       "type": "range", "id": "media_opacity", "label": "Background image opacity",
-      "unit": "%", "min": 0, "max": 100, "step": 1, "default": 18
+      "unit": "%", "min": 0, "max": 100, "step": 1, "default": 6
     },
     { "type": "image_picker", "id": "image", "label": "Background image" },
     {
