@@ -101,7 +101,9 @@
     grid-template-columns: 1fr 1.15fr;
     align-items: center;
     gap: clamp(2rem, 5vw, 6rem);
-    padding: clamp(3.6rem, 6vw, 7rem) 0;
+    /* Top padding reserves space for the transparent overlay header (position:
+       absolute on non-solid templates), matching the hero-banner section. */
+    padding: clamp(11rem, 4vw + 9rem, 14rem) 0 clamp(4rem, 6vw, 7rem);
     min-height: clamp(38rem, 48vw, 56rem);
   }
 
