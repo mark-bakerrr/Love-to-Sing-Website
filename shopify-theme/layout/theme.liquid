@@ -43,6 +43,13 @@
 
     <script src="{{ 'global.js' | asset_url }}" defer="defer"></script>
 
+    {%- comment -%}
+      Loaded BEFORE content_for_header (where app embeds inject) and WITHOUT defer
+      so its fetch/XHR patch installs before the Shop Drawer app captures window.fetch.
+      Keeps the standard cart drawer + header count in sync with external cart adds.
+    {%- endcomment -%}
+    <script src="{{ 'cart-sync.js' | asset_url }}"></script>
+
     {{ content_for_header }}
 
     {%- render 'settings' -%}
