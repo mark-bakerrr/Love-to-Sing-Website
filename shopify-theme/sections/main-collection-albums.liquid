@@ -129,7 +129,11 @@
   .albums-collection__cell { min-width: 0; }
 
   /* ── Card ───────────────────────────────────────────────────────────── */
-  .album-card { display: flex; flex-direction: column; height: 100%; }
+  .album-card { display: flex; flex-direction: column; height: 100%; position: relative; }
+  /* Lift the hovered card above its neighbours so the vinyl disc slides out
+     IN FRONT of the album beside it, not behind it. */
+  .album-card:hover,
+  .album-card:focus-within { z-index: 5; }
   .album-card__link {
     text-decoration: none;
     color: inherit;
@@ -206,7 +210,7 @@
 
   .album-card:hover .album-card__disc,
   .album-card:focus-within .album-card__disc {
-    transform: translateX(22%) rotate(10deg);
+    transform: translateX(30%) rotate(10deg);
   }
   .album-card:hover .album-card__sleeve,
   .album-card:focus-within .album-card__sleeve {
