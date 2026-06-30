@@ -1,0 +1,66 @@
+{%- comment -%}
+  Cart drawer extras — metafield-driven upsells / cross-sells, below the cart.
+  Rendered inside #CartDrawer-Body so it re-renders with the cart on cart:reload.
+
+  Sources (per cart line-item product, as the song/album metafields define):
+    - custom.album_product  -> "Complete the collection" (the full album for a single)
+    - custom.related_albums -> "More music you'll love" cross-sell rail
+  Excludes anything already in the cart and de-dupes across both blocks.
+{%- endcomment -%}
+
+{%- assign in_cart = ',' -%}
+{%- for it in cart.items -%}
+  {%- assign in_cart = in_cart | append: it.product.id | append: ',' -%}
+{%- endfor -%}
+{%- assign seen = ',' -%}
+
+{%- comment -%} Complete the collection: the full album behind any single in the cart. {%- endcomment -%}
+{%- capture complete -%}
+  {%- for it in cart.items -%}
+    {%- assign alb = it.product.metafields.custom.album_product.value -%}
+    {%- if alb != blank and alb.available -%}
+      {%- assign idkey = alb.id | append: ',' -%}
+      {%- unless in_cart contains idkey or seen contains idkey -%}
+        {%- assign seen = seen | append: idkey -%}
+        {%- render 'cart-upsell-card', product: alb -%}
+      {%- endunless -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- comment -%} More music you'll love: related albums from the cart items' metafields. {%- endcomment -%}
+{%- assign rel_count = 0 -%}
+{%- capture rail -%}
+  {%- for it in cart.items -%}
+    {%- assign rels = it.product.metafields.custom.related_albums.value -%}
+    {%- if rels != blank -%}
+      {%- for r in rels -%}
+        {%- if rel_count < 8 and r.available -%}
+          {%- assign idkey = r.id | append: ',' -%}
+          {%- unless in_cart contains idkey or seen contains idkey -%}
+            {%- assign seen = seen | append: idkey -%}
+            {%- assign rel_count = rel_count | plus: 1 -%}
+            {%- render 'cart-upsell-card', product: r -%}
+          {%- endunless -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- if complete != blank or rail != blank -%}
+  <div class="cart-extras">
+    {%- if complete != blank -%}
+      <section class="cart-extras__block">
+        <h3 class="cart-extras__title">Complete the collection</h3>
+        <div class="cart-extras__rail">{{ complete }}</div>
+      </section>
+    {%- endif -%}
+    {%- if rail != blank -%}
+      <section class="cart-extras__block">
+        <h3 class="cart-extras__title">More music you&rsquo;ll love</h3>
+        <div class="cart-extras__rail">{{ rail }}</div>
+      </section>
+    {%- endif -%}
+  </div>
+{%- endif -%}
