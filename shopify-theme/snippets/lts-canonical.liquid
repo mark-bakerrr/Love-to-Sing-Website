@@ -1,0 +1,18 @@
+{% comment %}
+  lts-canonical — SEO canonical override for near-duplicate "version" song products.
+
+  If the current product has a custom.canonical_to (product_reference) metafield
+  set, emit a canonical <link> pointing at that "mother" product instead of the
+  default self-canonical. Every other page (and any product without the metafield)
+  keeps Shopify's normal {{ canonical_url }} self-canonical.
+
+  Installed by studio/scripts/apply-canonical-theme-snippet.ts. To remove, run that
+  script with --revert --apply (restores the inline canonical and deletes this file).
+{% endcomment %}
+{%- liquid
+  assign canonical_href = canonical_url
+  if product != blank and product.metafields.custom.canonical_to.value != blank
+    assign canonical_href = product.metafields.custom.canonical_to.value.url | prepend: request.origin
+  endif
+-%}
+<link rel="canonical" href="{{ canonical_href }}">

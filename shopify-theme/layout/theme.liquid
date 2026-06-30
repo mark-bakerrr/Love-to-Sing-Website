@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="">
-    <link rel="canonical" href="{{ canonical_url }}">
+    {% render 'lts-canonical' %}
     {%- if request.page_type == 'search' -%}
       <meta name="robots" content="noindex,follow">
     {%- endif -%}
