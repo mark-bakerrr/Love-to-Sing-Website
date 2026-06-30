@@ -1,6 +1,8 @@
 {%- assign background_image = section.settings.background_image -%}
 {%- assign album_variant = product.selected_or_first_available_variant -%}
 {%- assign album_tracks = product.metafields.lts.album_tracklist.value -%}
+{%- assign album_meta = product.metafields.lts.album_meta.value -%}
+{%- assign track_count = album_meta.trackCount | default: album_tracks.size -%}
 
 <section
   id="lts-album-{{ section.id }}"
@@ -40,8 +42,18 @@
         </div><!-- /.lts-album__art -->
 
         <div class="lts-album__details">
-          <p class="lts-album__eyebrow">Christmas album</p>
+          <p class="lts-album__eyebrow">{{ album_meta.genre | default: 'Album' }}</p>
           <h1 class="lts-album__title h1" itemprop="name">{{ product.title | escape }}</h1>
+
+          <div class="lts-album__meta">
+            {%- if track_count and track_count > 0 -%}
+              <span>{{ track_count }} {% if track_count == 1 %}track{% else %}tracks{% endif %}</span>
+            {%- endif -%}
+            {%- if album_meta.runtime != blank -%}<span>{{ album_meta.runtime }}</span>{%- endif -%}
+            <span>MP3</span>
+            {%- if album_meta.releaseDate != blank -%}<span>{{ album_meta.releaseDate | date: '%-d %b %Y' }}</span>{%- endif -%}
+          </div><!-- /.lts-album__meta -->
+          <p class="lts-album__formats">WAV &amp; FLAC coming soon</p>
 
           <p class="lts-album__price">
             <span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
@@ -81,7 +93,6 @@
     <div class="lts-album__tracks" aria-labelledby="lts-album-tracklist-heading">
       <div class="lts-album__tracks-head">
         <div>
-          <p class="lts-album__tracks-kicker">Liner notes</p>
           <h2 id="lts-album-tracklist-heading" class="lts-album__tracks-title h3">Tracklist</h2>
         </div>
 
@@ -146,6 +157,25 @@
       </ol><!-- /.lts-album-tracklist -->
     </div><!-- /.lts-album__tracks -->
   </div><!-- /.container -->
+
+  <div class="lts-album__sticky" data-lts-album-sticky aria-hidden="true">
+    <div class="container lts-album__sticky-inner">
+      <div class="lts-album__sticky-id">
+        {%- if product.featured_image != blank -%}
+          <img class="lts-album__sticky-art" src="{{ product.featured_image | image_url: width: 96 }}" width="48" height="48" alt="" loading="lazy">
+        {%- endif -%}
+        <span class="lts-album__sticky-title">{{ product.title | escape }}</span>
+      </div>
+      <button
+        type="button"
+        class="button lts-album__sticky-add"
+        data-lts-album-sticky-add
+        {% unless album_variant.available %}disabled{% endunless %}
+      >
+        <span>{% render 'icon-cart' %} Add album &mdash; {{ product.price | money }}</span>
+      </button>
+    </div>
+  </div><!-- /.lts-album__sticky -->
 </section>
 
 <script id="lts-album-ctx" type="application/json">
@@ -160,6 +190,34 @@
   }
 </script>
 <script src="{{ 'album-player.js' | asset_url }}" defer></script>
+
+<script>
+  (function () {
+    var bar = document.querySelector('[data-lts-album-sticky]');
+    var cta = document.getElementById('lts-album-add');
+    if (!bar || !cta) return;
+
+    // The sticky button just forwards to the real CTA so all add-to-cart logic
+    // (cart refresh, "Added" feedback) lives in one place (album-player.js).
+    var stickyAdd = bar.querySelector('[data-lts-album-sticky-add]');
+    if (stickyAdd) {
+      stickyAdd.addEventListener('click', function () { cta.click(); });
+    }
+
+    if (!('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(
+      function (entries) {
+        var e = entries[0];
+        // Reveal only after the hero CTA has scrolled UP out of view.
+        var show = !e.isIntersecting && e.boundingClientRect.top < 0;
+        bar.classList.toggle('is-visible', show);
+        bar.setAttribute('aria-hidden', show ? 'false' : 'true');
+      },
+      { threshold: 0 },
+    );
+    io.observe(cta);
+  })();
+</script>
 
 {%- style -%}
   .lts-album {
@@ -280,10 +338,95 @@
   }
 
   .lts-album__title {
-    max-width: 13ch;
+    width: 100%;
     margin: 0;
     color: inherit;
     overflow-wrap: break-word;
+  }
+
+  .lts-album__meta {
+    margin: 1.2rem 0 0;
+    font-size: var(--fz-s);
+    color: inherit;
+    opacity: 0.85;
+  }
+
+  .lts-album__meta span:not(:first-child)::before {
+    content: "·";
+    padding: 0 0.8rem;
+    opacity: 0.6;
+  }
+
+  .lts-album__formats {
+    margin: 0.4rem 0 0;
+    font-size: var(--fz-s);
+    color: inherit;
+    opacity: 0.62;
+  }
+
+  /* Sticky "Add album" bar — appears once the hero CTA scrolls out of view. */
+  .lts-album__sticky {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 50;
+    background: var(--lts-album-surface, #fff);
+    color: var(--color-paragraphs, #2d1b12);
+    border-top: 1px solid var(--lts-album-border, rgba(52, 35, 24, 0.12));
+    box-shadow: 0 -0.4rem 1.8rem rgba(45, 11, 10, 0.12);
+    padding: 0.8rem 0;
+    transform: translateY(100%);
+    transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .lts-album__sticky.is-visible {
+    transform: translateY(0);
+  }
+
+  .lts-album__sticky-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.6rem;
+  }
+
+  .lts-album__sticky-id {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    min-width: 0;
+  }
+
+  .lts-album__sticky-art {
+    width: 4.8rem;
+    height: 4.8rem;
+    flex-shrink: 0;
+    border-radius: 0.6rem;
+    object-fit: cover;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  }
+
+  .lts-album__sticky-title {
+    font-weight: 800;
+    font-size: var(--fz-t);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lts-album__sticky-add {
+    flex-shrink: 0;
+  }
+
+  @media screen and (max-width: 750px) {
+    .lts-album__sticky-title {
+      max-width: 38vw;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lts-album__sticky {
+      transition: none;
+    }
   }
 
   .lts-album__price {
@@ -414,12 +557,10 @@
   }
 
   .lts-album-tracklist {
-    max-height: min(74rem, 72dvh);
     margin: 0;
     padding: 0.6rem 0;
     list-style: none;
-    overflow: auto;
-    scrollbar-color: var(--lts-album-accent) transparent;
+    overflow: visible;
   }
 
   .lts-album-track {
@@ -692,10 +833,6 @@
 
     .lts-album__tracks-head {
       padding: 2rem 1.6rem 1.4rem;
-    }
-
-    .lts-album-tracklist {
-      max-height: min(64rem, 68dvh);
     }
 
     .lts-album-track {
