@@ -244,8 +244,8 @@
   async function addToCart(variantId) {
     if (!variantId) throw new Error('Missing variant ID');
 
-    // Use Shopify's native cart endpoint without dispatching theme cart events.
-    return await fetchJson('/cart/add.js', {
+    // Add via Shopify's native cart endpoint, then tell the theme to refresh.
+    const result = await fetchJson('/cart/add.js', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -255,6 +255,17 @@
         items: [{ id: Number(variantId), quantity: 1 }]
       })
     });
+
+    // Refresh + open the theme cart drawer/count. cart-drawer.js listens for
+    // 'cart:reload' (re-renders the drawer sections) and 'cart:open'; this matches
+    // the pattern in single-music-footer-player.liquid. Without it the item is
+    // added server-side but the header/drawer never updates (looks like nothing).
+    try {
+      document.dispatchEvent(new CustomEvent('cart:reload', { bubbles: true }));
+      document.dispatchEvent(new CustomEvent('cart:open', { bubbles: true }));
+    } catch (_) {}
+
+    return result;
   }
 
   function setTrackAddMarkup(button) {
