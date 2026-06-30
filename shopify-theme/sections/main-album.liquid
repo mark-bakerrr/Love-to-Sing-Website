@@ -163,20 +163,23 @@
   wrapper uses overflow:hidden + isolation, which can clip a position:fixed child.
 {%- endcomment -%}
 <div class="lts-album__sticky" data-lts-album-sticky aria-hidden="true">
-  <div class="container lts-album__sticky-inner">
-    <div class="lts-album__sticky-id">
-      {%- if product.featured_image != blank -%}
-        <img class="lts-album__sticky-art" src="{{ product.featured_image | image_url: width: 96 }}" width="48" height="48" alt="" loading="lazy">
-      {%- endif -%}
+  <div class="lts-album__sticky-inner">
+    {%- if product.featured_image != blank -%}
+      <img class="lts-album__sticky-art" src="{{ product.featured_image | image_url: width: 120 }}" width="50" height="50" alt="" loading="lazy">
+    {%- endif -%}
+    <div class="lts-album__sticky-text">
       <span class="lts-album__sticky-title">{{ product.title | escape }}</span>
+      <span class="lts-album__sticky-price">{{ product.price | money }}</span>
     </div>
     <button
       type="button"
-      class="button lts-album__sticky-add"
+      class="lts-album__sticky-add"
       data-lts-album-sticky-add
       {% unless album_variant.available %}disabled{% endunless %}
     >
-      <span>{% render 'icon-cart' %} Add album &mdash; {{ product.price | money }}</span>
+      {% render 'icon-cart' %}
+      <span class="lts-album__sticky-add-label">Add album to cart</span>
+      <svg class="lts-album__sticky-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
     </button>
   </div>
 </div><!-- /.lts-album__sticky -->
@@ -374,18 +377,19 @@
     opacity: 0.72;
   }
 
-  /* Sticky "Add album" bar — appears once the hero CTA scrolls out of view. */
+  /* Sticky "Add album" bar — a centered, brand-red floating pill (matches the
+     song page's floating CTA), revealed once the hero CTA scrolls out of view. */
   .lts-album__sticky {
     position: fixed;
-    inset: auto 0 0 0;
-    z-index: 50;
-    background: var(--lts-album-surface, #fff);
-    color: var(--color-paragraphs, #2d1b12);
-    border-top: 1px solid var(--lts-album-border, rgba(52, 35, 24, 0.12));
-    box-shadow: 0 -0.4rem 1.8rem rgba(45, 11, 10, 0.12);
-    padding: 0.8rem 0;
-    transform: translateY(100%);
-    transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    padding: 0 1.6rem 1.6rem;
+    padding-bottom: max(1.6rem, env(safe-area-inset-bottom));
+    pointer-events: none;
+    transform: translateY(150%);
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lts-album__sticky.is-visible {
@@ -393,43 +397,98 @@
   }
 
   .lts-album__sticky-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.6rem;
-  }
-
-  .lts-album__sticky-id {
+    pointer-events: auto;
     display: flex;
     align-items: center;
     gap: 1.2rem;
-    min-width: 0;
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: 0.8rem 0.8rem 0.8rem 0.9rem;
+    border-radius: 1.6rem;
+    background: var(--c-main-500, #b91f1c);
+    color: #fff;
+    box-shadow: 0 1.4rem 3.6rem rgba(45, 11, 10, 0.34);
   }
 
   .lts-album__sticky-art {
-    width: 4.8rem;
-    height: 4.8rem;
+    width: 5rem;
+    height: 5rem;
     flex-shrink: 0;
-    border-radius: 0.6rem;
+    border-radius: 1rem;
     object-fit: cover;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+  }
+
+  .lts-album__sticky-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+    margin-right: auto;
   }
 
   .lts-album__sticky-title {
     font-weight: 800;
-    font-size: var(--fz-t);
+    font-size: var(--fz-r);
+    line-height: 1.15;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
+  .lts-album__sticky-price {
+    font-size: var(--fz-s);
+    opacity: 0.82;
+  }
+
   .lts-album__sticky-add {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: none;
+    cursor: pointer;
+    background: #fff;
+    color: var(--c-main-600, #8b1d18);
+    font-family: inherit;
+    font-weight: 800;
+    font-size: var(--fz-s);
+    line-height: 1;
+    padding: 1.1rem 1.4rem;
+    border-radius: 1.1rem;
+    transition: transform 120ms ease, box-shadow 150ms ease;
+  }
+
+  .lts-album__sticky-add:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.18);
+  }
+
+  .lts-album__sticky-add svg {
+    width: 1.6rem;
+    height: 1.6rem;
     flex-shrink: 0;
   }
 
+  .lts-album__sticky-add[disabled] {
+    opacity: 0.55;
+    cursor: default;
+  }
+
   @media screen and (max-width: 750px) {
+    .lts-album__sticky-inner {
+      gap: 0.9rem;
+      padding: 0.7rem;
+    }
+    .lts-album__sticky-art {
+      width: 4.4rem;
+      height: 4.4rem;
+    }
     .lts-album__sticky-title {
       max-width: 38vw;
+    }
+    .lts-album__sticky-add .lts-album__sticky-add-label {
+      display: none;
     }
   }
 
