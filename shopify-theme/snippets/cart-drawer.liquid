@@ -103,6 +103,15 @@
 </cart-drawer>
 
 {%- style -%}
+  /* ── Full-bleed shell ────────────────────────────────────────────────── */
+  /* Dawn insets the whole drawer with .cart-drawer__inner { padding: 0 2rem }.
+     Drop it so the heart header bleeds edge-to-edge across the entire head,
+     then restore the 2rem inset only where the cart content needs it.
+     (Slide/transition + dialog role stay on __inner, so they're untouched.) */
+  .cart-drawer__inner { padding: 0; }
+  .cart-drawer__contents { padding: 0 2rem; }
+  .cart-drawer__summary { padding-left: 2rem; padding-right: 2rem; }
+
   /* ── Heart-background header ─────────────────────────────────────────── */
   .cart-drawer__head--hearts {
     position: relative;
