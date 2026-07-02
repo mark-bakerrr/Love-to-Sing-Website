@@ -13,6 +13,8 @@
  * QA helpers (query params):
  *   ?santa_time=2026-12-24T11:30:00Z  — pretend it is that moment (time still flows)
  *   ?santa_speed=600                  — accelerate time, e.g. fly the route in minutes
+ *   ?phase=countdown|tracker|done     — friendly alias: jump straight to a state
+ *   ?t=0.5                            — jump that fraction through the route (implies tracker)
  */
 (function () {
   'use strict';
@@ -138,6 +140,17 @@
   if (typeof window === 'undefined' || customElements.get('santa-tracker')) return;
 
   var NUMBER_FORMAT = new Intl.NumberFormat();
+
+  // Rotating status line under the countdown digits
+  var PREP_MESSAGES = [
+    'The reindeer are being harnessed…',
+    'Elves are triple-checking the list…',
+    'Sleigh bells polished ✨',
+    'Cookies pre-loaded for the trip…',
+    'Rudolph’s nose — tested and glowing 🔴',
+    'Loading the sleigh (it’s a big year)…',
+    'Snow tyres? Checked. Magic? Fully charged.',
+  ];
 
   var GLOBE_R = 1;          // earth radius (scene units)
   var FLY_ALT = 1.03;       // sleigh altitude
@@ -290,6 +303,24 @@
       this.timeBaseAt = Date.now();
       this.speed = Math.max(1, parseFloat(param('santa_speed')) || 1);
 
+      // Friendly aliases on top of ?santa_time: jump to a phase or a route fraction
+      var phaseParam = param('phase');
+      var tParam = parseFloat(param('t'));
+      if (this.timeBase === null && (phaseParam || !isNaN(tParam))) {
+        var routeMs = 25 * 3600 * 1000; // matches the generated route length
+        if (phaseParam === 'countdown' || phaseParam === 'pre') {
+          this.timeBase = this.departure - 3 * 86400000;
+        } else if (phaseParam === 'done' || phaseParam === 'post') {
+          this.timeBase = this.departure + routeMs + 3600000;
+        } else {
+          var tFrac = isNaN(tParam) ? 0.5 : Math.max(0, Math.min(1, tParam));
+          this.timeBase = this.departure + tFrac * routeMs;
+        }
+      }
+
+      this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      this.prepIdx = -1;
+
       this.panels = {
         pre: this.querySelector('[data-state="pre"]'),
         live: this.querySelector('[data-state="live"]'),
@@ -347,7 +378,7 @@
         });
       }
 
-      this.initSnow();
+      this.initScene();
       this.timer = setInterval(this.tick.bind(this), 250);
       this.tick();
     }
@@ -397,12 +428,22 @@
         for (var key in this.panels) {
           if (this.panels[key]) this.panels[key].hidden = key !== state;
         }
+        this.classList.remove('is-pre', 'is-live', 'is-post');
+        this.classList.add('is-' + state);
         // The full-page globe hides the page scrollbar while live
         document.documentElement.classList.toggle('santa-live-active', state === 'live');
+        this.initSnow(state === 'post'); // Christmas morning eases the snowfall lighter
+        this.updateSceneVideo(state);
         if (state === 'live') this.setupLive();
+        if (state === 'post') this.enterPost();
       }
 
-      if (state === 'pre') this.renderCountdown(-e);
+      if (state === 'pre') {
+        this.renderCountdown(-e);
+        this.updatePrep();
+        this.updateWait();
+        this.maybeShootingStar();
+      }
       if (state === 'live' && this.route) {
         this.updateStats(e);
         this.updateRail(e);
@@ -432,6 +473,157 @@
           el.classList.add('is-ticking');
         }
       }
+    }
+
+    // Rotate the playful "elves are getting ready" line every few seconds
+    updatePrep() {
+      var el = this.prepEl || (this.prepEl = this.querySelector('[data-prep]'));
+      if (!el) return;
+      var now = Date.now();
+      if (this.prepAt && now - this.prepAt < 3500) return;
+      this.prepAt = now;
+      this.prepIdx = (this.prepIdx + 1) % PREP_MESSAGES.length;
+      var msg = PREP_MESSAGES[this.prepIdx];
+      if (this.reducedMotion) {
+        el.textContent = msg;
+        return;
+      }
+      el.classList.add('is-fading');
+      setTimeout(function () {
+        el.textContent = msg;
+        el.classList.remove('is-fading');
+      }, 250);
+    }
+
+    // How far through "the wait" are we? Anchored ~1 December → departure.
+    updateWait() {
+      var fill = this.waitFill || (this.waitFill = this.querySelector('[data-wait-fill]'));
+      if (!fill) return;
+      var anchor = this.departure - 23 * 86400000;
+      var f = (this.now() - anchor) / (this.departure - anchor);
+      f = Math.max(0.02, Math.min(1, f)); // always show a sliver of hope
+      var w = (f * 100).toFixed(2) + '%';
+      if (fill.style.width !== w) fill.style.width = w;
+    }
+
+    maybeShootingStar() {
+      if (this.reducedMotion) return;
+      var now = Date.now();
+      if (this.nextStarAt == null) this.nextStarAt = now + 4000;
+      if (now < this.nextStarAt) return;
+      this.nextStarAt = now + 9000 + Math.random() * 6000;
+      var host = this.querySelector('[data-shooting]');
+      if (!host) return;
+      var star = document.createElement('span');
+      star.className = 'santa-shooting-star';
+      star.style.top = (5 + Math.random() * 30) + '%';
+      star.style.left = (25 + Math.random() * 55) + '%';
+      host.appendChild(star);
+      setTimeout(function () { star.remove(); }, 1600);
+    }
+
+    /* ---------- Ambient scene (countdown / Christmas morning) ---------- */
+
+    // Stars render even under reduced motion (CSS stops the twinkle)
+    initScene() {
+      this.initSceneVideo();
+      var stars = this.querySelector('[data-stars]');
+      if (!stars) return;
+      var html = '';
+      for (var i = 0; i < 80; i++) {
+        html += '<span class="santa-star" style="' +
+          'left:' + (Math.random() * 100).toFixed(1) + '%;' +
+          'top:' + (Math.random() * 70).toFixed(1) + '%;' +
+          'animation-delay:-' + (Math.random() * 6).toFixed(1) + 's;' +
+          'animation-duration:' + (Math.random() * 3 + 3).toFixed(1) + 's;' +
+          'transform:scale(' + (Math.random() * 0.7 + 0.5).toFixed(2) + ');' +
+          '"></span>';
+      }
+      stars.innerHTML = html;
+    }
+
+    // Village video background: painted scene returns if it can't play,
+    // and it pauses whenever it isn't the visible backdrop.
+    initSceneVideo() {
+      var video = this.querySelector('[data-scene-video]');
+      if (!video) return;
+      this.sceneVideo = video;
+      var self = this;
+      video.addEventListener('error', function () {
+        self.classList.add('video-failed');
+      });
+      if (this.reducedMotion) {
+        // Static backdrop: hold the first frame instead of playing
+        video.removeAttribute('autoplay');
+        video.removeAttribute('loop');
+        video.addEventListener('loadeddata', function () { video.pause(); });
+        video.pause();
+        return;
+      }
+      var p = video.play();
+      if (p && p.catch) p.catch(function () { self.classList.add('video-failed'); });
+    }
+
+    updateSceneVideo(state) {
+      if (!this.sceneVideo || this.reducedMotion) return;
+      if (state === 'pre') {
+        var p = this.sceneVideo.play();
+        if (p && p.catch) p.catch(function () { /* stays paused */ });
+      } else {
+        this.sceneVideo.pause();
+      }
+    }
+
+    /* ---------- Christmas morning ---------- */
+
+    enterPost() {
+      this.burstConfetti();
+      this.fillTally();
+    }
+
+    // One-off celebratory confetti as the dawn takeover lands
+    burstConfetti() {
+      if (this.reducedMotion || this.confettiDone) return;
+      var scene = this.querySelector('.santa-scene');
+      if (!scene) return;
+      this.confettiDone = true;
+      var wrap = document.createElement('div');
+      wrap.className = 'santa-confetti';
+      var colors = ['#ef476f', '#ffd166', '#06d6a0', '#4cc9f0', '#ffffff'];
+      var html = '';
+      for (var i = 0; i < 60; i++) {
+        html += '<span style="' +
+          'left:' + (Math.random() * 100).toFixed(1) + '%;' +
+          'background:' + colors[i % colors.length] + ';' +
+          'animation-delay:' + (Math.random() * 0.8).toFixed(2) + 's;' +
+          'animation-duration:' + (Math.random() * 1.6 + 2).toFixed(2) + 's;' +
+          '"></span>';
+      }
+      wrap.innerHTML = html;
+      scene.appendChild(wrap);
+      setTimeout(function () { wrap.remove(); }, 4600);
+    }
+
+    // Final gift tally on the morning card ("7.8 billion")
+    fillTally() {
+      var el = this.querySelector('[data-tally]');
+      if (!el) return;
+      var self = this;
+      function apply(total) {
+        if (!total) return;
+        var billions = total / 1e9;
+        el.textContent = billions >= 1
+          ? billions.toFixed(1).replace(/\.0$/, '') + ' billion'
+          : NUMBER_FORMAT.format(total);
+      }
+      if (this.route) return apply(this.route.presentsTotal);
+      fetch(this.dataset.routeUrl)
+        .then(function (r) { return r.json(); })
+        .then(function (route) {
+          self.route = route;
+          apply(route.presentsTotal);
+        })
+        .catch(function () { /* keep the server-rendered fallback */ });
     }
 
     /* ---------- Live tracker (three.js globe) ---------- */
@@ -1067,6 +1259,7 @@
       }
       this.revealReady = false; // suppress the catch-up chime burst
       this.railCurrent = -1; // force the rail to repaint
+      this.confettiDone = false; // celebrate again when the replay finishes
       this.state = ''; // force a state refresh on next tick
       this.tick();
     }
@@ -1076,6 +1269,15 @@
       this.setInfo('status', pos.status === 'delivering'
         ? 'Delivering in ' + pos.current.city + ' 🎁'
         : 'Flying to ' + (pos.next ? pos.next.city : 'the North Pole'));
+
+      // Overall journey progress bar + "% of the world visited"
+      var frac = Math.max(0, Math.min(1, elapsed / this.routeDuration()));
+      var fill = this.journeyFill || (this.journeyFill = this.querySelector('[data-journey-fill]'));
+      if (fill) {
+        var w = (frac * 100).toFixed(1) + '%';
+        if (fill.style.width !== w) fill.style.width = w;
+      }
+      this.setInfo('journey', Math.round(frac * 100) + '% of the world visited');
     }
 
     /* ---------- Live itinerary rail ---------- */
@@ -1345,11 +1547,12 @@
 
     /* ---------- Snow ---------- */
 
-    initSnow() {
+    initSnow(light) {
       var layer = this.querySelector('[data-snow-layer]');
       if (!layer || this.dataset.snow !== 'true') return;
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (this.reducedMotion) return;
       var flakes = window.innerWidth < 750 ? 30 : 60;
+      if (light) flakes = Math.round(flakes / 4); // gentle flurries on Christmas morning
       var html = '';
       for (var i = 0; i < flakes; i++) {
         var size = (Math.random() * 0.5 + 0.3).toFixed(2);

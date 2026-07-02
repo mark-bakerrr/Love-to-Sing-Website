@@ -125,6 +125,290 @@ html.santa-live-active .santa-tracker__inner {
   font-size: var(--fz-m);
 }
 
+/* *word* headline accent (Instrument Serif italic, loaded by the section) */
+.santa-accent {
+  font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* ---------- Ambient scene (countdown + Christmas morning) ---------- */
+
+.santa-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* above the base gradient + star speckles, below the content */
+  pointer-events: none;
+  overflow: hidden;
+}
+
+html.santa-live-active .santa-scene {
+  display: none; /* the 3D globe brings its own sky */
+}
+
+/* Looping village video background (countdown state) + legibility scrim */
+.santa-scene__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 1.6s ease;
+}
+
+.santa-scene__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 8, 22, 0.55) 0%, rgba(5, 8, 22, 0.25) 35%, rgba(5, 8, 22, 0.55) 100%);
+  transition: opacity 1.6s ease;
+}
+
+/* The painted night layers stand down while the video plays the countdown */
+.santa-tracker.has-video:not(.is-post):not(.video-failed) .santa-scene__aurora,
+.santa-tracker.has-video:not(.is-post):not(.video-failed) .santa-scene__stars,
+.santa-tracker.has-video:not(.is-post):not(.video-failed) .santa-scene__moon,
+.santa-tracker.has-video:not(.is-post):not(.video-failed) .santa-scene__hills {
+  opacity: 0;
+}
+
+/* Christmas morning: video bows out, painted dawn takes over */
+.santa-tracker.is-post .santa-scene__video,
+.santa-tracker.is-post .santa-scene__scrim {
+  opacity: 0;
+}
+
+/* JS adds this if the video errors — painted scene returns */
+.santa-tracker.video-failed .santa-scene__video,
+.santa-tracker.video-failed .santa-scene__scrim {
+  display: none;
+}
+
+.santa-tracker.has-video .santa-scene__hills {
+  transition: opacity 1.6s ease;
+}
+
+/* Christmas-morning dawn: fades in over the night sky when the journey ends */
+.santa-scene__dawn {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #f7c6a3 0%, #e58a9b 55%, #4b3a6b 100%);
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+
+.santa-tracker.is-post .santa-scene__dawn { opacity: 1; }
+
+/* Aurora: big blurred colour blobs drifting slowly near the top of the sky */
+.santa-scene__aurora {
+  position: absolute;
+  width: 60vw;
+  height: 60vh;
+  border-radius: 50%;
+  filter: blur(64px);
+  mix-blend-mode: screen;
+  opacity: 0.35;
+  animation: santa-aurora 18s ease-in-out infinite alternate;
+  transition: opacity 1.6s ease;
+}
+
+.santa-scene__aurora--1 {
+  top: -12%;
+  left: -8%;
+  background: radial-gradient(closest-side, rgba(6, 214, 160, 0.55), transparent 70%);
+}
+
+.santa-scene__aurora--2 {
+  top: -6%;
+  right: -12%;
+  background: radial-gradient(closest-side, rgba(76, 201, 240, 0.5), transparent 70%);
+  animation-delay: -6s;
+  animation-duration: 22s;
+}
+
+.santa-scene__aurora--3 {
+  top: 18%;
+  left: 30%;
+  width: 50vw;
+  height: 40vh;
+  background: radial-gradient(closest-side, rgba(155, 93, 229, 0.4), transparent 70%);
+  animation-delay: -12s;
+  animation-duration: 26s;
+}
+
+.santa-tracker.is-post .santa-scene__aurora { opacity: 0; }
+
+@keyframes santa-aurora {
+  from { transform: translate3d(-4%, 0, 0) scale(1); }
+  to { transform: translate3d(5%, 6%, 0) scale(1.15); }
+}
+
+/* Twinkling stars (JS sprinkles ~80 of these at random positions) */
+.santa-scene__stars {
+  position: absolute;
+  inset: 0;
+  transition: opacity 1.6s ease;
+}
+
+.santa-tracker.is-post .santa-scene__stars { opacity: 0; }
+
+.santa-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+  animation: santa-star-twinkle 4s ease-in-out infinite;
+}
+
+@keyframes santa-star-twinkle {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.9; }
+}
+
+/* Glowing moon (night) / rising sun (Christmas morning) */
+.santa-scene__moon {
+  position: absolute;
+  top: 8%;
+  right: 12%;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #fffdf4 0%, #f4ecd2 60%, #e8dcb8 100%);
+  box-shadow:
+    0 0 48px 16px rgba(255, 250, 224, 0.35),
+    0 0 128px 48px rgba(255, 250, 224, 0.18);
+  transition: opacity 1.6s ease;
+}
+
+.santa-tracker.is-post .santa-scene__moon { opacity: 0; }
+
+.santa-scene__sun {
+  position: absolute;
+  bottom: 20%;
+  left: 14%;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 42% 40%, #fff8e0 0%, #ffd98a 55%, #ffb45e 100%);
+  box-shadow:
+    0 0 64px 24px rgba(255, 200, 120, 0.5),
+    0 0 176px 64px rgba(255, 170, 90, 0.3);
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+
+.santa-tracker.is-post .santa-scene__sun { opacity: 1; }
+
+/* Hills + a cosy village silhouette with flickering warm windows */
+.santa-scene__hills {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  width: 100%;
+  height: clamp(140px, 24vh, 260px);
+}
+
+.santa-scene__hill-back { fill: #0d1330; transition: fill 1.6s ease; }
+.santa-scene__hill-front { fill: #070b1d; transition: fill 1.6s ease; }
+
+.santa-scene__village path,
+.santa-scene__village rect {
+  fill: #10173a;
+  transition: fill 1.6s ease;
+}
+
+.santa-scene__village .santa-scene__window {
+  fill: #ffd166;
+  animation: santa-window-flicker 3.2s ease-in-out infinite;
+}
+
+.santa-scene__window--slow { animation-duration: 4.7s; animation-delay: -1.2s; }
+.santa-scene__window--late { animation-duration: 5.6s; animation-delay: -2.6s; }
+
+@keyframes santa-window-flicker {
+  0%, 100% { opacity: 1; }
+  45% { opacity: 0.55; }
+  60% { opacity: 0.85; }
+  75% { opacity: 0.45; }
+}
+
+/* At dawn the silhouettes soften to plum and the window lights go out */
+.santa-tracker.is-post .santa-scene__hill-back { fill: #3a2d55; }
+.santa-tracker.is-post .santa-scene__hill-front { fill: #2c2244; }
+.santa-tracker.is-post .santa-scene__village path,
+.santa-tracker.is-post .santa-scene__village rect { fill: #443461; }
+.santa-tracker.is-post .santa-scene__village .santa-scene__window { animation: none; }
+
+/* Shooting stars (spawned by JS every ~12s during the countdown) */
+.santa-scene__shooting {
+  position: absolute;
+  inset: 0;
+}
+
+.santa-shooting-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.7);
+  animation: santa-shoot 1.4s ease-out forwards;
+}
+
+.santa-shooting-star::before {
+  content: '';
+  position: absolute;
+  right: 1px;
+  top: 0;
+  width: 120px;
+  height: 1.5px;
+  background: linear-gradient(270deg, rgba(255, 255, 255, 0.9), transparent);
+  transform-origin: right center;
+  transform: rotate(-27deg);
+}
+
+@keyframes santa-shoot {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translate3d(-180px, 90px, 0); opacity: 0; }
+}
+
+/* One-off confetti burst as the Christmas-morning state lands */
+.santa-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.santa-confetti span {
+  position: absolute;
+  top: -3%;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  animation: santa-confetti-fall 3s ease-in forwards;
+}
+
+@keyframes santa-confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(105vh) rotate(540deg); opacity: 0.4; }
+}
+
+/* Keep the headline readable over the lighter dawn sky */
+.santa-tracker.is-post .santa-tracker__title,
+.santa-tracker.is-post .santa-tracker__subtitle {
+  text-shadow: 0 2px 24px rgba(52, 28, 76, 0.45);
+}
+
+.santa-tracker.is-post .santa-tracker__subtitle {
+  color: rgba(255, 255, 255, 0.95);
+}
+
 /* ---------- Countdown ---------- */
 
 .santa-countdown {
@@ -171,6 +455,77 @@ html.santa-live-active .santa-tracker__inner {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--c-blue-100);
+}
+
+/* Glass card wrapping the digits, status line and wait bar */
+.santa-countdown-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-200);
+  width: min(880px, 100%);
+  margin-inline: auto;
+  margin-bottom: var(--space-400);
+  padding: var(--space-300) var(--space-400);
+  border-radius: var(--radius-l);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+}
+
+.santa-countdown-card__label {
+  margin: 0;
+  font-size: var(--fz-s);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* inside the card the unit tiles lose their own heavy chrome */
+.santa-countdown-card .santa-countdown {
+  margin-bottom: 0;
+}
+
+.santa-countdown-card .santa-countdown__unit {
+  flex: 1 1 0;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.santa-countdown-card .santa-countdown__value {
+  font-size: clamp(48px, 6vw, 88px);
+}
+
+/* Rotating "elves are getting ready" status line */
+.santa-countdown__status {
+  margin: 0;
+  min-height: 1.4em;
+  color: var(--c-blue-100);
+  font-size: var(--fz-s);
+  transition: opacity 0.25s ease;
+}
+
+.santa-countdown__status.is-fading {
+  opacity: 0;
+}
+
+/* Thin "how far through the wait" progress bar (fills 1 Dec until lift-off) */
+.santa-wait {
+  height: 6px;
+  border-radius: 1584px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+
+.santa-wait__fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--c-yellow-300), #fff);
+  transition: width 1s linear;
 }
 
 .santa-tracker__cta {
@@ -388,6 +743,32 @@ html.santa-live-active .santa-tracker__inner {
   height: auto;
 }
 
+/* "Santa is live" eyebrow with a pulsing red dot */
+.santa-live__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-100);
+  margin: 0;
+  font-size: 9.92px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sp-red);
+}
+
+.santa-live__live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sp-red);
+  animation: santa-live-dot 1.6s ease-in-out infinite;
+}
+
+@keyframes santa-live-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 71, 111, 0.5); }
+  50% { box-shadow: 0 0 0 5px rgba(239, 71, 111, 0); }
+}
+
 .santa-live__status {
   display: inline-flex;
   align-self: flex-start;
@@ -557,6 +938,36 @@ html.santa-live-active .santa-tracker__inner {
   gap: var(--space-150);
   padding-top: var(--space-150);
   border-top: 1px solid var(--sp-line);
+}
+
+/* Overall journey progress across the whole route */
+.santa-progress {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-50);
+}
+
+.santa-progress__track {
+  height: 5px;
+  border-radius: 1584px;
+  background: rgba(15, 81, 50, 0.12);
+  overflow: hidden;
+}
+
+.santa-progress__fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--sp-green), var(--sp-sky));
+  transition: width 1s linear;
+}
+
+.santa-progress__label {
+  font-size: 9.92px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--sp-ink-soft);
 }
 
 .santa-stat { display: flex; flex-direction: column; }
@@ -818,34 +1229,142 @@ html.santa-live-active .santa-tracker__inner {
 
 /* ---------- Finished / Christmas Day ---------- */
 
-.santa-post__emoji {
-  font-size: 102.4px;
-  line-height: 1;
-  margin-bottom: var(--space-200);
-}
-
-.santa-post__actions {
+.santa-post {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-400);
+}
+
+.santa-post__intro {
+  max-width: 640px;
+}
+
+/* Warm, solid morning card against the dawn sky */
+.santa-post-card {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-200);
-  flex-wrap: wrap;
-  margin-top: var(--space-400);
+  width: min(480px, 100%);
+  padding: var(--space-400);
+  border-radius: var(--radius-l);
+  background: rgba(255, 255, 255, 0.92);
+  color: #20263a;
+  text-align: center;
+  box-shadow: 0 32px 80px rgba(30, 20, 50, 0.35);
 }
 
-.santa-post__replay {
-  padding: var(--space-200) var(--space-500);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 1584px;
-  background: transparent;
-  color: var(--c-neutral-50);
+.santa-post-card__check {
+  width: 48px;
+  height: 48px;
+  margin-inline: auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e7f6ec;
+  color: #1d7a46;
+  font-size: 22.4px;
   font-weight: 700;
-  font-size: var(--fz-m);
-  cursor: pointer;
-  transition: background 0.2s ease;
 }
 
-.santa-post__replay:hover {
-  background: rgba(255, 255, 255, 0.12);
+.santa-tracker .santa-post-card__heading {
+  margin: 0;
+  color: #20263a;
+  font-size: 22.4px;
+}
+
+.santa-post-card__tally {
+  margin: 0;
+  color: #5a6072;
+  font-size: var(--fz-s);
+}
+
+.santa-post-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-100);
+  margin-top: var(--space-100);
+}
+
+.santa-post-card__cta {
+  display: block;
+  width: 100%;
+  padding: var(--space-200);
+  border-radius: var(--radius-l);
+  font-weight: 700;
+  font-size: var(--fz-s);
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.santa-post-card__cta--primary {
+  background: var(--c-red-500);
+  color: #fff;
+}
+
+.santa-post-card__cta--primary:hover {
+  background: var(--c-red-400);
+  transform: translateY(-1px);
+}
+
+.santa-post-card__cta--secondary {
+  background: #eef0f4;
+  color: #20263a;
+}
+
+.santa-post-card__cta--secondary:hover {
+  background: #e2e5ec;
+}
+
+.santa-post-card__replay {
+  margin-top: var(--space-50);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #5a6072;
+  font-size: var(--fz-t);
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.santa-post-card__replay:hover {
+  color: #20263a;
+}
+
+.santa-post-card__closing {
+  margin: 0;
+  color: #8a7f74;
+  font-size: var(--fz-t);
+}
+
+/* Desktop: headline on the left, morning card on the right */
+@media screen and (min-width: 990px) {
+  .santa-post {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-600);
+    text-align: left;
+  }
+
+  .santa-post__intro {
+    text-align: left;
+  }
+
+  .santa-post__intro .santa-tracker__subtitle {
+    margin-inline: 0;
+    margin-bottom: 0;
+  }
+
+  .santa-post-card {
+    text-align: left;
+  }
+
+  .santa-post-card__check {
+    margin-inline: 0;
+  }
 }
 
 /* ---------- Snow ---------- */
@@ -880,7 +1399,13 @@ html.santa-live-active .santa-tracker__inner {
   .santa-tracker::before,
   .santa-tracker::after,
   .santa-countdown__value.is-ticking,
-  .santa-rail__row.is-current.is-delivering .santa-rail__node {
+  .santa-rail__row.is-current.is-delivering .santa-rail__node,
+  .santa-scene__aurora,
+  .santa-star,
+  .santa-scene__village .santa-scene__window,
+  .santa-shooting-star,
+  .santa-confetti span,
+  .santa-live__live-dot {
     animation: none;
   }
 }
@@ -903,5 +1428,22 @@ html.santa-live-active .santa-tracker__inner {
   .santa-countdown__unit {
     min-width: 118.4px;
     padding: var(--space-200) var(--space-100);
+  }
+
+  .santa-countdown-card {
+    gap: var(--space-150);
+    padding: var(--space-200) var(--space-150);
+  }
+
+  .santa-scene__moon {
+    width: 64px;
+    height: 64px;
+    right: 8%;
+    top: 6%;
+  }
+
+  .santa-scene__sun {
+    width: 88px;
+    height: 88px;
   }
 }

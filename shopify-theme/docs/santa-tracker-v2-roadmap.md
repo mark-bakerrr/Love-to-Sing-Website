@@ -211,8 +211,22 @@ This is what makes people feel it's *for them* — and what Google nails.
 **Phase 3 — "Most epic" (depth + reach)**
 9. glTF sleigh + 8 reindeer + particle trail.
 10. Timezone‑accurate regenerated route (local‑midnight arrivals) + more cities.
-11. Share card + milestone confetti + finale.
+11. Share card + ~~milestone confetti + finale~~ ✅ (finale shipped: dawn takeover,
+    confetti burst, morning card with tally + dual CTAs; share card still open).
 12. Pre‑Christmas village/activities + carol of the day.
+
+**Glow‑up pass (Jul 2026) — ✅ SHIPPED**
+- Countdown: AI‑generated looping village video background
+  (`assets/santa-village-bg.mp4`, Seedance 2.0, painted night scene as
+  fallback + reduced‑motion static frame), glass countdown card, rotating
+  elf‑prep status line, "wait" progress bar (1 Dec → lift‑off), shooting stars.
+- Painted ambient scene for pre/post: aurora, 80 twinkling stars, moon/rising
+  sun, parallax hills + village silhouette with flickering windows.
+- Christmas morning: dawn palette takeover, lighter snow, confetti burst,
+  solid morning card (tally, sing/shop CTAs, replay, closing line).
+- Serif italic `*accent*` headline treatment (Instrument Serif, section‑scoped).
+- Live panel: "Santa is live 🔴" eyebrow + journey % progress bar.
+- QA: `?phase=countdown|tracker|done` and `?t=0..1` aliases over `?santa_time=`.
 
 **Cross‑cutting (every phase):** performance tiers, accessibility, KTX2 assets,
 tab‑hidden pause, graceful fallbacks.
