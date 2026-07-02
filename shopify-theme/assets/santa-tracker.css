@@ -82,6 +82,44 @@ html.santa-live-active .santa-tracker__inner {
   margin-block: auto;
 }
 
+/* Countdown state: locked to exactly one viewport — headline up top, the
+   countdown pill on the video's snowy foreground at the bottom */
+.santa-tracker.is-pre .santa-tracker__inner {
+  height: 100vh;
+  height: 100svh;
+  min-height: 0;
+}
+
+.santa-tracker.is-pre .santa-tracker__logo {
+  margin-bottom: var(--space-150);
+}
+
+.santa-tracker__inner > [data-state="pre"]:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  margin-block: 0;
+}
+
+[data-state="pre"] .santa-countdown-card {
+  margin-top: auto;
+  margin-bottom: var(--space-100);
+}
+
+/* keep the whole countdown state within one viewport */
+[data-state="pre"] .santa-tracker__subtitle {
+  margin-bottom: var(--space-300);
+}
+
+.santa-glass-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
 .santa-tracker__logo {
   display: inline-flex;
   justify-content: center;
@@ -472,6 +510,55 @@ html.santa-live-active .santa-scene {
   border: 1px solid rgba(255, 255, 255, 0.16);
   backdrop-filter: blur(12px);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+}
+
+/* Apple-style "liquid glass" pill over the video's white snow: bright
+   refractive glass with dark ink. The url() line adds the turbulence
+   refraction in browsers that support SVG backdrop filters; others keep
+   the plain blur + saturation. */
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card {
+  border-radius: 36px;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.06));
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  -webkit-backdrop-filter: blur(7px) saturate(160%);
+  backdrop-filter: blur(7px) saturate(160%);
+  backdrop-filter: blur(7px) saturate(160%) url(#santa-glass-distortion);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.25),
+    0 12px 40px rgba(10, 16, 38, 0.25);
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card .santa-countdown__unit {
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card__label {
+  color: rgba(11, 16, 38, 0.66);
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card .santa-countdown__value {
+  color: var(--c-red-500);
+  text-shadow: none;
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card .santa-countdown__label {
+  color: rgba(11, 16, 38, 0.6);
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card .santa-countdown__status {
+  color: rgba(11, 16, 38, 0.72);
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card .santa-wait {
+  background: rgba(11, 16, 38, 0.16);
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card .santa-wait__fill {
+  background: linear-gradient(90deg, var(--c-red-500), #ff8f5e);
 }
 
 .santa-countdown-card__label {

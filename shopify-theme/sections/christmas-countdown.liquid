@@ -135,6 +135,15 @@
     <div class="santa-scene__shooting" data-shooting></div>
   </div>
 
+  {%- comment -%} Refraction filter for the liquid-glass countdown pill {%- endcomment -%}
+  <svg class="santa-glass-defs" aria-hidden="true" focusable="false">
+    <filter id="santa-glass-distortion" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92" result="noise"/>
+      <feGaussianBlur in="noise" stdDeviation="2" result="blurred"/>
+      <feDisplacementMap in="SourceGraphic" in2="blurred" scale="70" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
   <div data-snow-layer></div>
 
   <div class="santa-tracker__inner container">
@@ -180,10 +189,6 @@
           <div class="santa-wait__fill" data-wait-fill></div>
         </div>
       </div>
-
-      {%- if section.settings.cta_label != blank -%}
-        <a class="santa-tracker__cta" href="{{ cta_url }}">{{ section.settings.cta_label | escape }} 🎄</a>
-      {%- endif -%}
     </div>
 
     {%- comment -%} State C: Christmas Day — all presents delivered {%- endcomment -%}
