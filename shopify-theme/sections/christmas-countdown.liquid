@@ -18,12 +18,7 @@
   endif
 -%}
 
-{%- comment -%} Serif accent font for the *word* headline treatment {%- endcomment -%}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&display=swap">
-
-{%- comment -%} Text wrapped in *asterisks* renders as an italic serif accent {%- endcomment -%}
+{%- comment -%} Text wrapped in *asterisks* renders as an italic accent {%- endcomment -%}
 {%- capture title_pre_html -%}
   {%- assign accent_parts = section.settings.title_pre | escape | split: '*' -%}
   {%- for part in accent_parts -%}

@@ -163,9 +163,8 @@ html.santa-live-active .santa-tracker__inner {
   font-size: var(--fz-m);
 }
 
-/* *word* headline accent (Instrument Serif italic, loaded by the section) */
+/* *word* headline accent — lighter italic within the theme's own Nunito */
 .santa-accent {
-  font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif;
   font-style: italic;
   font-weight: 400;
   letter-spacing: 0.01em;
@@ -679,7 +678,6 @@ html.santa-live-active .santa-scene {
   --sp-ink-soft: rgba(247, 248, 252, 0.62);
   --sp-line: rgba(255, 255, 255, 0.14);
   --sp-red: var(--c-red-500);
-  --sp-red-text: var(--c-red-300);   /* red accent that reads on dark glass */
   --sp-gold: var(--c-yellow-300);
 }
 
@@ -744,7 +742,7 @@ html.santa-live-active .santa-scene {
     var(--sp-bg);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   backdrop-filter: blur(14px) saturate(160%);
-  color: var(--sp-red-text);
+  color: var(--sp-ink-soft);
   font-size: 17.6px;
   line-height: 1;
   cursor: pointer;
@@ -857,20 +855,20 @@ html.santa-live-active .santa-scene {
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--sp-red-text);
+  color: var(--sp-ink-soft);
 }
 
 .santa-live__live-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--c-red-400);
+  background: var(--c-red-500);
   animation: santa-live-dot 1.6s ease-in-out infinite;
 }
 
 @keyframes santa-live-dot {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(236, 84, 80, 0.55); }
-  50% { box-shadow: 0 0 0 5px rgba(236, 84, 80, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(185, 31, 28, 0.55); }
+  50% { box-shadow: 0 0 0 5px rgba(185, 31, 28, 0); }
 }
 
 .santa-live__status {
@@ -935,10 +933,10 @@ html.santa-live-active .santa-scene {
 .santa-rail__row:first-child::before { top: 50%; }
 .santa-rail__row:last-child::before { bottom: 50%; }
 
-/* travelled route thread glows gold — the same trail Santa draws on the globe */
+/* travelled route thread: quiet frosted white */
 .santa-rail__row.is-visited::before,
 .santa-rail__row.is-current::before {
-  background: linear-gradient(180deg, var(--sp-gold), rgba(250, 204, 85, 0.55));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.22));
 }
 
 .santa-rail__node {
@@ -972,15 +970,15 @@ html.santa-live-active .santa-scene {
 /* state: already visited */
 .santa-rail__row.is-visited { opacity: 0.72; }
 .santa-rail__row.is-visited .santa-rail__node {
-  background: var(--sp-gold);
-  border-color: var(--sp-gold);
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.9);
 }
 
 /* state: upcoming */
 .santa-rail__row.is-upcoming { opacity: 0.5; }
 .santa-rail__row.is-next { opacity: 1; }
 .santa-rail__row.is-next .santa-rail__node {
-  border-color: var(--sp-gold);
+  border-color: rgba(255, 255, 255, 0.65);
 }
 
 /* state: where Santa is right now */
@@ -988,9 +986,9 @@ html.santa-live-active .santa-scene {
 .santa-rail__row.is-current .santa-rail__node {
   width: 13.6px;
   height: 13.6px;
-  background: var(--c-red-400);
+  background: var(--c-red-500);
   border-color: #fff;
-  box-shadow: 0 0 0 4px rgba(236, 84, 80, 0.25), 0 0 14px rgba(236, 84, 80, 0.7);
+  box-shadow: 0 0 0 4px rgba(185, 31, 28, 0.3), 0 0 12px rgba(185, 31, 28, 0.55);
 }
 .santa-rail__row.is-current.is-delivering .santa-rail__node {
   animation: santa-pulse 1.4s ease-in-out infinite;
@@ -999,7 +997,7 @@ html.santa-live-active .santa-scene {
   font-family: var(--font-heading-family);
   font-weight: 800;
   font-size: var(--fz-m);
-  color: var(--sp-red-text);
+  color: var(--sp-ink);
 }
 .santa-rail__row.is-current.is-delivering .santa-rail__city::after {
   content: 'NOW';
@@ -1020,8 +1018,8 @@ html.santa-live-active .santa-scene {
   margin-left: var(--space-100);
   padding: 0.05em 0.45em;
   border-radius: 1584px;
-  background: rgba(250, 204, 85, 0.16);
-  color: var(--sp-gold);
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--sp-ink-soft);
   font-family: system-ui, sans-serif;
   font-size: 9.28px;
   font-weight: 800;
@@ -1030,8 +1028,8 @@ html.santa-live-active .santa-scene {
 }
 
 @keyframes santa-pulse {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(236, 84, 80, 0.25), 0 0 14px rgba(236, 84, 80, 0.7); }
-  50% { box-shadow: 0 0 0 7px rgba(236, 84, 80, 0.1), 0 0 20px rgba(236, 84, 80, 0.9); }
+  0%, 100% { box-shadow: 0 0 0 4px rgba(185, 31, 28, 0.3), 0 0 12px rgba(185, 31, 28, 0.55); }
+  50% { box-shadow: 0 0 0 7px rgba(185, 31, 28, 0.12), 0 0 18px rgba(185, 31, 28, 0.75); }
 }
 
 /* ---------- Stat footer ---------- */
@@ -1192,11 +1190,16 @@ html.santa-live-active .santa-scene {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--sp-red-text);
+  color: var(--sp-ink-soft);
   font-size: var(--fz-t);
   font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.santa-you__change:hover {
+  color: var(--sp-ink);
 }
 
 .santa-you__eta {
@@ -1212,7 +1215,7 @@ html.santa-live-active .santa-scene {
 .santa-you__city {
   margin: 0;
   font-size: var(--fz-t);
-  color: var(--sp-red-text);
+  color: var(--sp-ink);
   font-weight: 700;
 }
 
