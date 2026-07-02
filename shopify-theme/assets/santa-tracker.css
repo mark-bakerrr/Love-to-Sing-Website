@@ -457,17 +457,18 @@ html.santa-live-active .santa-scene {
   color: var(--c-blue-100);
 }
 
-/* Glass card wrapping the digits, status line and wait bar */
+/* Glass card wrapping the digits, status line and wait bar — compact, so
+   the village video behind it stays the hero */
 .santa-countdown-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-200);
-  width: min(880px, 100%);
+  gap: var(--space-150);
+  width: min(560px, 100%);
   margin-inline: auto;
-  margin-bottom: var(--space-400);
-  padding: var(--space-300) var(--space-400);
+  margin-bottom: var(--space-300);
+  padding: var(--space-200) var(--space-300);
   border-radius: var(--radius-l);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(10, 16, 38, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.16);
   backdrop-filter: blur(12px);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
@@ -490,13 +491,19 @@ html.santa-live-active .santa-scene {
 .santa-countdown-card .santa-countdown__unit {
   flex: 1 1 0;
   min-width: 0;
-  background: rgba(255, 255, 255, 0.05);
+  padding: var(--space-150) var(--space-100);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: none;
   box-shadow: none;
 }
 
 .santa-countdown-card .santa-countdown__value {
-  font-size: clamp(48px, 6vw, 88px);
+  font-size: clamp(28px, 3.2vw, 48px);
+}
+
+.santa-countdown-card .santa-countdown__label {
+  margin-top: var(--space-50);
+  font-size: var(--fz-t);
 }
 
 /* Rotating "elves are getting ready" status line */
