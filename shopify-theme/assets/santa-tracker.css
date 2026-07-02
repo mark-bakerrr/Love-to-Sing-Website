@@ -764,7 +764,6 @@ html.santa-live-active .santa-scene {
 .santa-live__panel.is-collapsed .santa-live__clock,
 .santa-live__panel.is-collapsed .santa-live__status,
 .santa-live__panel.is-collapsed .santa-you,
-.santa-live__panel.is-collapsed .santa-live__foot,
 .santa-live__panel.is-collapsed .santa-live__cta {
   display: none;
 }
@@ -1032,19 +1031,42 @@ html.santa-live-active .santa-scene {
   50% { box-shadow: 0 0 0 7px rgba(185, 31, 28, 0.12), 0 0 18px rgba(185, 31, 28, 0.75); }
 }
 
-/* ---------- Stat footer ---------- */
+/* ---------- Journey stats — companion glass panel, right side ---------- */
 
-.santa-live__foot {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-150);
+.santa-live__stats {
+  position: absolute;
+  z-index: 6;
+  right: var(--space-400);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-200);
+  width: min(232px, calc(100vw - 2 * var(--space-400)));
+  padding: var(--space-250) var(--space-300);
+  border-radius: 28px;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03)),
+    var(--sp-bg);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%) url(#santa-glass-distortion);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.35),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.12),
+    0 25.6px 64px rgba(20, 30, 60, 0.4);
+  color: var(--sp-ink);
+  text-align: left;
+}
+
+.santa-live__stats .santa-stat {
   padding-top: var(--space-150);
   border-top: 1px solid var(--sp-line);
 }
 
 /* Overall journey progress across the whole route */
 .santa-progress {
-  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   gap: var(--space-50);
@@ -1077,7 +1099,7 @@ html.santa-live-active .santa-scene {
 .santa-stat__num {
   font-family: var(--font-heading-family);
   font-weight: 800;
-  font-size: 18.4px;
+  font-size: 20.8px;
   line-height: 1.1;
   color: var(--sp-gold);
   font-variant-numeric: tabular-nums;
@@ -1329,6 +1351,43 @@ html.santa-live-active .santa-scene {
 }
 
 @media screen and (max-width: 989px) {
+  /* Stats become a compact glass strip above the banner */
+  .santa-live__stats {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: 88px;
+    transform: translateX(-50%);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-100) var(--space-200);
+    width: min(420px, calc(100vw - var(--space-300)));
+    padding: var(--space-150) var(--space-250);
+  }
+
+  .santa-live__stats .santa-progress {
+    grid-column: 1 / -1;
+  }
+
+  .santa-live__stats .santa-stat {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .santa-live__stats .santa-stat__num {
+    font-size: var(--fz-m);
+  }
+
+  /* the open sheet takes the same space — step the strip aside */
+  .santa-live__stats {
+    transition: opacity 0.25s ease;
+  }
+
+  .santa-live.is-panel-open .santa-live__stats {
+    opacity: 0;
+    pointer-events: none;
+  }
+
   /* Panel becomes a bottom sheet, opened from the floating banner */
   .santa-live__panel {
     left: 50%;

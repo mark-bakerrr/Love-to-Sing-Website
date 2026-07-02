@@ -292,26 +292,27 @@
         </div>
       </div>
 
-      <footer class="santa-live__foot">
-        <div class="santa-progress">
-          <div class="santa-progress__track" aria-hidden="true">
-            <div class="santa-progress__fill" data-journey-fill></div>
-          </div>
-          <span class="santa-progress__label" data-info="journey">Santa’s journey is underway…</span>
-        </div>
-        <div class="santa-stat">
-          <span class="santa-stat__num" data-info="presents" data-odometer>0</span>
-          <span class="santa-stat__label">presents delivered</span>
-        </div>
-        <div class="santa-stat">
-          <span class="santa-stat__num" data-info="distance" data-odometer>0 km</span>
-          <span class="santa-stat__label">travelled</span>
-        </div>
-      </footer>
-
       {%- if section.settings.cta_label != blank -%}
         <a class="santa-tracker__cta santa-live__cta" href="{{ cta_url }}">{{ section.settings.cta_label | escape }} 🎄</a>
       {%- endif -%}
+    </aside>
+
+    {%- comment -%} Journey stats — their own glass panel on the right {%- endcomment -%}
+    <aside class="santa-live__stats" aria-label="Journey statistics">
+      <div class="santa-progress">
+        <div class="santa-progress__track" aria-hidden="true">
+          <div class="santa-progress__fill" data-journey-fill></div>
+        </div>
+        <span class="santa-progress__label" data-info="journey">Santa’s journey is underway…</span>
+      </div>
+      <div class="santa-stat">
+        <span class="santa-stat__num" data-info="presents" data-odometer>0</span>
+        <span class="santa-stat__label">presents delivered</span>
+      </div>
+      <div class="santa-stat">
+        <span class="santa-stat__num" data-info="distance" data-odometer>0 km</span>
+        <span class="santa-stat__label">travelled</span>
+      </div>
     </aside>
 
     <button
