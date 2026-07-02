@@ -231,6 +231,9 @@
   <div class="santa-live" data-state="live" hidden>
     <div class="santa-live__globe" data-globe aria-label="3D globe showing Santa's live position"></div>
 
+    {%- comment -%} Brand — centred at the top of the screen at all times {%- endcomment -%}
+    <div class="santa-live__brand">{{ logo_link }}</div>
+
     <button
       class="santa-live__sound"
       type="button"
@@ -256,18 +259,24 @@
 
       <header class="santa-live__head">
         <div class="santa-live__topbar">
-          {{ logo_link }}
+          <p class="santa-live__eyebrow"><span class="santa-live__live-dot" aria-hidden="true"></span>Santa is live</p>
           <div class="santa-live__clock">
             <span class="santa-live__clock-time" data-info="local-clock">—</span>
             <span class="santa-live__clock-label">your local time</span>
           </div>
         </div>
-        <p class="santa-live__eyebrow"><span class="santa-live__live-dot" aria-hidden="true"></span>Santa is live</p>
         <p class="santa-live__status" data-info="status" aria-live="polite">Santa is on his way…</p>
       </header>
 
       {%- comment -%} Live itinerary rail — auto-scrolls as Santa flies {%- endcomment -%}
       <ol class="santa-rail" data-rail aria-label="Santa's route — cities visited and upcoming"></ol>
+
+      <div class="santa-progress">
+        <div class="santa-progress__track" aria-hidden="true">
+          <div class="santa-progress__fill" data-journey-fill></div>
+        </div>
+        <span class="santa-progress__label" data-info="journey">Santa’s journey is underway…</span>
+      </div>
 
       {%- comment -%} Personalised "Santa reaches you" {%- endcomment -%}
       <div class="santa-you" data-you data-you-state="closed">
@@ -297,14 +306,22 @@
       {%- endif -%}
     </aside>
 
-    {%- comment -%} Journey stats — their own glass panel on the right {%- endcomment -%}
+    {%- comment -%}
+      Journey stats — glass panel bottom-right on desktop. On mobile it is
+      the single bottom card: status + chevron opens the full itinerary sheet.
+    {%- endcomment -%}
     <aside class="santa-live__stats" aria-label="Journey statistics">
-      <div class="santa-progress">
-        <div class="santa-progress__track" aria-hidden="true">
-          <div class="santa-progress__fill" data-journey-fill></div>
-        </div>
-        <span class="santa-progress__label" data-info="journey">Santa’s journey is underway…</span>
-      </div>
+      <button
+        class="santa-live__stats-head"
+        type="button"
+        data-action="toggle-panel"
+        aria-expanded="false"
+        aria-label="Show Santa's full itinerary"
+      >
+        <span aria-hidden="true">🎅</span>
+        <span class="santa-live__stats-status" data-info="status">Santa is on his way…</span>
+        <span class="santa-live__stats-chevron" aria-hidden="true">▲</span>
+      </button>
       <div class="santa-stat">
         <span class="santa-stat__num" data-info="presents" data-odometer>0</span>
         <span class="santa-stat__label">presents delivered</span>
@@ -322,18 +339,6 @@
       hidden
     >
       🎅 Follow Santa
-    </button>
-
-    <button
-      class="santa-live__banner"
-      type="button"
-      data-action="toggle-panel"
-      aria-expanded="false"
-      aria-label="Show Santa tracker stats"
-    >
-      <span aria-hidden="true">🎅</span>
-      <span data-info="status">Santa is on his way…</span>
-      <span class="santa-live__banner-chevron" aria-hidden="true">▲</span>
     </button>
 
     <p class="santa-live__error" data-tracker-error hidden>

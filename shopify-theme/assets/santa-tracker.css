@@ -692,6 +692,26 @@ html.santa-live-active .santa-scene {
   height: 100%;
 }
 
+/* Brand — centred at the top of the screen during the live globe */
+.santa-live__brand {
+  position: absolute;
+  z-index: 7;
+  top: var(--space-300);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.santa-live__brand .santa-tracker__logo {
+  display: block;
+  margin: 0;
+}
+
+.santa-live__brand .santa-tracker__logo img {
+  width: auto;
+  height: auto;
+  max-width: 132px;
+}
+
 /* ---------- Compact stats panel ("flight log") ---------- */
 
 .santa-live__panel {
@@ -789,10 +809,6 @@ html.santa-live-active .santa-scene {
   display: none; /* hide NOW/NEXT pills in the narrow view */
 }
 
-.santa-live__panel.is-collapsed .santa-tracker__logo img {
-  max-width: 84px;
-}
-
 .santa-live__head {
   display: flex;
   flex-direction: column;
@@ -801,7 +817,7 @@ html.santa-live-active .santa-scene {
 
 .santa-live__topbar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-200);
 }
@@ -828,20 +844,6 @@ html.santa-live-active .santa-scene {
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--sp-ink-soft);
-}
-
-.santa-live__panel .santa-tracker__logo-text {
-  color: var(--sp-ink);
-}
-
-.santa-live__panel .santa-tracker__logo {
-  display: block;
-  margin: 0;
-}
-
-.santa-live__panel .santa-tracker__logo img {
-  max-width: 104px;
-  height: auto;
 }
 
 /* "Santa is live" eyebrow with a pulsing red dot */
@@ -1037,8 +1039,7 @@ html.santa-live-active .santa-scene {
   position: absolute;
   z-index: 6;
   right: var(--space-400);
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: var(--space-400);
   display: flex;
   flex-direction: column;
   gap: var(--space-200);
@@ -1060,9 +1061,44 @@ html.santa-live-active .santa-scene {
   text-align: left;
 }
 
-.santa-live__stats .santa-stat {
+.santa-live__stats .santa-stat + .santa-stat {
   padding-top: var(--space-150);
   border-top: 1px solid var(--sp-line);
+}
+
+/* Mobile only: the stats card doubles as the itinerary-sheet trigger */
+.santa-live__stats-head {
+  display: none;
+  align-items: center;
+  gap: var(--space-100);
+  width: 100%;
+  min-height: 44px;
+  padding: 0 0 var(--space-100);
+  border: 0;
+  border-bottom: 1px solid var(--sp-line);
+  background: none;
+  color: var(--sp-ink);
+  font-weight: 800;
+  font-size: var(--fz-s);
+  text-align: left;
+  cursor: pointer;
+}
+
+.santa-live__stats-status {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.santa-live__stats-chevron {
+  color: var(--sp-ink-soft);
+  font-size: 0.8em;
+  transition: transform 0.3s ease;
+}
+
+.santa-live.is-panel-open .santa-live__stats-chevron {
+  transform: rotate(180deg);
 }
 
 /* Overall journey progress across the whole route */
@@ -1105,7 +1141,7 @@ html.santa-live-active .santa-scene {
   font-variant-numeric: tabular-nums;
 }
 
-.santa-stat:nth-child(3) .santa-stat__num { color: var(--sp-ink); }
+.santa-stat:last-of-type .santa-stat__num { color: var(--sp-ink); }
 
 .santa-stat__label {
   font-size: 9.92px;
@@ -1282,11 +1318,11 @@ html.santa-live-active .santa-scene {
   max-width: 100%;
 }
 
-/* Follow Santa button â€” shown only in free-orbit mode */
+/* Follow Santa button â€” shown only in free-orbit mode, below the brand */
 .santa-live__follow {
   position: absolute;
   z-index: 7;
-  top: var(--space-300);
+  top: calc(var(--space-300) + 88px);
   left: 50%;
   transform: translateX(-50%);
   padding: var(--space-150) var(--space-400);
@@ -1298,43 +1334,6 @@ html.santa-live-active .santa-scene {
   font-size: var(--fz-s);
   cursor: pointer;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
-}
-
-/* Floating stats banner â€” tablet/mobile only */
-.santa-live__banner {
-  display: none;
-  position: absolute;
-  z-index: 7;
-  bottom: var(--space-300);
-  left: 50%;
-  transform: translateX(-50%);
-  align-items: center;
-  gap: var(--space-100);
-  max-width: calc(100vw - 2 * var(--space-200));
-  padding: var(--space-150) var(--space-400);
-  border: 0;
-  border-radius: 1584px;
-  background: var(--sp-red);
-  color: #fff;
-  font-weight: 700;
-  font-size: var(--fz-s);
-  white-space: nowrap;
-  cursor: pointer;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
-}
-
-.santa-live__banner span[data-info] {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.santa-live__banner-chevron {
-  font-size: 0.8em;
-  transition: transform 0.3s ease;
-}
-
-.santa-live.is-panel-open .santa-live__banner-chevron {
-  transform: rotate(180deg);
 }
 
 .santa-live__error {
@@ -1351,12 +1350,11 @@ html.santa-live-active .santa-scene {
 }
 
 @media screen and (max-width: 989px) {
-  /* Stats become a compact glass strip above the banner */
+  /* One bottom card: status row (opens the sheet) + stats */
   .santa-live__stats {
     right: auto;
     left: 50%;
-    top: auto;
-    bottom: 88px;
+    bottom: var(--space-300);
     transform: translateX(-50%);
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1365,11 +1363,13 @@ html.santa-live-active .santa-scene {
     padding: var(--space-150) var(--space-250);
   }
 
-  .santa-live__stats .santa-progress {
+  .santa-live__stats-head {
+    display: flex;
     grid-column: 1 / -1;
   }
 
-  .santa-live__stats .santa-stat {
+  .santa-live__stats .santa-stat,
+  .santa-live__stats .santa-stat + .santa-stat {
     padding-top: 0;
     border-top: 0;
   }
@@ -1378,14 +1378,14 @@ html.santa-live-active .santa-scene {
     font-size: var(--fz-m);
   }
 
-  /* the open sheet takes the same space — step the strip aside */
-  .santa-live__stats {
-    transition: opacity 0.25s ease;
+  /* while the sheet is open, slim down to just the status row */
+  .santa-live.is-panel-open .santa-live__stats .santa-stat {
+    display: none;
   }
 
-  .santa-live.is-panel-open .santa-live__stats {
-    opacity: 0;
-    pointer-events: none;
+  .santa-live.is-panel-open .santa-live__stats-head {
+    padding-bottom: 0;
+    border-bottom: 0;
   }
 
   /* Panel becomes a bottom sheet, opened from the floating banner */
@@ -1402,14 +1402,10 @@ html.santa-live-active .santa-scene {
 
   .santa-rail { max-height: 38vh; }
 
-  .santa-live__collapse { display: none; } /* sheet uses the banner toggle instead */
+  .santa-live__collapse { display: none; } /* sheet opens from the stats card instead */
 
   .santa-live.is-panel-open .santa-live__panel {
     transform: translate(-50%, 0);
-  }
-
-  .santa-live__banner {
-    display: inline-flex;
   }
 }
 
