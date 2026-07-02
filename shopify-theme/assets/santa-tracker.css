@@ -671,11 +671,12 @@ html.santa-live-active .santa-scene {
   z-index: 4;
   overflow: hidden;
 
-  /* Candy Cane Pop palette â€” bright, light, festive */
-  --sp-bg: rgba(255, 248, 240, 0.92);
-  --sp-ink: #0f5132;                 /* evergreen primary text */
-  --sp-ink-soft: rgba(15, 81, 50, 0.52);
-  --sp-line: rgba(15, 81, 50, 0.16);
+  /* Liquid-glass panel over the night globe: dark glass, light ink,
+     candy accents (red / mint / gold) kept for the festive pops */
+  --sp-bg: rgba(10, 16, 38, 0.5);
+  --sp-ink: #f2f5ff;
+  --sp-ink-soft: rgba(242, 245, 255, 0.55);
+  --sp-line: rgba(255, 255, 255, 0.16);
   --sp-red: #ef476f;                 /* coral candy red */
   --sp-green: #06d6a0;               /* holly mint */
   --sp-gold: #ffd166;                /* sunny gold */
@@ -709,11 +710,18 @@ html.santa-live-active .santa-scene {
   max-height: min(860px, calc(100vh - 48px));
   padding: var(--space-250) var(--space-300);
   transition: width 0.3s ease;
-  border-radius: var(--radius-l);
-  background: var(--sp-bg);
-  border: 1px solid rgba(239, 71, 111, 0.18);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 25.6px 64px rgba(20, 30, 60, 0.4);
+  border-radius: 28px;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03)),
+    var(--sp-bg);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%) url(#santa-glass-distortion);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.35),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.12),
+    0 25.6px 64px rgba(20, 30, 60, 0.4);
   color: var(--sp-ink);
   text-align: left;
 }
@@ -729,11 +737,14 @@ html.santa-live-active .santa-scene {
   display: grid;
   place-items: center;
   padding: 0;
-  border: 1px solid rgba(239, 71, 111, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-left: 0;
   border-radius: 0 var(--radius-m) var(--radius-m) 0;
-  background: var(--sp-bg);
-  backdrop-filter: blur(12px);
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03)),
+    var(--sp-bg);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
   color: var(--sp-red);
   font-size: 17.6px;
   line-height: 1;
@@ -937,8 +948,8 @@ html.santa-live-active .santa-scene {
   width: 9.92px;
   height: 9.92px;
   border-radius: 50%;
-  border: 2px solid var(--sp-line);
-  background: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.25);
   z-index: 1;
   transition: all 0.3s ease;
 }
@@ -1010,8 +1021,8 @@ html.santa-live-active .santa-scene {
   margin-left: var(--space-100);
   padding: 0.05em 0.45em;
   border-radius: 1584px;
-  background: rgba(6, 214, 160, 0.16);
-  color: #07795c;
+  background: rgba(6, 214, 160, 0.22);
+  color: #6ff0cf;
   font-family: system-ui, sans-serif;
   font-size: 9.28px;
   font-weight: 800;
@@ -1045,7 +1056,7 @@ html.santa-live-active .santa-scene {
 .santa-progress__track {
   height: 5px;
   border-radius: 1584px;
-  background: rgba(15, 81, 50, 0.12);
+  background: rgba(255, 255, 255, 0.16);
   overflow: hidden;
 }
 
@@ -1216,10 +1227,15 @@ html.santa-live-active .santa-scene {
   font-size: var(--fz-t);
   padding: 4.8px 9.6px;
   border-radius: 1584px;
-  border: 1px solid rgba(15, 81, 50, 0.25);
-  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.12);
   color: var(--sp-ink);
   cursor: pointer;
+}
+
+.santa-you__select option {
+  color: #0f1530;
+  background: #fff;
 }
 
 .santa-you__select {
