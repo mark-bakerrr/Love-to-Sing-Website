@@ -14,9 +14,34 @@
       "settings": {
         "background_image": "shopify://shop_images/hearts-background.png"
       }
+    },
+    "faq_downloads": {
+      "type": "faq",
+      "blocks": {
+        "faq-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "name": "FAQ",
+      "settings": {
+        "border_top": false,
+        "border_bottom": false,
+        "title": "How to get your music",
+        "subtitle": "Downloading your songs is quick and easy — here's everything you need to know.",
+        "faq_group": "faq-downloads"
+      }
     }
   },
   "order": [
-    "main"
+    "main",
+    "faq_downloads"
   ]
 }
