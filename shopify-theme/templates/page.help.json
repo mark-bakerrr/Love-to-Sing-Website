@@ -36,32 +36,6 @@
       "name": "FAQ",
       "settings": { "border_top": false, "border_bottom": false, "title": "Downloads", "subtitle": "Getting your songs and albums after you buy.", "faq_group": "faq-downloads" }
     },
-    "faq_licenses": {
-      "type": "faq",
-      "blocks": {
-        "faq-spacing": {
-          "type": "spacing",
-          "static": true,
-          "settings": { "spacing_top": 40, "spacing_bottom": 40, "spacing_top_mobile": 20, "spacing_bottom_mobile": 20 },
-          "blocks": {}
-        }
-      },
-      "name": "FAQ",
-      "settings": { "border_top": true, "border_bottom": false, "title": "Music licences", "subtitle": "Using our music in churches, schools and organisations.", "faq_group": "faq-licenses" }
-    },
-    "faq_membership": {
-      "type": "faq",
-      "blocks": {
-        "faq-spacing": {
-          "type": "spacing",
-          "static": true,
-          "settings": { "spacing_top": 40, "spacing_bottom": 40, "spacing_top_mobile": 20, "spacing_bottom_mobile": 20 },
-          "blocks": {}
-        }
-      },
-      "name": "FAQ",
-      "settings": { "border_top": true, "border_bottom": false, "title": "Membership & My Music", "subtitle": "Your membership, streaming and video access.", "faq_group": "faq-membership" }
-    },
     "faq_account": {
       "type": "faq",
       "blocks": {
@@ -102,5 +76,5 @@
       "settings": { "background_top": "#ffffff", "background_bottom": "#790200", "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)", "media_opacity": 5, "image": "shopify://shop_images/hearts-background.png", "text_color": "#ffffff", "title": "Join Our Newsletter", "subtitle": "Sign up and we'll send you a free song!" }
     }
   },
-  "order": ["main", "hero", "faq_downloads", "faq_licenses", "faq_membership", "faq_account", "contact_cta", "newsletter"]
+  "order": ["main", "hero", "faq_downloads", "faq_account", "contact_cta", "newsletter"]
 }
