@@ -47,7 +47,8 @@
           {%- for entry in group_entries -%}
             {%- if max_items > 0 and forloop.index0 >= max_items -%}{%- break -%}{%- endif -%}
             {%- assign eid = entry.system.id -%}
-            {%- unless seen_ids contains eid -%}
+            {%- assign eidkey = ',' | append: eid | append: ',' -%}
+            {%- unless seen_ids contains eidkey -%}
               {%- assign seen_ids = seen_ids | append: eid | append: ',' -%}
               {%- assign answer = entry.answer | metafield_tag -%}
               {%- assign is_open = false -%}
@@ -62,7 +63,8 @@
         {%- assign entry = block.settings.faq -%}
         {%- if entry != blank -%}
           {%- assign eid = entry.system.id -%}
-          {%- unless seen_ids contains eid -%}
+          {%- assign eidkey = ',' | append: eid | append: ',' -%}
+          {%- unless seen_ids contains eidkey -%}
             {%- assign seen_ids = seen_ids | append: eid | append: ',' -%}
             {%- assign answer = entry.answer | metafield_tag -%}
             {%- assign is_open = false -%}
