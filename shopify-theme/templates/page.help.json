@@ -25,29 +25,17 @@
     },
     "faq_downloads": {
       "type": "faq",
-      "blocks": {
-        "faq-spacing": {
-          "type": "spacing",
-          "static": true,
-          "settings": { "spacing_top": 80, "spacing_bottom": 40, "spacing_top_mobile": 40, "spacing_bottom_mobile": 20 },
-          "blocks": {}
-        }
-      },
+      "blocks": { "grp": { "type": "faq_group", "settings": { "faq_group": "faq-downloads", "max_items": 0 } } },
+      "block_order": ["grp"],
       "name": "FAQ",
-      "settings": { "border_top": false, "border_bottom": false, "title": "Downloads", "subtitle": "Getting your songs and albums after you buy.", "faq_group": "faq-downloads" }
+      "settings": { "border_top": false, "border_bottom": false, "open_first": false, "title": "Downloads", "subtitle": "Getting your songs and albums after you buy.", "padding_top": 80, "padding_bottom": 40 }
     },
     "faq_account": {
       "type": "faq",
-      "blocks": {
-        "faq-spacing": {
-          "type": "spacing",
-          "static": true,
-          "settings": { "spacing_top": 40, "spacing_bottom": 80, "spacing_top_mobile": 20, "spacing_bottom_mobile": 40 },
-          "blocks": {}
-        }
-      },
+      "blocks": { "grp": { "type": "faq_group", "settings": { "faq_group": "faq-account", "max_items": 0 } } },
+      "block_order": ["grp"],
       "name": "FAQ",
-      "settings": { "border_top": true, "border_bottom": false, "title": "Account & billing", "subtitle": "Signing in, orders, receipts and more.", "faq_group": "faq-account" }
+      "settings": { "border_top": true, "border_bottom": false, "open_first": false, "title": "Account & billing", "subtitle": "Signing in, orders, receipts and more.", "padding_top": 40, "padding_bottom": 80 }
     },
     "contact_cta": {
       "type": "button-text",

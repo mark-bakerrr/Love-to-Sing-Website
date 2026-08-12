@@ -298,25 +298,26 @@
     "faq_downloads": {
       "type": "faq",
       "blocks": {
-        "faq-spacing": {
-          "type": "spacing",
-          "static": true,
+        "grp": {
+          "type": "faq_group",
           "settings": {
-            "spacing_top": 80,
-            "spacing_bottom": 80,
-            "spacing_top_mobile": 20,
-            "spacing_bottom_mobile": 20
-          },
-          "blocks": {}
+            "faq_group": "faq-downloads",
+            "max_items": 0
+          }
         }
       },
+      "block_order": [
+        "grp"
+      ],
       "name": "FAQ",
       "settings": {
         "border_top": false,
         "border_bottom": false,
+        "open_first": false,
         "title": "How to get your music",
         "subtitle": "Downloading your songs is quick and easy — here's everything you need to know.",
-        "faq_group": "faq-downloads"
+        "padding_top": 80,
+        "padding_bottom": 80
       }
     }
   },
