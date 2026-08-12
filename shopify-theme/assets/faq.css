@@ -27,3 +27,6 @@
   flex-direction: column;
   gap: 0.8rem;
 }
+
+.faq__body--single { display: block; }
+.faq__body--single .faq__column { width: 100%; max-width: 760px; margin-inline: auto; }

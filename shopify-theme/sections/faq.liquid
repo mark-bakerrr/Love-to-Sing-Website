@@ -1,125 +1,139 @@
 {%- liquid
-  # Spacing block
-  content_for "block", type: "spacing", id: "faq-spacing"
-
   assign border_top = section.settings.border_top
   assign border_bottom = section.settings.border_bottom
   assign title = section.settings.title
   assign subtitle = section.settings.subtitle
-  assign faq_group = section.settings.faq_group
-  assign entries = faq_group.entries.value
+  assign open_first = section.settings.open_first
 
   capture classes
     echo 'faq'
-
     if border_bottom
       echo ' section-border-bottom'
     endif
-
     if border_top
       echo ' section-border-top'
     endif
   endcapture
 -%}
 
+<style>
+  #shopify-section-{{ section.id }} .faq {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+</style>
+
 {{- 'faq.css' | asset_url | stylesheet_tag -}}
 {{- 'faq-item.css' | asset_url | stylesheet_tag -}}
+
+{%- comment -%}
+  Collect rows from all blocks in editor order, de-duplicating by metaobject id
+  (the same FAQ can belong to multiple groups). Build the accordion markup and the
+  FAQPage JSON-LD in ONE pass. `rendered` counts real rows so `open_first` opens
+  only the first shown row. The per-entry logic is intentionally inlined in both
+  block branches — Liquid can't build an array of single metaobjects to unify them.
+{%- endcomment -%}
+{%- assign seen_ids = ',' -%}
+{%- assign rendered = 0 -%}
+{%- assign schema_items = '' -%}
+
+{%- capture rows -%}
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+      {%- when 'faq_group' -%}
+        {%- assign group_entries = block.settings.faq_group.entries.value -%}
+        {%- assign max_items = block.settings.max_items -%}
+        {%- if group_entries -%}
+          {%- for entry in group_entries -%}
+            {%- if max_items > 0 and forloop.index0 >= max_items -%}{%- break -%}{%- endif -%}
+            {%- assign eid = entry.system.id -%}
+            {%- unless seen_ids contains eid -%}
+              {%- assign seen_ids = seen_ids | append: eid | append: ',' -%}
+              {%- assign answer = entry.answer | metafield_tag -%}
+              {%- assign is_open = false -%}
+              {%- if open_first and rendered == 0 -%}{%- assign is_open = true -%}{%- endif -%}
+              {% render 'faq-item', heading: entry.question, answer: answer, is_open: is_open, modifier: 'large' %}
+              {%- capture schema_items -%}{{ schema_items }}{%- unless rendered == 0 -%},{%- endunless -%}{"@type":"Question","name":{{ entry.question | strip_html | json }},"acceptedAnswer":{"@type":"Answer","text":{{ answer | strip_html | strip_newlines | json }}}}{%- endcapture -%}
+              {%- assign rendered = rendered | plus: 1 -%}
+            {%- endunless -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- when 'faq_item' -%}
+        {%- assign entry = block.settings.faq -%}
+        {%- if entry != blank -%}
+          {%- assign eid = entry.system.id -%}
+          {%- unless seen_ids contains eid -%}
+            {%- assign seen_ids = seen_ids | append: eid | append: ',' -%}
+            {%- assign answer = entry.answer | metafield_tag -%}
+            {%- assign is_open = false -%}
+            {%- if open_first and rendered == 0 -%}{%- assign is_open = true -%}{%- endif -%}
+            {% render 'faq-item', heading: entry.question, answer: answer, is_open: is_open, modifier: 'large' %}
+            {%- capture schema_items -%}{{ schema_items }}{%- unless rendered == 0 -%},{%- endunless -%}{"@type":"Question","name":{{ entry.question | strip_html | json }},"acceptedAnswer":{"@type":"Answer","text":{{ answer | strip_html | strip_newlines | json }}}}{%- endcapture -%}
+            {%- assign rendered = rendered | plus: 1 -%}
+          {%- endunless -%}
+        {%- endif -%}
+    {%- endcase -%}
+  {%- endfor -%}
+{%- endcapture -%}
 
 <section class="{{- classes -}}">
   <div class="container">
     {%- if title != blank or subtitle != blank -%}
       <div class="faq__head center">
-        {%- if title != blank -%}
-          <h2 class="faq__title">
-            {{- title | escape | newline_to_br -}}
-          </h2><!-- /.faq__title -->
-        {%- endif -%}
-
-        {%- if subtitle != blank -%}
-          <p class="faq__subtitle">
-            {{- subtitle | escape | newline_to_br -}}
-          </p><!-- /.faq__subtitle -->
-        {%- endif -%}
-      </div><!-- /.faq__head -->
+        {%- if title != blank -%}<h2 class="faq__title">{{- title | escape | newline_to_br -}}</h2>{%- endif -%}
+        {%- if subtitle != blank -%}<p class="faq__subtitle">{{- subtitle | escape | newline_to_br -}}</p>{%- endif -%}
+      </div>
     {%- endif -%}
 
-    {%- if entries -%}
-      {%- assign half = entries.count | divided_by: 2 | ceil -%}
-
-      <div class="faq__body">
+    {%- if rendered > 0 -%}
+      <div class="faq__body faq__body--single">
         <div class="faq__column">
-          {%- assign is_open = true -%}
-
-          {%- for entry in entries limit: half -%}
-            {%- assign answer = entry.answer | metafield_tag -%}
-
-            {% render 'faq-item', heading: entry.question, answer: answer, is_open: is_open, modifier: 'large' %}
-
-            {%- assign is_open = false -%}
-          {%- endfor -%}
-        </div><!-- /.faq__column -->
-
-        <div class="faq__column">
-          {%- for entry in entries offset: half -%}
-            {%- assign answer = entry.answer | metafield_tag -%}
-
-            {% render 'faq-item', heading: entry.question, answer: answer, is_open: false, modifier: 'large' %}
-          {%- endfor -%}
-        </div><!-- /.faq__column -->
-      </div><!-- /.faq__body -->
+          {{ rows }}
+        </div>
+      </div>
     {%- endif -%}
-  </div><!-- /.container -->
-</section><!-- /.faq -->
+  </div>
+</section>
 
-{% render 'faq-schema', faq_group: faq_group %}
+{%- if rendered > 0 -%}
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{{ schema_items }}]}</script>
+{%- endif -%}
 
 {% schema %}
 {
   "name": "FAQ",
   "settings": [
+    { "type": "checkbox", "id": "border_top", "label": "Add border to top", "default": false },
+    { "type": "checkbox", "id": "border_bottom", "label": "Add border to bottom", "default": false },
+    { "type": "checkbox", "id": "open_first", "label": "Open the first FAQ by default", "default": false },
+    { "type": "header", "content": "Header" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "FAQs" },
+    { "type": "text", "id": "subtitle", "label": "Subtitle" },
+    { "type": "header", "content": "Section padding" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Top padding", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Bottom padding", "default": 80 }
+  ],
+  "blocks": [
     {
-      "type": "checkbox",
-      "id": "border_top",
-      "label": "Add border to top",
-      "default": false
+      "type": "faq_group",
+      "name": "FAQ Group",
+      "settings": [
+        { "type": "metaobject", "id": "faq_group", "label": "FAQ Group", "metaobject_type": "faq_group" },
+        { "type": "range", "id": "max_items", "min": 0, "max": 20, "step": 1, "label": "Max FAQs to show (0 = all)", "default": 0 }
+      ]
     },
     {
-      "type": "checkbox",
-      "id": "border_bottom",
-      "label": "Add border to bottom",
-      "default": false
-    },
-    {
-      "type": "header",
-      "content": "Header"
-    },
-    {
-      "type": "text",
-      "id": "title",
-      "label": "t:sections.featured-products.settings.title.label",
-      "default": "Category"
-    },
-    {
-      "type": "text",
-      "id": "subtitle",
-      "label": "t:sections.featured-products.settings.subtitle.label",
-      "default": "Find answers to your most pressing questions about music licenses for Churches and Schools."
-    },
-    {
-      "type": "metaobject",
-      "id": "faq_group",
-      "label": "FAQ Group",
-      "metaobject_type": "faq_group"
+      "type": "faq_item",
+      "name": "Single FAQ",
+      "settings": [
+        { "type": "metaobject", "id": "faq", "label": "FAQ", "metaobject_type": "faq" }
+      ]
     }
   ],
-  "disabled_on": {
-    "groups": ["header", "footer", "custom.popups"]
-  },
+  "max_blocks": 50,
+  "disabled_on": { "groups": ["header", "footer", "custom.popups"] },
   "presets": [
-    {
-      "name": "FAQ",
-      "settings": {}
-    }
+    { "name": "FAQ", "blocks": [ { "type": "faq_group" } ] }
   ]
 }
 {% endschema %}
