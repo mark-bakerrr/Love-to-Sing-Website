@@ -208,56 +208,27 @@
       }
     },
     "faqs_6JdhwA": {
-      "type": "faqs",
+      "type": "faq",
       "blocks": {
-        "faq_item_m9Gq7W": {
-          "type": "faq_item",
+        "grp": {
+          "type": "faq_group",
           "settings": {
-            "heading": "What is a license?",
-            "answer": "<p>A music license grants permission to use copyrighted music legally. It ensures that the rights of the creators are respected. Different licenses applcy depending on the intended use.</p>"
-          }
-        },
-        "faq_item_TnKKbE": {
-          "type": "faq_item",
-          "settings": {
-            "heading": "Do I need one?",
-            "answer": "<p>A music license grants permission to use copyrighted music legally. It ensures that the rights of the creators are respected. Different licenses apply depending on the intended use.</p>"
-          }
-        },
-        "faq_item_iTz4WN": {
-          "type": "faq_item",
-          "settings": {
-            "heading": "How to obtain licenses?",
-            "answer": "<p>A music license grants permission to use copyrighted music legally. It ensures that the rights of the creators are respected. Different licenses apply depending on the intended use.</p>"
-          }
-        },
-        "faq_item_8mzBN6": {
-          "type": "faq_item",
-          "settings": {
-            "heading": "Are there different types?",
-            "answer": "<p>A music license grants permission to use copyrighted music legally. It ensures that the rights of the creators are respected. Different licenses apply depending on the intended use.</p>"
-          }
-        },
-        "faq_item_993E4e": {
-          "type": "faq_item",
-          "settings": {
-            "heading": "What if I have issues?",
-            "answer": "<p>A music license grants permission to use copyrighted music legally. It ensures that the rights of the creators are respected. Different licenses apply depending on the intended use.</p>"
+            "faq_group": "faq-licenses",
+            "max_items": 0
           }
         }
       },
       "block_order": [
-        "faq_item_m9Gq7W",
-        "faq_item_TnKKbE",
-        "faq_item_iTz4WN",
-        "faq_item_8mzBN6",
-        "faq_item_993E4e"
+        "grp"
       ],
       "disabled": true,
-      "name": "FAQ Accordion",
+      "name": "FAQ",
       "settings": {
+        "border_top": false,
+        "border_bottom": false,
+        "open_first": false,
         "title": "FAQs",
-        "subtitle": "<p>Find answers to your most pressing questions about music licenses for Churches and Schools.</p>",
+        "subtitle": "Find answers to your most pressing questions about music licenses for Churches and Schools.",
         "padding_top": 80,
         "padding_bottom": 80
       }
