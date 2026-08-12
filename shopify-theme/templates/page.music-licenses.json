@@ -221,7 +221,6 @@
       "block_order": [
         "grp"
       ],
-      "disabled": true,
       "name": "FAQ",
       "settings": {
         "border_top": false,
