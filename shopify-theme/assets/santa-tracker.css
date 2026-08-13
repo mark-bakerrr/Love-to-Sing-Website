@@ -77,41 +77,77 @@ html.santa-live-active .santa-tracker__inner {
   display: none;
 }
 
+/* This page is immersive across every state: hide the theme header,
+   announcement bar and footer entirely (the tracker renders its own logo).
+   Scoped to .santa-page (added by the tracker) so the rest of the site is
+   unaffected. */
+html.santa-page .header,
+html.santa-page .announcement-bar,
+html.santa-page .footer {
+  display: none;
+}
+
 /* centre the active state in the space between logo and bottom edge */
 .santa-tracker__inner > [data-state]:not([hidden]) {
   margin-block: auto;
 }
 
-/* Countdown state: locked to exactly one viewport — headline up top, the
-   countdown pill on the video's snowy foreground at the bottom */
+/* Countdown state: the workshop video fills the screen and all content
+   (logo, headline, countdown) is stacked at the bottom over the fade, so the
+   video stays fully visible above it. */
 .santa-tracker.is-pre .santa-tracker__inner {
   height: 100vh;
   height: 100svh;
   min-height: 0;
+  display: flex;
+  flex-direction: column;         /* logo pinned top, countdown pinned bottom */
+  padding-top: var(--space-150);  /* logo up near the top edge */
+  padding-bottom: 7vh;            /* countdown low over the floor, but lifted
+                                     clear of the absolute copyright line */
 }
 
 .santa-tracker.is-pre .santa-tracker__logo {
-  margin-bottom: var(--space-150);
+  margin-bottom: 0;               /* stays at the top */
+}
+
+.santa-tracker.is-pre .santa-tracker__logo img {
+  max-width: 100px;               /* smaller logo */
 }
 
 .santa-tracker__inner > [data-state="pre"]:not([hidden]) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 1 1 auto;
-  min-height: 0;
+  margin-top: auto;               /* push the countdown block to the bottom... */
+  margin-bottom: 0;               /* ...and override the generic margin-block:auto
+                                     that was centering it vertically */
   width: 100%;
-  margin-block: 0;
 }
 
 [data-state="pre"] .santa-countdown-card {
-  margin-top: auto;
-  margin-bottom: var(--space-100);
+  margin-top: var(--space-200);
+  margin-bottom: 0;
 }
 
-/* keep the whole countdown state within one viewport */
 [data-state="pre"] .santa-tracker__subtitle {
-  margin-bottom: var(--space-300);
+  margin-bottom: var(--space-200);
+}
+
+/* Remove the grey "wait" progress track under the countdown */
+[data-state="pre"] .santa-wait {
+  display: none;
+}
+
+/* Countdown page: all text white over the workshop video */
+.santa-tracker.is-pre [data-state="pre"],
+.santa-tracker.is-pre [data-state="pre"] p,
+.santa-tracker.is-pre [data-state="pre"] span,
+.santa-tracker.is-pre [data-state="pre"] h1,
+.santa-tracker.is-pre [data-state="pre"] .santa-countdown__value,
+.santa-tracker.is-pre [data-state="pre"] .santa-countdown__label,
+.santa-tracker.is-pre [data-state="pre"] .santa-countdown-card__label,
+.santa-tracker.is-pre .santa-tracker__logo-text {
+  color: #fff !important;
 }
 
 .santa-glass-defs {
@@ -197,8 +233,14 @@ html.santa-live-active .santa-scene {
 .santa-scene__scrim {
   position: absolute;
   inset: 0;
+  /* Bottom-only fade: the top of the workshop video stays clear and viewable,
+     while the lower third darkens so the content stacked there stays legible. */
   background:
-    linear-gradient(180deg, rgba(5, 8, 22, 0.55) 0%, rgba(5, 8, 22, 0.25) 35%, rgba(5, 8, 22, 0.55) 100%);
+    linear-gradient(180deg,
+      rgba(5, 8, 22, 0) 0%,
+      rgba(5, 8, 22, 0) 40%,
+      rgba(5, 8, 22, 0.55) 68%,
+      rgba(5, 8, 22, 0.92) 100%);
   transition: opacity 1.6s ease;
 }
 
@@ -420,6 +462,8 @@ html.santa-live-active .santa-scene {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  z-index: 9;            /* above the globe + panels for the your-city burst */
+  pointer-events: none;
 }
 
 .santa-confetti span {
@@ -709,7 +753,7 @@ html.santa-live-active .santa-scene {
 .santa-live__brand .santa-tracker__logo img {
   width: auto;
   height: auto;
-  max-width: 132px;
+  max-width: 90px;
 }
 
 /* ---------- Compact stats panel ("flight log") ---------- */
@@ -1187,6 +1231,32 @@ html.santa-live-active .santa-scene {
   transform: scale(1.06);
 }
 
+/* Share button — beside the sound toggle during the live globe */
+.santa-live__share {
+  position: absolute;
+  z-index: 7;
+  top: var(--space-300);
+  right: calc(var(--space-300) + 82px);
+  width: 70.4px;
+  height: 70.4px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  background: rgba(9, 20, 45, 0.6);
+  backdrop-filter: blur(6px);
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.santa-live__share:hover {
+  background: rgba(9, 20, 45, 0.85);
+  transform: scale(1.06);
+}
+
 /* show ðŸ”‡ by default, ðŸ”Š when on */
 .santa-live__sound .santa-live__sound-on {
   display: none;
@@ -1322,7 +1392,7 @@ html.santa-live-active .santa-scene {
 .santa-live__follow {
   position: absolute;
   z-index: 7;
-  top: calc(var(--space-300) + 88px);
+  top: calc(var(--space-300) + 112px); /* clears the ~90px logo below the brand */
   left: 50%;
   transform: translateX(-50%);
   padding: var(--space-150) var(--space-400);

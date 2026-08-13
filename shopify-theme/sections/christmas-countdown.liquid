@@ -60,8 +60,12 @@
   data-route-url="{{ 'santa-route.json' | asset_url }}"
   data-three-js="{{ 'three.min.js' | asset_url }}"
   data-orbit-js="{{ 'orbit-controls.js' | asset_url }}"
+  data-gltf-js="{{ 'gltf-loader.js' | asset_url }}"
+  data-sleigh-glb="{{ 'santa-sleigh.glb' | asset_url }}"
+  data-reindeer-glb="{{ 'santa-reindeer.glb' | asset_url }}"
+  data-rudolph-glb="{{ 'santa-rudolph.glb' | asset_url }}"
   data-earth-day="{{ 'santa-earth.jpg' | asset_url }}"
-  data-earth-night="{{ 'santa-earth-night.png' | asset_url }}"
+  data-earth-night="{{ 'santa-earth-night.jpg' | asset_url }}"
   data-earth-clouds="{{ 'santa-earth-clouds.png' | asset_url }}"
   data-earth-spec="{{ 'santa-earth-spec.jpg' | asset_url }}"
   {% if music_url != blank %}data-music="{{ music_url }}"{% endif %}
@@ -244,6 +248,15 @@
     >
       <span class="santa-live__sound-on" aria-hidden="true">🔊</span>
       <span class="santa-live__sound-off" aria-hidden="true">🔇</span>
+    </button>
+
+    <button
+      class="santa-live__share"
+      type="button"
+      data-action="share"
+      aria-label="Share Santa's location"
+    >
+      <span aria-hidden="true">📤</span>
     </button>
 
     <aside class="santa-live__panel" data-panel aria-label="Santa tracker stats">

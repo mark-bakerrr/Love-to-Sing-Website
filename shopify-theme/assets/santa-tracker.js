@@ -15,6 +15,7 @@
  *   ?santa_speed=600                  — accelerate time, e.g. fly the route in minutes
  *   ?phase=countdown|tracker|done     — friendly alias: jump straight to a state
  *   ?t=0.5                            — jump that fraction through the route (implies tracker)
+ *   ?departure=2026-06-11T00:00:00Z   — override the departure instant (QA)
  */
 (function () {
   'use strict';
@@ -280,16 +281,26 @@
     '  vec3 refl = reflect(-sunDir, n);',
     '  float spec = pow(max(dot(viewDir, refl), 0.0), 20.0) * ocean * dayMix;',
     '  col += vec3(0.85, 0.92, 1.0) * spec * 0.45;',
-    // gentle fresnel atmosphere brightening at the limb
-    '  float fres = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0);',
-    '  col += vec3(0.35, 0.55, 0.95) * fres * 0.5;',
+    // very subtle limb shading so the sphere still reads round — no blue haze
+    '  float fres = pow(1.0 - max(dot(n, viewDir), 0.0), 4.0);',
+    '  col += vec3(0.30, 0.45, 0.70) * fres * 0.14;',
     '  gl_FragColor = vec4(col, 1.0);',
     '}',
   ].join('\n');
 
   class SantaTracker extends HTMLElement {
     connectedCallback() {
-      this.departure = Date.parse(this.dataset.departure);
+      // This immersive page hides the theme header/footer (scoped via this class).
+      document.documentElement.classList.add('santa-page');
+      // ?departure=2026-06-11T00:00:00Z — QA override for the section's departure
+      // instant (falls back to the data-departure setting if absent/invalid).
+      var depParam = param('departure');
+      this.depOverride = (depParam && !isNaN(Date.parse(depParam))) ? Date.parse(depParam) : null;
+      this.baseDeparture = Date.parse(this.dataset.departure);
+      // The active departure auto-rolls to the current year, so the page runs:
+      // countdown → live → "Merry Christmas" (through 31 Dec) → then flips to
+      // counting down to NEXT year's Christmas — no yearly setting change needed.
+      this.departure = this.computeDeparture();
       this.route = null;
       this.three = null;
       this.loading = false; // re-init cleanly if the editor reattaches the element
@@ -358,6 +369,9 @@
         soundBtn.addEventListener('click', this.toggleSound.bind(this));
       }
 
+      var shareBtn = this.querySelector('[data-action="share"]');
+      if (shareBtn) shareBtn.addEventListener('click', this.shareCard.bind(this));
+
       // Personalisation: location + city picker
       this.baseTimeBase = this.timeBase; // for "Go Live" to restore QA time too
       this.yourStop = null;
@@ -394,6 +408,23 @@
       if (this.three && this.three.renderer) this.three.renderer.dispose();
     }
 
+    // Departure instant for the current cycle: the section's date rolled forward
+    // to whichever year is >= now, so the tracker advances year-to-year on its own
+    // (shows "Merry Christmas" through 31 Dec, then counts down to next year).
+    computeDeparture() {
+      if (this.depOverride != null) return this.depOverride;      // QA / manual override
+      if (isNaN(this.baseDeparture)) return this.baseDeparture;
+      var fake = param('santa_time');
+      var refNow = (fake && !isNaN(Date.parse(fake))) ? Date.parse(fake) : Date.now();
+      var activeYear = Math.max(
+        new Date(this.baseDeparture).getFullYear(),
+        new Date(refNow).getFullYear()
+      );
+      var d = new Date(this.baseDeparture);
+      d.setFullYear(activeYear);
+      return d.getTime();
+    }
+
     now() {
       var real = Date.now();
       if (this.timeBase !== null) return this.timeBase + (real - this.timeBaseAt) * this.speed;
@@ -419,6 +450,11 @@
     }
 
     tick() {
+      // Roll to the next cycle automatically if the page stayed open across the
+      // new year (real-time only — QA modes keep their pinned instant).
+      if (this.depOverride == null && this.timeBase == null) {
+        this.departure = this.computeDeparture();
+      }
       var e = this.elapsed();
       var state = e < 0 ? 'pre' : e < this.routeDuration() ? 'live' : 'post';
       if (this.replayOffset !== null) state = 'live';
@@ -552,20 +588,14 @@
       video.addEventListener('error', function () {
         self.classList.add('video-failed');
       });
-      if (this.reducedMotion) {
-        // Static backdrop: hold the first frame instead of playing
-        video.removeAttribute('autoplay');
-        video.removeAttribute('loop');
-        video.addEventListener('loadeddata', function () { video.pause(); });
-        video.pause();
-        return;
-      }
+      // Play the ambient workshop loop even under prefers-reduced-motion (often
+      // on by default on Windows) — it's a gentle, non-flashing background.
       var p = video.play();
       if (p && p.catch) p.catch(function () { self.classList.add('video-failed'); });
     }
 
     updateSceneVideo(state) {
-      if (!this.sceneVideo || this.reducedMotion) return;
+      if (!this.sceneVideo) return;
       if (state === 'pre') {
         var p = this.sceneVideo.play();
         if (p && p.catch) p.catch(function () { /* stays paused */ });
@@ -581,12 +611,16 @@
       this.fillTally();
     }
 
-    // One-off celebratory confetti as the dawn takeover lands
-    burstConfetti() {
-      if (this.reducedMotion || this.confettiDone) return;
-      var scene = this.querySelector('.santa-scene');
+    // Celebratory confetti. The finale fires it once (guarded by confettiDone);
+    // pass force = true for repeatable bursts (e.g. Santa reaching your city).
+    burstConfetti(force) {
+      if (this.reducedMotion) return;
+      if (this.confettiDone && !force) return;
+      // The painted .santa-scene is hidden during the live globe, so drop the
+      // confetti over the whole tracker (full-screen) while live.
+      var scene = (this.state === 'live') ? this : this.querySelector('.santa-scene');
       if (!scene) return;
-      this.confettiDone = true;
+      if (!force) this.confettiDone = true;
       var wrap = document.createElement('div');
       wrap.className = 'santa-confetti';
       var colors = ['#ef476f', '#ffd166', '#06d6a0', '#4cc9f0', '#ffffff'];
@@ -641,10 +675,22 @@
           }
         })
         .then(function () {
+          // GLTFLoader (also depends on THREE) — optional: if it or the models
+          // fail to load, buildSleigh() falls back to the primitive sleigh.
+          if (self.dataset.gltfJs && !(window.THREE && THREE.GLTFLoader)) {
+            return loadScript(self.dataset.gltfJs).catch(function () { /* optional */ });
+          }
+        })
+        .then(function () {
           return fetch(self.dataset.routeUrl).then(function (r) { return r.json(); });
         })
         .then(function (route) {
           self.route = route;
+          // Preload the glTF sleigh/reindeer/Rudolph before building the globe,
+          // so buildSleigh() can use them synchronously. Always resolves.
+          return self.loadModels();
+        })
+        .then(function () {
           self.populateCityPicker();
           self.buildRail();
           self.initGlobe();
@@ -675,18 +721,54 @@
       }
     }
 
+    // Preload the glTF sleigh + reindeer + Rudolph. Resolves either way: on any
+    // failure (no loader, missing URLs, decode error) self.models stays null and
+    // buildSleigh() uses the hand-built primitive sleigh instead.
+    loadModels() {
+      var self = this;
+      if (!(window.THREE && THREE.GLTFLoader)) return Promise.resolve();
+      var urls = {
+        sleigh: this.dataset.sleighGlb,
+        reindeer: this.dataset.reindeerGlb,
+        rudolph: this.dataset.rudolphGlb,
+      };
+      if (!urls.sleigh || !urls.reindeer || !urls.rudolph) return Promise.resolve();
+      var loader = new THREE.GLTFLoader();
+      function load(url) {
+        return new Promise(function (resolve) {
+          loader.load(url, function (gltf) { resolve(gltf.scene); },
+            undefined, function () { resolve(null); });
+        });
+      }
+      return Promise.all([load(urls.sleigh), load(urls.reindeer), load(urls.rudolph)])
+        .then(function (arr) {
+          if (arr[0] && arr[1] && arr[2]) {
+            self.models = { sleigh: arr[0], reindeer: arr[1], rudolph: arr[2] };
+            self.debugNote('glTF models loaded');
+          } else {
+            self.debugNote('glTF load incomplete — using primitive sleigh');
+          }
+        })
+        .catch(function () { /* fall back to primitives */ });
+    }
+
     initGlobe() {
       var host = this.querySelector('[data-globe]');
       if (!host || !window.THREE) return this.showError();
 
       var renderer;
       try {
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        // preserveDrawingBuffer lets us snapshot the globe for the share card.
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
       } catch (e) {
         return this.showError(); // no WebGL — keep the stats panel, lose the globe
       }
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.setSize(host.clientWidth, host.clientHeight);
+      // Colour-manage output so the glTF PBR sleigh/reindeer render true-to-art.
+      // The earth is a custom ShaderMaterial (writes gl_FragColor directly), so
+      // it is unaffected; only lit/standard materials get the sRGB conversion.
+      renderer.outputEncoding = THREE.sRGBEncoding;
       host.appendChild(renderer.domElement);
 
       var scene = new THREE.Scene();
@@ -727,19 +809,7 @@
       // Clouds removed — they obscured the continents and city lights.
       var clouds = null;
 
-      // Soft atmosphere halo (brighter blue rim)
-      var atmosphere = new THREE.Mesh(
-        new THREE.SphereGeometry(GLOBE_R * 1.06, 64, 64),
-        new THREE.MeshBasicMaterial({
-          color: 0x6ba6ff,
-          transparent: true,
-          opacity: 0.28,
-          side: THREE.BackSide,
-          blending: THREE.AdditiveBlending,
-          depthWrite: false,
-        })
-      );
-      scene.add(atmosphere);
+      // Atmosphere halo removed — clean globe with a crisp edge, no blue haze.
 
       // Star field — bright white pinpoints + twinkling gold sparkle stars
       function sphereStars(count, rMin, rMax) {
@@ -768,39 +838,36 @@
       });
       scene.add(new THREE.Points(sphereStars(120, 28, 70), goldStarMat));
 
-      // Trailing gold "magic dust" behind the sleigh
-      var SP = 70;
-      var sparklePos = new Float32Array(SP * 3);
-      var sparkleCol = new Float32Array(SP * 3);
-      var sparkleGeo = new THREE.BufferGeometry();
-      sparkleGeo.setAttribute('position', new THREE.BufferAttribute(sparklePos, 3));
-      sparkleGeo.setAttribute('color', new THREE.BufferAttribute(sparkleCol, 3));
-      var sparkle = new THREE.Points(sparkleGeo, new THREE.PointsMaterial({
-        size: 0.04, vertexColors: true, transparent: true, map: disc,
-        blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
-      }));
-      sparkle.frustumCulled = false;
-      scene.add(sparkle);
 
       // Golden trail of visited legs (preallocated, revealed via draw range)
-      var maxTrail = (this.route.stops.length - 1) * ARC_STEPS + 1;
-      var trailPos = new Float32Array(maxTrail * 3);
-      var trailGeo = new THREE.BufferGeometry();
-      trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
-      trailGeo.setDrawRange(0, 0);
-      var trail = new THREE.Line(trailGeo, new THREE.LineBasicMaterial({
-        color: 0xfacc55, transparent: true, opacity: 0.85,
+      // Golden route trail — a thin glowing tube built once for the whole route
+      // and revealed progressively via draw range. (A LineBasicMaterial line is
+      // capped at 1px in WebGL and looked jagged/pixelated.)
+      var stopsArr = this.route.stops;
+      var trailPts = [latLngToV3(stopsArr[0].lat, stopsArr[0].lng, GLOBE_R * TRAIL_ALT)];
+      for (var tli = 1; tli < stopsArr.length; tli++) {
+        var ta = stopsArr[tli - 1], tb = stopsArr[tli];
+        for (var tk = 1; tk <= ARC_STEPS; tk++) {
+          var tll = slerp([ta.lat, ta.lng], [tb.lat, tb.lng], tk / ARC_STEPS);
+          trailPts.push(latLngToV3(tll[0], tll[1], GLOBE_R * TRAIL_ALT));
+        }
+      }
+      var trailTubeGeo = new THREE.TubeGeometry(
+        new THREE.CatmullRomCurve3(trailPts), trailPts.length - 1, 0.0035, 8, false);
+      trailTubeGeo.setDrawRange(0, 0);
+      // Solid bright gold (not additive) so the trail reads clearly over the lit
+      // day side of the earth as well as against dark space.
+      var trailTube = new THREE.Mesh(trailTubeGeo, new THREE.MeshBasicMaterial({
+        color: 0xffd451, transparent: true, opacity: 0.95, depthWrite: false,
       }));
-      scene.add(trail);
+      trailTube.frustumCulled = false;
+      scene.add(trailTube);
+      var trailTubeMaxIndex = trailTubeGeo.index ? trailTubeGeo.index.count : 0;
 
-      // Visited stop dots
-      var dotPos = new Float32Array(this.route.stops.length * 3);
-      var dotGeo = new THREE.BufferGeometry();
-      dotGeo.setAttribute('position', new THREE.BufferAttribute(dotPos, 3));
-      dotGeo.setDrawRange(0, 0);
-      scene.add(new THREE.Points(dotGeo, new THREE.PointsMaterial({
-        color: 0xfacc55, size: 0.02, sizeAttenuation: true,
-      })));
+      // Delivered-city markers: little 3D wrapped presents (instanced), dropped
+      // at each visited stop. Replaces the old square THREE.Points dots.
+      var presents = this.buildPresents(stopsArr.length);
+      presents.meshes.forEach(function (m) { scene.add(m); });
 
       var sleigh = this.buildSleigh();
       scene.add(sleigh);
@@ -813,19 +880,12 @@
         earthMat: earthMat,
         clouds: clouds,
         host: host,
-        trailGeo: trailGeo,
-        trailPos: trailPos,
-        trailCount: 0,
-        dotGeo: dotGeo,
-        dotPos: dotPos,
-        dotCount: 0,
+        trailTube: trailTube,
+        trailTubeGeo: trailTubeGeo,
+        trailTubeMaxIndex: trailTubeMaxIndex,
+        presents: presents,
         sleigh: sleigh,
         goldStarMat: goldStarMat,
-        sparkleGeo: sparkleGeo,
-        sparklePos: sparklePos,
-        sparkleCol: sparkleCol,
-        sparkleHead: 0,
-        sparkleCount: SP,
         lastForward: new THREE.Vector3(0, 0, 1),
         camLook: new THREE.Vector3(),
         camInit: false,
@@ -914,9 +974,102 @@
       if (this.followBtn) this.followBtn.hidden = true;
     }
 
+    // Dispatcher: use the glTF models when they loaded, else the primitive build.
+    buildSleigh() {
+      return this.models ? this.buildSleighGltf() : this.buildSleighPrimitive();
+    }
+
+    // Santa's sleigh + a 9-reindeer team (original 8 + Rudolph leading) built
+    // from the Higgsfield glTF models. Same group contract as the primitive
+    // build: faces +Z (travel), +Y up, and is scaled 0.055 as a whole. The team
+    // gallops via a procedural bob/pitch on each reindeer (see renderFrameInner)
+    // since these static meshes have no leg rig.
+    //
+    // MODEL_TF holds the per-model transform. `yaw` corrects the mesh's forward
+    // to +Z (the concepts were drawn facing "left", so a yaw offset is expected);
+    // `len` is the model's target footprint in local units, which sets the size
+    // ratio — the sleigh is deliberately larger than each reindeer.
+    buildSleighGltf() {
+      // Orientation verified in _santa-team-preview.html: the sleigh and reindeer
+      // came out of image→3D 90° apart, so they need different yaws to both face +Z.
+      var MODEL_TF = {
+        sleigh:   { yaw: Math.PI / 2, pitch: 0, len: 1.45 },
+        reindeer: { yaw: 0, pitch: 0, len: 0.72 },
+        rudolph:  { yaw: 0, pitch: 0, len: 0.72 },
+      };
+
+      // Clone a source scene, orient it to +Z, centre it, rest it on y=0, and
+      // scale it so its horizontal footprint == tf.len. Returns a wrapper Group.
+      function prep(src, tf) {
+        var inner = src.clone(true);
+        inner.rotation.set(tf.pitch || 0, tf.yaw || 0, tf.roll || 0);
+        inner.updateMatrixWorld(true);
+        var box = new THREE.Box3().setFromObject(inner);
+        var size = new THREE.Vector3(); box.getSize(size);
+        var center = new THREE.Vector3(); box.getCenter(center);
+        // centre on origin, then lift so the model's base sits at y=0
+        inner.position.sub(center);
+        inner.position.y += size.y / 2;
+        var footprint = Math.max(size.x, size.z) || 1;
+        var wrap = new THREE.Group();
+        wrap.add(inner);
+        wrap.scale.setScalar(tf.len / footprint);
+        return wrap;
+      }
+
+      var g = new THREE.Group();
+      var reindeer = [];
+
+      // Sleigh at the origin (hero, largest)
+      var sleigh = prep(this.models.sleigh, MODEL_TF.sleigh);
+      g.add(sleigh);
+
+      // Team: original 8 in 4 pairs ahead, then Rudolph leading front-centre = 9.
+      var rows = [1.0, 1.7, 2.4, 3.1];
+      var self = this;
+      function addDeer(src, tf, x, z) {
+        var d = prep(src, tf);
+        d.position.set(x, 0.06, z);
+        d.userData.baseY = 0.06;
+        d.userData.phase = (x < 0 ? 0 : Math.PI) + z * 1.3; // diagonal-ish gait
+        g.add(d);
+        reindeer.push(d);
+      }
+      for (var ri = 0; ri < rows.length; ri++) {
+        addDeer(this.models.reindeer, MODEL_TF.reindeer, -0.22, rows[ri]);
+        addDeer(this.models.reindeer, MODEL_TF.reindeer, 0.22, rows[ri]);
+      }
+      addDeer(this.models.rudolph, MODEL_TF.rudolph, 0, 3.85); // Rudolph out front
+
+      // Rudolph's nose glow: a soft red point light at the front of the team.
+      // distance is in WORLD units (unaffected by the group's 0.055 scale), so it
+      // is kept small to hug the lead reindeer rather than wash the whole globe.
+      var rudolphNose = new THREE.PointLight(0xff2a1e, 1.2, 0.5, 2);
+      rudolphNose.position.set(0, 0.16, 4.1);
+      g.add(rudolphNose);
+
+      // Reins: two lines from the sleigh forward over the team to Rudolph
+      var reinMat = new THREE.LineBasicMaterial({ color: 0x6b4a2a, transparent: true, opacity: 0.85 });
+      [-0.2, 0.2].forEach(function (x) {
+        var pts = [
+          new THREE.Vector3(x * 0.9, 0.34, 0.45),
+          new THREE.Vector3(x, 0.16, 1.0),
+          new THREE.Vector3(x, 0.16, 2.4),
+          new THREE.Vector3(x * 0.5, 0.18, 3.1),
+          new THREE.Vector3(0, 0.2, 3.85),
+        ];
+        g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), reinMat));
+      });
+
+      g.userData.reindeer = reindeer; // drives the procedural gallop
+      g.scale.setScalar(0.055);
+      return g;
+    }
+
     // Santa's sleigh + an 8-reindeer team in harness, built from primitives.
     // Faces +Z (direction of travel); the team strings out ahead of the sleigh.
-    buildSleigh() {
+    // Kept as the no-WebGL / glTF-load-failure fallback.
+    buildSleighPrimitive() {
       var g = new THREE.Group();
       var legs = [];
 
@@ -1115,13 +1268,25 @@
       var facing = p.clone().add(forward);
       T.sleigh.lookAt(facing);
 
-      // Galloping reindeer legs
-      var legs = T.sleigh.userData.legs;
-      if (legs) {
-        for (var li = 0; li < legs.length; li++) {
-          // diagonal pairs swing together; legs 0,3 vs 1,2
-          var phase = (li === 0 || li === 3) ? 0 : Math.PI;
-          legs[li].rotation.x = Math.sin(t / 90 + phase) * 0.5;
+      // Gallop. glTF reindeer are static meshes with no leg rig, so each one
+      // bobs and pitches on a per-deer phase to read as a flying gallop; the
+      // primitive team still swings its jointed legs.
+      var deer = T.sleigh.userData.reindeer;
+      if (deer) {
+        for (var di = 0; di < deer.length; di++) {
+          var d = deer[di];
+          var gait = Math.sin(t / 90 + d.userData.phase);
+          d.position.y = d.userData.baseY + gait * 0.05;
+          d.rotation.x = gait * 0.12;
+        }
+      } else {
+        var legs = T.sleigh.userData.legs;
+        if (legs) {
+          for (var li = 0; li < legs.length; li++) {
+            // diagonal pairs swing together; legs 0,3 vs 1,2
+            var phase = (li === 0 || li === 3) ? 0 : Math.PI;
+            legs[li].rotation.x = Math.sin(t / 90 + phase) * 0.5;
+          }
         }
       }
 
@@ -1158,24 +1323,6 @@
         }
         T.camera.up.copy(up); // local vertical → level horizon, no roll lag
         T.camera.lookAt(p.clone().addScaledVector(sf, 0.3).addScaledVector(up, -0.01));
-      }
-
-      // Trailing gold magic dust behind the sleigh
-      if (T.sparklePos) {
-        var hp = (Math.sin(t * 12.9898) * 43758.5453) % 1; // cheap deterministic jitter
-        var h = T.sparkleHead;
-        var jitterUp = (hp - 0.5) * 0.03;
-        var sp = p.clone().addScaledVector(up, 0.004 + jitterUp).addScaledVector(forward, -0.02);
-        T.sparklePos[h * 3] = sp.x + ((t * 0.7 % 1) - 0.5) * 0.02;
-        T.sparklePos[h * 3 + 1] = sp.y;
-        T.sparklePos[h * 3 + 2] = sp.z;
-        T.sparkleCol[h * 3] = 1.0; T.sparkleCol[h * 3 + 1] = 0.82; T.sparkleCol[h * 3 + 2] = 0.35;
-        for (var si = 0; si < T.sparkleCount; si++) {
-          T.sparkleCol[si * 3] *= 0.95; T.sparkleCol[si * 3 + 1] *= 0.95; T.sparkleCol[si * 3 + 2] *= 0.95;
-        }
-        T.sparkleHead = (h + 1) % T.sparkleCount;
-        T.sparkleGeo.attributes.position.needsUpdate = true;
-        T.sparkleGeo.attributes.color.needsUpdate = true;
       }
 
       // Gentle twinkle on the gold sparkle stars
@@ -1218,43 +1365,74 @@
     extendTrail(stopIndex) {
       var T = this.three;
       var stops = this.route.stops;
-      var s = stops[stopIndex];
 
-      if (stopIndex === 0) {
-        var v0 = latLngToV3(s.lat, s.lng, GLOBE_R * TRAIL_ALT);
-        T.trailPos[0] = v0.x; T.trailPos[1] = v0.y; T.trailPos[2] = v0.z;
-        T.trailCount = 1;
-      } else {
-        var prev = stops[stopIndex - 1];
-        for (var i = 1; i <= ARC_STEPS; i++) {
-          var ll = slerp([prev.lat, prev.lng], [s.lat, s.lng], i / ARC_STEPS);
-          var v = latLngToV3(ll[0], ll[1], GLOBE_R * TRAIL_ALT);
-          var o = T.trailCount * 3;
-          T.trailPos[o] = v.x; T.trailPos[o + 1] = v.y; T.trailPos[o + 2] = v.z;
-          T.trailCount++;
-        }
-      }
-      T.trailGeo.attributes.position.needsUpdate = true;
-      T.trailGeo.setDrawRange(0, T.trailCount);
+      // Reveal the golden tube up to this stop (fraction of the whole route).
+      var totalPts = 1 + (stops.length - 1) * ARC_STEPS;
+      var revealedPts = 1 + stopIndex * ARC_STEPS;
+      var frac = Math.min(1, revealedPts / totalPts);
+      T.trailTubeGeo.setDrawRange(0, Math.round(T.trailTubeMaxIndex * frac));
 
-      if (stopIndex > 0 && stopIndex < stops.length - 1) {
-        var dv = latLngToV3(s.lat, s.lng, GLOBE_R * TRAIL_ALT);
-        var d = T.dotCount * 3;
-        T.dotPos[d] = dv.x; T.dotPos[d + 1] = dv.y; T.dotPos[d + 2] = dv.z;
-        T.dotCount++;
-        T.dotGeo.attributes.position.needsUpdate = true;
-        T.dotGeo.setDrawRange(0, T.dotCount);
-      }
+      // Drop a 3D present at each delivered city (skip the North Pole start).
+      if (stopIndex >= 1) this.placePresent(stops[stopIndex]);
+    }
+
+    // A little wrapped present sitting on the globe at a delivered city.
+    placePresent(s) {
+      var P = this.three.presents;
+      var idx = P.count;
+      if (idx >= P.max) return;
+      var pos = latLngToV3(s.lat, s.lng, GLOBE_R * TRAIL_ALT);
+      var normal = pos.clone().normalize();
+      // Orient local +Y to the surface normal, plus a deterministic yaw for variety.
+      var quat = new THREE.Quaternion().setFromUnitVectors(P.up, normal);
+      quat.multiply(new THREE.Quaternion().setFromAxisAngle(P.up, (s.lng + s.lat) * 0.7));
+      var m = new THREE.Matrix4().compose(pos, quat, P.scale);
+      P.body.setMatrixAt(idx, m);
+      P.strapX.setMatrixAt(idx, m);
+      P.strapZ.setMatrixAt(idx, m);
+      P.bow.setMatrixAt(idx, m);
+      var c = idx + 1;
+      P.body.count = P.strapX.count = P.strapZ.count = P.bow.count = c;
+      P.body.instanceMatrix.needsUpdate = true;
+      P.strapX.instanceMatrix.needsUpdate = true;
+      P.strapZ.instanceMatrix.needsUpdate = true;
+      P.bow.instanceMatrix.needsUpdate = true;
+      P.count = c;
+    }
+
+    // Build the instanced present meshes: a red box body + a yellow ribbon cross
+    // and yellow bow. One draw call per part, N presents each.
+    buildPresents(maxCount) {
+      var red = new THREE.MeshStandardMaterial({ color: 0xc41e1a, roughness: 0.5, metalness: 0.08 });
+      var yellow = new THREE.MeshStandardMaterial({
+        color: 0xeed647, metalness: 0.2, roughness: 0.45,
+        emissive: 0x4a3d00, emissiveIntensity: 0.3,
+      });
+      var bowGeo = new THREE.IcosahedronGeometry(0.24, 0); bowGeo.translate(0, 0.52, 0);
+      var body = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.9, 1), red, maxCount);
+      var strapX = new THREE.InstancedMesh(new THREE.BoxGeometry(1.06, 0.94, 0.26), yellow, maxCount);
+      var strapZ = new THREE.InstancedMesh(new THREE.BoxGeometry(0.26, 0.94, 1.06), yellow, maxCount);
+      var bow = new THREE.InstancedMesh(bowGeo, yellow, maxCount);
+      var meshes = [body, strapX, strapZ, bow];
+      meshes.forEach(function (mesh) { mesh.count = 0; mesh.frustumCulled = false; });
+      return {
+        body: body, strapX: strapX, strapZ: strapZ, bow: bow, meshes: meshes,
+        up: new THREE.Vector3(0, 1, 0),
+        scale: new THREE.Vector3(0.008, 0.008, 0.008),
+        max: maxCount, count: 0,
+      };
     }
 
     startReplay() {
       this.replayOffset = Date.now();
       this.visitedCount = 0;
       if (this.three) {
-        this.three.trailCount = 0;
-        this.three.trailGeo.setDrawRange(0, 0);
-        this.three.dotCount = 0;
-        this.three.dotGeo.setDrawRange(0, 0);
+        this.three.trailTubeGeo.setDrawRange(0, 0);
+        var P = this.three.presents;
+        if (P) {
+          P.count = 0;
+          P.body.count = P.strapX.count = P.strapZ.count = P.bow.count = 0;
+        }
         this.three.camInit = false;
       }
       this.revealReady = false; // suppress the catch-up chime burst
@@ -1387,6 +1565,7 @@
 
     setYourStop(idx) {
       this.yourStop = this.route.stops[idx];
+      this.yourStopIdx = idx;
       this.updateYouCard();
       this.setYouState('set');
     }
@@ -1444,8 +1623,10 @@
       if (Math.abs(pos.presents - this.dispP) < 1) this.dispP = pos.presents;
       this.setInfo('presents', NUMBER_FORMAT.format(Math.round(this.dispP)));
 
-      // Distance — cumulative to the last stop + the leg flown so far
-      var stop = pos.current;
+      // Distance — cumulative to the last stop + the leg flown so far.
+      // pos.current is always set by routePosition; fall back to pos itself
+      // (which carries lat/lng) so a stale/edge payload can never crash the loop.
+      var stop = pos.current || pos;
       var legKm = haversineKm([stop.lat, stop.lng], [pos.lat, pos.lng]);
       var tgtD = (this.cumKm ? this.cumKm[pos.stopIndex] || 0 : 0) + legKm;
       if (this.dispD == null) this.dispD = tgtD;
@@ -1514,7 +1695,10 @@
     }
 
     onCityArrival(idx) {
-      this.playBell(idx % 12 === 0);
+      var isYou = (this.yourStopIdx != null && idx === this.yourStopIdx);
+      this.playBell(isYou || idx % 12 === 0);
+      // Santa just reached the visitor's own city — celebrate 🎁
+      if (isYou) this.burstConfetti(true);
     }
 
     // Quick sleigh-bell-ish chime synthesised on the fly — no audio asset needed
@@ -1535,6 +1719,103 @@
         g.connect(this.masterGain);
         osc.start(now);
         osc.stop(now + 0.65);
+      }
+    }
+
+    /* ---------- Share card ---------- */
+
+    // Snapshot the globe, composite a branded card, and open the native share
+    // sheet (image where supported; text + link otherwise).
+    shareCard() {
+      var T = this.three;
+      var pos = this.route
+        ? routePosition(this.route, Math.max(0, Math.min(this.elapsed(), this.routeDuration() - 0.01)))
+        : null;
+      var city = (pos && pos.current && pos.current.city) || 'the world';
+      var presents = NUMBER_FORMAT.format(Math.round((pos && pos.presents) || 0));
+      var caption = '🎅 Santa is over ' + city + ' — ' + presents +
+        ' presents delivered! Follow him live 🎄';
+      if (!T || !T.renderer || this.state !== 'live') return this._shareText(caption);
+
+      var self = this;
+      var dataUrl;
+      try {
+        T.renderer.render(T.scene, T.camera);        // fresh frame to capture
+        dataUrl = T.renderer.domElement.toDataURL('image/png');
+      } catch (e) {
+        return this._shareText(caption);             // tainted canvas → text share
+      }
+      var globe = new Image();
+      globe.onload = function () { self._composeShare(globe, city, presents, caption); };
+      globe.onerror = function () { self._shareText(caption); };
+      globe.src = dataUrl;
+    }
+
+    _composeShare(globe, city, presents, caption) {
+      var W = 1080, H = 1080;
+      var c = document.createElement('canvas');
+      c.width = W; c.height = H;
+      var x = c.getContext('2d');
+      x.fillStyle = '#0a1330';
+      x.fillRect(0, 0, W, H);
+      // globe screenshot, cover-fit into the top ~80%
+      var gh = Math.round(H * 0.80);
+      var s = Math.max(W / globe.width, gh / globe.height);
+      var dw = globe.width * s, dh = globe.height * s;
+      x.drawImage(globe, (W - dw) / 2, (gh - dh) / 2, dw, dh);
+      // bottom fade + caption
+      var grad = x.createLinearGradient(0, gh - 220, 0, H);
+      grad.addColorStop(0, 'rgba(6,11,30,0)');
+      grad.addColorStop(0.55, 'rgba(6,11,30,0.94)');
+      grad.addColorStop(1, 'rgba(6,11,30,1)');
+      x.fillStyle = grad;
+      x.fillRect(0, gh - 220, W, H - (gh - 220));
+      var FONT = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+      x.textAlign = 'center';
+      x.fillStyle = '#ffffff';
+      x.font = '700 56px ' + FONT;
+      x.fillText('🎅 Santa is over', W / 2, H - 235);
+      var cityFont = 84;
+      x.font = '800 ' + cityFont + 'px ' + FONT;
+      while (x.measureText(city).width > W - 110 && cityFont > 40) {
+        cityFont -= 4; x.font = '800 ' + cityFont + 'px ' + FONT;
+      }
+      x.fillStyle = '#EED647';
+      x.fillText(city, W / 2, H - 150);
+      x.fillStyle = '#ffffff';
+      x.font = '600 38px ' + FONT;
+      x.fillText(presents + ' presents delivered', W / 2, H - 92);
+      x.fillStyle = 'rgba(255,255,255,0.72)';
+      x.font = '600 32px ' + FONT;
+      x.fillText('Love to Sing · follow live at lovetosing.com', W / 2, H - 42);
+      this._exportShare(c, caption);
+    }
+
+    _exportShare(canvas, caption) {
+      var self = this;
+      canvas.toBlob(function (blob) {
+        if (!blob) return self._shareText(caption);
+        var file = new File([blob], 'love-to-sing-santa.png', { type: 'image/png' });
+        var data = { title: 'Love to Sing Santa Tracker', text: caption, url: 'https://www.lovetosing.com' };
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share(Object.assign({ files: [file] }, data)).catch(function () {});
+        } else if (navigator.share) {
+          navigator.share(data).catch(function () {});
+        } else {
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'love-to-sing-santa.png';
+          a.click();
+          setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+        }
+      }, 'image/png');
+    }
+
+    _shareText(caption) {
+      var data = { title: 'Love to Sing Santa Tracker', text: caption, url: 'https://www.lovetosing.com' };
+      if (navigator.share) { navigator.share(data).catch(function () {}); }
+      else if (navigator.clipboard) {
+        navigator.clipboard.writeText(caption + ' https://www.lovetosing.com').catch(function () {});
       }
     }
 
