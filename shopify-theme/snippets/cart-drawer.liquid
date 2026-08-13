@@ -55,7 +55,7 @@
           <div class="cart-drawer__empty">
             <p class="cart-drawer__empty-text">{{- 'cart.empty' | t -}}</p>
             <button type="button" class="cart-drawer__shop-more" onclick="this.closest('cart-drawer').close()">
-              Shop more music
+              {{- 'cart.continue_shopping' | t -}}
             </button>
           </div><!-- /.cart-drawer__empty -->
         {%- else -%}
@@ -93,7 +93,7 @@
 
           <div class="cart-drawer__shop-more-wrap">
             <button type="button" class="cart-drawer__shop-more" onclick="this.closest('cart-drawer').close()">
-              Shop more music
+              {{- 'cart.continue_shopping' | t -}}
             </button>
           </div>
         {%- endif -%}
@@ -261,21 +261,23 @@
   .cart-upsell__add[disabled] { opacity: 0.4; pointer-events: none; }
 
   /* ── Shop more ───────────────────────────────────────────────────────── */
-  .cart-drawer__shop-more-wrap { padding: 0.8rem 2rem 2rem; }
+  .cart-drawer__shop-more-wrap { padding: 0.4rem 2rem 2rem; text-align: center; }
   .cart-drawer__shop-more {
-    width: 100%;
-    padding: 1.2rem 1.6rem;
-    border: 1px solid var(--c-main-500, #b91f1c);
-    border-radius: 1rem;
+    display: inline-block;
+    width: auto;
+    padding: 0.4rem;
+    border: 0;
     background: transparent;
     color: var(--c-main-600, #8b1d18);
     font-family: inherit;
-    font-weight: 800;
+    font-weight: 700;
     font-size: var(--fz-s, 1.4rem);
+    text-decoration: underline;
+    text-underline-offset: 3px;
     cursor: pointer;
-    transition: background 150ms ease;
+    transition: color 150ms ease;
   }
-  .cart-drawer__shop-more:hover { background: var(--c-main-50, #fbeceb); }
+  .cart-drawer__shop-more:hover { color: var(--c-main-800, #641a19); background: transparent; }
   .cart-drawer__empty { display: flex; flex-direction: column; gap: 1.6rem; align-items: center; padding: 3.2rem 2rem; text-align: center; }
 
   @media (prefers-reduced-motion: reduce) {
