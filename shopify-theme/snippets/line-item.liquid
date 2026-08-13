@@ -14,11 +14,26 @@
 -%}
 
 <tr class="cart-item" id="CartItem-{{- line_item_index -}}">
-  <td class="cart-item__media">
-    {%- if line_item.image -%}
-      <a href="{{- line_item.url -}}" class="cart-item__link">
-        <span class="visually-hidden">{{- line_item.title | escape -}}</span>
+  {%- liquid
+    assign is_song = false
+    if line_item.product.tags contains 'song'
+      assign is_song = true
+    endif
+    assign use_icon = false
+    if is_song or line_item.image == blank
+      assign use_icon = true
+    endif
+  -%}
+  <td class="cart-item__media{% if use_icon %} cart-item__media--icon{% endif %}">
+    <a href="{{- line_item.url -}}" class="cart-item__link">
+      <span class="visually-hidden">{{- line_item.title | escape -}}</span>
 
+      {%- if is_song -%}
+        {%- comment -%} Songs show the site-wide music-note tile, not the artwork. {%- endcomment -%}
+        <div class="cart-item__icon-tile">
+          {%- render 'icon', icon: 'music-note-single' -%}
+        </div><!-- /.cart-item__icon-tile -->
+      {%- elsif line_item.image -%}
         {%- assign media_aspect = '1-1' -%}
         {%- if line_item.product.tags contains 'videos' -%}
           {%- assign media_aspect = '16-9' -%}
@@ -32,8 +47,13 @@
             render 'image', image: line_item.image, src: image_src, srcset: '', width: 200, height: 240
           -%}
         </div><!-- /.media -->
-      </a>
-    {%- endif -%}
+      {%- else -%}
+        {%- comment -%} Imageless items (licences, memberships): keep the row aligned with a music tile. {%- endcomment -%}
+        <div class="cart-item__icon-tile">
+          {%- render 'icon', icon: 'music-note' -%}
+        </div><!-- /.cart-item__icon-tile -->
+      {%- endif -%}
+    </a>
   </td><!-- /.cart-item__media -->
 
   <td class="cart-item__details">
@@ -97,7 +117,43 @@
             <div>
               <dt class="caption">{{- option.name -}}: </dt>
 
-              <dd class="caption bold">{{- option.value -}}</dd>
+              <dd class="caption bold">
+                {{- option.value -}}
+                {%- comment -%}
+                  Size-band options read as "Band 8" alone — add the attendance/roll range
+                  so buyers can sanity-check their band. Ranges mirror license-config.ts
+                  SIZE_BANDS; the org type (church/school/community) comes from the hidden
+                  _lts_org_type property the licence builder stores (church is the default).
+                {%- endcomment -%}
+                {%- liquid
+                  assign opt_dc = option.name | downcase
+                  assign band_range = ''
+                  assign band_noun = ''
+                  if opt_dc contains 'band'
+                    assign band_num = option.value | downcase | remove: 'band' | strip | plus: 0
+                    if band_num >= 1 and band_num <= 9
+                      assign org_t = line_item.properties['_lts_org_type'] | default: '' | downcase
+                      if org_t == 'school'
+                        assign band_ranges = '1–30|31–75|76–150|151–250|251–400|401–750|751–1,200|1,201–1,800|1,800+' | split: '|'
+                        assign band_noun = 'students'
+                      elsif org_t == 'church'
+                        assign band_ranges = '1–24|25–49|50–99|100–149|150–199|200–499|500–999|1,000–1,499|1,500+' | split: '|'
+                        assign band_noun = 'weekly attendance'
+                      else
+                        assign band_ranges = '1–24|25–49|50–99|100–149|150–199|200–499|500–999|1,000–1,499|1,500+' | split: '|'
+                        if org_t == 'community'
+                          assign band_noun = 'attendees'
+                        endif
+                      endif
+                      assign band_index = band_num | minus: 1
+                      assign band_range = band_ranges[band_index]
+                    endif
+                  endif
+                -%}
+                {%- if band_range != blank -%}
+                  <span class="cart-item__band-range">&nbsp;({{ band_range }}{% if band_noun != blank %} {{ band_noun }}{% endif %})</span>
+                {%- endif -%}
+              </dd>
             </div>
           {%- endfor -%}
         {%- endif -%}

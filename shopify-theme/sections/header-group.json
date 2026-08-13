@@ -86,7 +86,7 @@
         "solid_header_zXUe4i": {
           "type": "solid_header",
           "settings": {
-            "title": "blog\narticle\nproduct\nproduct.song_lyrics\nproduct.song_christmas\nproduct.celebration-song-lyrics\nproduct.song_halloween\nproduct.song_kids\nproduct.video_download\nproduct.licenses\nproduct.single.album\ncollection\npage\npage.ai-content-studio\nproduct.album"
+            "title": "blog\narticle\nproduct\nproduct.song_lyrics\nproduct.song_christmas\nproduct.celebration-song-lyrics\nproduct.song_halloween\nproduct.song_kids\nproduct.video_download\nproduct.licenses\nproduct.single.album\ncollection\npage\npage.ai-content-studio\nproduct.album\npage.licence-builder"
           }
         }
       },

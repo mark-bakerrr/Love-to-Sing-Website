@@ -10,18 +10,20 @@
 {
   "sections": {
     "main": {
-      "type": "christmas-countdown",
+      "type": "santa-tracker",
       "settings": {
         "logo": "shopify://shop_images/Love_to_Sing_Christmas_Logo.png",
         "logo_width": 180,
         "year": 2026,
-        "departure_override": "2026-06-11T00:00:00Z",
+        "departure_override": "",
         "enable_snow": true,
+        "video_bg_enabled": true,
+        "video_bg_url": "",
         "enable_sound": true,
         "music_url": "",
-        "eyebrow_pre": "Ho ho ho!",
-        "title_pre": "The magic is almost *here*",
-        "subtitle_pre": "Santa takes off from the North Pole on Christmas Eve — and Aotearoa New Zealand is one of his very first stops! Come back to follow his sleigh live around the world.",
+        "eyebrow_pre": "",
+        "title_pre": "The Countdown to Christmas is here!",
+        "subtitle_pre": "",
         "countdown_label": "Santa takes flight in",
         "title_live": "Santa is on his way!",
         "title_post": "Merry *Christmas!*",
@@ -29,7 +31,8 @@
         "closing_post": "See you next year! Love, Love to Sing 💛",
         "cta_label": "Sing our Christmas songs",
         "cta_url": "",
-        "cta2_label": "Shop the Christmas collection"
+        "cta2_label": "Shop the Christmas collection",
+        "cta2_url": ""
       }
     }
   },

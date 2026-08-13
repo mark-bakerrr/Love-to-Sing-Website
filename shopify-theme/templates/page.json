@@ -39,19 +39,6 @@
         "button_url": "/"
       }
     },
-    "ai_content_studio_tcaAU7": {
-      "type": "ai-content-studio",
-      "name": "AI Content Studio",
-      "settings": {
-        "heading": "Love to Sing AI Content Studio",
-        "subheading": "Create classroom-ready resources powered by Love to Sing songs.",
-        "daily_chat_limit": 100,
-        "allow_guest_preview": true,
-        "required_customer_tag": "ai_member",
-        "api_base_url": "/apps/lts-ai",
-        "terms_url": ""
-      }
-    },
     "newsletter_banner_p7QyDj": {
       "type": "newsletter-banner",
       "blocks": {
@@ -83,7 +70,6 @@
   "order": [
     "main",
     "hero_banner_raK6eP",
-    "ai_content_studio_tcaAU7",
     "newsletter_banner_p7QyDj"
   ]
 }

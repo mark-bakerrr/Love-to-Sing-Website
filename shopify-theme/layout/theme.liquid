@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="">
     {% render 'lts-canonical' %}
-    {%- if request.page_type == 'search' -%}
+    {%- if request.page_type == 'search' or product.type == 'Licence' or product.type == 'Membership' or template.suffix == 'licence' or template.suffix == 'single-licences' or page.handle == 'licence-terms' -%}
       <meta name="robots" content="noindex,follow">
     {%- endif -%}
     <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>

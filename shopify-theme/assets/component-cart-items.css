@@ -279,3 +279,60 @@ table.cart-items td.cart-item__price {
     width: 6rem;
   }
 }
+
+/* ── Line-item media tile: branded music note for songs + imageless licences.
+   Sized to match the 40×40 song icon used in the mega-menu / category rows. ── */
+.cart-item__media--icon {
+  width: 4rem;
+  vertical-align: top;
+}
+
+.cart-item__icon-tile {
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-s);
+  color: var(--c-main-500);
+  background-color: var(--c-main-100, var(--color-background-media));
+  transition:
+    background-color var(--duration-default, 0.2s) ease,
+    color var(--duration-default, 0.2s) ease;
+}
+
+.cart-item__icon-tile svg {
+  display: block;
+  width: 60%;
+  max-width: 2.4rem;
+  height: auto;
+}
+
+.cart-item__link:hover .cart-item__icon-tile {
+  background-color: var(--c-main-500);
+  color: var(--c-main-100, var(--color-background-media));
+}
+
+@media screen and (max-width: 480px) {
+  .cart-item__media--icon {
+    width: 3.2rem;
+  }
+
+  .cart-item__icon-tile {
+    width: 3.2rem;
+    height: 3.2rem;
+  }
+}
+
+/* Attendance/roll range shown after the size band, e.g. "Band 8 (1,000–1,499 …)" */
+.cart-item__band-range {
+  font-weight: 400;
+  color: var(--c-neutral-500, currentColor);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-item__icon-tile {
+    transition: none;
+  }
+}
