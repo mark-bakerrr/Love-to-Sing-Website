@@ -76,22 +76,24 @@
         {%- if collections_ref.size > 0 or collections_ref.count > 0 or has_credits != blank -%}
           <div class="song-about__aside">
             {%- render 'song-credits', product: product -%}
-            {%- if collections_ref.size > 0 -%}<div class="aside-divider"></div>{%- endif -%}
-            {%- if aside_title != blank -%}
-              <h3 class="song-about__aside-title h5">
-                {{- aside_title | escape -}}
-              </h3><!-- /.song-about__aside-title -->
-            {%- endif -%}
+            {%- if collections_ref.size > 0 -%}
+              <div class="aside-divider"></div>
+              {%- if aside_title != blank -%}
+                <h3 class="song-about__aside-title h5">
+                  {{- aside_title | escape -}}
+                </h3><!-- /.song-about__aside-title -->
+              {%- endif -%}
 
-            <ul class="song-about__collections">
-              {%- for collection_ref in collections_ref limit: 10 -%}
-                <li>
-                  <a href="{{- collection_ref.url -}}" class="song-about__collection">
-                    {{- collection_ref.title | escape -}}
-                  </a><!-- /.song-about__collection -->
-                </li>
-              {%- endfor -%}
-            </ul><!-- /.song-about__collections -->
+              <ul class="song-about__collections">
+                {%- for collection_ref in collections_ref limit: 10 -%}
+                  <li>
+                    <a href="{{- collection_ref.url -}}" class="song-about__collection">
+                      {{- collection_ref.title | escape -}}
+                    </a><!-- /.song-about__collection -->
+                  </li>
+                {%- endfor -%}
+              </ul><!-- /.song-about__collections -->
+            {%- endif -%}
           </div><!-- /.song-about__aside -->
         {%- endif -%}
       </div><!-- /.song-about__inner -->
