@@ -72,8 +72,11 @@
           </div><!-- /.song-about__main -->
         {%- endif -%}
 
-        {%- if collections_ref.size > 0 or collections_ref.count > 0 -%}
+        {%- assign has_credits = product.metafields.custom.credits.value | default: product.metafields.custom.copyright_line -%}
+        {%- if collections_ref.size > 0 or collections_ref.count > 0 or has_credits != blank -%}
           <div class="song-about__aside">
+            {%- render 'song-credits', product: product -%}
+            {%- if collections_ref.size > 0 -%}<div class="aside-divider"></div>{%- endif -%}
             {%- if aside_title != blank -%}
               <h3 class="song-about__aside-title h5">
                 {{- aside_title | escape -}}

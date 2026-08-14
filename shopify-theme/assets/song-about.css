@@ -83,3 +83,25 @@
     background-color: var(--c-neutral-300);
   }
 }
+
+/* ── Song credits (Design B — micro-label rows) ─────────────────────── */
+.song-credits { margin-bottom: 2.8rem; }
+.song-credits__list { display: flex; flex-direction: column; gap: 1.4rem; }
+.song-credits__row { display: flex; flex-direction: column; gap: 0.2rem; }
+.song-credits__role {
+  font-size: 1.05rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-neutral-400, #888);
+  font-weight: 800;
+}
+.song-credits__who { font-size: var(--fz-m, 1.8rem); font-weight: 800; }
+.song-credits__who a { color: var(--c-red-600, #912422); text-decoration: none; }
+.song-credits__who a:hover { text-decoration: underline; }
+.song-credits__copyright {
+  margin: 1.6rem 0 0;
+  font-size: var(--fz-s, 1.4rem);
+  color: var(--c-neutral-400, #888);
+  font-weight: 700;
+}
+.aside-divider { height: 1px; background: var(--c-neutral-200, #E8E8E8); margin: 2.4rem 0; }
