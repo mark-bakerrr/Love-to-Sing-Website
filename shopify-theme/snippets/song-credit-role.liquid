@@ -1,0 +1,26 @@
+{%- comment -%}
+  Renders one credit role's people as micro-label rows.
+  Accepts:
+  - people: list of `contributor` metaobjects (a custom.credit_* metafield .value)
+  - phrase: role phrase, e.g. "Written by"
+{%- endcomment -%}
+{%- if people != blank -%}
+  {%- for person in people -%}
+    {%- liquid
+      assign person_name = person.name
+      assign person_link = person.link
+    -%}
+    {%- if person_name != blank -%}
+      <div class="song-credits__row">
+        <span class="song-credits__role">{{ phrase }}</span>
+        <span class="song-credits__who">
+          {%- if person_link != blank -%}
+            <a href="{{ person_link }}" rel="noopener" target="_blank">{{ person_name | escape }}</a>
+          {%- else -%}
+            {{ person_name | escape }}
+          {%- endif -%}
+        </span>
+      </div>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
