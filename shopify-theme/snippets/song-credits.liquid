@@ -1,65 +1,57 @@
 {%- comment -%}
-  Renders the song credits block (Design B — micro-label rows).
-  Reads product.metafields.custom.credits (list of `song_credit` metaobjects)
-  and product.metafields.custom.copyright_line (override).
+  Song credits (Design B — micro-label rows), role-per-field model.
+  Each role is a product metafield custom.credit_* holding a list of
+  `contributor` metaobjects (name + optional link). To add a new role:
+  add its key to role_keys + phrase to role_phrases, and create the
+  matching custom.credit_<role> product metafield (list of contributors).
+  Performer is always "Love to Sing"; copyright falls back to the default.
   Accepts: product (defaults to the current product).
 {%- endcomment -%}
 {%- liquid
   assign _product = product | default: product
-  assign credits = _product.metafields.custom.credits.value
   assign copyright_line = _product.metafields.custom.copyright_line
   if copyright_line == blank
     assign copyright_line = '© Love to Sing Limited'
   endif
+  assign role_keys = 'credit_writers,credit_composers,credit_arrangers,credit_producers' | split: ','
+  assign role_phrases = 'Written by,Composed by,Arranged by,Produced by' | split: ','
 -%}
 
-{%- if credits != blank or copyright_line != blank -%}
-  <div class="song-credits" id="SongCredits">
-    <h3 class="song-about__aside-title">Credits</h3>
+<div class="song-credits" id="SongCredits">
+  <h3 class="song-about__aside-title">Credits</h3>
 
-    <div class="song-credits__list">
-      {%- for credit in credits -%}
-        {%- liquid
-          assign person = credit.contributor.value
-          assign person_name = person.name
-          assign person_link = person.link
-          assign role = credit.role
-          case role
-            when 'Writer'
-              assign phrase = 'Written by'
-            when 'Composer'
-              assign phrase = 'Composed by'
-            when 'Arranger'
-              assign phrase = 'Arranged by'
-            when 'Producer'
-              assign phrase = 'Produced by'
-            when 'Performer'
-              assign phrase = 'Performed by'
-            else
-              assign phrase = role | append: ':'
-          endcase
-        -%}
-        {%- if person_name != blank -%}
-          <div class="song-credits__row">
-            <span class="song-credits__role">{{ phrase }}</span>
-            <span class="song-credits__who">
-              {%- if person_link != blank -%}
-                <a href="{{ person_link }}" rel="noopener" target="_blank">{{ person_name | escape }}</a>
-              {%- else -%}
-                {{ person_name | escape }}
-              {%- endif -%}
-            </span>
-          </div>
-        {%- endif -%}
-      {%- endfor -%}
+  <div class="song-credits__list">
+    {%- for key in role_keys -%}
+      {%- assign phrase = role_phrases[forloop.index0] -%}
+      {%- assign people = _product.metafields.custom[key].value -%}
+      {%- if people != blank -%}
+        {%- for person in people -%}
+          {%- liquid
+            assign person_name = person.name
+            assign person_link = person.link
+          -%}
+          {%- if person_name != blank -%}
+            <div class="song-credits__row">
+              <span class="song-credits__role">{{ phrase }}</span>
+              <span class="song-credits__who">
+                {%- if person_link != blank -%}
+                  <a href="{{ person_link }}" rel="noopener" target="_blank">{{ person_name | escape }}</a>
+                {%- else -%}
+                  {{ person_name | escape }}
+                {%- endif -%}
+              </span>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endfor -%}
 
-      {%- comment -%} Performer is always Love to Sing {%- endcomment -%}
-      <div class="song-credits__row">
-        <span class="song-credits__role">Performed by</span>
-        <span class="song-credits__who">Love to Sing</span>
-      </div>
+    {%- comment -%} Performer is always Love to Sing {%- endcomment -%}
+    <div class="song-credits__row">
+      <span class="song-credits__role">Performed by</span>
+      <span class="song-credits__who">Love to Sing</span>
     </div>
-
-    <p class="song-credits__copyright">{{ copyright_line | escape }}</p>
   </div>
-{%- endif -%}
+
+  <p class="song-credits__copyright">{{ copyright_line | escape }}</p>
+</div>

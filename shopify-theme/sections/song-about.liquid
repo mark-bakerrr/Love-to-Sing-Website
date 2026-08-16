@@ -72,9 +72,8 @@
           </div><!-- /.song-about__main -->
         {%- endif -%}
 
-        {%- assign has_credits = product.metafields.custom.credits.value | default: product.metafields.custom.copyright_line -%}
-        {%- if collections_ref.size > 0 or collections_ref.count > 0 or has_credits != blank -%}
-          <div class="song-about__aside">
+        {%- comment -%} Aside always renders on songs: credits block shows Performer + © at minimum. {%- endcomment -%}
+        <div class="song-about__aside">
             {%- render 'song-credits', product: product -%}
             {%- if collections_ref.size > 0 -%}
               <div class="aside-divider"></div>
@@ -95,7 +94,6 @@
               </ul><!-- /.song-about__collections -->
             {%- endif -%}
           </div><!-- /.song-about__aside -->
-        {%- endif -%}
       </div><!-- /.song-about__inner -->
     </div><!-- /.container -->
   </section><!-- /.song-about -->
