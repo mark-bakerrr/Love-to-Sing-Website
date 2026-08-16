@@ -160,7 +160,8 @@
 
         {%- for property in line_item.properties -%}
           {%- assign property_first_char = property.first | slice: 0 -%}
-          {%- if property.last != blank and property_first_char != '_' -%}
+          {%- comment -%} 'Size' carries the attendee range for checkout; the cart already shows it on the Size-band option, so hide it here to avoid duplication. {%- endcomment -%}
+          {%- if property.last != blank and property_first_char != '_' and property.first != 'Size' -%}
             {%- liquid
               capture properties_first_placeholders
                 echo 'recipient.form.email_property' | t

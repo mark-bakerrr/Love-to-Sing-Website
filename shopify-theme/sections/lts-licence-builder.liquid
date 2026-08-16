@@ -202,6 +202,12 @@
     school:"Number of students",
     community:"Number of regular attendees"
   };
+  // Short noun for the visible "Size" line-item property (surfaces at checkout).
+  var SIZE_NOUN = {
+    church:"weekly attendance",
+    school:"students",
+    community:"attendees"
+  };
 
   // Pre-fill from URL params: ?licence= (grant), ?org= (org type), ?size= (number).
   // Defaults: grant all_in_one, org church, empty size. Params are normalized +
@@ -324,7 +330,8 @@
             _lts_org_name: orgName,
             _lts_org_type: org,
             _lts_size_band: String(band),
-            _lts_declared_size: String(num)
+            _lts_declared_size: String(num),
+            'Size': RANGES[org][band-1] + ' ' + SIZE_NOUN[org]
           }
         }]
       })
