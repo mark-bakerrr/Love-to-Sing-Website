@@ -9,11 +9,11 @@ Theme lives in `shopify-theme/`. GitHub: <https://github.com/mark-bakerrr/Love-t
 
 | Role | Theme | ID |
 |------|-------|----|
-| **DEV / working** (push here) | **Love to Sing Website v3.1.0** `[unpublished]` | **`185013862673`** |
-| **LIVE** (never push here) | Love to Sing Website v3.0.0 `[live]` | `184956944657` |
+| **DEV / working** (push here) | **Love to Sing Website v3.1.1** `[unpublished]` | **`185014518033`** |
+| **LIVE** (never push here) | Love to Sing Website v3.1.0 `[live]` | `185013862673` |
 
 - Theme roles change over time. **ALWAYS run `shopify theme list` and confirm `[live]` vs `[unpublished]` before ANY push. Never assume a theme id.**
-- All development and testing pushes go to the current **unpublished** dev theme (currently v3.1.0).
+- All development and testing pushes go to the current **unpublished** dev theme (currently v3.1.1).
 
 ---
 
