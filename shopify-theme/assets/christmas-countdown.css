@@ -1,0 +1,222 @@
+/* Christmas Countdown — full-viewport 16:9 overlay for livestream + web.
+   Ported from the christmas-countdown.html prototype. Typography is sized in
+   container-query units so it scales with the frame, not the raw viewport. */
+
+:root {
+  --cc-bleed: #b3121a; /* dark red used behind the background image */
+  --cc-ink: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+html, body.cc-body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--cc-bleed);
+  font-family: 'Nunito', system-ui, sans-serif;
+  overflow: hidden;
+}
+
+/* Stage fills the whole viewport (and the whole 16:9 embed on upstream.so).
+   The background-image is set inline from the section setting. */
+.cc-stage {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background-color: var(--cc-bleed);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  container-type: size;
+  user-select: none;
+}
+
+/* ---------- Brand logo (top-left, links to lovetosing.com) ---------- */
+
+.cc-brand {
+  position: absolute;
+  top: 3cqh;
+  left: 3cqh;
+  display: block;
+  z-index: 3;
+  line-height: 0;
+}
+.cc-brand img {
+  height: 13cqh;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 0.4cqh 1cqh rgba(80, 0, 0, 0.35));
+}
+
+/* ---------- Countdown ---------- */
+
+.cc-countdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 58cqh;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0.4cqw;
+  text-align: center;
+}
+
+.cc-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 15cqw;
+}
+
+.cc-unit .cc-value {
+  font-weight: 800;
+  font-size: 26cqh;
+  line-height: 0.85;
+  color: var(--cc-ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  text-shadow: 0 0.6cqh 1.6cqh rgba(80, 0, 0, 0.45);
+}
+
+.cc-unit .cc-label {
+  margin-top: 1.2cqh;
+  font-weight: 800;
+  font-size: 5cqh;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cc-ink);
+  text-shadow: 0 0.3cqh 0.8cqh rgba(80, 0, 0, 0.35);
+}
+
+.cc-sep {
+  font-weight: 800;
+  font-size: 22cqh;
+  line-height: 0.85;
+  color: rgba(255, 255, 255, 0.8);
+  align-self: flex-start;
+  margin-top: 1cqh;
+}
+
+/* pop on tick — subtle */
+.cc-value.is-ticking { animation: cc-pop 0.28s ease; }
+@keyframes cc-pop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.025); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- Christmas message (post state) ---------- */
+
+.cc-message {
+  position: absolute;
+  left: 6cqw;
+  right: 6cqw;
+  top: 58cqh;
+  transform: translateY(-50%);
+  text-align: center;
+  font-weight: 800;
+  font-size: 14cqh;
+  line-height: 1.05;
+  color: var(--cc-ink);
+  text-shadow: 0 0.6cqh 1.6cqh rgba(80, 0, 0, 0.45);
+}
+.cc-message p { margin: 0; }
+
+/* Toggle which state shows */
+.cc-stage:not(.is-post) .cc-message { display: none; }
+.cc-stage.is-post .cc-countdown { display: none; }
+
+/* ---------- Music widget (bottom-left, website only) ---------- */
+
+.cc-player {
+  position: absolute;
+  left: 3cqh;
+  bottom: 3cqh;
+  display: flex;
+  align-items: center;
+  gap: 1.4cqh;
+  padding: 1.1cqh 1.8cqh 1.1cqh 1.1cqh;
+  border-radius: 2.2cqh;
+  background: rgba(20, 0, 0, 0.42);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border: 0.15cqh solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 0.6cqh 2cqh rgba(0, 0, 0, 0.35);
+  color: var(--cc-ink);
+  max-width: 52cqh;
+}
+
+/* Broadcast mode (?overlay=1) hides the player entirely */
+.cc-stage.is-overlay .cc-player { display: none; }
+
+.cc-player .cc-art {
+  width: 8cqh;
+  height: 8cqh;
+  border-radius: 1.4cqh;
+  object-fit: cover;
+  flex: none;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0.3cqh 0.8cqh rgba(0, 0, 0, 0.4);
+}
+
+.cc-player .cc-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.cc-player .cc-title {
+  font-weight: 800;
+  font-size: 2.6cqh;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 30cqh;
+}
+
+.cc-player .cc-artist {
+  font-weight: 600;
+  font-size: 2.1cqh;
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 30cqh;
+}
+
+.cc-player .cc-controls {
+  display: flex;
+  align-items: center;
+  gap: 1cqh;
+  margin-left: 0.4cqh;
+}
+
+.cc-player button {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--cc-ink);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.cc-player button svg { display: block; }
+.cc-player .cc-btn-side svg { width: 3.2cqh; height: 3.2cqh; }
+.cc-player .cc-btn-play {
+  width: 6cqh;
+  height: 6cqh;
+  border-radius: 50%;
+  background: var(--cc-ink);
+  color: #b3121a;
+}
+.cc-player .cc-btn-play svg { width: 3.2cqh; height: 3.2cqh; }
+.cc-player button:hover { opacity: 0.85; }

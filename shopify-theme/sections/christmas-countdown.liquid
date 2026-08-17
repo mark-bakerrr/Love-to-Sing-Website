@@ -1,0 +1,204 @@
+{%- comment -%}
+  Christmas Countdown — full-viewport 16:9 countdown overlay for livestreaming
+  (upstream.so webpage embed) and lovetosing.com.
+
+  Use with the dedicated chrome-free layout: set the page's theme template to
+  "christmas-countdown" (templates/page.christmas-countdown.liquid).
+
+  QA: ?overlay=1 hides the music player; ?now=<ISO> fakes the clock.
+{%- endcomment -%}
+
+{%- liquid
+  assign bg = section.settings.background_image
+  if bg != blank
+    assign bg_url = bg | image_url: width: 1920
+  else
+    assign bg_url = 'Red Countdown Background.jpg' | asset_url
+  endif
+-%}
+
+<div class="cc-stage" id="cc-stage" style="background-image: url('{{ bg_url }}');">
+
+  {%- if section.settings.logo != blank -%}
+    <a class="cc-brand" href="https://lovetosing.com" target="_blank" rel="noopener" aria-label="{{ shop.name | escape }}">
+      <img src="{{ section.settings.logo | image_url: width: 720 }}" alt="{{ shop.name | escape }}" width="360" height="120">
+    </a>
+  {%- endif -%}
+
+  {%- comment -%} Countdown (pre-Christmas) {%- endcomment -%}
+  <div class="cc-countdown" id="cc-countdown">
+    <div class="cc-unit"><span class="cc-value" data-unit="days">--</span><span class="cc-label">Days</span></div>
+    <span class="cc-sep">:</span>
+    <div class="cc-unit"><span class="cc-value" data-unit="hours">--</span><span class="cc-label">Hours</span></div>
+    <span class="cc-sep">:</span>
+    <div class="cc-unit"><span class="cc-value" data-unit="minutes">--</span><span class="cc-label">Minutes</span></div>
+    <span class="cc-sep">:</span>
+    <div class="cc-unit"><span class="cc-value" data-unit="seconds">--</span><span class="cc-label">Seconds</span></div>
+  </div>
+
+  {%- comment -%} Christmas message (shown once the countdown passes, through Dec 31) {%- endcomment -%}
+  <div class="cc-message" id="cc-message">{{ section.settings.christmas_message }}</div>
+
+  {%- comment -%} Music widget (website only; hidden in ?overlay=1) {%- endcomment -%}
+  {%- if section.settings.show_music_player and section.blocks.size > 0 -%}
+    <div class="cc-player" id="cc-player">
+      <img class="cc-art" alt="" src="" width="80" height="80">
+      <div class="cc-meta">
+        <span class="cc-title">—</span>
+        <span class="cc-artist">—</span>
+      </div>
+      <div class="cc-controls">
+        <button class="cc-btn-side cc-prev" aria-label="Previous">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+        </button>
+        <button class="cc-btn-play" aria-label="Play">
+          <svg class="cc-icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="cc-icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+        </button>
+        <button class="cc-btn-side cc-next" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+        </button>
+      </div>
+    </div>
+  {%- endif -%}
+</div>
+
+<script type="application/json" id="cc-config">
+{
+  "referenceTz": {{ section.settings.reference_tz | json }},
+  "targetMonth": {{ section.settings.target_month | default: 12 | json }},
+  "targetDay": {{ section.settings.target_day | default: 25 | json }},
+  "playlist": [
+    {%- assign first = true -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'track' and block.settings.audio_url != blank -%}
+        {%- unless first -%},{%- endunless -%}{%- assign first = false -%}
+        {
+          "title": {{ block.settings.title | default: block.settings.artwork.alt | json }},
+          "artist": {{ block.settings.artist | json }},
+          "art": {% if block.settings.artwork != blank %}{{ block.settings.artwork | image_url: width: 240 | json }}{% else %}""{% endif %},
+          "src": {{ block.settings.audio_url | json }}
+        }
+      {%- endif -%}
+    {%- endfor -%}
+  ]
+}
+</script>
+
+<script src="{{ 'christmas-countdown.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Christmas Countdown",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Brand logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo (top-left)",
+      "info": "Links permanently to lovetosing.com."
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image",
+      "info": "16:9 recommended. Falls back to the bundled red snowflake background if empty."
+    },
+    {
+      "type": "header",
+      "content": "Countdown target"
+    },
+    {
+      "type": "select",
+      "id": "reference_tz",
+      "label": "Reference timezone",
+      "info": "The countdown hits zero at midnight in this timezone. Because the livestream overlay is rendered on your machine and burned into the video, a fixed reference keeps every viewer's numbers consistent.",
+      "default": "America/New_York",
+      "options": [
+        { "value": "America/New_York", "label": "New York (Eastern)" },
+        { "value": "America/Chicago", "label": "Chicago (Central)" },
+        { "value": "America/Denver", "label": "Denver (Mountain)" },
+        { "value": "America/Los_Angeles", "label": "Los Angeles (Pacific)" },
+        { "value": "UTC", "label": "UTC / London (GMT)" },
+        { "value": "Europe/London", "label": "London (UK)" },
+        { "value": "Pacific/Auckland", "label": "Auckland (New Zealand)" },
+        { "value": "Australia/Sydney", "label": "Sydney (Australia)" }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "target_month",
+      "label": "Target month (1–12)",
+      "default": 12
+    },
+    {
+      "type": "number",
+      "id": "target_day",
+      "label": "Target day",
+      "default": 25
+    },
+    {
+      "type": "header",
+      "content": "Christmas message"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "christmas_message",
+      "label": "Message shown after the countdown (until Dec 31)",
+      "default": "It's Christmas! 🎄"
+    },
+    {
+      "type": "header",
+      "content": "Music player"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_music_player",
+      "label": "Show music player (website only)",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "track",
+      "name": "Track",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Song title"
+        },
+        {
+          "type": "text",
+          "id": "artist",
+          "label": "Artist",
+          "default": "Love to Sing"
+        },
+        {
+          "type": "image_picker",
+          "id": "artwork",
+          "label": "Artwork"
+        },
+        {
+          "type": "url",
+          "id": "audio_url",
+          "label": "Audio URL (full track)",
+          "info": "Full-length audio. Public URLs are readable by anyone — use a gated/authenticated source for paid songs (see hosting note)."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Christmas Countdown"
+    }
+  ]
+}
+{% endschema %}
