@@ -3,9 +3,10 @@
    container-query units so it scales with the frame, not the raw viewport. */
 
 :root {
-  --hc-bleed: #160a24;   /* deep purple behind the background image */
-  --hc-ink: #ffffff;     /* countdown numbers */
-  --hc-accent: #ff8f3c;  /* pumpkin orange — labels */
+  --hc-bleed: #160a24;    /* deep purple behind the background image */
+  --hc-ink: #ffffff;      /* countdown numbers */
+  --hc-accent: #ff8f3c;   /* pumpkin orange — labels */
+  --hc-outline: #12061f;  /* near-black text outline */
 }
 
 * { box-sizing: border-box; }
@@ -76,30 +77,35 @@ html, body.hc-body {
 }
 
 .hc-unit .hc-value {
-  font-weight: 800;
+  font-weight: 400;
   font-size: 26cqh;
   line-height: 0.85;
   color: var(--hc-ink);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.03em;
+  letter-spacing: 0.01em;
+  -webkit-text-stroke: 0.45cqh var(--hc-outline);
+  paint-order: stroke fill;
   text-shadow: 0 0.6cqh 1.8cqh rgba(0, 0, 0, 0.6);
 }
 
 .hc-unit .hc-label {
   margin-top: 1.2cqh;
-  font-weight: 800;
+  font-weight: 400;
   font-size: 5cqh;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--hc-accent);
+  -webkit-text-stroke: 0.22cqh var(--hc-outline);
+  paint-order: stroke fill;
   text-shadow: 0 0.3cqh 1cqh rgba(0, 0, 0, 0.55);
 }
 
 .hc-sep {
-  font-weight: 800;
+  font-weight: 400;
   font-size: 22cqh;
   line-height: 0.85;
   color: rgba(255, 255, 255, 0.7);
+  -webkit-text-stroke: 0.35cqh var(--hc-outline);
+  paint-order: stroke fill;
   align-self: flex-start;
   margin-top: 1cqh;
 }
@@ -121,10 +127,12 @@ html, body.hc-body {
   top: 58cqh;
   transform: translateY(-50%);
   text-align: center;
-  font-weight: 800;
+  font-weight: 400;
   font-size: 14cqh;
   line-height: 1.05;
   color: var(--hc-ink);
+  -webkit-text-stroke: 0.3cqh var(--hc-outline);
+  paint-order: stroke fill;
   text-shadow: 0 0.6cqh 1.8cqh rgba(0, 0, 0, 0.6);
 }
 .hc-message p { margin: 0; }
