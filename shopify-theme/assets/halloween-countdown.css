@@ -37,6 +37,45 @@ html, body.hc-body {
   user-select: none;
 }
 
+/* ---------- Motion FX overlays (mist / crows / pumpkins) ---------- */
+
+.hc-fx {
+  position: absolute;
+  pointer-events: none;
+  object-fit: cover;
+  z-index: 1;
+}
+/* Drifting fog on black, composited with screen so the black vanishes */
+.hc-fx-mist {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
+/* Crows fly across the upper (moonlit) sky band */
+.hc-fx-crows {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 46%;
+  object-position: center top;
+}
+/* Jack-o'-lanterns gently sway along the bottom */
+.hc-fx-pumpkins {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 24%;
+  object-fit: contain;
+  object-position: bottom;
+}
+
+/* Keep all content above the FX layers */
+.hc-countdown,
+.hc-message,
+.hc-player { z-index: 2; }
+
 /* ---------- Brand logo (top-left, links to lovetosing.com) ---------- */
 
 .hc-brand {

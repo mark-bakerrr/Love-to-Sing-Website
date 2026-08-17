@@ -20,6 +20,13 @@
 
 <div class="hc-stage" id="hc-stage" style="background-image: url('{{ bg_url }}');">
 
+  {%- comment -%} Motion FX: mist (screen-blend), crows + pumpkins (alpha WebM) {%- endcomment -%}
+  {%- if section.settings.show_fx -%}
+    <video class="hc-fx hc-fx-mist" src="{{ 'halloween-mist.mp4' | asset_url }}" autoplay muted loop playsinline aria-hidden="true"></video>
+    <video class="hc-fx hc-fx-crows" src="{{ 'halloween-crows.webm' | asset_url }}" autoplay muted loop playsinline aria-hidden="true"></video>
+    <video class="hc-fx hc-fx-pumpkins" src="{{ 'halloween-pumpkins.webm' | asset_url }}" autoplay muted loop playsinline aria-hidden="true"></video>
+  {%- endif -%}
+
   {%- if section.settings.logo != blank -%}
     <a class="hc-brand" href="https://lovetosing.com" target="_blank" rel="noopener" aria-label="{{ shop.name | escape }}">
       <img src="{{ section.settings.logo | image_url: width: 720 }}" alt="{{ shop.name | escape }}" width="360" height="120">
@@ -152,6 +159,16 @@
       "label": "Show message for (days after target)",
       "info": "How many days the message shows before rolling to next year. 1 = just the day itself.",
       "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Motion effects"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_fx",
+      "label": "Show animated overlays (mist, crows, pumpkins)",
+      "default": true
     },
     {
       "type": "header",
