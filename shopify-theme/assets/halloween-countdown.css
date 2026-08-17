@@ -37,6 +37,17 @@ html, body.hc-body {
   user-select: none;
 }
 
+/* ---------- Optional looping background video ---------- */
+
+.hc-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
 /* ---------- Motion FX overlays (mist / crows / pumpkins) ---------- */
 
 .hc-fx {

@@ -19,6 +19,16 @@
 
 <div class="cc-stage" id="cc-stage" style="background-image: url('{{ bg_url }}');">
 
+  {%- comment -%} Optional looping background video (plays over the static image) {%- endcomment -%}
+  {%- assign bg_video = section.settings.background_video -%}
+  {%- if bg_video != blank -%}
+    <video class="cc-bg-video" autoplay muted loop playsinline preload="auto" poster="{{ bg_url }}" aria-hidden="true">
+      {%- for source in bg_video.sources -%}
+        <source src="{{ source.url }}" type="{{ source.mime_type }}">
+      {%- endfor -%}
+    </video>
+  {%- endif -%}
+
   {%- if section.settings.logo != blank -%}
     <a class="cc-brand" href="https://lovetosing.com" target="_blank" rel="noopener" aria-label="{{ shop.name | escape }}">
       <img src="{{ section.settings.logo | image_url: width: 720 }}" alt="{{ shop.name | escape }}" width="360" height="120">
@@ -109,7 +119,13 @@
       "type": "image_picker",
       "id": "background_image",
       "label": "Background image",
-      "info": "16:9 recommended. Falls back to the bundled red snowflake background if empty."
+      "info": "16:9 recommended. Falls back to the bundled red snowflake background if empty. Used as the poster if a background video is set."
+    },
+    {
+      "type": "video",
+      "id": "background_video",
+      "label": "Background video (optional)",
+      "info": "Upload a seamless 16:9 loop (e.g. 60s). When set, it plays as the looping background over the image."
     },
     {
       "type": "header",

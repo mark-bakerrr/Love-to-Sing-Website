@@ -35,6 +35,19 @@ html, body.cc-body {
   user-select: none;
 }
 
+/* Optional looping background video (plays over the static image) */
+.cc-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+.cc-countdown,
+.cc-message,
+.cc-player { z-index: 2; }
+
 /* ---------- Brand logo (top-left, links to lovetosing.com) ---------- */
 
 .cc-brand {

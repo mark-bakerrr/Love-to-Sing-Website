@@ -20,8 +20,18 @@
 
 <div class="hc-stage" id="hc-stage" style="background-image: url('{{ bg_url }}');">
 
-  {%- comment -%} Motion FX: mist (screen-blend), crows + pumpkins (alpha WebM) {%- endcomment -%}
-  {%- if section.settings.show_fx -%}
+  {%- comment -%} Optional looping background video (overrides the static image + FX) {%- endcomment -%}
+  {%- assign bg_video = section.settings.background_video -%}
+  {%- if bg_video != blank -%}
+    <video class="hc-bg-video" autoplay muted loop playsinline preload="auto" poster="{{ bg_url }}" aria-hidden="true">
+      {%- for source in bg_video.sources -%}
+        <source src="{{ source.url }}" type="{{ source.mime_type }}">
+      {%- endfor -%}
+    </video>
+  {%- endif -%}
+
+  {%- comment -%} Motion FX: mist (screen-blend), crows + pumpkins (alpha WebM). Suppressed when a background video is set. {%- endcomment -%}
+  {%- if section.settings.show_fx and bg_video == blank -%}
     <video class="hc-fx hc-fx-mist" src="{{ 'halloween-mist.mp4' | asset_url }}" autoplay muted loop playsinline aria-hidden="true"></video>
     <video class="hc-fx hc-fx-crows" src="{{ 'halloween-crows.webm' | asset_url }}" autoplay muted loop playsinline aria-hidden="true"></video>
     <video class="hc-fx hc-fx-pumpkins" src="{{ 'halloween-pumpkins.webm' | asset_url }}" autoplay muted loop playsinline aria-hidden="true"></video>
@@ -118,7 +128,13 @@
       "type": "image_picker",
       "id": "background_image",
       "label": "Background image",
-      "info": "16:9 recommended. Falls back to the bundled Halloween background if empty."
+      "info": "16:9 recommended. Falls back to the bundled Halloween background if empty. Used as the poster if a background video is set."
+    },
+    {
+      "type": "video",
+      "id": "background_video",
+      "label": "Background video (optional)",
+      "info": "Upload a seamless 16:9 loop (e.g. 60s). When set, it plays as the background and the animated mist/crows/pumpkins overlays are turned off."
     },
     {
       "type": "header",
