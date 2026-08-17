@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Christmas Countdown — Love to Sing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Dark red pulled from the background image, used for the letterbox bleed */
+    --bleed: #b3121a;
+    --ink: #ffffff;
+    --gold: #ffd76a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bleed);
+    font-family: 'Nunito', system-ui, sans-serif;
+    overflow: hidden;
+  }
+
+  /* The stage fills the whole viewport (and the whole 16:9 embed on
+     upstream.so). Background covers edge-to-edge. */
+  .stage {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background: url('./shopify-theme/assets/Red%20Countdown%20Background.jpg') center / cover no-repeat, var(--bleed);
+    overflow: hidden;
+    /* Everything inside sizes relative to the stage, not the viewport */
+    container-type: size;
+    user-select: none;
+  }
+
+  /* ---------- Brand logo (top-left, links to lovetosing.com) ---------- */
+
+  .brand {
+    position: absolute;
+    top: 3cqh;
+    left: 3cqh;
+    display: block;
+    z-index: 3;
+    line-height: 0;
+  }
+
+  .brand img {
+    height: 13cqh;
+    width: auto;
+    display: block;
+    filter: drop-shadow(0 0.4cqh 1cqh rgba(80, 0, 0, 0.35));
+  }
+
+  /* ---------- Countdown ---------- */
+
+  .countdown {
+    position: absolute;
+    left: 0;
+    right: 0;
+    /* Sit in the open red area below the banner */
+    top: 58cqh;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 0.4cqw;
+    text-align: center;
+  }
+
+  .unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 15cqw;
+  }
+
+  .unit .value {
+    font-weight: 800;
+    font-size: 26cqh;
+    line-height: 0.85;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+    text-shadow: 0 0.6cqh 1.6cqh rgba(80, 0, 0, 0.45);
+  }
+
+  .unit .label {
+    margin-top: 1.2cqh;
+    font-weight: 800;
+    font-size: 5cqh;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-shadow: 0 0.3cqh 0.8cqh rgba(80, 0, 0, 0.35);
+  }
+
+  /* Separator colon between units */
+  .sep {
+    font-weight: 800;
+    font-size: 22cqh;
+    line-height: 0.85;
+    color: rgba(255, 255, 255, 0.8);
+    align-self: flex-start;
+    margin-top: 1cqh;
+  }
+
+  /* pop on tick */
+  .value.is-ticking { animation: pop 0.28s ease; }
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.025); }
+    100% { transform: scale(1); }
+  }
+
+  /* ---------- Christmas message (post state) ---------- */
+
+  .message {
+    position: absolute;
+    left: 6cqw;
+    right: 6cqw;
+    top: 58cqh;
+    transform: translateY(-50%);
+    text-align: center;
+    font-weight: 800;
+    font-size: 14cqh;
+    line-height: 1.05;
+    color: var(--ink);
+    text-shadow: 0 0.6cqh 1.6cqh rgba(80, 0, 0, 0.45);
+  }
+
+  /* Toggle which state shows */
+  .stage:not(.is-post) .message { display: none; }
+  .stage.is-post .countdown { display: none; }
+
+  /* ---------- Music widget (bottom-left, website only) ---------- */
+
+  .player {
+    position: absolute;
+    left: 3cqh;
+    bottom: 3cqh;
+    display: flex;
+    align-items: center;
+    gap: 1.4cqh;
+    padding: 1.1cqh 1.8cqh 1.1cqh 1.1cqh;
+    border-radius: 2.2cqh;
+    background: rgba(20, 0, 0, 0.42);
+    backdrop-filter: blur(12px) saturate(1.1);
+    -webkit-backdrop-filter: blur(12px) saturate(1.1);
+    border: 0.15cqh solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 0.6cqh 2cqh rgba(0, 0, 0, 0.35);
+    color: var(--ink);
+    max-width: 52cqh;
+  }
+
+  .stage.is-overlay .player { display: none; }
+
+  .player .art {
+    width: 8cqh;
+    height: 8cqh;
+    border-radius: 1.4cqh;
+    object-fit: cover;
+    flex: none;
+    box-shadow: 0 0.3cqh 0.8cqh rgba(0, 0, 0, 0.4);
+  }
+
+  .player .meta {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.2;
+  }
+
+  .player .p-title {
+    font-weight: 800;
+    font-size: 2.6cqh;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 30cqh;
+  }
+
+  .player .p-artist {
+    font-weight: 600;
+    font-size: 2.1cqh;
+    opacity: 0.75;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 30cqh;
+  }
+
+  .player .controls {
+    display: flex;
+    align-items: center;
+    gap: 1cqh;
+    margin-left: 0.4cqh;
+  }
+
+  .player button {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    padding: 0;
+  }
+  .player button svg { display: block; }
+  .player .btn-side svg { width: 3.2cqh; height: 3.2cqh; }
+  .player .btn-play {
+    width: 6cqh;
+    height: 6cqh;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #b3121a;
+  }
+  .player .btn-play svg { width: 3.2cqh; height: 3.2cqh; }
+  .player button:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+
+    <!-- Brand logo (theme setting; link is permanent to lovetosing.com) -->
+    <a class="brand" id="brand" href="https://lovetosing.com" target="_blank" rel="noopener" aria-label="Love to Sing">
+      <img id="brand-img" alt="Love to Sing">
+    </a>
+
+    <!-- Countdown (pre-Christmas) -->
+    <div class="countdown" id="countdown">
+      <div class="unit"><span class="value" data-unit="days">--</span><span class="label">Days</span></div>
+      <span class="sep">:</span>
+      <div class="unit"><span class="value" data-unit="hours">--</span><span class="label">Hours</span></div>
+      <span class="sep">:</span>
+      <div class="unit"><span class="value" data-unit="minutes">--</span><span class="label">Minutes</span></div>
+      <span class="sep">:</span>
+      <div class="unit"><span class="value" data-unit="seconds">--</span><span class="label">Seconds</span></div>
+    </div>
+
+    <!-- Christmas message (Dec 25 -> Dec 31) -->
+    <div class="message" id="message">It's Christmas! 🎄</div>
+
+    <!-- Music widget (website only, hidden in ?overlay=1) -->
+    <div class="player" id="player">
+      <img class="art" id="p-art" alt="" src="">
+      <div class="meta">
+        <span class="p-title" id="p-title">—</span>
+        <span class="p-artist" id="p-artist">—</span>
+      </div>
+      <div class="controls">
+        <button class="btn-side" id="prev" aria-label="Previous">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+        </button>
+        <button class="btn-play" id="playpause" aria-label="Play">
+          <svg id="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+        </button>
+        <button class="btn-side" id="next" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  var params = new URLSearchParams(location.search);
+  var stage = document.getElementById('stage');
+
+  /* ============================================================
+     CONFIG — these become theme-editor settings in the real build
+     ============================================================ */
+
+  // Reference timezone the countdown hits zero on (IANA name).
+  var REFERENCE_TZ = 'America/New_York';
+
+  // Message shown Dec 25 -> Dec 31 (customisable in theme editor later).
+  var CHRISTMAS_MESSAGE = "It's Christmas! 🎄";
+
+  // Brand logo — theme editor image_picker in the real build. Link is permanent
+  // to lovetosing.com (set in the markup). Placeholder art here.
+  var LOGO_SRC = logoPlaceholder();
+
+  // Placeholder playlist. Real build: full-length gated Love to Sing audio +
+  // real song artwork. src here are full-length sample tracks so play/next
+  // is genuinely functional.
+  var PLAYLIST = [
+    {
+      title: 'Jingle Bells',
+      artist: 'Love to Sing',
+      art: cover('#c0392b', 'JB'),
+      src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+    },
+    {
+      title: 'We Wish You a Merry Christmas',
+      artist: 'Love to Sing',
+      art: cover('#1e7d4f', 'MC'),
+      src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'
+    },
+    {
+      title: 'Deck the Halls',
+      artist: 'Love to Sing',
+      art: cover('#b8860b', 'DH'),
+      src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3'
+    }
+  ];
+
+  /* ============================================================
+     Overlay (broadcast) mode
+     ============================================================ */
+  if (params.get('overlay') === '1') stage.classList.add('is-overlay');
+
+  /* ============================================================
+     Time helpers — target = Dec 25 00:00 in REFERENCE_TZ
+     ============================================================ */
+
+  // Offset (ms) between the given tz's wall clock and UTC at `date`.
+  function tzOffset(date, tz) {
+    var dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, hourCycle: 'h23',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+    var p = {};
+    dtf.formatToParts(date).forEach(function (x) { p[x.type] = x.value; });
+    var asUTC = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
+    return asUTC - date.getTime();
+  }
+
+  // The UTC instant for a wall-clock time in a given tz (DST-corrected).
+  function zonedWallToUtc(y, mo, d, h, mi, s, tz) {
+    var utc = Date.UTC(y, mo - 1, d, h, mi, s);
+    var off = tzOffset(new Date(utc), tz);
+    // one correction pass resolves DST boundaries
+    return utc - off;
+  }
+
+  // The calendar year currently showing in the reference tz for `nowMs`.
+  function yearIn(nowMs, tz) {
+    return parseInt(new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, year: 'numeric'
+    }).format(new Date(nowMs)), 10);
+  }
+
+  // Christmas (Dec 25 00:00) of year `y` in the reference tz, as a UTC ms.
+  function christmasOf(y) {
+    return zonedWallToUtc(y, 12, 25, 0, 0, 0, REFERENCE_TZ);
+  }
+
+  // "Now" — real, or a QA override via ?now=2026-12-25T00:00
+  function now() {
+    var fake = params.get('now');
+    if (fake) {
+      var t = Date.parse(fake);
+      if (!isNaN(t)) return t;
+    }
+    return Date.now();
+  }
+
+  /* ============================================================
+     Render loop
+     ============================================================ */
+
+  var lastValues = {};
+
+  function render() {
+    var n = now();
+    var year = yearIn(n, REFERENCE_TZ);
+    var target = christmasOf(year);
+
+    // Jan 1 -> Dec 24: count down to this year's Christmas.
+    // Dec 25 -> Dec 31: target has passed -> show message. Jan 1 rolls the year.
+    if (n < target) {
+      stage.classList.remove('is-post');
+      renderCountdown(Math.floor((target - n) / 1000));
+    } else {
+      stage.classList.add('is-post');
+    }
+  }
+
+  function renderCountdown(secondsLeft) {
+    var units = {
+      days: Math.floor(secondsLeft / 86400),
+      hours: Math.floor((secondsLeft % 86400) / 3600),
+      minutes: Math.floor((secondsLeft % 3600) / 60),
+      seconds: Math.floor(secondsLeft % 60)
+    };
+    Object.keys(units).forEach(function (unit) {
+      var el = document.querySelector('[data-unit="' + unit + '"]');
+      if (!el) return;
+      var value = unit === 'days'
+        ? String(units[unit])
+        : String(units[unit]).padStart(2, '0');
+      if (lastValues[unit] !== value) {
+        lastValues[unit] = value;
+        el.textContent = value;
+        el.classList.remove('is-ticking');
+        void el.offsetWidth; // restart animation
+        el.classList.add('is-ticking');
+      }
+    });
+  }
+
+  document.getElementById('message').textContent = CHRISTMAS_MESSAGE;
+  document.getElementById('brand-img').src = LOGO_SRC;
+  render();
+  setInterval(render, 250);
+
+  /* ============================================================
+     Music player (native Audio, dependency-free)
+     ============================================================ */
+
+  var audio = new Audio();
+  audio.preload = 'none';
+  var idx = 0;
+  var iconPlay = document.getElementById('icon-play');
+  var iconPause = document.getElementById('icon-pause');
+  var ppBtn = document.getElementById('playpause');
+
+  function load(i, autoplay) {
+    idx = (i + PLAYLIST.length) % PLAYLIST.length;
+    var t = PLAYLIST[idx];
+    audio.src = t.src;
+    document.getElementById('p-art').src = t.art;
+    document.getElementById('p-title').textContent = t.title;
+    document.getElementById('p-artist').textContent = t.artist;
+    if (autoplay) audio.play().catch(function () {});
+  }
+
+  function setPlayingUI(playing) {
+    iconPlay.style.display = playing ? 'none' : 'block';
+    iconPause.style.display = playing ? 'block' : 'none';
+    ppBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+  }
+
+  ppBtn.addEventListener('click', function () {
+    if (audio.paused) audio.play().catch(function () {}); else audio.pause();
+  });
+  document.getElementById('prev').addEventListener('click', function () { load(idx - 1, true); });
+  document.getElementById('next').addEventListener('click', function () { load(idx + 1, true); });
+  audio.addEventListener('play', function () { setPlayingUI(true); });
+  audio.addEventListener('pause', function () { setPlayingUI(false); });
+  audio.addEventListener('ended', function () { load(idx + 1, true); });
+
+  load(0, false);
+
+  /* ============================================================
+     Placeholder cover art (festive SVG data-URI, no external deps)
+     ============================================================ */
+  // Placeholder brand logo (swapped for the real theme-setting image later)
+  function logoPlaceholder() {
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="360" height="120">' +
+      '<rect width="360" height="120" rx="24" fill="#ffffff"/>' +
+      '<text x="30" y="58" font-family="Nunito, sans-serif" font-size="34" font-weight="800" fill="#c0392b">Love to Sing</text>' +
+      '<text x="30" y="94" font-family="Nunito, sans-serif" font-size="20" font-weight="700" fill="#1e7d4f">lovetosing.com</text>' +
+      '</svg>';
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+
+  function cover(colour, initials) {
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">' +
+      '<rect width="160" height="160" rx="18" fill="' + colour + '"/>' +
+      '<text x="80" y="98" font-family="Nunito, sans-serif" font-size="64" font-weight="800" ' +
+      'fill="#ffffff" text-anchor="middle">' + initials + '</text></svg>';
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+})();
+</script>
+</body>
+</html>
