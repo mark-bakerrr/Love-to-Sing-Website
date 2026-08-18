@@ -279,3 +279,16 @@ html, body.hc-body {
 }
 .hc-player .hc-btn-play svg { width: 3.2cqh; height: 3.2cqh; }
 .hc-player button:hover { opacity: 0.85; }
+
+/* ---------- Portrait / tall viewports (mobile) ----------
+   The design is 16:9. On any viewport taller than 16:9, fit the stage to a
+   centred 16:9 band (full width) so the countdown never overflows. The body
+   bleed colour fills the letterbox above/below. */
+@media (max-aspect-ratio: 16 / 9) {
+  .hc-stage {
+    height: 56.25vw; /* 9/16 of the width */
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+  }
+}
