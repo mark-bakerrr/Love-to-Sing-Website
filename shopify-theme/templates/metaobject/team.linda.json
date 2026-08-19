@@ -24,8 +24,10 @@
           }
         },
         "ph1": {
-          "type": "photo_right",
-          "settings": {}
+          "type": "photo",
+          "settings": {
+            "pw_handle": "christmas-in-the-park-1"
+          }
         },
         "t3": {
           "type": "text",
@@ -35,8 +37,10 @@
           }
         },
         "ph2": {
-          "type": "photo_left",
-          "settings": {}
+          "type": "photo",
+          "settings": {
+            "pw_handle": "in-the-recording-studio"
+          }
         },
         "t4": {
           "type": "text",
@@ -46,8 +50,10 @@
           }
         },
         "ph3": {
-          "type": "photo_right",
-          "settings": {}
+          "type": "photo",
+          "settings": {
+            "pw_handle": "the-founding-trio"
+          }
         },
         "t5": {
           "type": "text",

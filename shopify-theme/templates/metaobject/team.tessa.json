@@ -17,8 +17,10 @@
           }
         },
         "p2": {
-          "type": "photo_right",
-          "settings": {}
+          "type": "photo",
+          "settings": {
+            "pw_handle": "in-the-recording-studio"
+          }
         },
         "t3": {
           "type": "text",
@@ -28,8 +30,10 @@
           }
         },
         "p4": {
-          "type": "photo_left",
-          "settings": {}
+          "type": "photo",
+          "settings": {
+            "pw_handle": "wilson-home-visit"
+          }
         },
         "t5": {
           "type": "text",
@@ -39,8 +43,10 @@
           }
         },
         "p6": {
-          "type": "photo_right",
-          "settings": {}
+          "type": "photo",
+          "settings": {
+            "pw_handle": "education-degree-graduation"
+          }
         },
         "t7": {
           "type": "text",

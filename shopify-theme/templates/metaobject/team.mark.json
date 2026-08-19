@@ -17,8 +17,10 @@
           }
         },
         "p2": {
-          "type": "photo_right",
-          "settings": {}
+          "type": "photo",
+          "settings": {
+            "pw_handle": "behind-the-scenes"
+          }
         },
         "t3": {
           "type": "text",
@@ -28,8 +30,10 @@
           }
         },
         "p4": {
-          "type": "photo_left",
-          "settings": {}
+          "type": "photo",
+          "settings": {
+            "pw_handle": "behind-the-camera"
+          }
         },
         "t5": {
           "type": "text",

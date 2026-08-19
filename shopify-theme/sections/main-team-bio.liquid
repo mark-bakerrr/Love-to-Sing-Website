@@ -32,9 +32,10 @@
 <script>document.documentElement.classList.add('main-color-{{ main_color | escape }}');</script>
 
 <style>
-  /* Site header adopts this member's scheme colour once it sticks on scroll.
-     The theme paints the header background on .header::before (fades in via opacity). */
-  .shopify-section-group-header-group.is-stuck .header::before{background:linear-gradient(180deg, var(--c-main-500), var(--c-main-600))!important}
+  /* Site header adopts this member's scheme colour on scroll. Set the background VARIABLE
+     always (theme fades .header::before via opacity) so the fade-out is the scheme colour,
+     never the theme's default red. */
+  .shopify-section-group-header-group .header{--color-header-background:linear-gradient(180deg, var(--c-main-500), var(--c-main-600))}
   .shopify-section-group-header-group.is-stuck .header{--color-header-text:{{ hero_text }};color:{{ hero_text }}!important}
   .shopify-section-group-header-group.is-stuck .header a,
   .shopify-section-group-header-group.is-stuck .header summary,
@@ -87,24 +88,32 @@
             </div>
             {%- endif -%}
 
-          {%- when 'photo_left', 'photo_right' -%}
-            {%- assign side = 'left' -%}
-            {%- if block.type == 'photo_right' -%}{%- assign side = 'right' -%}{%- endif -%}
-            <figure class="weave {{ side }}" {{ block.shopify_attributes }}>
-              <div class="grid">
-                <div class="ph">
-                  {%- if block.settings.image != blank -%}
-                    <img src="{{ block.settings.image | image_url: width: 1200 }}" alt="{{ block.settings.title | escape }}" width="{{ block.settings.image.width }}" height="{{ block.settings.image.height }}" loading="lazy">
-                  {%- else -%}
-                    {{ 'image' | placeholder_svg_tag: 'tb-ph-placeholder' }}
-                  {%- endif -%}
-                </div>
-                <figcaption>
-                  {%- if block.settings.year != blank -%}<span class="yr">{{ block.settings.year | escape }}</span>{%- endif -%}
-                  {%- if block.settings.title != blank -%}<div class="cap">{{ block.settings.title | escape }}</div>{%- endif -%}
-                  {%- if block.settings.description != blank -%}<p class="cap-desc">{{ block.settings.description | escape }}</p>{%- endif -%}
-                </figcaption>
+          {%- when 'photo' -%}
+            {%- assign pw = blank -%}
+            {%- if block.settings.pw_handle != blank -%}
+              {%- for e in metaobjects.photo_wall.values -%}
+                {%- if e.system.handle == block.settings.pw_handle -%}{%- assign pw = e -%}{%- break -%}{%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+            {%- liquid
+              assign ph_img = pw.photo.value
+              assign ph_year = pw.year.value
+              assign ph_title = block.settings.title | default: pw.title.value
+              assign ph_desc = block.settings.description | default: pw.description.value
+            -%}
+            <figure class="photo" {{ block.shopify_attributes }}>
+              <div class="ph">
+                {%- if ph_img != blank -%}
+                  <img src="{{ ph_img | image_url: width: 1200 }}" alt="{{ ph_title | escape }}" loading="lazy">
+                {%- else -%}
+                  {{ 'image' | placeholder_svg_tag: 'tb-ph-placeholder' }}
+                {%- endif -%}
               </div>
+              <figcaption>
+                {%- if ph_year != blank -%}<span class="yr">{{ ph_year | escape }}</span>{%- endif -%}
+                {%- if ph_title != blank -%}<div class="cap">{{ ph_title | escape }}</div>{%- endif -%}
+                {%- if ph_desc != blank -%}<p class="cap-desc">{{ ph_desc | escape }}</p>{%- endif -%}
+              </figcaption>
             </figure>
 
         {%- endcase -%}
@@ -188,20 +197,19 @@
   .tb-pin::before{left:12px;transform:rotate(-45deg);transform-origin:0 100%}
   .tb-pin::after{left:0;transform:rotate(45deg);transform-origin:100% 100%}
 
-  /* woven photos — full image, break wider than the column, alternate sides */
-  .tb figure.weave{margin:clamp(4.8rem,7vw,7.2rem) auto;width:min(96rem,94vw);position:relative;left:50%;translate:-50% 0}
-  .tb figure.weave .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:clamp(1.92rem,3.5vw,4.16rem);align-items:center}
-  .tb figure.weave.right .ph{order:2}
-  .tb figure.weave .ph{border-radius:14px;overflow:hidden;box-shadow:0 22px 44px rgba(0,0,0,.16)}
-  .tb figure.weave .ph img{width:100%;height:auto;display:block}
-  .tb figure.weave .ph svg{width:100%;height:auto;display:block;aspect-ratio:4/3;background:#ececec}
-  .tb figure.weave .yr{display:inline-block;font-weight:900;color:var(--red);font-size:1.28rem;letter-spacing:.1em;margin-bottom:.56rem}
-  .tb figure.weave .cap{font-weight:800;font-size:clamp(1.92rem,2.4vw,2.4rem);color:var(--ink);line-height:1.15}
-  .tb figure.weave .cap-desc{margin-top:.8rem;font-weight:500;font-size:clamp(1.6rem,1.7vw,1.76rem);line-height:1.5;color:var(--body)}
+  /* photo — centred image with the caption centred below */
+  .tb figure.photo{margin:clamp(4.8rem,7vw,7.2rem) auto;max-width:min(66rem,92vw);text-align:center}
+  .tb figure.photo .ph{border-radius:14px;overflow:hidden;box-shadow:0 22px 44px rgba(0,0,0,.16)}
+  .tb figure.photo .ph img{width:100%;height:auto;display:block}
+  .tb figure.photo .ph svg{width:100%;height:auto;display:block;aspect-ratio:4/3;background:#ececec}
+  .tb figure.photo figcaption{margin-top:clamp(1.2rem,2.5vw,1.8rem)}
+  .tb figure.photo .yr{display:inline-block;font-weight:900;color:var(--red);font-size:1.28rem;letter-spacing:.1em;margin-bottom:.4rem}
+  .tb figure.photo .cap{font-weight:800;font-size:clamp(1.92rem,2.4vw,2.4rem);color:var(--ink);line-height:1.15}
+  .tb figure.photo .cap-desc{margin:.72rem auto 0;max-width:46rem;font-weight:500;font-size:clamp(1.6rem,1.7vw,1.76rem);line-height:1.5;color:var(--body)}
 
   /* subtle motion — gentle image zoom on hover + scroll reveal */
-  .tb figure.weave .ph img{transition:transform .8s cubic-bezier(.22,1,.36,1)}
-  .tb figure.weave:hover .ph img{transform:scale(1.035)}
+  .tb figure.photo .ph img{transition:transform .8s cubic-bezier(.22,1,.36,1)}
+  .tb figure.photo:hover .ph img{transform:scale(1.035)}
   .tb-portrait img{transition:transform .8s cubic-bezier(.22,1,.36,1)}
   .tb-hero:hover .tb-portrait img{transform:scale(1.03)}
   @media (prefers-reduced-motion: no-preference){
@@ -220,8 +228,6 @@
   @media(max-width:800px){
     .tb-hero__in{grid-template-columns:1fr}
     .tb-portrait{order:-1;max-width:24rem}
-    .tb figure.weave .grid,.tb figure.weave.right .grid{grid-template-columns:1fr}
-    .tb figure.weave.right .ph{order:0}
   }
 {% endstylesheet %}
 
@@ -230,7 +236,7 @@
   (function(){
     if(!('IntersectionObserver' in window)) return;
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    var els=[].slice.call(document.querySelectorAll('.tb-body .tb-seg, .tb-body .tb-note, .tb-body figure.weave'));
+    var els=[].slice.call(document.querySelectorAll('.tb-body .tb-seg, .tb-body .tb-note, .tb-body figure.photo'));
     if(!els.length) return;
     els.forEach(function(el){ el.classList.add('tb-anim'); });
     var io=new IntersectionObserver(function(entries){
@@ -338,23 +344,12 @@
       ]
     },
     {
-      "type": "photo_left",
-      "name": "Weave photo — left",
+      "type": "photo",
+      "name": "Photo",
       "settings": [
-        { "type": "image_picker", "id": "image", "label": "Image" },
-        { "type": "text", "id": "year", "label": "Year" },
-        { "type": "text", "id": "title", "label": "Title (header)" },
-        { "type": "text", "id": "description", "label": "Description" }
-      ]
-    },
-    {
-      "type": "photo_right",
-      "name": "Weave photo — right",
-      "settings": [
-        { "type": "image_picker", "id": "image", "label": "Image" },
-        { "type": "text", "id": "year", "label": "Year" },
-        { "type": "text", "id": "title", "label": "Title (header)" },
-        { "type": "text", "id": "description", "label": "Description" }
+        { "type": "text", "id": "pw_handle", "label": "Photo Wall photo (handle)", "info": "The handle of the Photo Wall entry — its image, year, title and description are pulled in automatically. Find the handle on the Photo Wall entry in admin." },
+        { "type": "text", "id": "title", "label": "Title override (optional)" },
+        { "type": "text", "id": "description", "label": "Description override (optional)" }
       ]
     }
   ],
