@@ -1,46 +1,190 @@
 {%- comment -%}
-  Team member bio page (rendered for a `team` metaobject's web page).
-  The photo_wall people tags link here.
+  Team member bio page (rendered for a `team` metaobject web page).
+  Editorial layout on the Love to Sing design system. Per-member hero colour,
+  rich `content`, a `quote` sticky note, and the Photo Wall photos the person is
+  tagged in woven down the page (full images, alternating sides).
 {%- endcomment -%}
 
-<div class="team-bio">
-  {%- if metaobject.photo.value != blank -%}
-    <img class="team-bio__photo"
-      src="{{ metaobject.photo.value | image_url: width: 640 }}"
-      alt="{{ metaobject.name.value | escape }}" width="220" height="220" loading="lazy">
-  {%- endif -%}
+{%- liquid
+  assign m = metaobject
+  assign heart = 'hearts-background.png' | asset_url
 
-  <h1 class="team-bio__name">{{ metaobject.name.value | escape }}</h1>
+  assign hero_color = m.hero_color.value | default: '#C42637'
+  assign bright = hero_color | color_brightness
+  assign hero_bottom = hero_color | color_darken: 12
+  if bright > 140
+    assign hero_text = '#241a00'
+    assign hero_intro = hero_color | color_darken: 52
+    assign heart_tint = hero_color | color_darken: 42
+  else
+    assign hero_text = '#ffffff'
+    assign hero_intro = hero_color | color_lighten: 42
+    assign heart_tint = '#ffffff'
+  endif
+  assign heart_op = section.settings.hero_heart_opacity | default: 7 | divided_by: 100.0
+-%}
 
-  {%- if metaobject.role.value != blank -%}
-    <p class="team-bio__role">{{ metaobject.role.value | escape }}</p>
-  {%- endif -%}
+<div class="tb" style="
+  --heart:url('{{ heart }}');
+  --hero-bg:linear-gradient(180deg, {{ hero_color }}, {{ hero_bottom }});
+  --hero-text:{{ hero_text }};
+  --hero-intro:{{ hero_intro }};
+  --heart-tint:{{ heart_tint }};
+  --heart-op:{{ heart_op }};">
 
-  {%- if metaobject.bio.value != blank -%}
-    <div class="team-bio__text">{{ metaobject.bio.value | newline_to_br }}</div>
-  {%- endif -%}
+  <header class="tb-hero">
+    <div class="tb-hero__in">
+      <div class="tb-hero__text">
+        <h1>{{ m.name.value | escape }}</h1>
+        {%- if m.role.value != blank -%}<span class="tb-role">{{ m.role.value | escape }}</span>{%- endif -%}
+        {%- if m.bio.value != blank -%}<p class="tb-intro">{{ m.bio.value | escape }}</p>{%- endif -%}
+      </div>
+      {%- if m.photo.value != blank -%}
+        <div class="tb-portrait"><img src="{{ m.photo.value | image_url: width: 760 }}" alt="{{ m.name.value | escape }}" width="420" height="525" loading="eager"></div>
+      {%- endif -%}
+    </div>
+  </header>
 
-  <p class="team-bio__back">
-    <a href="{{ routes.root_url }}pages/photo-wall">&larr; Back to the Photo Wall</a>
-  </p>
+  <div class="tb-body">
+    <div id="tb-content" class="rte">{{ m.content }}</div>
+  </div>
 </div>
 
+{%- if m.quote.value != blank -%}
+  <script type="application/json" id="tb-quote">{"text": {{ m.quote.value | json }}, "cite": {{ m.name.value | json }}}</script>
+{%- endif -%}
+
+<script type="application/json" id="tb-photos">
+[
+  {%- assign first = true -%}
+  {%- for e in metaobjects.photo_wall.values -%}
+    {%- for person in e.people.value -%}
+      {%- if person.system.handle == m.system.handle -%}
+        {%- unless first -%},{%- endunless -%}{%- assign first = false -%}
+        {"img": {{ e.photo.value | image_url: width: 1100 | json }}, "year": {{ e.year.value | json }}, "title": {{ e.title.value | json }}}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endfor -%}
+]
+</script>
+
 {% stylesheet %}
-  .team-bio{max-width:820px;margin:0 auto;padding:64px 24px;text-align:center;
-    font-family:'Nunito', system-ui, sans-serif;}
-  .team-bio__photo{width:200px;height:200px;object-fit:cover;border-radius:18px;
-    box-shadow:0 14px 34px rgba(0,0,0,.18);}
-  .team-bio__name{font-size:clamp(32px,5vw,44px);font-weight:900;margin:24px 0 4px;line-height:1.05;}
-  .team-bio__role{font-size:16px;font-weight:800;color:#C42637;letter-spacing:.02em;margin:0 0 22px;}
-  .team-bio__text{font-size:17px;line-height:1.65;color:#3a3a3a;max-width:640px;margin:0 auto;text-align:left;}
-  .team-bio__back{margin-top:36px;}
-  .team-bio__back a{color:#C42637;font-weight:800;text-decoration:none;}
-  .team-bio__back a:hover{text-decoration:underline;}
+  .tb{--ink:#1a1a1a;--body:#333;--muted:#797979;--red:#C42637;--pink:#fcdcdb;
+    --measure:52rem;--wrap:clamp(1rem,4vw,3.5rem);
+    font-family:'Nunito',system-ui,sans-serif;color:var(--body);line-height:1.7}
+  .tb *{box-sizing:border-box}
+
+  .tb-hero{position:relative;overflow:hidden;background:var(--hero-bg);color:var(--hero-text)}
+  .tb-hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:var(--heart-tint);opacity:var(--heart-op);
+    -webkit-mask:var(--heart) center/cover;mask:var(--heart) center/cover}
+  .tb-hero__in{position:relative;max-width:74rem;margin:0 auto;padding:clamp(2.5rem,6vw,5rem) var(--wrap);
+    display:grid;grid-template-columns:minmax(0,1fr) 21rem;gap:clamp(1.5rem,5vw,3.5rem);align-items:center}
+  .tb-hero h1{font-weight:900;font-size:clamp(2.6rem,7.5vw,5.4rem);line-height:.95;letter-spacing:-.02em;margin:0;text-wrap:balance}
+  .tb-role{display:inline-flex;align-items:center;gap:.4em;
+    background:color-mix(in srgb, var(--hero-text) 12%, transparent);color:var(--hero-text);
+    font-weight:800;font-size:.95rem;padding:6px 15px;border-radius:999px;margin:1.1rem 0 .2rem}
+  .tb-role::before{content:"\2665";font-size:.85em;opacity:.85}
+  .tb-intro{font-size:clamp(1.05rem,2vw,1.25rem);max-width:36rem;margin:1rem 0 0;color:var(--hero-intro)}
+  .tb-portrait{aspect-ratio:4/5;border-radius:16px;overflow:hidden;box-shadow:0 26px 54px rgba(0,0,0,.3)}
+  .tb-portrait img{width:100%;height:100%;object-fit:cover;display:block}
+
+  .tb-body{max-width:var(--measure);margin:clamp(3.5rem,9vw,6.25rem) auto;padding:0 var(--wrap)}
+  .tb .rte>*{max-width:var(--measure);margin-left:auto;margin-right:auto}
+  .tb .rte h2,.tb .rte h3{font-weight:900;color:var(--ink);line-height:1.08;letter-spacing:-.01em;margin:clamp(3rem,7vw,4.5rem) 0 .8rem;text-wrap:balance}
+  .tb .rte h2{font-size:clamp(1.7rem,4vw,2.4rem)} .tb .rte h3{font-size:clamp(1.35rem,3vw,1.7rem)}
+  .tb .rte p{font-size:clamp(1.05rem,1.6vw,1.18rem);margin:0 0 1.15rem;color:var(--body);text-wrap:pretty}
+  .tb .rte>p:first-of-type{font-size:clamp(1.2rem,2.2vw,1.4rem);font-weight:600;color:var(--ink)}
+  .tb .rte a{color:var(--red);font-weight:700} .tb .rte strong{font-weight:800} .tb .rte em{font-style:italic}
+  .tb .rte ul,.tb .rte ol{margin:0 0 1.15rem 1.2rem} .tb .rte li{margin:.3rem 0}
+
+  /* quote sticky note (JS-inserted) */
+  .tb-note{max-width:var(--measure);margin:clamp(3rem,7vw,4.5rem) auto}
+  .tb-note__card{position:relative;background:#f3f3f3;padding:1.7rem 1.9rem;border-radius:14px;rotate:-1.5deg;
+    box-shadow:0 18px 40px rgba(0,0,0,.14)}
+  .tb-note__card::before{content:"";position:absolute;inset:0;pointer-events:none;background:var(--red);opacity:.03;border-radius:14px;
+    -webkit-mask:var(--heart) center/cover;mask:var(--heart) center/cover}
+  .tb-note__q,.tb-note__c{position:relative}
+  .tb-note__q{font-family:'Caveat',cursive;font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.12;color:#3a2f22}
+  .tb-note__c{display:block;margin-top:.55rem;font-weight:800;color:var(--red);font-size:.92rem}
+  .tb-pin{position:absolute;top:-15px;left:50%;translate:-50% 0;width:24px;height:22px;filter:drop-shadow(0 4px 5px rgba(0,0,0,.35))}
+  .tb-pin::before,.tb-pin::after{content:"";position:absolute;top:0;width:12px;height:19px;background:var(--red);border-radius:12px 12px 0 0}
+  .tb-pin::before{left:12px;transform:rotate(-45deg);transform-origin:0 100%}
+  .tb-pin::after{left:0;transform:rotate(45deg);transform-origin:100% 100%}
+
+  /* woven photos — full image, break wider than the column, alternate sides */
+  .tb figure.weave{margin:clamp(3rem,7vw,4.5rem) auto;width:min(60rem,94vw);position:relative;left:50%;translate:-50% 0}
+  .tb figure.weave .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:clamp(1.2rem,3.5vw,2.6rem);align-items:center}
+  .tb figure.weave.right .ph{order:2}
+  .tb figure.weave .ph{border-radius:14px;overflow:hidden;box-shadow:0 22px 44px rgba(0,0,0,.16)}
+  .tb figure.weave .ph img{width:100%;height:auto;display:block}
+  .tb figure.weave .yr{display:inline-block;font-weight:900;color:var(--red);font-size:.8rem;letter-spacing:.1em;margin-bottom:.35rem}
+  .tb figure.weave .cap{font-weight:800;font-size:clamp(1.2rem,2.4vw,1.5rem);color:var(--ink);line-height:1.15}
+
+  @media(max-width:800px){
+    .tb-hero__in{grid-template-columns:1fr}
+    .tb-portrait{order:-1;max-width:15rem}
+    .tb figure.weave .grid,.tb figure.weave.right .grid{grid-template-columns:1fr}
+    .tb figure.weave.right .ph{order:0}
+  }
 {% endstylesheet %}
+
+{% javascript %}
+  (function(){
+    var content=document.getElementById('tb-content');
+    if(!content) return;
+    function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+    function readJSON(id){try{var el=document.getElementById(id);return el?JSON.parse(el.textContent):null;}catch(e){return null;}}
+
+    var blocks=Array.prototype.slice.call(content.children);
+    var after=0; // insert position pointer within blocks
+
+    // quote sticky note after the first block
+    var q=readJSON('tb-quote');
+    if(q&&q.text&&blocks.length){
+      var note=document.createElement('div');
+      note.className='tb-note';
+      note.innerHTML='<div class="tb-note__card"><span class="tb-pin"></span>'
+        +'<div class="tb-note__q">“'+esc(q.text)+'”</div>'
+        +(q.cite?'<span class="tb-note__c">— '+esc(q.cite)+'</span>':'')+'</div>';
+      blocks[0].insertAdjacentElement('afterend', note);
+      after=1;
+    }
+
+    // weave photos through the remaining blocks, alternating sides
+    var photos=(readJSON('tb-photos')||[]).filter(function(p){return p&&p.img;});
+    if(photos.length){
+      function fig(p,i){
+        var f=document.createElement('figure');
+        f.className='weave '+(i%2?'right':'left');
+        f.innerHTML='<div class="grid"><div class="ph"><img src="'+esc(p.img)+'" alt="" loading="lazy"></div>'
+          +'<figcaption>'+(p.year?'<span class="yr">'+esc(p.year)+'</span>':'')
+          +(p.title?'<div class="cap">'+esc(p.title)+'</div>':'')+'</figcaption></div>';
+        return f;
+      }
+      var remaining=blocks.slice(after+1);
+      if(!remaining.length){ photos.forEach(function(p,i){content.appendChild(fig(p,i));}); return; }
+      var step=Math.max(1, Math.floor(remaining.length/(photos.length+1)));
+      var pi=0;
+      for(var i=step-1;i<remaining.length && pi<photos.length;i+=step){
+        remaining[i].insertAdjacentElement('afterend', fig(photos[pi],pi)); pi++;
+      }
+      while(pi<photos.length){ content.appendChild(fig(photos[pi],pi)); pi++; }
+    }
+  })();
+{% endjavascript %}
 
 {% schema %}
 {
   "name": "Team bio",
-  "settings": []
+  "settings": [
+    {
+      "type": "range",
+      "id": "hero_heart_opacity",
+      "label": "Heart background transparency",
+      "min": 0, "max": 100, "step": 1, "unit": "%",
+      "default": 7
+    }
+  ]
 }
 {% endschema %}
