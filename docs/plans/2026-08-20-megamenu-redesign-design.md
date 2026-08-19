@@ -35,8 +35,18 @@ Adding a new menu type means wrestling that schema. It must also be **beautiful 
 - **Transparent at the top** (over the hero), **fills with the header colour on scroll** (`.solid`). Also goes solid while a mega menu is open.
 - **No divider line** under nav links or above the panel.
 - **Click-to-open** as well as hover: on touch / `hover:none` devices hover-open is disabled and tap toggles the panel (click-away and Esc close).
-- A **floating "pill" header variant** is included behind a toggle (detached, rounded, always-solid; mega drops as a rounded card).
+- A **floating "pill" header variant** is the default (toggle to compare). Lower radius (`--radius-m`), and it **stays floating on mobile**; the mega drops as a rounded card.
 - Colours use the theme **main-color schemes** (red/blue/green/yellow); Halloween uses a placeholder orange to be mapped to a real scheme.
+
+### Search — full-screen overlay (reuses the existing engine)
+The current site already uses Shopify **predictive search**: `routes.predictive_search_url?q=…&resources[type]=product,article,page&section_id=predictive-search`, rendered by `sections/predictive-search.liquid`; the `/search` results page (`sections/main-search.liquid`) has **all / song / shop / blog** chips; songs are `tag:song` products. **We keep that engine** and only replace the shell:
+
+- Clicking the header **search icon** opens a **full-screen overlay** — Love to Sing logo top-left, a large single input with an animated red underline, the same **all / songs / shop / blog** chips, plus **popular searches** and **top songs** (song discs mirror the per-product main-color).
+- **GSAP entrance**: backdrop fade + blur, logo/input rise, results **stagger** in (ui-polish motion). Graceful CSS fallback (`--i` staggered delays) if GSAP is unavailable. Esc / ✕ / backdrop close.
+- Production: wrap the existing `predictive-search.liquid` markup in this overlay; `z-index` above the header; reuse the `PredictiveSearch` fetch/debounce/cache JS.
+
+### Mobile — full-page overlay menu (replaces the side drawer)
+- The **☰** opens a **full-page overlay** (brand deep-red gradient), big staggered nav items with inline accordions, a search trigger, and Cart/Account footer. GSAP stagger with CSS fallback; body scroll-locked.
 
 ### Architecture — **Option A: native menu + typed section blocks**
 Chosen over (B) redesigned metaobjects and (C) hardcoded snippets.
@@ -56,7 +66,7 @@ Single interactive file: `docs/plans/megamenu-wireframes/index.html`, built on *
 2. **Shop** — ecommerce: three link columns (products / licences / bundles) + a featured-album card with price and CTA.
 3. **Discover** — editorial hub: a large gradient **feature card for *Heart of Love to Sing***, a **team-bios** people list with avatars, and image **tiles** (Photo Wall / Blog / Send it in).
 4. **Countdown** — seasonal: **"127 sleeps to Christmas"** hero + a **24-door advent calendar** (opened / today / locked states) + a **This week** highlights list.
-5. **Mobile drawer** — full-screen slide-in accordion covering all four (mirrors `navigation-mobile.liquid`, switches at 990px); includes a countdown bar and avatar sublinks.
+5. **Mobile / overlays** — full-page **menu overlay** (replaces the side drawer) + full-screen **search overlay**, both with GSAP-staggered entrances.
 
 Desktop: single-open hover controller (Esc closes, keyboard focus opens). Mobile: `<details>` drill-down, overlay, body-scroll lock.
 
