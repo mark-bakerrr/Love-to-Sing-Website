@@ -1,0 +1,165 @@
+{%- comment -%}
+  Photo Wall — a pannable corkboard of pinned photos. Click a photo for a popup
+  with its data. Photos come from the `photo_wall` metaobject; each person in a
+  photo's `people` list is a `team` metaobject that links to their bio page.
+
+  Use with the chrome-free layout: set the page's theme template to "photo-wall"
+  (templates/page.photo-wall.liquid).
+{%- endcomment -%}
+
+{%- liquid
+  assign entries = metaobjects.photo_wall.values | sort: 'year.value'
+-%}
+
+{{ 'photo-wall.css' | asset_url | stylesheet_tag }}
+
+<div class="pw-viewport" id="pw-viewport">
+  <div class="pw-world" id="pw-world">
+    <div class="pw-watermark" id="pw-watermark">{{ section.settings.watermark | escape | newline_to_br }}</div>
+  </div>
+</div>
+
+<a class="pw-topbar" href="{{ routes.root_url }}">
+  {%- if section.settings.logo != blank -%}
+    <img src="{{ section.settings.logo | image_url: width: 220 }}" alt="{{ shop.name | escape }}" width="110" height="26">
+  {%- else -%}
+    <span class="logo">{{ shop.name | escape }}</span>
+  {%- endif -%}
+  {%- if section.settings.subtitle != blank -%}<span class="sub">{{ section.settings.subtitle | escape }}</span>{%- endif -%}
+</a>
+
+<div class="pw-hint" id="pw-hint">Drag to explore · Scroll to zoom</div>
+
+<div class="pw-controls">
+  <button id="pw-zoom-in" aria-label="Zoom in">+</button>
+  <button id="pw-zoom-out" aria-label="Zoom out">&minus;</button>
+  <button id="pw-recentre" aria-label="Recentre" title="Recentre">&#9673;</button>
+</div>
+
+{%- if section.settings.show_music_player and section.blocks.size > 0 -%}
+  <div class="pw-player" id="pw-player">
+    <img class="art" id="pw-part" alt="" width="44" height="44">
+    <div class="meta"><div class="t" id="pw-ptitle">&mdash;</div><div class="a" id="pw-partist">&mdash;</div></div>
+    <div class="ctrl">
+      <button class="side" id="pw-pprev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+      <button class="play" id="pw-pplay" aria-label="Play">
+        <svg id="pw-iplay" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="pw-ipause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+      </button>
+      <button class="side" id="pw-pnext" aria-label="Next"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
+    </div>
+  </div>
+{%- endif -%}
+
+<div class="pw-modal" id="pw-modal">
+  <div class="pw-backdrop" data-close></div>
+  <div class="pw-dialog">
+    <button class="pw-close" data-close aria-label="Close">&#10005;</button>
+    <div class="pw-photo"><img id="pw-mphoto" alt="" width="1000" height="750"></div>
+    <div class="pw-info" id="pw-minfo"></div>
+  </div>
+</div>
+
+{%- if entries.size == 0 and request.design_mode -%}
+  <div class="pw-empty">Add entries to your <strong>Photo wall</strong> metaobject to populate this wall.</div>
+{%- endif -%}
+
+{%- comment -%} Photo data for the canvas + popup {%- endcomment -%}
+<script type="application/json" id="pw-data">
+[
+  {%- for e in entries -%}
+    {
+      "src": {{ e.photo.value | image_url: width: 1000 | json }},
+      "thumb": {{ e.photo.value | image_url: width: 520 | json }},
+      "year": {{ e.year.value | json }},
+      "title": {{ e.title.value | json }},
+      "desc": {{ e.description.value | json }},
+      "location": {{ e.location.value | json }},
+      "category": {{ e.category.value | json }},
+      "link": {{ e.link.value | json }},
+      "people": [
+        {%- for person in e.people.value -%}
+          {"name": {{ person.name.value | json }}, "url": {{ person.system.url | json }}}{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ],
+      "product": {% if e.product.value != blank %}{"img": {{ e.product.value.featured_image | image_url: width: 200 | json }}, "url": {{ e.product.value.url | json }}}{% else %}null{% endif %}
+    }{%- unless forloop.last -%},{%- endunless -%}
+  {%- endfor -%}
+]
+</script>
+
+{%- comment -%} Music playlist from Track blocks {%- endcomment -%}
+<script type="application/json" id="pw-tracks">
+[
+  {%- assign first = true -%}
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'track' and block.settings.audio_url != blank -%}
+      {%- unless first -%},{%- endunless -%}{%- assign first = false -%}
+      {
+        "title": {{ block.settings.title | json }},
+        "artist": {{ block.settings.artist | json }},
+        "art": {% if block.settings.artwork != blank %}{{ block.settings.artwork | image_url: width: 120 | json }}{% else %}""{% endif %},
+        "src": {{ block.settings.audio_url | json }}
+      }
+    {%- endif -%}
+  {%- endfor -%}
+]
+</script>
+
+<script src="{{ 'photo-wall.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Photo Wall",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo (top-left)",
+      "info": "Links to the homepage. Falls back to the shop name if empty."
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "The Heart of Love to Sing"
+    },
+    {
+      "type": "text",
+      "id": "watermark",
+      "label": "Background watermark",
+      "default": "LOVE TO\nSING",
+      "info": "Faint text in the middle of the board. Use a line break for two lines."
+    },
+    {
+      "type": "header",
+      "content": "Music player"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_music_player",
+      "label": "Show music player",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "track",
+      "name": "Track",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Song title" },
+        { "type": "text", "id": "artist", "label": "Artist", "default": "Love to Sing" },
+        { "type": "image_picker", "id": "artwork", "label": "Artwork" },
+        { "type": "url", "id": "audio_url", "label": "Audio URL", "info": "Full/lo-fi track (Shopify Files URL is fine)." }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "Photo Wall" }
+  ]
+}
+{% endschema %}
