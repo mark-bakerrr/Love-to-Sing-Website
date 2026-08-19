@@ -1,0 +1,79 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-team-bio",
+      "blocks": {
+        "t1": {
+          "type": "text",
+          "settings": {
+            "body": "<p>Linda Adamson is the founder of Love to Sing, a family business that has grown from its New Zealand beginnings into a catalogue of music enjoyed around the world.</p><p>Linda’s connection with children’s music began through her work as an early childhood teacher and later as a music lecturer. Her first major publication, <em>Love to Learn Songbook</em>, was published by Ashton Scholastic in 1991 — bringing together songs, illustrations and practical ideas to encourage children to participate in music.</p>"
+          }
+        },
+        "q1": {
+          "type": "quote",
+          "settings": {
+            "quote": "You do not need to be an expert to share singing and dancing with children. Enthusiasm and participation is the key — children will join in wholeheartedly.",
+            "cite": "Linda Adamson"
+          }
+        },
+        "t2": {
+          "type": "text",
+          "settings": {
+            "heading": "The beginning of Love to Sing",
+            "body": "<p>In 1994, with a small family loan, Linda established Love to Sing Ltd. One of her first independent ventures was Love to Sing Christmas Songs — she developed a fundraising programme and sent sample cassettes directly to schools and early childhood centres throughout New Zealand. More than 7,000 cassettes were sold, helping establish the young business.</p><p>Linda worked from home so she could build Love to Sing while raising her two daughters. As the company grew, home and business continued side by side — something that remains part of Love to Sing today.</p>"
+          }
+        },
+        "ph1": {
+          "type": "photo_right",
+          "settings": {}
+        },
+        "t3": {
+          "type": "text",
+          "settings": {
+            "heading": "From an idea to a finished product",
+            "body": "<p>In the early years, Linda was involved in virtually every stage of bringing a Love to Sing product to market — developing concepts and songs, working with arranger Brett Holt and illustrator Vasanti Unka, organising young singers and recordings, coordinating printing and packaging, and marketing to schools, centres and retailers.</p><p>The catalogue grew across songbooks, cassettes, CDs, videos, DVDs, fitness programmes and teaching resources. Linda has since written more than 200 original songs, with more than 400 works registered with APRA.</p>"
+          }
+        },
+        "ph2": {
+          "type": "photo_left",
+          "settings": {}
+        },
+        "t4": {
+          "type": "text",
+          "settings": {
+            "heading": "A family story",
+            "body": "<p>Family has remained at the heart of Love to Sing. Linda’s daughters, nieces, nephews and children of family friends were involved in recordings, videos and performances during the early years. Today, Linda works closely with her daughter Tessa Baker, Head of Creative Production, and son-in-law Mark Baker.</p><p>For Linda, being able to create music while working alongside her family has been one of the great joys of the journey.</p>"
+          }
+        },
+        "ph3": {
+          "type": "photo_right",
+          "settings": {}
+        },
+        "t5": {
+          "type": "text",
+          "settings": {
+            "heading": "Happy vibrations around the world",
+            "body": "<p>Long before YouTube or streaming existed, Linda had a simple vision: to create <em>happy vibrations around the world</em> through music. Today, Love to Sing reaches audiences everywhere through YouTube and major platforms, its videos accumulating billions of views. More than three decades on, Linda continues to write and create new music.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "q1",
+        "t2",
+        "ph1",
+        "t3",
+        "ph2",
+        "t4",
+        "ph3",
+        "t5"
+      ],
+      "settings": {
+        "hero_heart_opacity": 7
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}
