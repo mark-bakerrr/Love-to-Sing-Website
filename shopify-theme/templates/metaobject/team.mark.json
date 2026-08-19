@@ -1,0 +1,58 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-team-bio",
+      "blocks": {
+        "t0": {
+          "type": "text",
+          "settings": {
+            "body": "<p>Mark Baker is an integral part of the family team behind Love to Sing, bringing business, technical and digital expertise — along with a willingness to turn his hand to whatever needs doing.</p><p>With a degree in Marketing and Business, Mark works across IT, accounts, digital systems and website production, helping Love to Sing continue evolving in an increasingly digital world.</p>"
+          }
+        },
+        "t1": {
+          "type": "text",
+          "settings": {
+            "heading": "Technology & website development",
+            "body": "<p>Mark can write code and contributes to the ongoing development and design of the Love to Sing website, combining technical problem-solving with an understanding of the business and its changing needs.</p><p>He also works across accounts and business systems, providing an important technical and operational foundation for the company.</p>"
+          }
+        },
+        "p2": {
+          "type": "photo_right",
+          "settings": {}
+        },
+        "t3": {
+          "type": "text",
+          "settings": {
+            "heading": "Behind the camera — and wherever needed",
+            "body": "<p>Mark’s involvement with Love to Sing began long before his current technical role.</p><p>At around 17 or 18 years old, he was prepared to climb into the Big Teddy Bear costume for Love to Sing shows — an early example of the many hats he has worn over the years.</p><p>That same willingness continues today. During studio productions Mark helps with filming and works behind the scenes alongside the film director, while at dance and choreography sessions he is just as likely to be found helping with practical jobs — even sweeping the studio floor when that’s what needs doing.</p>"
+          }
+        },
+        "p4": {
+          "type": "photo_left",
+          "settings": {}
+        },
+        "t5": {
+          "type": "text",
+          "settings": {
+            "heading": "A family team",
+            "body": "<p>Mark works alongside his wife, Tessa Baker, Head of Creative Production, whose creative skills complement Mark’s technical and business strengths.</p><p>Together with Linda Adamson, they form the core family team behind Love to Sing today — combining songwriting, creative production, technology and business with a very hands-on approach.</p><p>From wearing a teddy-bear costume to writing code, working behind the camera, sweeping the studio floor or making a very good coffee, Mark’s contribution reflects something that has always been part of Love to Sing: everyone is prepared to wear many hats.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "t0",
+        "t1",
+        "p2",
+        "t3",
+        "p4",
+        "t5"
+      ],
+      "settings": {
+        "hero_heart_opacity": 7
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

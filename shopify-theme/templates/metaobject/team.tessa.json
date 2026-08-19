@@ -1,0 +1,71 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-team-bio",
+      "blocks": {
+        "t0": {
+          "type": "text",
+          "settings": {
+            "body": "<p>Tessa Baker, formerly Tessa Adamson, has been part of Love to Sing for most of her life. From performing and recording as a child to becoming Head of Creative Production, her experience spans performance, education, choreography and creative production.</p>"
+          }
+        },
+        "t1": {
+          "type": "text",
+          "settings": {
+            "heading": "Growing up with the music",
+            "body": "<p>Tessa grew up surrounded by Love to Sing and became one of its familiar young faces and voices.</p><p>She recorded songs, performed with the Love to Sing choir and appeared in videos including <em>Here Is a Beehive</em>, <em>Hello Nice Day</em>, <em>Hey Baby Let’s Rock and Roll</em> and <em>We’re Going on a Lion Hunt</em>.</p><p>Those early years gave Tessa first-hand experience of how children connect with music through singing, movement and participation.</p>"
+          }
+        },
+        "p2": {
+          "type": "photo_right",
+          "settings": {}
+        },
+        "t3": {
+          "type": "text",
+          "settings": {
+            "heading": "Performing at home and around the world",
+            "body": "<p>Tessa went on to perform hundreds of shows and workshops with Linda in schools, community events and larger public performances.</p><p>Her Love to Sing journey also took her internationally, with performances and workshops in Taiwan, Singapore and Thailand.</p><p>She has taken part in many community and charitable events, supporting causes including Starship Children’s Hospital, Wilson Home, Variety, Nurture’s Teddy Bears’ Picnic and PORSE’s Christchurch earthquake fundraising efforts.</p>"
+          }
+        },
+        "p4": {
+          "type": "photo_left",
+          "settings": {}
+        },
+        "t5": {
+          "type": "text",
+          "settings": {
+            "heading": "From education to creative production",
+            "body": "<p>Tessa completed an Education Degree and worked as a primary-school teacher, teaching arts, music and drama.</p><p>Today, as Head of Creative Production, she draws on that background to help shape Love to Sing’s music and visual content — leading creative development, performance and choreography, and working with vocalists, musicians, arrangers, artists and other creative professionals in New Zealand and around the world.</p>"
+          }
+        },
+        "p6": {
+          "type": "photo_right",
+          "settings": {}
+        },
+        "t7": {
+          "type": "text",
+          "settings": {
+            "heading": "The next generation of Love to Sing",
+            "body": "<p>Tessa now helps lead the creative direction of the business alongside Linda Adamson and her husband, Mark Baker, combining the family’s creative, educational and technical strengths.</p><p>Having grown from child performer to educator and creative producer, Tessa brings a lifetime of Love to Sing experience to its future — helping introduce the music to new generations and audiences around the world.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "t0",
+        "t1",
+        "p2",
+        "t3",
+        "p4",
+        "t5",
+        "p6",
+        "t7"
+      ],
+      "settings": {
+        "hero_heart_opacity": 7
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}
