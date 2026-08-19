@@ -10,6 +10,7 @@
 <style>
 /* ============================================================
    Tokens copied 1:1 from the live theme (assets/base.css)
+   Main-color schemes mirror the site's product main-color coding.
    ============================================================ */
 :root{
   --c-neutral-50:#fff; --c-neutral-100:#F4F4F4; --c-neutral-200:#E8E8E8; --c-neutral-300:#B0B0B0;
@@ -20,6 +21,8 @@
   --c-green-300:#A5D0A9; --c-green-500:#519659;
   --c-blue-300:#76AAEA; --c-blue-500:#205FA9;
   --c-main-500:var(--c-red-500); --c-main-600:var(--c-red-600); --c-main-700:var(--c-red-700);
+  /* Halloween has no theme scheme yet — placeholder orange, map to a real scheme later */
+  --c-orange-400:#F0813A; --c-orange-600:#B4470F;
 
   /* colour-scheme vars (from settings_data default scheme) */
   --color-foreground:#141414; --color-subdued:#797979; --color-border:#e3e3e3;
@@ -45,23 +48,29 @@ html{font-size:62.5%}                 /* 1rem = 10px, matches theme */
 *{box-sizing:border-box}
 body{margin:0;font-family:"Nunito",system-ui,sans-serif;color:var(--color-foreground);
      background:#fafafa;font-size:var(--fz-r);line-height:1.5}
-.page{min-height:170vh}
 a{color:inherit}
 
-/* per-song tint helpers (mirror product .main-color-* metafield) */
+/* per-song / per-category tint helpers (mirror product .main-color-* metafield) */
 .tint-red{--tint-bg:var(--c-red-100);--tint-fg:var(--c-red-500)}
 .tint-blue{--tint-bg:var(--c-blue-300);--tint-fg:var(--c-blue-500)}
 .tint-green{--tint-bg:var(--c-green-300);--tint-fg:var(--c-green-500)}
 .tint-yellow{--tint-bg:var(--c-yellow-300);--tint-fg:#8A6F1E}
 
-/* ---------- header (menus left · logo centre · icons right) ---------- */
-.site-header{position:sticky;top:0;z-index:40;background:var(--header-bg);color:var(--header-text)}
+/* ============================================================
+   HEADER — transparent over hero, fills with colour on scroll
+   (menus left · logo centre · icons right)
+   ============================================================ */
+.site-header{position:fixed;top:0;left:0;right:0;z-index:40;color:var(--header-text);
+  background:linear-gradient(180deg,rgba(0,0,0,.30),rgba(0,0,0,0));
+  transition:background var(--duration-slow) var(--ease-smooth),box-shadow var(--duration-slow) var(--ease-smooth),
+             top var(--duration-slow) var(--ease-smooth),width var(--duration-slow) var(--ease-smooth),
+             border-radius var(--duration-slow) var(--ease-smooth)}
+.site-header.solid{background:var(--header-bg);box-shadow:0 2px 16px rgba(0,0,0,.18)}
 .bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;column-gap:var(--space-300);
   height:8.8rem;max-width:132rem;margin:0 auto;padding:0 var(--space-300)}
 .bar-left{display:flex;align-items:center;gap:var(--space-100);min-width:0}
 .bar-right{display:flex;align-items:center;justify-content:flex-end;gap:var(--space-100)}
 .burger{display:none;width:4.4rem;height:4.4rem;border:0;background:none;color:inherit;cursor:pointer;align-items:center;justify-content:center}
-/* centred round logo badge (placeholder for the heart logo asset) */
 .logo{justify-self:center;display:grid;place-items:center;width:6.4rem;height:6.4rem;border-radius:50%;
   background:#fff;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.18);line-height:1;text-align:center}
 .logo .heart{color:var(--c-red-500);font-size:2.8rem;line-height:1}
@@ -69,19 +78,22 @@ nav.main{display:flex;align-items:stretch;height:100%}
 .nav-item{position:static;display:flex;align-items:center}
 .nav-link{display:inline-flex;align-items:center;gap:.6rem;height:100%;padding:0 var(--space-150);
   font-weight:800;font-size:var(--fz-r);color:var(--header-text);text-decoration:none;border:0;background:none;
-  cursor:pointer;position:relative;font-family:inherit}
+  cursor:pointer;position:relative;font-family:inherit;transition:opacity var(--duration-fast) var(--ease-smooth)}
+.nav-link:hover{opacity:.82}
 .nav-link .chev{transition:transform var(--duration-normal) var(--ease-smooth)}
 .nav-item[data-open="true"] .nav-link .chev{transform:rotate(180deg)}
-.nav-link::after{content:"";position:absolute;left:var(--space-150);right:var(--space-150);bottom:1.6rem;height:2px;
-  border-radius:3px;background:#fff;transform:scaleX(0);transform-origin:center;
-  transition:transform var(--duration-normal) var(--ease-smooth)}
-.nav-item[data-open="true"] .nav-link::after,.nav-item:not(.has-mega) .nav-link:hover::after{transform:scaleX(1)}
 .icon-btn{position:relative;width:4.2rem;height:4.2rem;border-radius:50%;border:0;background:transparent;color:inherit;
   display:grid;place-items:center;cursor:pointer;transition:transform var(--duration-fast) var(--ease-smooth),background var(--duration-fast) var(--ease-smooth)}
-.icon-btn:hover{background:rgba(255,255,255,.14)}
+.icon-btn:hover{background:rgba(255,255,255,.16)}
 .icon-btn:active{transform:scale(.94)}
 .icon-btn .count{position:absolute;top:.4rem;right:.4rem;min-width:1.7rem;height:1.7rem;padding:0 .4rem;border-radius:999px;
   background:#fff;color:var(--c-red-600);font-size:1rem;font-weight:900;display:grid;place-items:center}
+
+/* ---- FLOATING VARIANT (toggle bottom-right) ---- */
+body.floating .site-header{top:1.4rem;left:50%;right:auto;transform:translateX(-50%);
+  width:min(132rem,calc(100% - 2.8rem));border-radius:999px;background:var(--header-bg);box-shadow:0 10px 34px rgba(0,0,0,.24)}
+body.floating .site-header .bar{height:6.8rem;padding:0 var(--space-400)}
+body.floating .mega{left:0;right:0;top:calc(100% + 1rem);border-radius:var(--radius-l);overflow:hidden;box-shadow:0 18px 44px rgba(0,0,0,.20)}
 
 /* ---------- buttons (mirror .button / .button--outlined) ---------- */
 .button{display:inline-flex;align-items:center;justify-content:center;gap:.8rem;font-family:inherit;font-weight:800;
@@ -97,9 +109,10 @@ nav.main{display:flex;align-items:stretch;height:100%}
 
 /* ============================================================
    Desktop megamenu — entrance blurs in (ui-polish rule 5)
+   No divider line under nav / above panel.
    ============================================================ */
 .mega{position:absolute;left:0;right:0;top:100%;background:var(--color-background-secondary);
-  border-top:1px solid var(--color-border);box-shadow:var(--shadow-elevated);
+  box-shadow:var(--shadow-elevated);
   opacity:0;visibility:hidden;transform:translateY(8px);filter:blur(2px);
   transition:opacity var(--duration-slow) var(--ease-smooth),transform var(--duration-slow) var(--ease-smooth),
              filter var(--duration-slow) var(--ease-smooth),visibility var(--duration-slow);z-index:30}
@@ -109,11 +122,20 @@ nav.main{display:flex;align-items:stretch;height:100%}
 .mega-inner{max-width:126rem;margin:0 auto;padding:var(--space-400) var(--space-300)}
 
 /* ============================================================
-   TYPE 1 · SONGS — music finder (tinted rail + song-card grid)
+   TYPE 1 · SONGS — music finder
+   Left rail: active-category LOGO above CATEGORIES list.
+   Right: song cards with the music icon LEFT of the name (a row).
    ============================================================ */
 .songs{display:flex;min-height:38rem;max-height:80vh}
-.song-rail{width:24rem;flex:none;background:var(--color-megamenu-left-background);padding:var(--space-400) 0 var(--space-400) var(--space-400);
+.song-rail{width:26rem;flex:none;background:var(--color-megamenu-left-background);padding:var(--space-300) 0 var(--space-400) var(--space-300);
   display:flex;flex-direction:column}
+.song-logo{margin:0 var(--space-200) var(--space-250) 0;height:8rem;border-radius:var(--radius-m);display:flex;
+  align-items:center;gap:var(--space-150);padding:0 var(--space-200);color:#fff;box-shadow:var(--shadow-card);
+  transition:background var(--duration-normal) var(--ease-smooth)}
+.song-logo .mark{width:4.4rem;height:4.4rem;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;flex:none}
+.song-logo .mark svg{width:2.4rem;height:2.4rem;color:#fff}
+.song-logo b{font-size:var(--fz-r);font-weight:900;line-height:1.1}
+.song-logo small{display:block;font-size:var(--fz-t);font-weight:700;opacity:.85}
 .song-rail .eyebrow{padding:0 var(--space-200)}
 .song-cat{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:1.2rem 1.6rem;
   text-decoration:none;color:var(--color-megamenu-left-text);font-weight:700;font-size:var(--fz-r);
@@ -124,17 +146,17 @@ nav.main{display:flex;align-items:stretch;height:100%}
 .song-cat.is-active{background:var(--c-neutral-50);color:var(--c-neutral-950)}
 .song-cat.is-active i{opacity:1}
 .song-products{flex:1;min-width:0;padding:var(--space-400);display:flex;flex-direction:column;overflow-y:auto}
-.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:var(--space-250) var(--space-200)}
-.song{display:flex;flex-direction:column;align-items:center;gap:.9rem;padding:1rem .6rem;border-radius:var(--radius-m);
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-100) var(--space-200)}
+.song{display:flex;flex-direction:row;align-items:center;gap:var(--space-150);padding:1rem 1.2rem;border-radius:var(--radius-m);
   text-decoration:none;color:var(--color-foreground);
   transition:transform var(--duration-normal) var(--ease-smooth),background var(--duration-normal) var(--ease-smooth)}
-.song:hover{background:var(--c-red-50);transform:translateY(-2px)}
-.song:active{transform:scale(.98)}
-.song .disc{width:6rem;height:6rem;border-radius:50%;display:grid;place-items:center;
-  background:var(--tint-bg,var(--c-red-100));color:var(--tint-fg,var(--c-red-500));box-shadow:inset 0 0 0 6px rgba(255,255,255,.55)}
-.song .disc svg{width:2.8rem;height:2.8rem}
-.song .t{font-weight:800;font-size:var(--fz-t);text-align:center;line-height:1.25}
-.song-actions{display:flex;gap:var(--space-200);align-items:center;margin-top:var(--space-500)}
+.song:hover{background:var(--c-red-50);transform:translateX(2px)}
+.song:active{transform:scale(.99)}
+.song .disc{width:4.8rem;height:4.8rem;flex:none;border-radius:50%;display:grid;place-items:center;
+  background:var(--tint-bg,var(--c-red-100));color:var(--tint-fg,var(--c-red-500));box-shadow:inset 0 0 0 5px rgba(255,255,255,.55)}
+.song .disc svg{width:2.2rem;height:2.2rem}
+.song .t{font-weight:800;font-size:var(--fz-s);text-align:left;line-height:1.2}
+.song-actions{display:flex;gap:var(--space-200);align-items:center;margin-top:var(--space-400)}
 .search{flex:1;display:flex;align-items:center;gap:1rem;background:var(--c-neutral-100);border:1px solid var(--color-border);
   border-radius:999px;padding:1.1rem 1.6rem}
 .search input{border:0;background:none;outline:none;font-family:inherit;font-size:var(--fz-s);width:100%;color:inherit}
@@ -163,10 +185,29 @@ nav.main{display:flex;align-items:stretch;height:100%}
 .album .price s{font-size:var(--fz-s);font-weight:700;color:var(--color-subdued);margin-left:.6rem}
 
 /* ============================================================
-   TYPE 3 · DISCOVER — editorial content hub
-   (Heart of LTS feature · team bios · photo wall · blog)
+   TYPE 3 · DISCOVER — listing of pages (Heart feature on RIGHT)
    ============================================================ */
-.discover-grid{display:grid;grid-template-columns:34rem 1fr 1fr;gap:var(--space-400)}
+.discover-grid{display:grid;grid-template-columns:1fr 1fr 34rem;gap:var(--space-400)}
+.list-col{display:flex;flex-direction:column}
+.list-link{display:flex;align-items:center;gap:var(--space-150);padding:1rem 1.2rem;border-radius:var(--radius-s);
+  text-decoration:none;color:var(--color-foreground);transition:background var(--duration-fast) var(--ease-smooth)}
+.list-link:hover{background:var(--c-red-50)}
+.list-link .ic{width:3.8rem;height:3.8rem;border-radius:var(--radius-s);flex:none;display:grid;place-items:center;color:#fff;background:var(--c-red-500)}
+.list-link .ic svg{width:2rem;height:2rem}
+.list-link b{font-size:var(--fz-s);font-weight:800;display:block;line-height:1.2}
+.list-link span{font-size:var(--fz-t);color:var(--color-subdued);font-weight:600}
+/* elaborated "New this week" cards */
+.news{display:flex;flex-direction:column;gap:var(--space-100)}
+.news-item{display:flex;gap:var(--space-150);padding:.8rem;border-radius:var(--radius-m);text-decoration:none;color:inherit;
+  transition:background var(--duration-fast) var(--ease-smooth)}
+.news-item:hover{background:var(--c-red-50)}
+.news-thumb{width:6.4rem;height:6.4rem;border-radius:var(--radius-s);flex:none;display:grid;place-items:center;color:#fff;
+  font-weight:900;font-size:var(--fz-t);text-align:center;line-height:1.05}
+.news-body{min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.news-body .tag2{font-size:1rem;font-weight:800;color:var(--c-red-600);text-transform:uppercase;letter-spacing:.06em}
+.news-body b{font-size:var(--fz-s);font-weight:800;line-height:1.2}
+.news-body time{font-size:var(--fz-t);color:var(--color-subdued);font-weight:700}
+/* Heart feature card */
 .feature{position:relative;border-radius:var(--radius-l);overflow:hidden;min-height:33rem;
   display:flex;flex-direction:column;justify-content:flex-end;padding:var(--space-300);color:#fff;
   background:linear-gradient(160deg,#EC5450 0%,#912422 60%,#521B1A 100%);
@@ -179,78 +220,60 @@ nav.main{display:flex;align-items:stretch;height:100%}
   color:rgba(255,255,255,.92);max-width:32ch;position:relative}
 .feature .button{align-self:flex-start;position:relative;background:#fff;color:var(--c-red-600)}
 .feature .button:hover{background:var(--c-red-50)}
-.disc-col{display:flex;flex-direction:column}
-/* team bios list */
-.people{display:flex;flex-direction:column;gap:2px}
-.person{display:flex;align-items:center;gap:var(--space-150);padding:.8rem 1rem;border-radius:var(--radius-s);
-  text-decoration:none;color:inherit;transition:background var(--duration-fast) var(--ease-smooth)}
-.person:hover{background:var(--c-red-50)}
-.avatar{width:4.6rem;height:4.6rem;border-radius:50%;flex:none;display:grid;place-items:center;
-  font-weight:900;font-size:var(--fz-r);color:#fff;box-shadow:inset 0 0 0 3px rgba(255,255,255,.4)}
-.person b{font-size:var(--fz-s);font-weight:800;display:block;line-height:1.2}
-.person span{font-size:var(--fz-t);color:var(--color-subdued);font-weight:600}
-/* photo wall + blog tiles */
-.tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-150)}
-.tile{position:relative;border-radius:var(--radius-m);overflow:hidden;aspect-ratio:1/1;
-  display:flex;align-items:flex-end;padding:1.2rem;text-decoration:none;color:#fff;
-  transition:transform var(--duration-normal) var(--ease-smooth)}
-.tile:hover{transform:translateY(-2px)}
-.tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.55))}
-.tile b{position:relative;z-index:1;font-weight:800;font-size:var(--fz-s);line-height:1.2}
-.tile span{position:relative;z-index:1;font-size:var(--fz-t);font-weight:700;opacity:.9;display:block}
-.tile.span2{grid-column:span 2;aspect-ratio:2/1}
-/* mini photo-wall mosaic inside a tile */
-.tile.photo{background:
-  linear-gradient(135deg,#F5928F,#B91F1C),
-  repeating-linear-gradient(45deg,rgba(255,255,255,.08) 0 8px,transparent 8px 16px)}
-.tile.blog{background:linear-gradient(150deg,#76AAEA,#205FA9)}
-.tile.sendin{background:linear-gradient(150deg,#A5D0A9,#519659)}
-.tile.schools{background:linear-gradient(150deg,#FACC55,#B98A1E)}
 
 /* ============================================================
-   TYPE 4 · COUNTDOWN — seasonal / advent (date-led)
+   TYPE 4 · COUNTDOWN — multiple live countdowns + New this week
    ============================================================ */
-.count-grid{display:grid;grid-template-columns:30rem 1fr 27rem;gap:var(--space-400);align-items:stretch}
-.count-hero{border-radius:var(--radius-l);padding:var(--space-300);color:#fff;display:flex;flex-direction:column;
-  justify-content:center;text-align:center;position:relative;overflow:hidden;
-  background:linear-gradient(160deg,#B91F1C,#521B1A)}
-.count-hero .snow{position:absolute;inset:0;opacity:.25;background-image:
-  radial-gradient(2px 2px at 20% 30%,#fff,transparent),
-  radial-gradient(2px 2px at 70% 20%,#fff,transparent),
-  radial-gradient(2px 2px at 40% 70%,#fff,transparent),
-  radial-gradient(2px 2px at 85% 60%,#fff,transparent),
-  radial-gradient(2px 2px at 55% 45%,#fff,transparent)}
-.count-hero .num{font-size:8rem;font-weight:900;line-height:.9;position:relative}
-.count-hero .lbl{font-size:var(--fz-m);font-weight:800;margin:.6rem 0 1.6rem;position:relative}
-.count-hero .button{align-self:center;position:relative;background:#fff;color:var(--c-red-600)}
-.count-hero .sub{font-size:var(--fz-t);font-weight:700;opacity:.85;margin-top:1.2rem;position:relative}
-/* advent doors */
-.advent{display:flex;flex-direction:column}
-.doors{display:grid;grid-template-columns:repeat(6,1fr);gap:var(--space-100);flex:1;align-content:start}
-.door{aspect-ratio:1/1;border-radius:var(--radius-s);display:grid;place-items:center;font-weight:900;font-size:var(--fz-m);
-  text-decoration:none;background:var(--c-red-50);color:var(--c-red-600);border:1.5px solid var(--c-red-100);
-  transition:transform var(--duration-fast) var(--ease-smooth),background var(--duration-fast) var(--ease-smooth)}
-.door:hover{transform:translateY(-2px) scale(1.03);background:var(--c-red-100)}
-.door.open{background:linear-gradient(150deg,#EC5450,#912422);color:#fff;border-color:transparent}
-.door.today{outline:3px solid var(--c-yellow-300);outline-offset:2px}
-.door.locked{background:var(--c-neutral-100);color:var(--c-neutral-300);border-color:var(--color-border);cursor:not-allowed}
-/* this-week highlights */
+.count-grid{display:grid;grid-template-columns:1fr 30rem;gap:var(--space-400)}
+.cd-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-200)}
+.cd-card{position:relative;border-radius:var(--radius-l);overflow:hidden;padding:var(--space-250);color:#fff;
+  display:flex;flex-direction:column;justify-content:flex-end;min-height:15rem;
+  transition:transform var(--duration-normal) var(--ease-smooth);text-decoration:none}
+.cd-card:hover{transform:translateY(-2px)}
+.cd-card .snow{position:absolute;inset:0;opacity:.22;background-image:
+  radial-gradient(2px 2px at 20% 30%,#fff,transparent),radial-gradient(2px 2px at 70% 22%,#fff,transparent),
+  radial-gradient(2px 2px at 42% 68%,#fff,transparent),radial-gradient(2px 2px at 85% 55%,#fff,transparent)}
+.cd-card .live{position:absolute;top:1.2rem;right:1.2rem;display:flex;align-items:center;gap:.5rem;
+  background:rgba(255,255,255,.2);padding:.3rem .8rem;border-radius:999px;font-size:1rem;font-weight:800;letter-spacing:.04em}
+.cd-card .live::before{content:"";width:.7rem;height:.7rem;border-radius:50%;background:#fff}
+.cd-card .num{font-size:5rem;font-weight:900;line-height:.85;position:relative}
+.cd-card .num small{font-size:var(--fz-s);font-weight:800;opacity:.85;margin-left:.6rem}
+.cd-card .cd-name{font-size:var(--fz-m);font-weight:900;position:relative;margin-top:.4rem}
+.cd-card .cd-sub{font-size:var(--fz-t);font-weight:700;opacity:.85;position:relative}
+.cd-red{background:linear-gradient(160deg,#EC5450,#521B1A)}
+.cd-orange{background:linear-gradient(160deg,var(--c-orange-400),#3A1A0A)}
+.cd-blue{background:linear-gradient(160deg,#76AAEA,#123A6B)}
+.cd-green{background:linear-gradient(160deg,#A5D0A9,#2C5E32)}
+/* New this week rail */
 .week{display:flex;flex-direction:column;gap:var(--space-100)}
 .week-item{display:flex;gap:var(--space-150);align-items:center;padding:1rem 1.2rem;border-radius:var(--radius-m);
   text-decoration:none;color:inherit;background:var(--c-neutral-100);transition:background var(--duration-fast) var(--ease-smooth)}
 .week-item:hover{background:var(--c-red-50)}
-.week-item .dot{width:3.8rem;height:3.8rem;border-radius:var(--radius-s);flex:none;display:grid;place-items:center;
-  font-weight:900;color:#fff;font-size:var(--fz-t);background:var(--c-red-500);text-align:center;line-height:1}
+.week-item .dot{width:4rem;height:4rem;border-radius:var(--radius-s);flex:none;display:grid;place-items:center;
+  font-weight:900;color:#fff;font-size:1rem;background:var(--c-red-500);text-align:center;line-height:1}
 .week-item b{font-size:var(--fz-s);font-weight:800;display:block;line-height:1.2}
 .week-item span{font-size:var(--fz-t);color:var(--color-subdued);font-weight:600}
 
-.hint{max-width:126rem;margin:2.6rem auto 0;padding:0 var(--space-300);color:var(--color-subdued);font-size:var(--fz-s);font-weight:700;line-height:1.6}
+/* ============================================================
+   Demo page scaffolding (hero shows the transparent header)
+   ============================================================ */
+.hero{min-height:66vh;display:grid;place-items:center;text-align:center;color:#fff;padding:12rem 2rem 4rem;
+  background:radial-gradient(120% 90% at 50% 0%,#EC5450 0%,#912422 45%,#2D0B0A 100%)}
+.hero h1{font-size:clamp(3.2rem,6vw,6rem);font-weight:900;margin:0 0 1rem;line-height:1.02}
+.hero p{font-size:var(--fz-l);font-weight:700;opacity:.9;margin:0}
+.filler{max-width:80rem;margin:0 auto;padding:8rem 2rem;color:var(--color-subdued);font-weight:700}
+.hint{max-width:80rem;margin:0 auto 4rem;padding:0 2rem;color:var(--color-subdued);font-size:var(--fz-s);font-weight:700;line-height:1.7}
 .tag{display:inline-block;background:#111;color:#fff;font-size:1.1rem;font-weight:800;padding:3px 9px;border-radius:6px;letter-spacing:.06em;margin-left:8px}
-.legend{display:inline-block;background:var(--c-red-100);color:var(--c-red-700);font-size:1.1rem;font-weight:800;padding:2px 8px;border-radius:6px;margin:0 3px}
+
+/* floating toggle control */
+.wf-controls{position:fixed;right:1.6rem;bottom:1.6rem;z-index:70;background:#111;color:#fff;border-radius:var(--radius-m);
+  padding:1.2rem 1.4rem;box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:var(--fz-t);font-weight:700;display:flex;flex-direction:column;gap:.6rem;max-width:24rem}
+.wf-controls label{display:flex;align-items:center;gap:.8rem;cursor:pointer}
+.wf-controls input{width:1.8rem;height:1.8rem;accent-color:var(--c-red-400)}
+.wf-controls small{opacity:.7;font-weight:600;line-height:1.4}
 
 /* ============================================================
-   MOBILE — slide-in drawer with search + drill-down accordion
-   (mirrors navigation-mobile.liquid; switches at 990px)
+   MOBILE — slide-in drawer (mirrors navigation-mobile.liquid)
    ============================================================ */
 .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);opacity:0;visibility:hidden;z-index:50;
   transition:opacity var(--duration-normal) var(--ease-smooth),visibility var(--duration-normal)}
@@ -261,7 +284,7 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
 .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:var(--space-200) var(--space-250);border-bottom:1px solid var(--color-border)}
 .drawer-head .logo{width:auto;height:auto;border-radius:0;box-shadow:none;background:none;font-weight:900;color:var(--c-red-600);font-size:var(--fz-m)}
 .drawer-head .logo span{color:var(--color-foreground)}
-.drawer-search{margin:var(--space-200) var(--space-250) 0}
+.drawer-search{flex:none;margin:var(--space-200) var(--space-250) 0}   /* FIX: was stretching (flex:1) */
 .drawer-nav{padding:var(--space-150) var(--space-150) var(--space-400);overflow-y:auto}
 .drawer-item>details{border-bottom:1px solid var(--color-border)}
 .drawer-item summary{list-style:none;display:flex;align-items:center;justify-content:space-between;
@@ -275,18 +298,10 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
   font-weight:700;font-size:var(--fz-r);border-radius:var(--radius-s)}
 .drawer-sublink:hover{background:var(--c-red-50)}
 .drawer-sublink small{color:var(--color-subdued);font-weight:700}
-.drawer-sublink .mini-av{width:3.2rem;height:3.2rem;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:900;font-size:var(--fz-t);margin-right:.4rem}
-.drawer-sublink.with-av{justify-content:flex-start}
 .drawer-flat{display:block;padding:1.6rem 1.2rem;font-weight:800;font-size:var(--fz-m);text-decoration:none;border-bottom:1px solid var(--color-border)}
-.drawer-countbar{margin:var(--space-150) 1.2rem .4rem;border-radius:var(--radius-m);padding:1.2rem 1.6rem;
-  background:linear-gradient(150deg,#B91F1C,#521B1A);color:#fff;display:flex;align-items:center;justify-content:space-between}
-.drawer-countbar b{font-size:2.4rem;font-weight:900;line-height:1}
-.drawer-countbar span{font-size:var(--fz-t);font-weight:700;opacity:.9}
-.drawer-album{margin:var(--space-200) 1.2rem 0;background:var(--c-red-50);border:1px solid var(--c-red-100);border-radius:var(--radius-m);padding:var(--space-200);display:flex;gap:var(--space-150);align-items:center}
-.drawer-album .mini{width:5.2rem;height:5.2rem;border-radius:var(--radius-s);background:linear-gradient(150deg,#EC5450,#912422);display:grid;place-items:center;flex:none}
-.drawer-album .mini svg{width:2.6rem;height:2.6rem;color:#fff}
-.drawer-album b{display:block;color:var(--c-red-700);font-size:var(--fz-s)}
-.drawer-album span{font-size:var(--fz-t);color:var(--color-subdued);font-weight:700}
+.drawer-cd{margin:.4rem 1.2rem;border-radius:var(--radius-m);padding:1rem 1.4rem;color:#fff;display:flex;align-items:center;justify-content:space-between}
+.drawer-cd b{font-size:2.2rem;font-weight:900;line-height:1}
+.drawer-cd span{font-size:var(--fz-t);font-weight:700;opacity:.9}
 
 @media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important}}
 
@@ -297,21 +312,22 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
   .bar{column-gap:var(--space-200);height:6.4rem}
   .logo{width:5.2rem;height:5.2rem}
   .bar-right .icon-btn.search-btn{display:none}   /* search lives in the drawer on mobile */
+  body.floating .site-header{top:0;transform:none;left:0;width:100%;border-radius:0}
+  .wf-controls{left:1.6rem;right:1.6rem;max-width:none}
 }
 @media (min-width:991px){ .drawer,.drawer-overlay{display:none} }
-/* mid-width tightening (991–1180) so 4 rich panels never overflow */
+/* mid-width tightening (991–1180) so rich panels never overflow */
 @media (max-width:1180px) and (min-width:991px){
   .shop-grid{grid-template-columns:1fr 1fr 28rem}.shop-col:nth-child(3){display:none}
-  .cards{grid-template-columns:repeat(5,1fr)}
-  .discover-grid{grid-template-columns:28rem 1fr 1fr}
-  .count-grid{grid-template-columns:26rem 1fr 24rem}
-  .doors{grid-template-columns:repeat(4,1fr)}
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .discover-grid{grid-template-columns:1fr 1fr 28rem}
+  .count-grid{grid-template-columns:1fr 26rem}
 }
 </style>
 </head>
 <body>
-<div class="page">
-  <header class="site-header">
+
+  <header class="site-header" id="siteHeader">
     <div class="bar">
       <div class="bar-left">
       <button class="burger" id="burger" aria-label="Open menu"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
@@ -325,13 +341,15 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
           <div class="mega">
             <div class="songs">
               <aside class="song-rail">
+                <div class="song-logo" id="songLogo" style="background:linear-gradient(150deg,#EC5450,#912422)">
+                  <span class="mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 13.5351V3H20V6H14V17C14 19.2091 12.2091 21 10 21C7.79086 21 6 19.2091 6 17C6 14.7909 7.79086 13 10 13C10.7286 13 11.4117 13.1948 12 13.5351Z"/></svg></span>
+                  <span><b id="songLogoTitle">Christmas Songs</b><small id="songLogoSub">116 songs &amp; carols</small></span>
+                </div>
                 <p class="eyebrow">Categories</p>
-                <a class="song-cat is-active" href="#">Christmas <span style="display:flex;align-items:center;gap:.8rem"><small>116</small><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span></a>
-                <a class="song-cat" href="#">Action &amp; Movement <small>42</small></a>
-                <a class="song-cat" href="#">Lullabies <small>28</small></a>
-                <a class="song-cat" href="#">Nursery Rhymes <small>60</small></a>
-                <a class="song-cat" href="#">Learning &amp; ABC <small>35</small></a>
-                <a class="song-cat" href="#">Faith &amp; Worship <small>24</small></a>
+                <a class="song-cat is-active" href="#" data-title="Christmas Songs" data-sub="116 songs &amp; carols" data-grad="linear-gradient(150deg,#EC5450,#912422)">Christmas <span style="display:flex;align-items:center;gap:.8rem"><small>116</small><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span></a>
+                <a class="song-cat" href="#" data-title="Kids Songs" data-sub="Sing-along favourites" data-grad="linear-gradient(150deg,#76AAEA,#205FA9)">Kids Songs <small>300+</small></a>
+                <a class="song-cat" href="#" data-title="Halloween Songs" data-sub="Spooky sing-alongs" data-grad="linear-gradient(150deg,#F0813A,#B4470F)">Halloween <small>40</small></a>
+                <a class="song-cat" href="#" data-title="Celebration Songs" data-sub="Birthdays &amp; special days" data-grad="linear-gradient(150deg,#A5D0A9,#519659)">Celebration <small>55</small></a>
               </aside>
               <section class="song-products">
                 <div class="cards" id="songCards"></div>
@@ -391,7 +409,7 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
           </div>
         </div>
 
-        <!-- ============ TYPE 3 · DISCOVER (editorial content hub) ============ -->
+        <!-- ============ TYPE 3 · DISCOVER (page listing · Heart on right) ============ -->
         <div class="nav-item has-mega">
           <button class="nav-link" aria-haspopup="true">Discover
             <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -399,7 +417,25 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
           <div class="mega">
             <div class="mega-inner">
               <div class="discover-grid">
-                <!-- feature: Heart of Love to Sing -->
+                <!-- col 1 · explore pages -->
+                <div class="list-col">
+                  <p class="eyebrow">Explore</p>
+                  <a class="list-link" href="#"><span class="ic" style="background:linear-gradient(150deg,#F5928F,#B91F1C)"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v14H4z" stroke="#fff" stroke-width="2"/><path d="M4 15l5-4 4 3 3-2 4 3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>The Photo Wall</b><span>Your singalong photos</span></span></a>
+                  <a class="list-link" href="#"><span class="ic" style="background:linear-gradient(150deg,#76AAEA,#205FA9)"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5z" stroke="#fff" stroke-width="2"/><path d="M8 9h8M8 13h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></span><span><b>From the Blog</b><span>Tips, news &amp; ideas</span></span></a>
+                  <a class="list-link" href="#"><span class="ic" style="background:linear-gradient(150deg,#A5D0A9,#519659)"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8l8 5 8-5M4 8v9h16V8L12 3 4 8z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg></span><span><b>Send it in</b><span>Share your videos</span></span></a>
+                  <a class="list-link" href="#"><span class="ic" style="background:linear-gradient(150deg,#FACC55,#B98A1E)"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 21l-4.9 2.6.9-5.5-4-3.9 5.5-.8L12 3z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg></span><span><b>Free Resources</b><span>Printables &amp; activities</span></span></a>
+                </div>
+                <!-- col 2 · New this week (elaborated) -->
+                <div class="list-col">
+                  <p class="eyebrow">New this week</p>
+                  <div class="news">
+                    <a class="news-item" href="#"><span class="news-thumb" style="background:linear-gradient(150deg,#EC5450,#912422)">PHOTO<br>WALL</span><span class="news-body"><span class="tag2">Gallery</span><b>18 new nativity photos added</b><time>2 days ago</time></span></a>
+                    <a class="news-item" href="#"><span class="news-thumb" style="background:linear-gradient(150deg,#76AAEA,#205FA9)">BLOG</span><span class="news-body"><span class="tag2">Article</span><b>10 easy carols for toddlers</b><time>4 days ago</time></span></a>
+                    <a class="news-item" href="#"><span class="news-thumb" style="background:linear-gradient(150deg,#A5D0A9,#519659)">VIDEO</span><span class="news-body"><span class="tag2">Send it in</span><b>Ella’s class sings Jingle Bells</b><time>this week</time></span></a>
+                  </div>
+                  <a class="button button--ghost button--sm" href="#" style="margin-top:auto">See what’s new →</a>
+                </div>
+                <!-- col 3 (RIGHT) · Heart of Love to Sing -->
                 <a class="feature" href="#">
                   <span class="heart-wm">♥</span>
                   <p class="eyebrow">Our story</p>
@@ -407,32 +443,12 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
                   <p>Why a little family in New Zealand has helped millions of children find their voice.</p>
                   <span class="button button--sm">Read our story →</span>
                 </a>
-                <!-- team bios -->
-                <div class="disc-col">
-                  <p class="eyebrow">Meet the family</p>
-                  <div class="people">
-                    <a class="person" href="#"><span class="avatar" style="background:linear-gradient(150deg,#EC5450,#912422)">J</span><span><b>Jable &amp; the team</b><span>Founders &amp; song-makers</span></span></a>
-                    <a class="person" href="#"><span class="avatar" style="background:linear-gradient(150deg,#76AAEA,#205FA9)">P</span><span><b>Patrick</b><span>Music &amp; production</span></span></a>
-                    <a class="person" href="#"><span class="avatar" style="background:linear-gradient(150deg,#A5D0A9,#519659)">S</span><span><b>Sarah</b><span>Voices &amp; performance</span></span></a>
-                    <a class="person" href="#"><span class="avatar" style="background:linear-gradient(150deg,#FACC55,#B98A1E)">M</span><span><b>Michael</b><span>Animation &amp; video</span></span></a>
-                  </div>
-                  <a class="button button--ghost button--sm" href="#" style="margin-top:auto">All team bios →</a>
-                </div>
-                <!-- photo wall / blog / send it in -->
-                <div class="disc-col">
-                  <p class="eyebrow">More to explore</p>
-                  <div class="tiles">
-                    <a class="tile photo span2" href="#"><span>gallery</span><b>The Photo Wall</b></a>
-                    <a class="tile blog" href="#"><span>latest</span><b>From the Blog</b></a>
-                    <a class="tile sendin" href="#"><span>your videos</span><b>Send it in</b></a>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ============ TYPE 4 · COUNTDOWN (seasonal / advent) ============ -->
+        <!-- ============ TYPE 4 · COUNTDOWN (multiple live countdowns) ============ -->
         <div class="nav-item has-mega">
           <button class="nav-link" aria-haspopup="true">Countdown
             <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -440,34 +456,28 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
           <div class="mega">
             <div class="mega-inner">
               <div class="count-grid">
-                <!-- hero: sleeps to Christmas -->
-                <div class="count-hero">
-                  <span class="snow"></span>
-                  <span class="num">127</span>
-                  <span class="lbl">sleeps to Christmas</span>
-                  <a class="button button--sm" href="#">Open today’s door →</a>
-                  <span class="sub">A new activity every day of advent</span>
-                </div>
-                <!-- advent doors -->
-                <div class="advent">
-                  <p class="eyebrow">Advent calendar · December</p>
-                  <div class="doors">
-                    <a class="door open" href="#">1</a><a class="door open" href="#">2</a><a class="door open" href="#">3</a>
-                    <a class="door today" href="#">4</a><a class="door" href="#">5</a><a class="door" href="#">6</a>
-                    <a class="door" href="#">7</a><a class="door" href="#">8</a><a class="door" href="#">9</a>
-                    <a class="door" href="#">10</a><a class="door" href="#">11</a><a class="door" href="#">12</a>
-                    <span class="door locked">13</span><span class="door locked">14</span><span class="door locked">15</span>
-                    <span class="door locked">16</span><span class="door locked">17</span><span class="door locked">18</span>
+                <!-- multiple countdown cards -->
+                <div>
+                  <p class="eyebrow">Live countdowns</p>
+                  <div class="cd-cards">
+                    <a class="cd-card cd-red" href="#"><span class="snow"></span><span class="live">LIVE</span>
+                      <span class="num">127<small>sleeps</small></span><span class="cd-name">Christmas</span><span class="cd-sub">25 December · widget + daily ideas</span></a>
+                    <a class="cd-card cd-orange" href="#"><span class="live">LIVE</span>
+                      <span class="num">71<small>days</small></span><span class="cd-name">Halloween</span><span class="cd-sub">31 October · spooky songs</span></a>
+                    <a class="cd-card cd-blue" href="#"><span class="live">LIVE</span>
+                      <span class="num">133<small>days</small></span><span class="cd-name">New Year</span><span class="cd-sub">1 January · party playlist</span></a>
+                    <a class="cd-card cd-green" href="#"><span class="live">LIVE</span>
+                      <span class="num">240<small>days</small></span><span class="cd-name">Easter</span><span class="cd-sub">Spring songs &amp; crafts</span></a>
                   </div>
                 </div>
-                <!-- this week -->
-                <div class="advent">
-                  <p class="eyebrow">This week</p>
+                <!-- New this week (widgets we're building) -->
+                <div class="list-col">
+                  <p class="eyebrow">New this week</p>
                   <div class="week">
-                    <a class="week-item" href="#"><span class="dot">NEW</span><span><b>Nativity rehearsal pack</b><span>Songs, scripts &amp; backing tracks</span></span></a>
-                    <a class="week-item" href="#"><span class="dot" style="background:var(--c-blue-500)">DIY</span><span><b>Make a paper star</b><span>Craft with the kids</span></span></a>
-                    <a class="week-item" href="#"><span class="dot" style="background:var(--c-green-500)">SING</span><span><b>Carol of the day</b><span>Away in a Manger</span></span></a>
-                    <a class="button button--ghost button--sm" href="#">See the full countdown →</a>
+                    <a class="week-item" href="#"><span class="dot">NEW</span><span><b>Christmas Eve tracker</b><span>Hour-by-hour widget · just launched</span></span></a>
+                    <a class="week-item" href="#"><span class="dot" style="background:var(--c-orange-400)">SOON</span><span><b>12 Days of Christmas</b><span>Widget in build</span></span></a>
+                    <a class="week-item" href="#"><span class="dot" style="background:var(--c-green-500)">SING</span><span><b>Carol of the day</b><span>Daily song picker</span></span></a>
+                    <a class="button button--ghost button--sm" href="#">All countdowns &amp; widgets →</a>
                   </div>
                 </div>
               </div>
@@ -491,10 +501,25 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
     </div>
   </header>
 
-  <p class="hint">Desktop: hover <b>Songs</b> · <b>Shop</b> · <b>Discover</b> · <b>Countdown</b> to see the four mega-menu <i>types</i>, each with its own layout.
-  Resize below 990px (or tap ☰) for the mobile drawer — wireframe #5.
-  <br>Advent legend: <span class="legend">opened</span> = past days · <span class="legend" style="background:var(--c-yellow-300);color:#8A6F1E">today</span> · greyed = locked.
-  <span class="tag">WIREFRAME · theme tokens</span></p>
+  <!-- hero so the transparent-at-top header is visible; scroll to see it fill -->
+  <section class="hero">
+    <div>
+      <h1>Love to Sing</h1>
+      <p>Scroll down — the header fills with colour. Hover a menu (or tap on touch).</p>
+    </div>
+  </section>
+
+  <p class="hint" style="margin-top:4rem">
+    Four mega-menu <b>types</b>: <b>Songs</b> (finder) · <b>Shop</b> (ecommerce) · <b>Discover</b> (page listing, Heart on the right) · <b>Countdown</b> (multiple live countdowns).
+    Header is <b>transparent at the top</b> and fills on scroll. Tap the toggle to preview the <b>floating</b> variant. Resize below 990px (or ☰) for the mobile drawer.
+    <span class="tag">WIREFRAME · theme tokens</span>
+  </p>
+  <div class="filler">Page content below the header — scroll back up to see the transparent state over the hero.</div>
+
+<!-- floating toggle -->
+<div class="wf-controls">
+  <label><input type="checkbox" id="floatToggle"> Floating header</label>
+  <small>Detached rounded “pill” variant. Scroll the page to watch the header change from transparent to solid.</small>
 </div>
 
 <!-- ===== wireframe #5 · mobile drawer ===== -->
@@ -514,11 +539,9 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
       <summary>Songs <span class="chev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
       <div class="drawer-sub">
         <a class="drawer-sublink" href="#">Christmas <small>116</small></a>
-        <a class="drawer-sublink" href="#">Action &amp; Movement <small>42</small></a>
-        <a class="drawer-sublink" href="#">Lullabies <small>28</small></a>
-        <a class="drawer-sublink" href="#">Nursery Rhymes <small>60</small></a>
-        <a class="drawer-sublink" href="#">Learning &amp; ABC <small>35</small></a>
-        <a class="drawer-sublink" href="#">Faith &amp; Worship <small>24</small></a>
+        <a class="drawer-sublink" href="#">Kids Songs <small>300+</small></a>
+        <a class="drawer-sublink" href="#">Halloween <small>40</small></a>
+        <a class="drawer-sublink" href="#">Celebration <small>55</small></a>
       </div>
     </details></div>
     <!-- Shop -->
@@ -535,11 +558,6 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
         <a class="drawer-sublink" href="#">Copyright Licence</a>
         <a class="drawer-sublink" href="#">Streaming Licence</a>
         <a class="drawer-sublink" href="#">All-in-One Licence</a>
-        <a class="drawer-sublink" href="#">Which licence do I need?</a>
-        <div class="drawer-album">
-          <span class="mini"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 13.5351V3H20V6H14V17C14 19.2091 12.2091 21 10 21C7.79086 21 6 19.2091 6 17C6 14.7909 7.79086 13 10 13C10.7286 13 11.4117 13.1948 12 13.5351Z"/></svg></span>
-          <div><b>Christmas Songs &amp; Carols</b><span>25 songs · from $14.99</span></div>
-        </div>
       </div>
     </details></div>
     <!-- Discover -->
@@ -547,27 +565,26 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
       <summary>Discover <span class="chev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
       <div class="drawer-sub">
         <a class="drawer-sublink" href="#"><b>The Heart of Love to Sing</b></a>
-        <p class="drawer-group">Meet the family</p>
-        <a class="drawer-sublink with-av" href="#"><span class="mini-av" style="background:linear-gradient(150deg,#EC5450,#912422)">J</span>Jable &amp; the team</a>
-        <a class="drawer-sublink with-av" href="#"><span class="mini-av" style="background:linear-gradient(150deg,#76AAEA,#205FA9)">P</span>Patrick</a>
-        <a class="drawer-sublink with-av" href="#"><span class="mini-av" style="background:linear-gradient(150deg,#A5D0A9,#519659)">S</span>Sarah</a>
-        <a class="drawer-sublink" href="#">All team bios →</a>
-        <p class="drawer-group">More</p>
         <a class="drawer-sublink" href="#">The Photo Wall</a>
         <a class="drawer-sublink" href="#">From the Blog</a>
         <a class="drawer-sublink" href="#">Send it in</a>
+        <a class="drawer-sublink" href="#">Free Resources</a>
+        <p class="drawer-group">New this week</p>
+        <a class="drawer-sublink" href="#">18 new nativity photos</a>
+        <a class="drawer-sublink" href="#">10 easy carols for toddlers</a>
       </div>
     </details></div>
     <!-- Countdown -->
     <div class="drawer-item"><details>
       <summary>Countdown <span class="chev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
       <div class="drawer-sub">
-        <div class="drawer-countbar"><span>sleeps to Christmas</span><b>127</b></div>
-        <a class="drawer-sublink" href="#">Open today’s door <small>day 4</small></a>
-        <a class="drawer-sublink" href="#">Nativity rehearsal pack</a>
-        <a class="drawer-sublink" href="#">Make a paper star</a>
+        <div class="drawer-cd" style="background:linear-gradient(150deg,#EC5450,#521B1A)"><span>Christmas · sleeps</span><b>127</b></div>
+        <a class="drawer-sublink" href="#">Halloween <small>71 days</small></a>
+        <a class="drawer-sublink" href="#">New Year <small>133 days</small></a>
+        <a class="drawer-sublink" href="#">Easter <small>240 days</small></a>
+        <p class="drawer-group">New this week</p>
+        <a class="drawer-sublink" href="#">Christmas Eve tracker</a>
         <a class="drawer-sublink" href="#">Carol of the day</a>
-        <a class="drawer-sublink" href="#">See the full countdown →</a>
       </div>
     </details></div>
     <a class="drawer-flat" href="#">About</a>
@@ -575,7 +592,7 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
 </aside>
 
 <script>
-  // song grid mock
+  // song grid mock — music icon LEFT of the name (row layout)
   var note='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 13.5351V3H20V6H14V17C14 19.2091 12.2091 21 10 21C7.79086 21 6 19.2091 6 17C6 14.7909 7.79086 13 10 13C10.7286 13 11.4117 13.1948 12 13.5351Z"/></svg>';
   var tints=['tint-red','tint-blue','tint-green','tint-yellow'];
   var titles=["Jingle Bells","Away in a Manger","We Wish You","Silent Night","Little Donkey","Deck the Halls",
@@ -585,23 +602,48 @@ body.drawer-open .drawer-overlay{opacity:1;visibility:visible}
     return '<a class="song '+tints[i%tints.length]+'" href="#"><span class="disc">'+note+'</span><span class="t">'+t+'</span></a>';
   }).join('');
 
-  // single-open desktop controller (fixes :focus-within staying open)
+  // Songs category → swap the logo block above CATEGORIES
+  var cats=[].slice.call(document.querySelectorAll('.song-cat'));
+  var sLogo=document.getElementById('songLogo'),sT=document.getElementById('songLogoTitle'),sS=document.getElementById('songLogoSub');
+  function activateCat(c){cats.forEach(function(x){x.classList.toggle('is-active',x===c);});
+    sLogo.style.background=c.dataset.grad;sT.innerHTML=c.dataset.title;sS.innerHTML=c.dataset.sub;}
+  cats.forEach(function(c){c.addEventListener('mouseenter',function(){activateCat(c);});
+    c.addEventListener('click',function(e){e.preventDefault();activateCat(c);});});
+
+  // ===== desktop menu controller — hover on hover-capable devices, click everywhere =====
   var nav=document.getElementById('mainNav');
+  var header=document.getElementById('siteHeader');
   var items=[].slice.call(nav.querySelectorAll('.nav-item')),closeTimer;
-  function openOnly(item){clearTimeout(closeTimer);items.forEach(function(n){n.dataset.open=(n===item&&item&&item.classList.contains('has-mega'))?'true':'false';});}
-  function closeAll(){items.forEach(function(n){n.dataset.open='false';});}
+  var canHover=window.matchMedia('(hover:hover)').matches;
+  function syncHeader(){var anyOpen=items.some(function(n){return n.dataset.open==='true';});
+    header.classList.toggle('solid',anyOpen||window.scrollY>10);}
+  function openOnly(item){clearTimeout(closeTimer);
+    items.forEach(function(n){n.dataset.open=(n===item&&item&&item.classList.contains('has-mega'))?'true':'false';});syncHeader();}
+  function closeAll(){items.forEach(function(n){n.dataset.open='false';});syncHeader();}
   items.forEach(function(item){
-    item.addEventListener('mouseenter',function(){openOnly(item);});
+    if(canHover){item.addEventListener('mouseenter',function(){openOnly(item);});}
     item.addEventListener('focusin',function(){openOnly(item);});
     item.querySelector('.nav-link').addEventListener('click',function(e){
       if(!item.classList.contains('has-mega'))return;e.preventDefault();
       openOnly(item.dataset.open==='true'?null:item);});
   });
-  nav.addEventListener('mouseleave',function(){closeTimer=setTimeout(closeAll,120);});
-  nav.addEventListener('mouseenter',function(){clearTimeout(closeTimer);});
+  if(canHover){
+    nav.addEventListener('mouseleave',function(){closeTimer=setTimeout(closeAll,140);});
+    nav.addEventListener('mouseenter',function(){clearTimeout(closeTimer);});
+  }
+  // click-away closes on touch
+  document.addEventListener('click',function(e){if(!nav.contains(e.target))closeAll();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeAll();document.body.classList.remove('drawer-open');}});
 
-  // mobile drawer
+  // ===== transparent → solid on scroll =====
+  window.addEventListener('scroll',syncHeader,{passive:true});
+  syncHeader();
+
+  // ===== floating toggle =====
+  document.getElementById('floatToggle').addEventListener('change',function(e){
+    document.body.classList.toggle('floating',e.target.checked);});
+
+  // ===== mobile drawer =====
   function setDrawer(o){document.body.classList.toggle('drawer-open',o);}
   document.getElementById('burger').addEventListener('click',function(){setDrawer(true);});
   document.getElementById('drawerClose').addEventListener('click',function(){setDrawer(false);});

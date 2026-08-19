@@ -25,11 +25,18 @@ Adding a new menu type means wrestling that schema. It must also be **beautiful 
 
 | Item | Menu type | Surfaces |
 |------|-----------|----------|
-| **Songs** | Music finder | Category rail + song-card grid, search, "view all" |
+| **Songs** | Music finder | Category rail (Christmas · Kids · Halloween · Celebration) with the active category's **logo above the list**; song cards with the **music icon left of the name** (matches live); search + "view all" |
 | **Shop** | Ecommerce | Product/licence link columns + featured album |
-| **Discover** | Editorial content hub | *Heart of Love to Sing*, team bios, Photo Wall, Blog, Send it in |
-| **Countdown** | Seasonal / advent (date-led) | Sleeps-to-Christmas hero, advent doors, this-week highlights |
+| **Discover** | **Page listing** | Column of pages (Photo Wall, Blog, Send it in, Free Resources), an elaborated **"New this week"** column, and the ***Heart of Love to Sing* feature on the RIGHT**. No "meet the family" — team is a single **About** link. |
+| **Countdown** | **Multiple live countdowns** | Grid of countdown cards (Christmas, Halloween, New Year, Easter) each with a live day-count widget + a **"New this week"** rail of widgets in build. *No advent calendar — we don't run one yet.* |
 | **About** | Simple link | — |
+
+### Header behaviour (added after wireframe review)
+- **Transparent at the top** (over the hero), **fills with the header colour on scroll** (`.solid`). Also goes solid while a mega menu is open.
+- **No divider line** under nav links or above the panel.
+- **Click-to-open** as well as hover: on touch / `hover:none` devices hover-open is disabled and tap toggles the panel (click-away and Esc close).
+- A **floating "pill" header variant** is included behind a toggle (detached, rounded, always-solid; mega drops as a rounded card).
+- Colours use the theme **main-color schemes** (red/blue/green/yellow); Halloween uses a placeholder orange to be mapped to a real scheme.
 
 ### Architecture — **Option A: native menu + typed section blocks**
 Chosen over (B) redesigned metaobjects and (C) hardcoded snippets.
@@ -53,12 +60,13 @@ Single interactive file: `docs/plans/megamenu-wireframes/index.html`, built on *
 
 Desktop: single-open hover controller (Esc closes, keyboard focus opens). Mobile: `<details>` drill-down, overlay, body-scroll lock.
 
-## Open questions for Mark (post-wireframe)
+## Open questions for Mark (post-wireframe, round 2)
 
-- Team names/roles in Discover are **placeholders** — swap for the real bios.
-- Countdown hero number should be **dynamically computed** in Liquid (days to 25 Dec); advent doors are illustrative.
-- Confirm whether **About** stays a flat link or also becomes a menu.
-- Whether wireframe #5 (mobile) should instead be a **second layout option** for Discover or Countdown (pure pick-your-favourite variation).
+- Countdown day-counts should be **dynamically computed** in Liquid per countdown; the widgets are being built separately.
+- Halloween needs a **real theme colour scheme** (placeholder orange for now).
+- Confirm the exact **Discover page list** (Photo Wall, Blog, Send it in, Free Resources… anything else?).
+- Standard header vs **floating** variant — which direction do we productionise?
+- Real **logo assets** per song category (Christmas / Kids / Halloween / Celebration).
 
 ## Next step
 
