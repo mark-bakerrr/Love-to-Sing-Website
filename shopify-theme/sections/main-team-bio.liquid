@@ -9,25 +9,32 @@
   assign m = metaobject
   assign heart = 'hearts-background.png' | asset_url
 
-  assign hero_color = m.hero_color.value | default: '#C42637'
-  assign bright = hero_color | color_brightness
-  assign hero_bottom = hero_color | color_darken: 12
-  if bright > 140
+  # Reuse the theme's named colour schemes (main-color-{red|blue|green|black|yellow}),
+  # so the hero, header and footer all read the same --c-main-* ramp as the rest of the site.
+  assign main_color = m.main_color.value | default: 'red' | downcase
+  assign light_scheme = false
+  if main_color == 'yellow'
+    assign light_scheme = true
+  endif
+  if light_scheme
     assign hero_text = '#241a00'
-    assign hero_intro = hero_color | color_darken: 52
-    assign heart_tint = hero_color | color_darken: 42
+    assign hero_intro = 'rgba(36,26,0,.78)'
+    assign heart_ink = '#241a00'
   else
     assign hero_text = '#ffffff'
-    assign hero_intro = hero_color | color_lighten: 42
-    assign heart_tint = '#ffffff'
+    assign hero_intro = 'rgba(255,255,255,.82)'
+    assign heart_ink = '#ffffff'
   endif
   assign heart_op = section.settings.hero_heart_opacity | default: 7 | divided_by: 100.0
 -%}
 
+{%- comment -%} Put the scheme class on <html> so the shared header & footer inherit --c-main-*. {%- endcomment -%}
+<script>document.documentElement.classList.add('main-color-{{ main_color | escape }}');</script>
+
 <style>
-  /* Site header adopts this member's hero colour once it sticks on scroll.
+  /* Site header adopts this member's scheme colour once it sticks on scroll.
      The theme paints the header background on .header::before (fades in via opacity). */
-  .shopify-section-group-header-group.is-stuck .header::before{background:{{ hero_color }}!important}
+  .shopify-section-group-header-group.is-stuck .header::before{background:linear-gradient(180deg, var(--c-main-500), var(--c-main-600))!important}
   .shopify-section-group-header-group.is-stuck .header{--color-header-text:{{ hero_text }};color:{{ hero_text }}!important}
   .shopify-section-group-header-group.is-stuck .header a,
   .shopify-section-group-header-group.is-stuck .header summary,
@@ -36,12 +43,12 @@
   .shopify-section-group-header-group.is-stuck .header svg{color:{{ hero_text }}!important}
 </style>
 
-<div class="tb" style="
+<div class="tb main-color-{{ main_color | escape }}" style="
   --heart:url('{{ heart }}');
-  --hero-bg:linear-gradient(180deg, {{ hero_color }}, {{ hero_bottom }});
+  --hero-bg:linear-gradient(180deg, var(--c-main-500), var(--c-main-600));
   --hero-text:{{ hero_text }};
   --hero-intro:{{ hero_intro }};
-  --heart-tint:{{ heart_tint }};
+  --heart-tint:{{ heart_ink }};
   --heart-op:{{ heart_op }};">
 
   <header class="tb-hero">
@@ -143,7 +150,7 @@
     -webkit-mask:var(--heart) center/cover;mask:var(--heart) center/cover}
   .tb-hero__in{position:relative;max-width:118.4rem;margin:0 auto;padding:clamp(7.2rem,10vw,12.8rem) var(--wrap) clamp(4.8rem,7vw,9.6rem);
     display:grid;grid-template-columns:minmax(0,1fr) 33.6rem;gap:clamp(2.4rem,5vw,5.6rem);align-items:center}
-  .tb-hero h1{font-weight:900;font-size:clamp(4.16rem,7.5vw,8.64rem);line-height:.95;letter-spacing:-.02em;margin:0;text-wrap:balance}
+  .tb-hero h1{color:var(--hero-text);font-weight:900;font-size:clamp(4.16rem,7.5vw,8.64rem);line-height:.95;letter-spacing:-.02em;margin:0;text-wrap:balance}
   .tb-role{display:inline-flex;align-items:center;gap:.4em;
     background:color-mix(in srgb, var(--hero-text) 12%, transparent);color:var(--hero-text);
     font-weight:800;font-size:1.52rem;padding:6px 15px;border-radius:999px;margin:1.76rem 0 .32rem}
