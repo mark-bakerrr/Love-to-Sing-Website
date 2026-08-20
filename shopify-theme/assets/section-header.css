@@ -22,12 +22,57 @@
 }
 
 .header--solid:before,
+.header.is-solid:before,
 .is-stuck .header:before {
   opacity: 1;
 }
 
-.is-stuck .header {
+.is-stuck .header,
+.header.is-solid {
   box-shadow: 0 0.8rem 10rem #00000044;
+}
+
+/* ------------------------------------------------------------ *\
+  Floating pill variant
+  Transparent over the hero at the top -> fills + shadow on scroll
+  (`.is-solid` toggled by JS in Task 2). `.header--floating` sits on
+  the header root; the pill centres and rounds via `--radius-m`.
+\* ------------------------------------------------------------ */
+.header--floating {
+  width: min(132rem, calc(100% - 2.4rem));
+  margin-inline: auto;
+  margin-top: 1.2rem;
+  border-radius: var(--radius-m);
+  transition: margin var(--duration-default) ease-in-out,
+    width var(--duration-default) ease-in-out,
+    box-shadow var(--duration-default) ease-in-out;
+}
+
+/* Clip the background overlay to the pill's rounded corners */
+.header--floating:before {
+  border-radius: var(--radius-m);
+}
+
+.header--floating.is-solid {
+  box-shadow: 0 1rem 3rem #00000038;
+}
+
+/* Keep the full-bleed megamenu spanning the viewport once the header
+   is narrowed to a centred pill: the pill's left edge sits 1.2rem in,
+   so re-anchor the 100vw panel back to the viewport edge. */
+.header--floating .header__megamenu {
+  left: -1.2rem;
+}
+
+@media (max-width: 990px) {
+  .header--floating {
+    width: calc(100% - 1.6rem);
+    margin-top: 0.8rem;
+  }
+
+  .header--floating .header__megamenu {
+    left: -0.8rem;
+  }
 }
 
 .header--solid[class*="main-color-"]:before {
