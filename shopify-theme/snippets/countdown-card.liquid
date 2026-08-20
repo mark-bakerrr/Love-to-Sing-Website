@@ -1,0 +1,136 @@
+{%- comment -%}
+  countdown-card — renders ONE countdown. Shared by:
+    - sections/countdown.liquid       (standalone full-width section)
+    - the "countdown" block in main-song.liquid  (inline block)
+
+  Params (all optional except design):
+    design         one of: xmas-advent, xmas-globe, xmas-sleigh,
+                   hall-jack, hall-neon, hall-cauldron
+    heading        optional heading text
+    target_month   1-12   (default 12)
+    target_day     1-31   (default 25)
+    reference_tz   IANA tz (default America/New_York)
+    recurring      boolean (default true)
+    end_behavior   hide | message | message-then-hide (default message)
+    end_message    inline richtext shown at zero
+    grace_days     integer (default 6)
+    cta_label      button label
+    cta_link       button url (button only renders when both set)
+    transparent_bg boolean — drop the skin's coloured panel
+
+  Numbers are timezone-correct in lts-countdown.js. QA: ?now=<ISO>.
+{%- endcomment -%}
+
+{{ 'lts-countdown.css' | asset_url | stylesheet_tag }}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+
+{%- liquid
+  assign cd_design = design | default: 'xmas-globe'
+  assign cd_month = target_month | default: 12
+  assign cd_day = target_day | default: 25
+  assign cd_tz = reference_tz | default: 'America/New_York'
+  assign cd_end = end_behavior | default: 'message'
+  assign cd_grace = grace_days | default: 6
+
+  assign fx = ''
+  assign skin = ''
+  assign art = ''
+  assign art_w = 0
+  assign art_h = 0
+  case cd_design
+    when 'xmas-advent'
+      assign skin = 's-advent'
+      assign fx = 'advent'
+    when 'xmas-globe'
+      assign skin = 's-globe'
+      assign fx = 'globe'
+      assign art = 'lts-cd-xmas-snowglobe.png'
+      assign art_w = 150
+      assign art_h = 150
+    when 'xmas-sleigh'
+      assign skin = 's-sleigh'
+      assign fx = 'sleigh'
+      assign art = 'lts-cd-xmas-sleigh.png'
+      assign art_w = 220
+      assign art_h = 126
+    when 'hall-jack'
+      assign skin = 's-jack'
+      assign fx = 'pumpkin'
+      assign art = 'lts-cd-hall-pumpkin.png'
+      assign art_w = 205
+      assign art_h = 205
+    when 'hall-neon'
+      assign skin = 's-neon'
+      assign fx = 'neon'
+    when 'hall-cauldron'
+      assign skin = 's-cauldron'
+      assign fx = 'cauldron'
+      assign art = 'lts-cd-hall-cauldron.png'
+      assign art_w = 135
+      assign art_h = 135
+    else
+      assign skin = 's-globe'
+      assign fx = 'globe'
+      assign art = 'lts-cd-xmas-snowglobe.png'
+      assign art_w = 150
+      assign art_h = 150
+  endcase
+
+  assign root_class = 'lts-cd'
+  if transparent_bg
+    assign root_class = root_class | append: ' lts-cd--transparent'
+  endif
+-%}
+
+<div
+  class="{{ root_class }}"
+  data-fx="{{ fx }}"
+  data-countdown
+  data-target-month="{{ cd_month }}"
+  data-target-day="{{ cd_day }}"
+  data-tz="{{ cd_tz }}"
+  data-end="{{ cd_end }}"
+  data-grace-days="{{ cd_grace }}"
+  data-recurring="{% if recurring == false %}false{% else %}true{% endif %}"
+>
+  {%- if heading != blank -%}
+    <h2 class="lts-cd__heading">{{ heading | escape }}</h2>
+  {%- endif -%}
+
+  <div class="{{ skin }} skin">
+    {%- if cd_design == 'xmas-advent' -%}
+      <div class="snowfield"></div>
+    {%- elsif cd_design == 'hall-neon' -%}
+      <span class="bat" style="top:1.4rem;left:2rem;font-size:1.6rem">🦇</span>
+      <span class="bat" style="top:2.2rem;right:3rem;font-size:1.1rem">🦇</span>
+    {%- elsif art != blank -%}
+      <div class="artbox"><img class="art" src="{{ art | asset_url }}" alt="" width="{{ art_w }}" height="{{ art_h }}" loading="lazy"></div>
+    {%- endif -%}
+
+    <div class="cd">
+      <div class="row">
+        <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
+        <span class="sep" aria-hidden="true">:</span>
+        <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
+        <span class="sep" aria-hidden="true">:</span>
+        <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
+        <span class="sep" aria-hidden="true">:</span>
+        <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
+      </div>
+      {%- if end_message != blank -%}
+        <div class="msg" data-countdown-message hidden>{{ end_message }}</div>
+      {%- endif -%}
+    </div>
+
+    {%- if cta_link != blank and cta_label != blank -%}
+      <div class="ctaWrap">
+        <a class="cta" href="{{ cta_link }}">{{ cta_label | escape }} <span class="arw">→</span></a>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+<script src="{{ 'gsap.min.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'lts-countdown.js' | asset_url }}" defer="defer"></script>

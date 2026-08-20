@@ -35,12 +35,29 @@
             "title": "Youtube Music",
             "link": "https://music.youtube.com/channel/UCjDkTzwSifCid5vl3gLtfbQ"
           }
+        },
+        "countdown_block": {
+          "type": "countdown",
+          "settings": {
+            "design": "hall-jack",
+            "target_month": 10,
+            "target_day": 31,
+            "reference_tz": "America/New_York",
+            "recurring": true,
+            "end_behavior": "message",
+            "end_message": "Happy Halloween! 🎃",
+            "grace_days": 6,
+            "cta_label": "See the Halloween countdown",
+            "cta_link": "/pages/halloween-countdown",
+            "transparent_bg": false
+          }
         }
       },
       "block_order": [
         "icon_button_iRFNKY",
         "icon_button_hapJGT",
-        "icon_button_MYCCeP"
+        "icon_button_MYCCeP",
+        "countdown_block"
       ],
       "settings": {
         "background_image": "shopify://shop_images/hearts-background.png",
@@ -51,22 +68,6 @@
         "form_text": "Login to download any lyric sheet without having to re-enter your email.",
         "enable_share": true,
         "share_title": "Share this song"
-      }
-    },
-    "countdown_hall": {
-      "type": "countdown",
-      "settings": {
-        "design": "hall-jack",
-        "target_month": 10,
-        "target_day": 31,
-        "reference_tz": "America/New_York",
-        "recurring": true,
-        "end_behavior": "message",
-        "end_message": "Happy Halloween! 🎃",
-        "grace_days": 6,
-        "cta_label": "See the Halloween countdown",
-        "cta_link": "/pages/halloween-countdown",
-        "transparent_bg": false
       }
     },
     "custom_html_xJpEXA": {
@@ -373,7 +374,6 @@
   },
   "order": [
     "main",
-    "countdown_hall",
     "custom_html_xJpEXA",
     "featured_products_3X66Cw",
     "song_about_mDzcLq",

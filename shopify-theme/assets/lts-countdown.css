@@ -18,14 +18,23 @@
 .lts-cd .artbox{position:relative;z-index:1;display:flex;justify-content:center;margin-bottom:-16px;pointer-events:none}
 .lts-cd .art{display:block}
 .lts-cd .cd{position:relative;z-index:2;width:100%}
-.lts-cd .row{display:flex;justify-content:center;gap:1.4rem;flex-wrap:nowrap}
-.lts-cd .tile{display:flex;flex-direction:column;align-items:center;padding:.2rem .3rem;min-width:5rem}
-.lts-cd .num{font-size:4.8rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;will-change:transform}
-.lts-cd .lab{font-size:.92rem;letter-spacing:.14em;text-transform:uppercase;margin-top:.6rem;opacity:.8}
+.lts-cd{container-type:inline-size}
+.lts-cd .row{display:flex;justify-content:center;align-items:flex-start;gap:clamp(.3rem,3cqi,1.4rem);flex-wrap:nowrap}
+.lts-cd .tile{display:flex;flex-direction:column;align-items:center;padding:.2rem .3rem;min-width:0}
+.lts-cd .num{font-size:clamp(1.9rem,8.5cqi,4.4rem);font-weight:800;line-height:1;font-variant-numeric:tabular-nums;will-change:transform}
+.lts-cd .lab{font-size:clamp(.56rem,2cqi,.9rem);letter-spacing:.14em;text-transform:uppercase;margin-top:.5rem;opacity:.8}
+/* colon separators between units — same colour/size as the numbers */
+.lts-cd .sep{align-self:flex-start;font-weight:800;line-height:1;font-size:clamp(1.9rem,8.5cqi,4.4rem);opacity:1;color:currentColor}
+.lts-cd .s-advent .sep{color:#f5d689}
+.lts-cd .s-globe .sep{color:#eaf6ff}
+.lts-cd .s-sleigh .sep{color:#fff}
+.lts-cd .s-jack .sep{color:#fff3d8}
+.lts-cd .s-neon .sep{color:#b6f24e}
+.lts-cd .s-cauldron .sep{color:#5fffbb}
 /* boxed 'card' skins keep their containers */
 .lts-cd .s-advent .tile{border-radius:1rem;padding:1rem .9rem .8rem;box-shadow:0 6px 16px rgba(0,0,0,.3)}
-.lts-cd .s-advent .num{font-size:3.8rem}
-.lts-cd .sep{display:none}
+.lts-cd .s-advent .num{font-size:clamp(1.8rem,7cqi,3.6rem)}
+.lts-cd .s-advent .sep{display:none}
 .lts-cd .msg{font-size:2.1rem;font-weight:800;text-align:center;padding:1rem .5rem}
 .lts-cd [hidden]{display:none!important}
 .lts-cd .ctaWrap{margin-top:1.5rem;z-index:2}
@@ -97,8 +106,10 @@
 .lts-cd .s-jack .num,.lts-cd .s-neon .num,.lts-cd .s-cauldron .num,
 .lts-cd .s-jack .lab,.lts-cd .s-neon .lab,.lts-cd .s-cauldron .lab,
 .lts-cd .s-jack .cta,.lts-cd .s-neon .cta,.lts-cd .s-cauldron .cta,
-.lts-cd .s-jack .msg,.lts-cd .s-neon .msg,.lts-cd .s-cauldron .msg{font-family:'Creepster',system-ui,cursive;font-weight:400;letter-spacing:.05em}
-.lts-cd .s-jack .num,.lts-cd .s-neon .num,.lts-cd .s-cauldron .num{font-size:5.4rem}
+.lts-cd .s-jack .msg,.lts-cd .s-neon .msg,.lts-cd .s-cauldron .msg,
+.lts-cd .s-jack .sep,.lts-cd .s-neon .sep,.lts-cd .s-cauldron .sep{font-family:'Creepster',system-ui,cursive;font-weight:400;letter-spacing:.05em}
+.lts-cd .s-jack .num,.lts-cd .s-neon .num,.lts-cd .s-cauldron .num,
+.lts-cd .s-jack .sep,.lts-cd .s-neon .sep,.lts-cd .s-cauldron .sep{font-size:clamp(2.1rem,10cqi,5.2rem)}
 .lts-cd .s-jack .lab,.lts-cd .s-neon .lab,.lts-cd .s-cauldron .lab{letter-spacing:.14em;opacity:.9}
 .lts-cd .s-jack .cta,.lts-cd .s-neon .cta,.lts-cd .s-cauldron .cta{font-size:1.55rem;letter-spacing:.06em}
 

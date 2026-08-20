@@ -26,6 +26,11 @@
 (function () {
   'use strict';
 
+  // Idempotency: this file may be enqueued by the section, the block and the
+  // widget on the same page. Only the first execution should initialise.
+  if (window.__ltsCountdownInit) return;
+  window.__ltsCountdownInit = true;
+
   var params;
   try { params = new URLSearchParams(location.search); } catch (e) { params = null; }
 

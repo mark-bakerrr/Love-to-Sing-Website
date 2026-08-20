@@ -1,128 +1,28 @@
 {%- comment -%}
-  Countdown — reusable seasonal countdown block.
+  Countdown — standalone full-width section.
 
-  Merchants add this section to any template, pick a design (skin), set the
-  target month/day + reference timezone, and choose what happens at zero.
+  Renders the shared snippet 'countdown-card'. The same countdown is also
+  available as an inline BLOCK inside the Main Song Product section, and as the
+  global overlay via snippets/countdown-widget.liquid. All three share
+  snippets/countdown-card.liquid + assets/lts-countdown.{css,js}.
 
-  Six shipping designs:
-    xmas-advent    -> class s-advent   fx advent    (CSS + falling snow, no art)
-    xmas-globe     -> class s-globe    fx globe     (art lts-cd-xmas-snowglobe)
-    xmas-sleigh    -> class s-sleigh   fx sleigh    (art lts-cd-xmas-sleigh)
-    hall-jack      -> class s-jack     fx pumpkin   (art lts-cd-hall-pumpkin)
-    hall-neon      -> class s-neon     fx neon      (CSS bats, no art)
-    hall-cauldron  -> class s-cauldron fx cauldron  (art lts-cd-hall-cauldron)
-
-  Numbers are timezone-correct in lts-countdown.js. QA: ?now=<ISO>.
+  QA: ?now=<ISO> fakes the clock.
 {%- endcomment -%}
 
-{{ 'lts-countdown.css' | asset_url | stylesheet_tag }}
-
-{%- comment -%} Creepster is only used by Halloween skins, but it's cheap and dedup'd. {%- endcomment -%}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
-
-{%- liquid
-  assign design = section.settings.design
-  assign fx = ''
-  assign skin = ''
-  assign art = ''
-
-  assign art_w = 0
-  assign art_h = 0
-  case design
-    when 'xmas-advent'
-      assign skin = 's-advent'
-      assign fx = 'advent'
-    when 'xmas-globe'
-      assign skin = 's-globe'
-      assign fx = 'globe'
-      assign art = 'lts-cd-xmas-snowglobe.png'
-      assign art_w = 150
-      assign art_h = 150
-    when 'xmas-sleigh'
-      assign skin = 's-sleigh'
-      assign fx = 'sleigh'
-      assign art = 'lts-cd-xmas-sleigh.png'
-      assign art_w = 220
-      assign art_h = 126
-    when 'hall-jack'
-      assign skin = 's-jack'
-      assign fx = 'pumpkin'
-      assign art = 'lts-cd-hall-pumpkin.png'
-      assign art_w = 205
-      assign art_h = 205
-    when 'hall-neon'
-      assign skin = 's-neon'
-      assign fx = 'neon'
-    when 'hall-cauldron'
-      assign skin = 's-cauldron'
-      assign fx = 'cauldron'
-      assign art = 'lts-cd-hall-cauldron.png'
-      assign art_w = 135
-      assign art_h = 135
-    else
-      assign skin = 's-globe'
-      assign fx = 'globe'
-      assign art = 'lts-cd-xmas-snowglobe.png'
-      assign art_w = 150
-      assign art_h = 150
-  endcase
-
-  assign root_class = 'lts-cd'
-  if section.settings.transparent_bg
-    assign root_class = root_class | append: ' lts-cd--transparent'
-  endif
--%}
-
-<div
-  class="{{ root_class }}"
-  data-fx="{{ fx }}"
-  data-countdown
-  data-target-month="{{ section.settings.target_month | default: 12 }}"
-  data-target-day="{{ section.settings.target_day | default: 25 }}"
-  data-tz="{{ section.settings.reference_tz }}"
-  data-end="{{ section.settings.end_behavior }}"
-  data-grace-days="{{ section.settings.grace_days | default: 6 }}"
-  data-recurring="{% if section.settings.recurring %}true{% else %}false{% endif %}"
->
-  {%- if section.settings.heading != blank -%}
-    <h2 class="lts-cd__heading">{{ section.settings.heading | escape }}</h2>
-  {%- endif -%}
-
-  <div class="{{ skin }} skin">
-    {%- comment -%} Per-skin decoration in front of the number row {%- endcomment -%}
-    {%- if design == 'xmas-advent' -%}
-      <div class="snowfield"></div>
-    {%- elsif design == 'hall-neon' -%}
-      <span class="bat" style="top:1.4rem;left:2rem;font-size:1.6rem">🦇</span>
-      <span class="bat" style="top:2.2rem;right:3rem;font-size:1.1rem">🦇</span>
-    {%- elsif art != blank -%}
-      <div class="artbox"><img class="art" src="{{ art | asset_url }}" alt="" width="{{ art_w }}" height="{{ art_h }}" loading="lazy"></div>
-    {%- endif -%}
-
-    <div class="cd">
-      <div class="row">
-        <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
-        <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
-        <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
-        <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
-      </div>
-      {%- if section.settings.end_message != blank -%}
-        <div class="msg" data-countdown-message hidden>{{ section.settings.end_message }}</div>
-      {%- endif -%}
-    </div>
-
-    {%- if section.settings.cta_link != blank and section.settings.cta_label != blank -%}
-      <div class="ctaWrap">
-        <a class="cta" href="{{ section.settings.cta_link }}">{{ section.settings.cta_label | escape }} <span class="arw">→</span></a>
-      </div>
-    {%- endif -%}
-  </div>
-</div>
-
-<script src="{{ 'gsap.min.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'lts-countdown.js' | asset_url }}" defer="defer"></script>
+{% render 'countdown-card',
+  design: section.settings.design,
+  heading: section.settings.heading,
+  target_month: section.settings.target_month,
+  target_day: section.settings.target_day,
+  reference_tz: section.settings.reference_tz,
+  recurring: section.settings.recurring,
+  end_behavior: section.settings.end_behavior,
+  end_message: section.settings.end_message,
+  grace_days: section.settings.grace_days,
+  cta_label: section.settings.cta_label,
+  cta_link: section.settings.cta_link,
+  transparent_bg: section.settings.transparent_bg
+%}
 
 {% schema %}
 {

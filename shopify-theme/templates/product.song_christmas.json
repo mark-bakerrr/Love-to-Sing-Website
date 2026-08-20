@@ -35,12 +35,29 @@
             "title": "Youtube Music",
             "link": "https://music.youtube.com/channel/UCjDkTzwSifCid5vl3gLtfbQ"
           }
+        },
+        "countdown_block": {
+          "type": "countdown",
+          "settings": {
+            "design": "xmas-globe",
+            "target_month": 12,
+            "target_day": 25,
+            "reference_tz": "America/New_York",
+            "recurring": true,
+            "end_behavior": "message",
+            "end_message": "It's Christmas! 🎄",
+            "grace_days": 6,
+            "cta_label": "See the Christmas countdown",
+            "cta_link": "/pages/christmas-countdown",
+            "transparent_bg": false
+          }
         }
       },
       "block_order": [
         "icon_button_iRFNKY",
         "icon_button_hapJGT",
-        "icon_button_MYCCeP"
+        "icon_button_MYCCeP",
+        "countdown_block"
       ],
       "settings": {
         "background_image": "shopify://shop_images/hearts-background.png",
@@ -51,22 +68,6 @@
         "form_text": "Login to download any lyric sheet without having to re-enter your email.",
         "enable_share": true,
         "share_title": "Share this song"
-      }
-    },
-    "countdown_xmas": {
-      "type": "countdown",
-      "settings": {
-        "design": "xmas-globe",
-        "target_month": 12,
-        "target_day": 25,
-        "reference_tz": "America/New_York",
-        "recurring": true,
-        "end_behavior": "message",
-        "end_message": "It's Christmas! 🎄",
-        "grace_days": 6,
-        "cta_label": "See the Christmas countdown",
-        "cta_link": "/pages/christmas-countdown",
-        "transparent_bg": false
       }
     },
     "custom_html_xJpEXA": {
@@ -340,7 +341,6 @@
   },
   "order": [
     "main",
-    "countdown_xmas",
     "custom_html_xJpEXA",
     "featured_products_3X66Cw",
     "song_about_mDzcLq",

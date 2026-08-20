@@ -11,7 +11,7 @@ A reusable, themeable countdown system for lovetosing.com — Halloween & Christ
 
 ## Key decisions
 
-- **One reusable thing with a design dropdown**, not N separate blocks — the engine (ticking, timezone, auto-hide) lives in one place. Delivered as a **section** (`sections/countdown.liquid`) because the song templates are flat section-lists and `main-song` doesn't accept `@theme` blocks.
+- **One reusable thing with a design dropdown**, not N separate blocks — the engine (ticking, timezone, auto-hide) lives in one place. Delivered THREE ways, all sharing `snippets/countdown-card.liquid` + `assets/lts-countdown.{css,js}`: (1) an inline **block** inside the Main Song Product section (`main-song` has a local `countdown` block type, rendered under "Share this song"); (2) a standalone full-width **section** (`sections/countdown.liquid`) for other pages; (3) the global overlay **widget**. `main-song` is custom-coded (renders its blocks via filtered loops), so the block is a local block type there rather than a portable `@theme` block.
 - **Auto + manual override** for season selection; **auto-hide at 00:00:00** once a countdown passes its target (per Mark).
 - **Separate skin sets**: elaborate section skins vs one compact widget skin per season.
 - Art via **Higgsfield** (children's-storybook style, transparent PNGs), background-removed.
