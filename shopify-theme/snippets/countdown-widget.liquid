@@ -1,43 +1,70 @@
 {%- comment -%}
-  countdown-widget — global floating bottom-right countdown widget.
+  countdown-widget — global floating bottom-right countdown overlay.
 
-  Decides the active season via countdown-season (included so it shares scope
-  and exposes cd_season / cd_link / cd_month / cd_day / cd_tz). If no season
-  is active (off / out of window), renders nothing.
+  Resolves the active season inline from theme settings (no include, so there's
+  no cross-snippet scope dependency):
+    settings.countdown_widget_mode  auto | halloween | christmas | off
+    settings.countdown_widget_tz    IANA tz (default America/New_York)
+    settings.cd_hall_link / cd_hall_month / cd_hall_day
+    settings.cd_xmas_link / cd_xmas_month / cd_xmas_day
+  Auto windows: Halloween Sep 15–Oct 31, Christmas Nov 1–Dec 25; else nothing.
 
-  Otherwise renders a compact .lts-cdw widget for the season: dismiss ✕,
-  season art, a caption, and a [data-countdown][data-widget] block that hides
-  itself at zero. The whole widget links to the season's countdown page.
+  It is ALSO removed by lts-countdown.js (and hidden by CSS :has()) on any page
+  that already shows an inline countdown, so it never doubles up.
 
-  Dismiss is remembered per-season in localStorage (handled in
-  lts-countdown.js via data-widget-key / [data-cdw-close]).
-
-  Include once in layout/theme.liquid, e.g.:
-    {% render 'countdown-widget' %}
+  Rendered once in layout/theme.liquid: {% render 'countdown-widget' %}
 {%- endcomment -%}
 
-{%- include 'countdown-season' -%}
+{%- liquid
+  assign mode = settings.countdown_widget_mode | default: 'auto'
+  assign cd_tz = settings.countdown_widget_tz | default: 'America/New_York'
+  assign hall_month = settings.cd_hall_month | default: 10
+  assign hall_day = settings.cd_hall_day | default: 31
+  assign xmas_month = settings.cd_xmas_month | default: 12
+  assign xmas_day = settings.cd_xmas_day | default: 25
+
+  assign cd_season = ''
+  if mode == 'halloween'
+    assign cd_season = 'halloween'
+  elsif mode == 'christmas'
+    assign cd_season = 'christmas'
+  elsif mode == 'off'
+    assign cd_season = ''
+  else
+    assign m = 'now' | date: '%m' | plus: 0
+    assign d = 'now' | date: '%d' | plus: 0
+    assign md = m | times: 100 | plus: d
+    if md >= 915 and md <= 1031
+      assign cd_season = 'halloween'
+    elsif md >= 1101 and md <= 1225
+      assign cd_season = 'christmas'
+    endif
+  endif
+
+  assign cd_link = ''
+  assign cd_month = 12
+  assign cd_day = 25
+  if cd_season == 'halloween'
+    assign cd_link = settings.cd_hall_link
+    assign cd_month = hall_month
+    assign cd_day = hall_day
+    assign w_class = 'w-hall'
+    assign w_art = 'lts-cd-hall-pumpkin.png'
+    assign w_cap = 'Halloween countdown'
+  elsif cd_season == 'christmas'
+    assign cd_link = settings.cd_xmas_link
+    assign cd_month = xmas_month
+    assign cd_day = xmas_day
+    assign w_class = 'w-xmas'
+    assign w_art = 'lts-cd-xmas-snowglobe.png'
+    assign w_cap = 'Christmas countdown'
+  endif
+-%}
 
 {%- if cd_season != blank -%}
-  {%- liquid
-    if cd_season == 'halloween'
-      assign w_class = 'w-hall'
-      assign w_art = 'lts-cd-hall-pumpkin.png'
-      assign w_cap = 'Halloween countdown'
-    else
-      assign w_class = 'w-xmas'
-      assign w_art = 'lts-cd-xmas-snowglobe.png'
-      assign w_cap = 'Christmas countdown'
-    endif
-    assign w_tag = 'div'
-  -%}
-
   {{ 'lts-countdown.css' | asset_url | stylesheet_tag }}
 
-  <div
-    class="lts-cdw {{ w_class }}"
-    data-widget-key="{{ cd_season }}"
-  >
+  <div class="lts-cdw {{ w_class }}" data-widget-key="{{ cd_season }}">
     {%- if cd_link != blank -%}
       <a class="lts-cdw__hit" href="{{ cd_link }}" aria-label="{{ w_cap | escape }}"></a>
     {%- endif -%}
