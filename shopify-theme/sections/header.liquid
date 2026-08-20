@@ -125,7 +125,7 @@
 {%- endstyle -%}
 
 <header
-  class="header color-{{ color_scheme }}{% if is_solid %} header--solid {{ class }}{% endif %}"
+  class="header color-{{ color_scheme }}{% if is_solid %} header--solid {{ class }}{% endif %}{% if section.settings.floating_header %} header--floating{% endif %}"
   style="--logo-width: {{ section.settings.logo_width | default: 108 }}px;--logo-width-mobile: {{ section.settings.logo_width_mobile | default: 76 }}px;"
 >
   <div class="container container--fullwidth">
@@ -339,6 +339,12 @@
         "id": "main_colors",
         "default": "scheme_1",
         "label": "Main colors"
+      },
+      {
+        "type": "checkbox",
+        "id": "floating_header",
+        "label": "Floating header",
+        "default": true
       }
     ],
     "blocks": [
