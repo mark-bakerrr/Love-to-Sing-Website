@@ -80,11 +80,9 @@
 
 /* ===================== HALLOWEEN ===================== */
 /* 4 Jack-o'-Lantern — pumpkin behind the numbers */
-.lts-cd .s-jack{background:radial-gradient(120% 120% at 50% 15%,#5a2a0d,#1c0f06);position:relative;min-height:220px;justify-content:center}
-.lts-cd .s-jack .artbox{position:absolute;top:50%;left:50%;transform:translate(-50%,-56%);margin:0;z-index:1}
-.lts-cd .s-jack .art{width:205px;filter:drop-shadow(0 0 22px rgba(255,120,20,.45))}
-.lts-cd .s-jack .cd{position:relative;z-index:2}
-.lts-cd .s-jack .num{color:#fff3d8;text-shadow:0 0 12px rgba(255,140,30,.95),0 2px 4px rgba(0,0,0,.7)}
+.lts-cd .s-jack{background:radial-gradient(120% 120% at 50% 15%,#5a2a0d,#1c0f06)}
+.lts-cd .s-jack .art{width:150px;filter:drop-shadow(0 0 20px rgba(255,120,20,.5))}
+.lts-cd .s-jack .num{color:#fff3d8;text-shadow:0 0 12px rgba(255,140,30,.9),0 2px 4px rgba(0,0,0,.7)}
 .lts-cd .s-jack .lab{color:#ffcf8a}
 .lts-cd .s-jack .msg{color:#ff9a2e;text-shadow:0 0 16px rgba(255,140,30,.6)}
 .lts-cd .s-jack .cta{background:#ff8a1e;color:#2a1000}
@@ -95,7 +93,7 @@
 .lts-cd .s-neon .num{color:#b6f24e;text-shadow:0 0 6px #9bff2e,0 0 14px #4f9c0e}
 .lts-cd .s-neon .lab{color:#b06bff;text-shadow:0 0 8px #7a2bd4}
 .lts-cd .s-neon .msg{color:#c6ff5a;text-shadow:0 0 14px #9bff2e}
-.lts-cd .s-neon .cta{background:transparent;border-color:#c6ff5a;color:#c6ff5a;box-shadow:0 0 12px rgba(155,255,46,.4)}
+.lts-cd .s-neon .cta{background:#13220b;border-color:#9bff2e;color:#c6ff5a;box-shadow:0 0 12px rgba(155,255,46,.4)}
 
 /* 6 Cauldron */
 .lts-cd .s-cauldron{background:radial-gradient(120% 120% at 50% 20%,#123024,#08150f)}
@@ -122,12 +120,10 @@
 
 /* Transparent background toggle (removes the skin's background panel) */
 .lts-cd--transparent .skin{background:transparent!important}
-/* Transparent: give each number its own card, hide colons, go bigger */
-.lts-cd--transparent .tile{background:rgba(18,18,26,.62);border-radius:1rem;padding:.7rem .7rem .55rem;box-shadow:0 6px 16px rgba(0,0,0,.35)}
+/* Transparent: give each number its own card, hide colons (numbers size via
+   container queries against the fixed wrapper width, so they always fit). */
+.lts-cd--transparent .tile{background:rgba(18,18,26,.62);border-radius:1rem;padding:.6rem .6rem .5rem;box-shadow:0 6px 16px rgba(0,0,0,.35)}
 .lts-cd--transparent .sep{display:none}
-.lts-cd--transparent .num,.lts-cd--transparent .sep{font-size:3.4rem!important}
-.lts-cd--transparent .lab{font-size:.78rem!important}
-.lts-cd--transparent .cta{font-size:1.5rem!important}
 
 /* ===================== FLOATING WIDGET ===================== */
 /* The widget wraps the SAME skin (.lts-cd) as the block/section, so it inherits
@@ -139,7 +135,7 @@ body:has(.lts-cd--inline) .lts-cdw{display:none!important}
   filter:drop-shadow(0 16px 36px rgba(0,0,0,.5))}
 /* Transparent overlay: no panel; wrapper hugs the (larger) content so the ✕
    sits right beside the numbers, and the heavy wrapper shadow is dropped. */
-.lts-cdw--transparent{width:min(300px,calc(100vw - 3.2rem));filter:none}
+.lts-cdw--transparent{width:min(340px,calc(100vw - 3.2rem));filter:none}
 .lts-cdw--transparent .close{top:-.7rem;right:-.7rem}
 .lts-cdw .lts-cd{width:100%}
 .lts-cdw .close{position:absolute;top:-1rem;right:-1rem;z-index:5;width:2.6rem;height:2.6rem;border-radius:50%;
