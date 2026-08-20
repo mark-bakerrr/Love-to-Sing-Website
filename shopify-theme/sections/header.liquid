@@ -13,6 +13,7 @@
   assign _blocks = section.blocks
   assign current_template = template.name | append: '.' | append: template.suffix
   assign menu_blocks = _blocks | where: "type", "mega_menu"
+  assign menu_item_blocks = _blocks | where: "type", "menu_item"
   assign solid_color_blocks = _blocks | where: "type", "solid_header"
 
   comment
@@ -133,7 +134,7 @@
       {%- if linklists[section.settings.menu].links.size > 0 -%}
         {%- render 'navigation-mobile', menu: linklists[section.settings.menu_mobile] -%}
 
-        {%- render 'navigation-desktop', menu: linklists[section.settings.menu], megamenu_blocks: menu_blocks -%}
+        {%- render 'navigation-desktop', menu: linklists[section.settings.menu], megamenu_blocks: menu_blocks, menu_item_blocks: menu_item_blocks -%}
       {%- endif -%}
 
       <div class="header__logo-placeholder"> </div><!-- /.header__logo-placeholder -->

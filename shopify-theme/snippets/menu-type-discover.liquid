@@ -1,0 +1,13 @@
+{%- comment -%}
+  Discover (page listing) menu type — PLACEHOLDER.
+  TODO Task 7: build the discover panel from block_settings.discover_links / discover_blog /
+  discover_feature_page / discover_feature_image.
+  Accepts: block_settings, link
+{%- endcomment -%}
+<div class="header__megamenu">
+  <header-megamenu class="megamenu">
+    <div class="megamenu__inner" megamenu="main-wrapper">
+      <p class="megamenu__title">{{ link.title | escape }}</p>
+    </div><!-- /.megamenu__inner -->
+  </header-megamenu><!-- /.megamenu -->
+</div><!-- /.header__megamenu -->
