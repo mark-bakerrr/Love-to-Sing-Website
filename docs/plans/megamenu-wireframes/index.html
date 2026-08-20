@@ -600,8 +600,8 @@ body:not(.gsap) .overlay.is-open .stag{opacity:1;transform:none}
   var header=document.getElementById('siteHeader');
   var items=[].slice.call(nav.querySelectorAll('.nav-item')),closeTimer;
   var canHover=window.matchMedia('(hover:hover)').matches;
-  function syncHeader(){var anyOpen=items.some(function(n){return n.dataset.open==='true';});
-    header.classList.toggle('solid',anyOpen||window.scrollY>10);}
+  // header fills with colour ONLY on scroll — stays transparent at the top even with a mega menu open
+  function syncHeader(){header.classList.toggle('solid',window.scrollY>10);}
   function openOnly(item){clearTimeout(closeTimer);
     items.forEach(function(n){n.dataset.open=(n===item&&item&&item.classList.contains('has-mega'))?'true':'false';});syncHeader();}
   function closeAll(){items.forEach(function(n){n.dataset.open='false';});syncHeader();}
