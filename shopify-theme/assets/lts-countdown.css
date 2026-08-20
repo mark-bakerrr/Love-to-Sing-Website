@@ -120,6 +120,9 @@
 .lts-cd--transparent .skin{background:transparent!important}
 
 /* ===================== FLOATING WIDGET ===================== */
+/* Never show the overlay on a page that already has an inline countdown
+   (a .lts-cd block or section). JS also removes it for browsers without :has(). */
+body:has(.lts-cd) .lts-cdw{display:none!important}
 .lts-cdw{position:fixed;right:2.2rem;bottom:2.2rem;z-index:100;cursor:pointer;border:none;border-radius:1.4rem;
   padding:1rem 1.3rem 1rem 1rem;display:flex;align-items:center;gap:.8rem;box-shadow:0 14px 34px rgba(0,0,0,.55);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;text-decoration:none}

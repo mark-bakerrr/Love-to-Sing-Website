@@ -31,6 +31,16 @@
   if (window.__ltsCountdownInit) return;
   window.__ltsCountdownInit = true;
 
+  // Never show the floating overlay on a page that already has an inline
+  // countdown (a .lts-cd block/section). CSS :has() handles this too; this
+  // removal also covers browsers without :has() and stops the widget ticking.
+  if (document.querySelector('.lts-cd')) {
+    var _ws = document.querySelectorAll('.lts-cdw');
+    for (var _i = 0; _i < _ws.length; _i++) {
+      if (_ws[_i].parentNode) _ws[_i].parentNode.removeChild(_ws[_i]);
+    }
+  }
+
   var params;
   try { params = new URLSearchParams(location.search); } catch (e) { params = null; }
 
