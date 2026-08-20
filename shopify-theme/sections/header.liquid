@@ -297,315 +297,302 @@
 {%- endif -%}
 
 {% schema %}
-  {
-    "name": "t:sections.header.name",
-    "settings": [
-      {
-        "type": "image_picker",
-        "id": "logo",
-        "label": "t:sections.header.settings.logo.label"
-      },
-      {
-        "type": "html",
-        "id": "logo_svg_code",
-        "label": "t:sections.header.settings.logo_svg_code.label",
-        "info": "t:sections.header.settings.logo_svg_code.info"
-      },
-      {
-        "type": "number",
-        "id": "logo_width",
-        "label": "Logo width (px)",
-        "default": 108
-      },
-      {
-        "type": "number",
-        "id": "logo_width_mobile",
-        "label": "Logo width Mobile (px)",
-        "default": 76
-      },
-      {
-        "type": "link_list",
-        "id": "menu_mobile",
-        "default": "main-menu",
-        "label": "Mobile menu"
-      },
-      {
-        "type": "link_list",
-        "id": "menu",
-        "default": "main-menu",
-        "label": "Desktop menu"
-      },
-      {
-        "type": "color_scheme",
-        "id": "main_colors",
-        "default": "scheme_1",
-        "label": "Main colors"
-      },
-      {
-        "type": "checkbox",
-        "id": "floating_header",
-        "label": "Floating header",
-        "default": true
-      }
-    ],
-    "blocks": [
-      {
-        "name": "Custom template Logo",
-        "type": "custom_template_logo",
-        "settings": [
-          {
-            "type": "textarea",
-            "id": "title",
-            "label": "Template name",
-            "info": "Enter a list of templates(each on a new line) with type and name in the following format: '[type].[name]', eg. 'product.christmas', 'collection.special-offers'. Default templates have no name, so use just the type, for example 'product' or 'collection'.",
-          },
-          {
-            "type": "image_picker",
-            "id": "logo",
-            "label": "Logo"
-          },
-        ]
-      },
-      {
-        "name": "Custom color scheme",
-        "type": "custom_color_scheme",
-        "settings": [
-          {
-            "type": "textarea",
-            "id": "title",
-            "label": "Template name",
-            "info": "Enter a list of templates(each on a new line) with type and name in the following format: '[type].[name]', eg. 'product.christmas', 'collection.special-offers'. Default templates have no name, so use just the type, for example 'product' or 'collection'.",
-          },
-          {
-            "type": "color_scheme",
-            "id": "color_scheme",
-            "default": "scheme_1",
-            "label": "Color scheme"
-          }
-        ]
-      },
-      {
-        "name": "Mega menu",
-        "type": "mega_menu",
-        "settings": [
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Main menu name"
-          },
-          {
-            "type": "metaobject",
-            "id": "mega_menu",
-            "label": "Mega menu",
-            "metaobject_type": "mega_menu_item"
-          }
-        ]
-      },
-      {
-        "name": "Menu item",
-        "type": "menu_item",
-        "settings": [
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Menu link text (must match a Navigation item)"
-          },
-          {
-            "type": "select",
-            "id": "menu_type",
-            "label": "Menu type",
-            "default": "simple",
-            "options": [
-              { "value": "simple", "label": "Simple dropdown" },
-              { "value": "songs", "label": "Songs (music finder)" },
-              { "value": "shop", "label": "Shop (ecommerce)" },
-              { "value": "discover", "label": "Discover (page listing)" },
-              { "value": "countdown", "label": "Countdown (multiple countdowns)" }
-            ]
-          },
-          {
-            "type": "header",
-            "content": "Songs",
-            "visible_if": "{{ block.settings.menu_type == 'songs' }}"
-          },
-          {
-            "type": "collection_list",
-            "id": "songs_categories",
-            "label": "Category collections",
-            "limit": 8,
-            "visible_if": "{{ block.settings.menu_type == 'songs' }}"
-          },
-          {
-            "type": "color_scheme",
-            "id": "songs_scheme",
-            "label": "Accent colour scheme",
-            "visible_if": "{{ block.settings.menu_type == 'songs' }}"
-          },
-          {
-            "type": "header",
-            "content": "Shop",
-            "visible_if": "{{ block.settings.menu_type == 'shop' }}"
-          },
-          {
-            "type": "link_list",
-            "id": "shop_menu",
-            "label": "Shop menu (columns from nested links)",
-            "visible_if": "{{ block.settings.menu_type == 'shop' }}"
-          },
-          {
-            "type": "product",
-            "id": "shop_feature_product",
-            "label": "Featured album/product",
-            "visible_if": "{{ block.settings.menu_type == 'shop' }}"
-          },
-          {
-            "type": "header",
-            "content": "Discover",
-            "visible_if": "{{ block.settings.menu_type == 'discover' }}"
-          },
-          {
-            "type": "link_list",
-            "id": "discover_links",
-            "label": "Explore links",
-            "visible_if": "{{ block.settings.menu_type == 'discover' }}"
-          },
-          {
-            "type": "blog",
-            "id": "discover_blog",
-            "label": "New this week (blog)",
-            "visible_if": "{{ block.settings.menu_type == 'discover' }}"
-          },
-          {
-            "type": "page",
-            "id": "discover_feature_page",
-            "label": "Feature page (Heart of Love to Sing)",
-            "visible_if": "{{ block.settings.menu_type == 'discover' }}"
-          },
-          {
-            "type": "image_picker",
-            "id": "discover_feature_image",
-            "label": "Feature image",
-            "visible_if": "{{ block.settings.menu_type == 'discover' }}"
-          },
-          {
-            "type": "header",
-            "content": "Countdown",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "text",
-            "id": "cd1_title",
-            "label": "Countdown 1 — title",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "text",
-            "id": "cd1_date",
-            "label": "Countdown 1 — date (YYYY-MM-DD)",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "url",
-            "id": "cd1_link",
-            "label": "Countdown 1 — link",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "color_scheme",
-            "id": "cd1_scheme",
-            "label": "Countdown 1 — colour scheme",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "text",
-            "id": "cd2_title",
-            "label": "Countdown 2 — title",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "text",
-            "id": "cd2_date",
-            "label": "Countdown 2 — date (YYYY-MM-DD)",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "url",
-            "id": "cd2_link",
-            "label": "Countdown 2 — link",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "color_scheme",
-            "id": "cd2_scheme",
-            "label": "Countdown 2 — colour scheme",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "text",
-            "id": "cd3_title",
-            "label": "Countdown 3 — title",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "text",
-            "id": "cd3_date",
-            "label": "Countdown 3 — date (YYYY-MM-DD)",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "url",
-            "id": "cd3_link",
-            "label": "Countdown 3 — link",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "color_scheme",
-            "id": "cd3_scheme",
-            "label": "Countdown 3 — colour scheme",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "text",
-            "id": "cd4_title",
-            "label": "Countdown 4 — title",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "text",
-            "id": "cd4_date",
-            "label": "Countdown 4 — date (YYYY-MM-DD)",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "url",
-            "id": "cd4_link",
-            "label": "Countdown 4 — link",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          },
-          {
-            "type": "color_scheme",
-            "id": "cd4_scheme",
-            "label": "Countdown 4 — colour scheme",
-            "visible_if": "{{ block.settings.menu_type == 'countdown' }}"
-          }
-        ]
-      },
-      {
-        "name": "Solid header",
-        "type": "solid_header",
-        "settings": [
-          {
-            "type": "paragraph",
-            "content": "Templates, that will have solid color headers by default"
-          },
-          {
-            "type": "textarea",
-            "id": "title",
-            "label": "Template name",
-            "info": "Enter a list of templates(each on a new line) with type and name in the following format: '[type].[name]', eg. 'product.christmas', 'collection.special-offers'. Default templates have no name, so use just the type, for example 'product' or 'collection'.",
-          }
-        ]
-      },
-    ],
-  }
+{
+  "name": "t:sections.header.name",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "t:sections.header.settings.logo.label"
+    },
+    {
+      "type": "html",
+      "id": "logo_svg_code",
+      "label": "t:sections.header.settings.logo_svg_code.label",
+      "info": "t:sections.header.settings.logo_svg_code.info"
+    },
+    {
+      "type": "number",
+      "id": "logo_width",
+      "label": "Logo width (px)",
+      "default": 108
+    },
+    {
+      "type": "number",
+      "id": "logo_width_mobile",
+      "label": "Logo width Mobile (px)",
+      "default": 76
+    },
+    {
+      "type": "link_list",
+      "id": "menu_mobile",
+      "default": "main-menu",
+      "label": "Mobile menu"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "default": "main-menu",
+      "label": "Desktop menu"
+    },
+    {
+      "type": "color_scheme",
+      "id": "main_colors",
+      "default": "scheme_1",
+      "label": "Main colors"
+    },
+    {
+      "type": "checkbox",
+      "id": "floating_header",
+      "label": "Floating header",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Custom template Logo",
+      "type": "custom_template_logo",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Template name",
+          "info": "Enter a list of templates(each on a new line) with type and name in the following format: '[type].[name]', eg. 'product.christmas', 'collection.special-offers'. Default templates have no name, so use just the type, for example 'product' or 'collection'."
+        },
+        {
+          "type": "image_picker",
+          "id": "logo",
+          "label": "Logo"
+        }
+      ]
+    },
+    {
+      "name": "Custom color scheme",
+      "type": "custom_color_scheme",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Template name",
+          "info": "Enter a list of templates(each on a new line) with type and name in the following format: '[type].[name]', eg. 'product.christmas', 'collection.special-offers'. Default templates have no name, so use just the type, for example 'product' or 'collection'."
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "default": "scheme_1",
+          "label": "Color scheme"
+        }
+      ]
+    },
+    {
+      "name": "Mega menu",
+      "type": "mega_menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Main menu name"
+        },
+        {
+          "type": "metaobject",
+          "id": "mega_menu",
+          "label": "Mega menu",
+          "metaobject_type": "mega_menu_item"
+        }
+      ]
+    },
+    {
+      "name": "Menu item",
+      "type": "menu_item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Menu link text (must match a Navigation item)"
+        },
+        {
+          "type": "select",
+          "id": "menu_type",
+          "label": "Menu type",
+          "default": "simple",
+          "options": [
+            {
+              "value": "simple",
+              "label": "Simple dropdown"
+            },
+            {
+              "value": "songs",
+              "label": "Songs (music finder)"
+            },
+            {
+              "value": "shop",
+              "label": "Shop (ecommerce)"
+            },
+            {
+              "value": "discover",
+              "label": "Discover (page listing)"
+            },
+            {
+              "value": "countdown",
+              "label": "Countdown (multiple countdowns)"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Songs"
+        },
+        {
+          "type": "collection_list",
+          "id": "songs_categories",
+          "label": "Category collections",
+          "limit": 8
+        },
+        {
+          "type": "color_scheme",
+          "id": "songs_scheme",
+          "label": "Accent colour scheme"
+        },
+        {
+          "type": "header",
+          "content": "Shop"
+        },
+        {
+          "type": "link_list",
+          "id": "shop_menu",
+          "label": "Shop menu (columns from nested links)"
+        },
+        {
+          "type": "product",
+          "id": "shop_feature_product",
+          "label": "Featured album/product"
+        },
+        {
+          "type": "header",
+          "content": "Discover"
+        },
+        {
+          "type": "link_list",
+          "id": "discover_links",
+          "label": "Explore links"
+        },
+        {
+          "type": "blog",
+          "id": "discover_blog",
+          "label": "New this week (blog)"
+        },
+        {
+          "type": "page",
+          "id": "discover_feature_page",
+          "label": "Feature page (Heart of Love to Sing)"
+        },
+        {
+          "type": "image_picker",
+          "id": "discover_feature_image",
+          "label": "Feature image"
+        },
+        {
+          "type": "header",
+          "content": "Countdown"
+        },
+        {
+          "type": "text",
+          "id": "cd1_title",
+          "label": "Countdown 1 — title"
+        },
+        {
+          "type": "text",
+          "id": "cd1_date",
+          "label": "Countdown 1 — date (YYYY-MM-DD)"
+        },
+        {
+          "type": "url",
+          "id": "cd1_link",
+          "label": "Countdown 1 — link"
+        },
+        {
+          "type": "color_scheme",
+          "id": "cd1_scheme",
+          "label": "Countdown 1 — colour scheme"
+        },
+        {
+          "type": "text",
+          "id": "cd2_title",
+          "label": "Countdown 2 — title"
+        },
+        {
+          "type": "text",
+          "id": "cd2_date",
+          "label": "Countdown 2 — date (YYYY-MM-DD)"
+        },
+        {
+          "type": "url",
+          "id": "cd2_link",
+          "label": "Countdown 2 — link"
+        },
+        {
+          "type": "color_scheme",
+          "id": "cd2_scheme",
+          "label": "Countdown 2 — colour scheme"
+        },
+        {
+          "type": "text",
+          "id": "cd3_title",
+          "label": "Countdown 3 — title"
+        },
+        {
+          "type": "text",
+          "id": "cd3_date",
+          "label": "Countdown 3 — date (YYYY-MM-DD)"
+        },
+        {
+          "type": "url",
+          "id": "cd3_link",
+          "label": "Countdown 3 — link"
+        },
+        {
+          "type": "color_scheme",
+          "id": "cd3_scheme",
+          "label": "Countdown 3 — colour scheme"
+        },
+        {
+          "type": "text",
+          "id": "cd4_title",
+          "label": "Countdown 4 — title"
+        },
+        {
+          "type": "text",
+          "id": "cd4_date",
+          "label": "Countdown 4 — date (YYYY-MM-DD)"
+        },
+        {
+          "type": "url",
+          "id": "cd4_link",
+          "label": "Countdown 4 — link"
+        },
+        {
+          "type": "color_scheme",
+          "id": "cd4_scheme",
+          "label": "Countdown 4 — colour scheme"
+        }
+      ]
+    },
+    {
+      "name": "Solid header",
+      "type": "solid_header",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Templates, that will have solid color headers by default"
+        },
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Template name",
+          "info": "Enter a list of templates(each on a new line) with type and name in the following format: '[type].[name]', eg. 'product.christmas', 'collection.special-offers'. Default templates have no name, so use just the type, for example 'product' or 'collection'."
+        }
+      ]
+    }
+  ]
+}
 {% endschema %}
