@@ -451,11 +451,23 @@
         ]
       },
       { "type": "header", "content": "Halloween" },
+      { "type": "select", "id": "cd_hall_design", "label": "Widget design", "default": "hall-jack", "options": [
+        { "value": "hall-jack", "label": "Jack-o'-Lantern" },
+        { "value": "hall-neon", "label": "Spooky Neon" },
+        { "value": "hall-cauldron", "label": "Cauldron" }
+      ] },
       { "type": "url", "id": "cd_hall_link", "label": "Halloween countdown page link" },
+      { "type": "text", "id": "cd_hall_cta_label", "label": "Button label", "default": "See the Halloween countdown" },
       { "type": "number", "id": "cd_hall_month", "label": "Halloween target month", "default": 10 },
       { "type": "number", "id": "cd_hall_day", "label": "Halloween target day", "default": 31 },
       { "type": "header", "content": "Christmas" },
+      { "type": "select", "id": "cd_xmas_design", "label": "Widget design", "default": "xmas-globe", "options": [
+        { "value": "xmas-advent", "label": "Advent Cards" },
+        { "value": "xmas-globe", "label": "Snow Globe" },
+        { "value": "xmas-sleigh", "label": "Sleigh" }
+      ] },
       { "type": "url", "id": "cd_xmas_link", "label": "Christmas countdown page link" },
+      { "type": "text", "id": "cd_xmas_cta_label", "label": "Button label", "default": "See the Christmas countdown" },
       { "type": "number", "id": "cd_xmas_month", "label": "Christmas target month", "default": 12 },
       { "type": "number", "id": "cd_xmas_day", "label": "Christmas target day", "default": 25 }
     ]

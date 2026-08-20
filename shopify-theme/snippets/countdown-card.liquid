@@ -79,8 +79,14 @@
   endcase
 
   assign root_class = 'lts-cd'
+  unless is_widget
+    assign root_class = root_class | append: ' lts-cd--inline'
+  endunless
   if transparent_bg
     assign root_class = root_class | append: ' lts-cd--transparent'
+  endif
+  if is_widget
+    assign cd_end = 'hide'
   endif
 -%}
 
@@ -88,6 +94,7 @@
   class="{{ root_class }}"
   data-fx="{{ fx }}"
   data-countdown
+  {% if is_widget %}data-widget="1"{% endif %}
   data-target-month="{{ cd_month }}"
   data-target-day="{{ cd_day }}"
   data-tz="{{ cd_tz }}"

@@ -1,16 +1,21 @@
 {%- comment -%}
   countdown-widget — global floating bottom-right countdown overlay.
 
-  Resolves the active season inline from theme settings (no include, so there's
-  no cross-snippet scope dependency):
+  Renders the SAME skin as the block/section (snippets/countdown-card) inside a
+  floating wrapper, so it follows the identical pattern: art on top, responsive
+  numbers with colons, and a CTA button (link from theme settings).
+
+  Season resolved inline (no include → no scope dependency):
     settings.countdown_widget_mode  auto | halloween | christmas | off
     settings.countdown_widget_tz    IANA tz (default America/New_York)
-    settings.cd_hall_link / cd_hall_month / cd_hall_day
-    settings.cd_xmas_link / cd_xmas_month / cd_xmas_day
+    Halloween: cd_hall_link, cd_hall_month(10), cd_hall_day(31),
+               cd_hall_design(hall-jack), cd_hall_cta_label
+    Christmas: cd_xmas_link, cd_xmas_month(12), cd_xmas_day(25),
+               cd_xmas_design(xmas-globe), cd_xmas_cta_label
   Auto windows: Halloween Sep 15–Oct 31, Christmas Nov 1–Dec 25; else nothing.
 
-  It is ALSO removed by lts-countdown.js (and hidden by CSS :has()) on any page
-  that already shows an inline countdown, so it never doubles up.
+  Removed by lts-countdown.js (and hidden by CSS :has()) on any page that
+  already shows an inline countdown (.lts-cd--inline), so it never doubles up.
 
   Rendered once in layout/theme.liquid: {% render 'countdown-widget' %}
 {%- endcomment -%}
@@ -18,10 +23,6 @@
 {%- liquid
   assign mode = settings.countdown_widget_mode | default: 'auto'
   assign cd_tz = settings.countdown_widget_tz | default: 'America/New_York'
-  assign hall_month = settings.cd_hall_month | default: 10
-  assign hall_day = settings.cd_hall_day | default: 31
-  assign xmas_month = settings.cd_xmas_month | default: 12
-  assign xmas_day = settings.cd_xmas_day | default: 25
 
   assign cd_season = ''
   if mode == 'halloween'
@@ -41,57 +42,36 @@
     endif
   endif
 
-  assign cd_link = ''
-  assign cd_month = 12
-  assign cd_day = 25
   if cd_season == 'halloween'
-    assign cd_link = settings.cd_hall_link
-    assign cd_month = hall_month
-    assign cd_day = hall_day
     assign w_class = 'w-hall'
-    assign w_art = 'lts-cd-hall-pumpkin.png'
-    assign w_cap = 'Halloween countdown'
+    assign w_design = settings.cd_hall_design | default: 'hall-jack'
+    assign w_link = settings.cd_hall_link
+    assign w_month = settings.cd_hall_month | default: 10
+    assign w_day = settings.cd_hall_day | default: 31
+    assign w_cta = settings.cd_hall_cta_label | default: 'See the Halloween countdown'
   elsif cd_season == 'christmas'
-    assign cd_link = settings.cd_xmas_link
-    assign cd_month = xmas_month
-    assign cd_day = xmas_day
     assign w_class = 'w-xmas'
-    assign w_art = 'lts-cd-xmas-snowglobe.png'
-    assign w_cap = 'Christmas countdown'
+    assign w_design = settings.cd_xmas_design | default: 'xmas-globe'
+    assign w_link = settings.cd_xmas_link
+    assign w_month = settings.cd_xmas_month | default: 12
+    assign w_day = settings.cd_xmas_day | default: 25
+    assign w_cta = settings.cd_xmas_cta_label | default: 'See the Christmas countdown'
   endif
 -%}
 
 {%- if cd_season != blank -%}
-  {{ 'lts-countdown.css' | asset_url | stylesheet_tag }}
-
   <div class="lts-cdw {{ w_class }}" data-widget-key="{{ cd_season }}">
-    {%- if cd_link != blank -%}
-      <a class="lts-cdw__hit" href="{{ cd_link }}" aria-label="{{ w_cap | escape }}"></a>
-    {%- endif -%}
     <button class="close" type="button" aria-label="Dismiss" data-cdw-close>✕</button>
-    <img class="art" src="{{ w_art | asset_url }}" alt="" width="58" height="58" loading="lazy">
-    <div class="lts-cdw__body">
-      <span class="cap">{{ w_cap }}</span>
-      <div
-        class="cd"
-        data-countdown
-        data-widget="1"
-        data-target-month="{{ cd_month }}"
-        data-target-day="{{ cd_day }}"
-        data-tz="{{ cd_tz }}"
-        data-end="hide"
-        data-recurring="true"
-      >
-        <div class="row">
-          <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
-          <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
-          <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
-          <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
-        </div>
-      </div>
-    </div>
+    {% render 'countdown-card',
+      design: w_design,
+      is_widget: true,
+      target_month: w_month,
+      target_day: w_day,
+      reference_tz: cd_tz,
+      recurring: true,
+      end_behavior: 'hide',
+      cta_label: w_cta,
+      cta_link: w_link
+    %}
   </div>
-
-  <script src="{{ 'gsap.min.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'lts-countdown.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}

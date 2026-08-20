@@ -120,24 +120,15 @@
 .lts-cd--transparent .skin{background:transparent!important}
 
 /* ===================== FLOATING WIDGET ===================== */
-/* Never show the overlay on a page that already has an inline countdown
-   (a .lts-cd block or section). JS also removes it for browsers without :has(). */
-body:has(.lts-cd) .lts-cdw{display:none!important}
-.lts-cdw{position:fixed;right:2.2rem;bottom:2.2rem;z-index:100;cursor:pointer;border:none;border-radius:1.4rem;
-  padding:1rem 1.3rem 1rem 1rem;display:flex;align-items:center;gap:.8rem;box-shadow:0 14px 34px rgba(0,0,0,.55);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;text-decoration:none}
-.lts-cdw__hit{position:absolute;inset:0;z-index:1;border-radius:inherit}
-.lts-cdw .close{position:absolute;top:-.8rem;right:-.8rem;width:2.2rem;height:2.2rem;border-radius:50%;border:none;
-  background:#222;color:#fff;font-size:1.3rem;cursor:pointer;line-height:2rem;z-index:3;padding:0}
-.lts-cdw .art,.lts-cdw__body{position:relative;z-index:2;pointer-events:none}
-.lts-cdw .art{width:58px;height:58px;object-fit:contain;flex:none}
-.lts-cdw .num{font-size:1.9rem;font-weight:800;font-variant-numeric:tabular-nums}
-.lts-cdw .row{display:flex;gap:.5rem}
-.lts-cdw .tile{display:flex;flex-direction:column;align-items:center;min-width:3rem;padding:0;background:none;box-shadow:none;border:none}
-.lts-cdw .lab{font-size:.68rem;margin-top:.15rem;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
-.lts-cdw .cap{font-size:1.05rem;opacity:.92;display:block;margin-bottom:.15rem;font-weight:800}
-.lts-cdw.w-xmas{background:linear-gradient(140deg,#8f1420,#5a0c14);color:#f5d689;border:1px solid #b9863f}
-.lts-cdw.w-xmas .lab{color:#e8c98a}
-.lts-cdw.w-hall{background:linear-gradient(140deg,#2a1508,#120a04);color:#ff9a2e;border:1px solid #b5540a}
-.lts-cdw.w-hall .lab{color:#c79a5a}
-.lts-cdw [hidden]{display:none!important}
+/* The widget wraps the SAME skin (.lts-cd) as the block/section, so it inherits
+   the art-on-top layout, responsive numbers, colons and CTA button. This wrapper
+   only handles fixed positioning, the drop shadow and the dismiss button. */
+/* Never show the overlay on a page that already has an INLINE countdown. */
+body:has(.lts-cd--inline) .lts-cdw{display:none!important}
+.lts-cdw{position:fixed;right:1.6rem;bottom:1.6rem;z-index:100;width:min(320px,calc(100vw - 3.2rem));
+  filter:drop-shadow(0 16px 36px rgba(0,0,0,.5))}
+.lts-cdw .lts-cd{width:100%}
+.lts-cdw .close{position:absolute;top:-1rem;right:-1rem;z-index:5;width:2.6rem;height:2.6rem;border-radius:50%;
+  border:2px solid #fff;background:#1c1c1c;color:#fff;font-size:1.4rem;line-height:1;cursor:pointer;padding:0;
+  box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.lts-cdw[hidden]{display:none!important}

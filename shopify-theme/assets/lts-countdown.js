@@ -32,9 +32,10 @@
   window.__ltsCountdownInit = true;
 
   // Never show the floating overlay on a page that already has an inline
-  // countdown (a .lts-cd block/section). CSS :has() handles this too; this
+  // countdown (.lts-cd--inline; the widget's own card is .lts-cd but NOT
+  // --inline, so this won't self-suppress). CSS :has() handles this too; this
   // removal also covers browsers without :has() and stops the widget ticking.
-  if (document.querySelector('.lts-cd')) {
+  if (document.querySelector('.lts-cd--inline')) {
     var _ws = document.querySelectorAll('.lts-cdw');
     for (var _i = 0; _i < _ws.length; _i++) {
       if (_ws[_i].parentNode) _ws[_i].parentNode.removeChild(_ws[_i]);
@@ -315,11 +316,9 @@
         });
       });
 
-      // ---- widget: idle art bob + hover lift ----
+      // ---- widget: hover lift (the inner skin handles its own art motion) ----
       gsap.utils.toArray('.lts-cdw').forEach(function (fw) {
-        var fart = fw.querySelector('.art');
-        if (fart) gsap.to(fart, { y: -3, duration: 1.8, ease: 'sine.inOut', repeat: -1, yoyo: true });
-        fw.addEventListener('mouseenter', function () { gsap.to(fw, { y: -4, scale: 1.03, duration: .3 }); });
+        fw.addEventListener('mouseenter', function () { gsap.to(fw, { y: -4, scale: 1.02, duration: .3 }); });
         fw.addEventListener('mouseleave', function () { gsap.to(fw, { y: 0, scale: 1, duration: .3 }); });
       });
     });
