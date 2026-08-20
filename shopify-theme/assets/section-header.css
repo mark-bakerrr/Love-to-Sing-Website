@@ -69,9 +69,10 @@
   width: 100%;
   top: calc(100% + 0.8rem);
   border: 0;
-  border-radius: var(--radius-l);
-  overflow: hidden;
-  box-shadow: 0 1.8rem 4.4rem #00000033;
+  box-shadow: none;
+  /* overflow stays VISIBLE so the :before hover-bridge that spans the gap to
+     the card is not clipped (otherwise the menu closes when the mouse crosses
+     the gap). The rounding/clipping/shadow live on the inner .megamenu below. */
 }
 
 .header--floating .megamenu {
@@ -79,6 +80,9 @@
   --products-width: calc(100% - var(--main-menu-width));
   --submenu-width: 20rem;
   --submenu-products-width: calc(100% - var(--main-menu-width) - var(--submenu-width));
+  border-radius: var(--radius-l);
+  overflow: hidden;
+  box-shadow: 0 1.8rem 4.4rem #00000033;
 }
 
 @media (max-width: 990px) {
