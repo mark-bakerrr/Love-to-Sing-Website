@@ -41,11 +41,11 @@
     0 2px 4px rgba(0,0,0,.02), 0 1px 2px rgba(0,0,0,.04), 0 0 0 .5px #e0e0e0;
   --shadow-card:0 1px 2px rgba(0,0,0,.05),0 2px 4px rgba(0,0,0,.02),0 0 0 .5px rgba(0,0,0,.08);
 }
-html{font-size:62.5%}
+html{font-size:62.5%;scrollbar-gutter:stable}   /* reserve gutter → no page shift when overlays lock scroll */
 *{box-sizing:border-box}
 body{margin:0;font-family:"Nunito",system-ui,sans-serif;color:var(--color-foreground);
      background:#fafafa;font-size:var(--fz-r);line-height:1.5}
-body.no-scroll{overflow:hidden}
+html.no-scroll,body.no-scroll{overflow:hidden}
 a{color:inherit}
 
 .tint-red{--tint-bg:var(--c-red-100);--tint-fg:var(--c-red-500)}
@@ -85,9 +85,10 @@ nav.main{display:flex;align-items:stretch;height:100%}
 .icon-btn .count{position:absolute;top:.4rem;right:.4rem;min-width:1.7rem;height:1.7rem;padding:0 .4rem;border-radius:999px;
   background:#fff;color:var(--c-red-600);font-size:1rem;font-weight:900;display:grid;place-items:center}
 
-/* FLOATING VARIANT — lower radius, stays floating on mobile */
+/* FLOATING VARIANT — lower radius, transparent at top, colour on scroll, floats on mobile */
 body.floating .site-header{top:1.2rem;left:50%;right:auto;transform:translateX(-50%);
-  width:min(132rem,calc(100% - 2.4rem));border-radius:var(--radius-m);background:var(--header-bg);box-shadow:0 10px 30px rgba(0,0,0,.22)}
+  width:min(132rem,calc(100% - 2.4rem));border-radius:var(--radius-m);background:transparent}
+body.floating .site-header.solid{background:var(--header-bg);box-shadow:0 10px 30px rgba(0,0,0,.22)}
 body.floating .site-header .bar{height:6.8rem}
 body.floating .mega{left:0;right:0;top:calc(100% + .8rem);border-radius:var(--radius-l);overflow:hidden;box-shadow:0 18px 44px rgba(0,0,0,.20)}
 
@@ -137,8 +138,9 @@ body.floating .mega{left:0;right:0;top:calc(100% + .8rem);border-radius:var(--ra
 .song .disc{width:4.8rem;height:4.8rem;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--tint-bg,var(--c-red-100));color:var(--tint-fg,var(--c-red-500));box-shadow:inset 0 0 0 5px rgba(255,255,255,.55)}
 .song .disc svg{width:2.2rem;height:2.2rem}
 .song .t{font-weight:800;font-size:var(--fz-s);text-align:left;line-height:1.2}
-.song-actions{display:flex;gap:var(--space-200);align-items:center;margin-top:var(--space-400)}
-.search{flex:1;display:flex;align-items:center;gap:1rem;background:var(--c-neutral-100);border:1px solid var(--color-border);border-radius:999px;padding:1.1rem 1.6rem}
+.song-actions{display:flex;gap:var(--space-200);align-items:stretch;margin-top:var(--space-400)}
+.song-actions .button{height:4.8rem;padding-top:0;padding-bottom:0}   /* match search height */
+.search{flex:1;display:flex;align-items:center;gap:1rem;height:4.8rem;background:var(--c-neutral-100);border:1px solid var(--color-border);border-radius:999px;padding:0 1.6rem}
 .search input{border:0;background:none;outline:none;font-family:inherit;font-size:var(--fz-s);width:100%;color:inherit}
 
 /* TYPE 2 · SHOP */
@@ -229,7 +231,8 @@ body:not(.gsap) .overlay.is-open .stag{opacity:1;transform:none}
 .so-logo b span{color:var(--color-foreground)}
 .so-close{width:5rem;height:5rem;border-radius:50%;border:0;background:var(--c-neutral-100);color:var(--color-foreground);display:grid;place-items:center;cursor:pointer;transition:transform var(--duration-fast) var(--ease-spring),background var(--duration-fast)}
 .so-close:hover{background:var(--c-red-100);transform:rotate(90deg)}
-.so-body{flex:1;overflow-y:auto;max-width:96rem;width:100%;margin:0 auto;padding:2rem var(--space-400) var(--space-500)}
+.so-body{flex:1;overflow-y:auto;max-width:96rem;width:100%;margin:0 auto;padding:2rem var(--space-400) var(--space-500);scrollbar-width:none}
+.so-body::-webkit-scrollbar{display:none}
 .so-field{display:flex;align-items:center;gap:1.6rem;border-bottom:3px solid var(--c-red-500);padding:1.2rem .4rem}
 .so-field svg{width:3rem;height:3rem;color:var(--c-red-500);flex:none}
 .so-field input{flex:1;border:0;outline:0;background:none;font-family:inherit;font-weight:800;font-size:clamp(2.4rem,4vw,3.6rem);color:var(--color-foreground);min-width:0}
@@ -259,7 +262,8 @@ body:not(.gsap) .overlay.is-open .stag{opacity:1;transform:none}
 .mo-close:hover{background:rgba(255,255,255,.24);transform:rotate(90deg)}
 .mo-search{margin:0 var(--space-300);display:flex;align-items:center;gap:1rem;background:rgba(255,255,255,.14);border-radius:999px;padding:1.3rem 1.8rem;color:#fff;cursor:pointer;font-weight:700}
 .mo-search svg{width:2.2rem;height:2.2rem}
-.mo-nav{flex:1;overflow-y:auto;padding:var(--space-300)}
+.mo-nav{flex:1;overflow-y:auto;padding:var(--space-300);scrollbar-width:none}
+.mo-nav::-webkit-scrollbar{display:none}
 .mo-item{border-bottom:1px solid rgba(255,255,255,.16)}
 .mo-item>details>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:1.8rem .4rem;font-size:2.8rem;font-weight:900;cursor:pointer}
 .mo-item summary::-webkit-details-marker{display:none}
@@ -614,33 +618,36 @@ body:not(.gsap) .overlay.is-open .stag{opacity:1;transform:none}
   window.addEventListener('scroll',syncHeader,{passive:true});syncHeader();
 
   // ===== overlay open/close with GSAP (fallback to CSS class) =====
-  function openOverlay(el){
-    el.classList.add('is-open');document.body.classList.add('no-scroll');
-    if(G){var stg=el.querySelectorAll('.stag');
-      G.killTweensOf(stg);
+  // Scroll stays locked across a menu→search hand-off so the page never shifts.
+  function showOverlay(el){
+    el.classList.add('is-open');document.documentElement.classList.add('no-scroll');document.body.classList.add('no-scroll');
+    if(G){var stg=el.querySelectorAll('.stag');G.killTweensOf([el].concat([].slice.call(stg)));
       G.fromTo(el,{autoAlpha:0},{autoAlpha:1,duration:.3,ease:'power2.out'});
       G.fromTo(stg,{y:26,autoAlpha:0},{y:0,autoAlpha:1,duration:.5,stagger:.05,ease:'power3.out',delay:.06});}
   }
-  function closeOverlay(el){
-    document.body.classList.remove('no-scroll');
-    if(G){G.to(el,{autoAlpha:0,duration:.22,ease:'power1.in',onComplete:function(){el.classList.remove('is-open');el.style.removeProperty('visibility');el.style.removeProperty('opacity');}});}
-    else{el.classList.remove('is-open');}
+  function hideOverlay(el,opts){opts=opts||{};
+    function done(){el.classList.remove('is-open');el.style.removeProperty('visibility');el.style.removeProperty('opacity');
+      if(!opts.keepLock){document.documentElement.classList.remove('no-scroll');document.body.classList.remove('no-scroll');}if(opts.then)opts.then();}
+    if(G){G.to(el,{autoAlpha:0,duration:.22,ease:'power1.in',onComplete:done});}else{done();}
   }
   var searchOverlay=document.getElementById('searchOverlay');
   var menuOverlay=document.getElementById('menuOverlay');
-  function openSearch(){closeAll();openOverlay(searchOverlay);setTimeout(function(){document.getElementById('searchInput').focus();},260);}
+  function focusSearch(){setTimeout(function(){document.getElementById('searchInput').focus();},260);}
+  function openSearch(){closeAll();showOverlay(searchOverlay);focusSearch();}
   document.getElementById('searchBtn').addEventListener('click',openSearch);
-  document.getElementById('searchClose').addEventListener('click',function(){closeOverlay(searchOverlay);});
-  document.getElementById('burger').addEventListener('click',function(){openOverlay(menuOverlay);});
-  document.getElementById('menuClose').addEventListener('click',function(){closeOverlay(menuOverlay);});
-  document.getElementById('menuSearch').addEventListener('click',function(){closeOverlay(menuOverlay);setTimeout(openSearch,240);});
+  document.getElementById('searchClose').addEventListener('click',function(){hideOverlay(searchOverlay);});
+  document.getElementById('burger').addEventListener('click',function(){showOverlay(menuOverlay);});
+  document.getElementById('menuClose').addEventListener('click',function(){hideOverlay(menuOverlay);});
+  // menu → search: fade the menu out while keeping scroll locked, then open search
+  document.getElementById('menuSearch').addEventListener('click',function(){
+    hideOverlay(menuOverlay,{keepLock:true,then:function(){showOverlay(searchOverlay);focusSearch();}});});
   // search chips
   [].slice.call(document.querySelectorAll('.so-chip')).forEach(function(c){
     c.addEventListener('click',function(){document.querySelectorAll('.so-chip').forEach(function(x){x.classList.remove('is-active');});c.classList.add('is-active');});});
 
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeAll();
-    if(searchOverlay.classList.contains('is-open'))closeOverlay(searchOverlay);
-    if(menuOverlay.classList.contains('is-open'))closeOverlay(menuOverlay);}});
+    if(searchOverlay.classList.contains('is-open'))hideOverlay(searchOverlay);
+    if(menuOverlay.classList.contains('is-open'))hideOverlay(menuOverlay);}});
 
   // floating toggle (on by default)
   document.getElementById('floatToggle').addEventListener('change',function(e){
