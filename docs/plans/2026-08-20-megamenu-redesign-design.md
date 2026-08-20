@@ -35,7 +35,8 @@ Adding a new menu type means wrestling that schema. It must also be **beautiful 
 - **Transparent at the top** (over the hero), **fills with the header colour on scroll** (`.solid`). Also goes solid while a mega menu is open.
 - **No divider line** under nav links or above the panel.
 - **Click-to-open** as well as hover: on touch / `hover:none` devices hover-open is disabled and tap toggles the panel (click-away and Esc close).
-- A **floating "pill" header variant** is the default (toggle to compare). Lower radius (`--radius-m`), and it **stays floating on mobile**; the mega drops as a rounded card.
+- A **floating "pill" header variant** is the default (toggle to compare). Lower radius (`--radius-m`), and it **stays floating on mobile**. **Docks to a full-width square bar while a mega menu is open** (`.header--floating.menu-open`) so it merges flush with the panel — a rounded pill over a full-bleed panel otherwise reveals thin arcs of background at its corners.
+- **Seasonal logo drives the header colour.** The logo swaps per season (Christmas/Halloween/…); the header's solid background comes from the theme colour scheme (`--color-header-background`), so changing the season's scheme recolours the floating header automatically. Logo has a subtle `drop-shadow` so it reads on any header colour.
 - Colours use the theme **main-color schemes** (red/blue/green/yellow); Halloween uses a placeholder orange to be mapped to a real scheme.
 
 ### Search — full-screen overlay (reuses the existing engine)
