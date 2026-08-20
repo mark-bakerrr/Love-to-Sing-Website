@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-20
 **Branch:** `feat/christmas-countdown` (wireframe stage)
-**Status:** Wireframes built — awaiting Mark's review/adjustments before implementation planning.
+**Status:** ✅ Design approved (floating header). Wireframe signed off. Ready for implementation planning — see `2026-08-20-megamenu-redesign-plan.md`.
 
 ---
 
@@ -48,7 +48,7 @@ The current site already uses Shopify **predictive search**: `routes.predictive_
 ### Mobile — full-page overlay menu (replaces the side drawer)
 - The **☰** opens a **full-page overlay** (brand deep-red gradient), big staggered nav items with inline accordions, a search trigger, and Cart/Account footer. GSAP stagger with CSS fallback; body scroll-locked.
 
-### Architecture — **Option A: native menu + typed section blocks**
+### Architecture — **Option A: native menu + typed section blocks** ✅
 Chosen over (B) redesigned metaobjects and (C) hardcoded snippets.
 
 - **Structure** comes from Shopify's native navigation (Online Store → Navigation), drag-and-drop.
@@ -58,26 +58,62 @@ Chosen over (B) redesigned metaobjects and (C) hardcoded snippets.
 
 *Trade-off accepted:* a one-time rebuild of the header section, in exchange for removing the confusion and making new menus additive.
 
+---
+
+## How the menu is built TODAY (the clunky flow we're replacing)
+
+The current header is `sections/header.liquid` → `snippets/navigation-desktop.liquid`, driven by a `mega_menu_item` **metaobject**. To configure **one** mega menu a merchant must:
+
+1. **Navigation** → add the top-level link (e.g. "Songs") to `main-menu`.
+2. **Content → Metaobjects → `mega_menu_item`** → create an entry, then fill a `menu_categories` list where **each** category needs: `title`, `url`, `collection` (multi-ref), `color_scheme` (**a number** that indexes `settings.color_schemes`), `logo_image`, `add_search` (bool), and `button_1/2/3_label` + `_link` + **`button_2_menu`/`button_3_menu` (a number** that says which submenu tab the button appears on).
+3. **Header section** → add a **"Mega menu" block**, type the **"Main menu name"** so it **exactly matches** the nav link text, and point its metaobject picker at the entry from step 2.
+
+**Why it's terrible** (all confirmed in code):
+- **Two numbers with no labels** — `color_scheme` and `button_x_menu` are integer indices. Reorder or delete a colour scheme / collection and every menu silently points at the wrong thing (`navigation-desktop.liquid` loops `settings.color_schemes` matching `forloop.index`; `megamenu-products.liquid` shows a button only when `forloop.index == button_2_menu`).
+- **String-match wiring** — the header block `title` must equal the nav link `title` character-for-character or the menu just doesn't appear, with no error.
+- **No live preview** — it's all in the metaobject editor, blind; you only see breakage on the storefront.
+- **Layout is inferred from product tags** — `megamenu-products.liquid` hard-codes "if first product tag is `song` → 18 items/3 cols, `ebook` → 4/4, else 6/6." You can't choose a layout.
+- **Rigid vw columns** — `megamenu.css` fixes `--main-menu-width:22vw`, `--submenu-width:19.2vw`.
+- **Desktop and mobile diverge** — mobile ignores the metaobject entirely and just walks the native linklist.
+
+## How you'll build menus GOING FORWARD (Architecture A)
+
+Everything moves into the **Header section** in the theme editor. Native Navigation still owns the link list; each top-level item gets a matching **header block** whose first setting is a **Menu type** dropdown. Selecting a type reveals only that type's fields (Shopify `visible_if`), so there are no orphan/irrelevant settings:
+
+| Menu type | What you fill in (theme editor, live preview) |
+|-----------|-----------------------------------------------|
+| **Songs** | Pick category collections; per category: a colour scheme **by name** (not index) and a logo image. Song cards auto-pull from the collection. |
+| **Shop** | Up to N link columns (heading + links via native menu or manual) + an optional featured product/album. |
+| **Discover** | Left link columns (pick pages), a **New this week** blog/source, and the **Heart** feature (page + image). |
+| **Countdown** | Repeatable countdown entries (title, target date, colour, link) + a New-this-week list. Day-counts computed in Liquid. |
+| **Simple** | Just uses the native menu's child links (a plain dropdown). |
+
+No metaobjects, no index maths, no exact-string wiring — the block *is* the menu, edited where you can see it.
+
+*(Full current-state code map lives in the plan doc; file inventory below.)*
+
+### Files the rebuild touches
+`sections/header.liquid` (schema + typed blocks), `snippets/navigation-desktop.liquid` (rewrite to read block settings), new per-type snippets (`menu-type-songs/shop/discover/countdown.liquid`), `assets/header-megamenu.js` (simplify — hover/click/height), `assets/megamenu.css` + `section-header.css` (floating header, transparent-on-scroll, overlays), new `snippets/search-overlay.liquid` + `menu-overlay.liquid` wrapping the existing `predictive-search` engine, `config/settings_schema.json` (Halloween colour scheme). Retire the `mega_menu_item` metaobject once migrated.
+
 ## The 5 wireframes
 
 Single interactive file: `docs/plans/megamenu-wireframes/index.html`, built on **the live theme's design tokens** (`assets/base.css` — colours, spacing, radius, 62.5% root, Nunito, ui-polish easing/shadows).
 
-1. **Songs** — music finder: tinted left category rail + 6-col song-card grid (colour tints mirror the per-product `main-color` metafield); search + "View all" pinned at the base.
+1. **Songs** — music finder: tinted left category rail with the **active category logo above "Categories"** + song cards (**music icon left of the name**, per-product `main-color` tint); equal-height "View all" + search at the base.
 2. **Shop** — ecommerce: three link columns (products / licences / bundles) + a featured-album card with price and CTA.
-3. **Discover** — editorial hub: a large gradient **feature card for *Heart of Love to Sing***, a **team-bios** people list with avatars, and image **tiles** (Photo Wall / Blog / Send it in).
-4. **Countdown** — seasonal: **"127 sleeps to Christmas"** hero + a **24-door advent calendar** (opened / today / locked states) + a **This week** highlights list.
-5. **Mobile / overlays** — full-page **menu overlay** (replaces the side drawer) + full-screen **search overlay**, both with GSAP-staggered entrances.
+3. **Discover** — page listing: link column (Photo Wall / Blog / Send it in / Free Resources), an elaborated **New this week** column, and the ***Heart of Love to Sing* feature on the right**. (No team list — team is the About link.)
+4. **Countdown** — **multiple live countdown cards** (Christmas / Halloween / New Year / Easter) + a **New this week** widgets rail. (No advent.)
+5. **Overlays** — full-page **menu overlay** (replaces the side drawer) + full-screen **search overlay**, both GSAP-staggered; scroll-lock uses `scrollbar-gutter:stable` so opening never shifts the page.
 
-Desktop: single-open hover controller (Esc closes, keyboard focus opens). Mobile: `<details>` drill-down, overlay, body-scroll lock.
+Header: floating pill (approved), transparent at top → solid on scroll, stays transparent while a menu opens; hover on hover-capable devices, click/tap everywhere.
 
-## Open questions for Mark (post-wireframe, round 2)
+## Resolved / to confirm during build
 
-- Countdown day-counts should be **dynamically computed** in Liquid per countdown; the widgets are being built separately.
-- Halloween needs a **real theme colour scheme** (placeholder orange for now).
-- Confirm the exact **Discover page list** (Photo Wall, Blog, Send it in, Free Resources… anything else?).
-- Standard header vs **floating** variant — which direction do we productionise?
-- Real **logo assets** per song category (Christmas / Kids / Halloween / Celebration).
+- **Header:** floating variant — ✅ approved.
+- Countdown day-counts: computed in Liquid per countdown; widgets built separately.
+- Halloween: add a **real theme colour scheme** (placeholder orange today).
+- Confirm the exact **Discover page list** and real **category logo assets** (Christmas / Kids / Halloween / Celebration) during build.
 
 ## Next step
 
-After Mark reviews and adjusts the wireframes, proceed to **writing-plans** for the Liquid implementation of Architecture A (header section rebuild + four typed blocks + mobile drawer), following the theme's safe-deploy workflow (push `--only` to the unpublished dev theme, matching `git push`, PR into `main`).
+Implementation plan in `docs/plans/2026-08-20-megamenu-redesign-plan.md`. Build against the **unpublished dev theme** with `shopify theme push --only <file>`, matching `git push`, PR into `main` — per the safe-deploy workflow in CLAUDE.md.
