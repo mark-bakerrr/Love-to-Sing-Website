@@ -38,9 +38,11 @@
 .lts-cd .msg{font-size:2.1rem;font-weight:800;text-align:center;padding:1rem .5rem}
 .lts-cd [hidden]{display:none!important}
 .lts-cd .ctaWrap{margin-top:1.5rem;z-index:2}
-.lts-cd .cta{display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;font-size:1.22rem;font-weight:800;
-  letter-spacing:.01em;padding:.75rem 1.5rem;border-radius:2.4rem;cursor:pointer;border:2px solid transparent}
+.lts-cd .cta{display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;font-size:clamp(1.05rem,4.5cqi,1.7rem);font-weight:800;
+  letter-spacing:.01em;padding:.7em 1.2em;border-radius:2.4rem;cursor:pointer;border:2px solid transparent}
 .lts-cd .cta .arw{display:inline-block}
+/* Kill the theme's global link-underline pseudo that draws a line through our CTA */
+.lts-cd .cta::after,.lts-cd .cta::before{content:none!important;display:none!important}
 
 /* particles */
 .lts-cd .flake{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff;pointer-events:none;z-index:1}
@@ -111,7 +113,7 @@
 .lts-cd .s-jack .num,.lts-cd .s-neon .num,.lts-cd .s-cauldron .num,
 .lts-cd .s-jack .sep,.lts-cd .s-neon .sep,.lts-cd .s-cauldron .sep{font-size:clamp(2.1rem,10cqi,5.2rem)}
 .lts-cd .s-jack .lab,.lts-cd .s-neon .lab,.lts-cd .s-cauldron .lab{letter-spacing:.14em;opacity:.9}
-.lts-cd .s-jack .cta,.lts-cd .s-neon .cta,.lts-cd .s-cauldron .cta{font-size:1.55rem;letter-spacing:.06em}
+.lts-cd .s-jack .cta,.lts-cd .s-neon .cta,.lts-cd .s-cauldron .cta{font-size:clamp(1.2rem,5cqi,2rem);letter-spacing:.06em}
 
 /* Optional heading above the skin */
 .lts-cd__heading{text-align:center;margin:0 0 1.6rem;font-size:2.2rem;font-weight:800}
@@ -127,6 +129,8 @@
 body:has(.lts-cd--inline) .lts-cdw{display:none!important}
 .lts-cdw{position:fixed;right:1.6rem;bottom:1.6rem;z-index:100;width:min(320px,calc(100vw - 3.2rem));
   filter:drop-shadow(0 16px 36px rgba(0,0,0,.5))}
+/* Transparent overlay: no panel, so go bigger and drop the heavy wrapper shadow */
+.lts-cdw--transparent{width:min(460px,calc(100vw - 3.2rem));filter:none}
 .lts-cdw .lts-cd{width:100%}
 .lts-cdw .close{position:absolute;top:-1rem;right:-1rem;z-index:5;width:2.6rem;height:2.6rem;border-radius:50%;
   border:2px solid #fff;background:#1c1c1c;color:#fff;font-size:1.4rem;line-height:1;cursor:pointer;padding:0;

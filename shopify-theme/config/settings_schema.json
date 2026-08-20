@@ -450,6 +450,7 @@
           { "value": "Australia/Sydney", "label": "Sydney (Australia)" }
         ]
       },
+      { "type": "checkbox", "id": "countdown_widget_transparent", "label": "Transparent overlay", "default": false, "info": "Removes the widget's coloured background panel so it floats directly over the page." },
       { "type": "header", "content": "Halloween" },
       { "type": "select", "id": "cd_hall_design", "label": "Widget design", "default": "hall-jack", "options": [
         { "value": "hall-jack", "label": "Jack-o'-Lantern" },

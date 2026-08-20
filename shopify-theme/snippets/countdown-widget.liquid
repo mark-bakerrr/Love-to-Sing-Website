@@ -60,7 +60,7 @@
 -%}
 
 {%- if cd_season != blank -%}
-  <div class="lts-cdw {{ w_class }}" data-widget-key="{{ cd_season }}">
+  <div class="lts-cdw {{ w_class }}{% if settings.countdown_widget_transparent %} lts-cdw--transparent{% endif %}" data-widget-key="{{ cd_season }}">
     <button class="close" type="button" aria-label="Dismiss" data-cdw-close>✕</button>
     {% render 'countdown-card',
       design: w_design,
@@ -71,7 +71,8 @@
       recurring: true,
       end_behavior: 'hide',
       cta_label: w_cta,
-      cta_link: w_link
+      cta_link: w_link,
+      transparent_bg: settings.countdown_widget_transparent
     %}
   </div>
 {%- endif -%}
