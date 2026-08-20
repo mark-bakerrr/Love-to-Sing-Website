@@ -64,6 +64,23 @@
   left: -1.2rem;
 }
 
+/* When a mega menu is open, dock the floating pill to full-width square so it
+   merges flush with the panel — a rounded pill above a full-bleed panel would
+   otherwise reveal thin arcs of the background at its corners. */
+.header--floating.menu-open {
+  width: 100%;
+  margin-top: 0;
+  border-radius: 0;
+}
+
+.header--floating.menu-open:before {
+  border-radius: 0;
+}
+
+.header--floating.menu-open .header__megamenu {
+  left: 0;
+}
+
 @media (max-width: 990px) {
   .header--floating {
     width: calc(100% - 1.6rem);
@@ -110,6 +127,8 @@
 .header__logo svg {
   width: 100%;
   height: auto;
+  /* slight lift so the seasonal logo reads on any header colour */
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.22));
 }
 
 @media screen and (max-width: 989px) {
