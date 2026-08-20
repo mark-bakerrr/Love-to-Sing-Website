@@ -116,26 +116,28 @@
       <div class="artbox"><img class="art" src="{{ art | asset_url }}" alt="" width="{{ art_w }}" height="{{ art_h }}" loading="lazy"></div>
     {%- endif -%}
 
-    <div class="cd">
-      <div class="row">
-        <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
-        <span class="sep" aria-hidden="true">:</span>
-        <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
-        <span class="sep" aria-hidden="true">:</span>
-        <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
-        <span class="sep" aria-hidden="true">:</span>
-        <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
+    <div class="lts-cd__stack">
+      <div class="cd">
+        <div class="row">
+          <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
+          <span class="sep" aria-hidden="true">:</span>
+          <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
+          <span class="sep" aria-hidden="true">:</span>
+          <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
+          <span class="sep" aria-hidden="true">:</span>
+          <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
+        </div>
+        {%- if end_message != blank -%}
+          <div class="msg" data-countdown-message hidden>{{ end_message }}</div>
+        {%- endif -%}
       </div>
-      {%- if end_message != blank -%}
-        <div class="msg" data-countdown-message hidden>{{ end_message }}</div>
+
+      {%- if cta_link != blank and cta_label != blank -%}
+        <div class="ctaWrap">
+          <a class="cta" href="{{ cta_link }}">{{ cta_label | escape }} <span class="arw">→</span></a>
+        </div>
       {%- endif -%}
     </div>
-
-    {%- if cta_link != blank and cta_label != blank -%}
-      <div class="ctaWrap">
-        <a class="cta" href="{{ cta_link }}">{{ cta_label | escape }} <span class="arw">→</span></a>
-      </div>
-    {%- endif -%}
   </div>
 </div>
 

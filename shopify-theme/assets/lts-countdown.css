@@ -19,7 +19,9 @@
 .lts-cd .art{display:block}
 .lts-cd .cd{position:relative;z-index:2;width:100%}
 .lts-cd{container-type:inline-size}
-.lts-cd .row{display:flex;justify-content:center;align-items:flex-start;gap:clamp(.3rem,3cqi,1.4rem);flex-wrap:nowrap}
+/* numbers row + CTA share one width so they line up */
+.lts-cd__stack{display:grid;grid-template-columns:1fr;justify-items:stretch;width:max-content;max-width:100%}
+.lts-cd .row{display:flex;justify-content:space-between;align-items:flex-start;gap:clamp(.3rem,3cqi,1.4rem);flex-wrap:nowrap}
 .lts-cd .tile{display:flex;flex-direction:column;align-items:center;padding:.2rem .3rem;min-width:0}
 .lts-cd .num{font-size:clamp(1.9rem,8.5cqi,4.4rem);font-weight:800;line-height:1;font-variant-numeric:tabular-nums;will-change:transform}
 .lts-cd .lab{font-size:clamp(.56rem,2cqi,.9rem);letter-spacing:.14em;text-transform:uppercase;margin-top:.5rem;opacity:.8}
@@ -38,7 +40,7 @@
 .lts-cd .msg{font-size:2.1rem;font-weight:800;text-align:center;padding:1rem .5rem}
 .lts-cd [hidden]{display:none!important}
 .lts-cd .ctaWrap{margin-top:1.5rem;z-index:2}
-.lts-cd .cta{display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;font-size:clamp(1.05rem,4.5cqi,1.7rem);font-weight:800;
+.lts-cd .cta{display:flex;width:100%;box-sizing:border-box;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;font-size:clamp(1.05rem,4.5cqi,1.7rem);font-weight:800;
   letter-spacing:.01em;padding:.7em 1.2em;border-radius:2.4rem;cursor:pointer;border:2px solid transparent}
 .lts-cd .cta .arw{display:inline-block}
 /* Kill the theme's global link-underline pseudo that draws a line through our CTA */
@@ -120,6 +122,12 @@
 
 /* Transparent background toggle (removes the skin's background panel) */
 .lts-cd--transparent .skin{background:transparent!important}
+/* Transparent: give each number its own card, hide colons, go bigger */
+.lts-cd--transparent .tile{background:rgba(18,18,26,.62);border-radius:1rem;padding:.7rem .7rem .55rem;box-shadow:0 6px 16px rgba(0,0,0,.35)}
+.lts-cd--transparent .sep{display:none}
+.lts-cd--transparent .num,.lts-cd--transparent .sep{font-size:3.4rem!important}
+.lts-cd--transparent .lab{font-size:.78rem!important}
+.lts-cd--transparent .cta{font-size:1.5rem!important}
 
 /* ===================== FLOATING WIDGET ===================== */
 /* The widget wraps the SAME skin (.lts-cd) as the block/section, so it inherits
@@ -129,8 +137,10 @@
 body:has(.lts-cd--inline) .lts-cdw{display:none!important}
 .lts-cdw{position:fixed;right:1.6rem;bottom:1.6rem;z-index:100;width:min(320px,calc(100vw - 3.2rem));
   filter:drop-shadow(0 16px 36px rgba(0,0,0,.5))}
-/* Transparent overlay: no panel, so go bigger and drop the heavy wrapper shadow */
-.lts-cdw--transparent{width:min(460px,calc(100vw - 3.2rem));filter:none}
+/* Transparent overlay: no panel; wrapper hugs the (larger) content so the ✕
+   sits right beside the numbers, and the heavy wrapper shadow is dropped. */
+.lts-cdw--transparent{width:min(300px,calc(100vw - 3.2rem));filter:none}
+.lts-cdw--transparent .close{top:-.7rem;right:-.7rem}
 .lts-cdw .lts-cd{width:100%}
 .lts-cdw .close{position:absolute;top:-1rem;right:-1rem;z-index:5;width:2.6rem;height:2.6rem;border-radius:50%;
   border:2px solid #fff;background:#1c1c1c;color:#fff;font-size:1.4rem;line-height:1;cursor:pointer;padding:0;
