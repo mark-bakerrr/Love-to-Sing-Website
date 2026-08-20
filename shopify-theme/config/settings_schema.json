@@ -415,5 +415,49 @@
         "default": true
       }
     ]
+  },
+  {
+    "name": "Countdown widget",
+    "settings": [
+      { "type": "paragraph", "content": "Global floating countdown shown bottom-right site-wide. It auto-hides when a countdown ends and can be dismissed by visitors." },
+      {
+        "type": "select",
+        "id": "countdown_widget_mode",
+        "label": "Active season",
+        "default": "auto",
+        "info": "Auto shows Halloween ~Sep 15–Oct 31 and Christmas ~Nov 1–Dec 25; otherwise nothing.",
+        "options": [
+          { "value": "auto", "label": "Auto (by date)" },
+          { "value": "halloween", "label": "Halloween" },
+          { "value": "christmas", "label": "Christmas" },
+          { "value": "off", "label": "Off" }
+        ]
+      },
+      {
+        "type": "select",
+        "id": "countdown_widget_tz",
+        "label": "Reference timezone",
+        "default": "America/New_York",
+        "info": "Every visitor sees the same numbers regardless of their own timezone.",
+        "options": [
+          { "value": "America/New_York", "label": "New York (Eastern)" },
+          { "value": "America/Chicago", "label": "Chicago (Central)" },
+          { "value": "America/Denver", "label": "Denver (Mountain)" },
+          { "value": "America/Los_Angeles", "label": "Los Angeles (Pacific)" },
+          { "value": "UTC", "label": "UTC / London (GMT)" },
+          { "value": "Europe/London", "label": "London (UK)" },
+          { "value": "Pacific/Auckland", "label": "Auckland (New Zealand)" },
+          { "value": "Australia/Sydney", "label": "Sydney (Australia)" }
+        ]
+      },
+      { "type": "header", "content": "Halloween" },
+      { "type": "url", "id": "cd_hall_link", "label": "Halloween countdown page link" },
+      { "type": "number", "id": "cd_hall_month", "label": "Halloween target month", "default": 10 },
+      { "type": "number", "id": "cd_hall_day", "label": "Halloween target day", "default": 31 },
+      { "type": "header", "content": "Christmas" },
+      { "type": "url", "id": "cd_xmas_link", "label": "Christmas countdown page link" },
+      { "type": "number", "id": "cd_xmas_month", "label": "Christmas target month", "default": 12 },
+      { "type": "number", "id": "cd_xmas_day", "label": "Christmas target day", "default": 25 }
+    ]
   }
 ]

@@ -53,6 +53,22 @@
         "share_title": "Share this song"
       }
     },
+    "countdown_xmas": {
+      "type": "countdown",
+      "settings": {
+        "design": "xmas-globe",
+        "target_month": 12,
+        "target_day": 25,
+        "reference_tz": "America/New_York",
+        "recurring": true,
+        "end_behavior": "message",
+        "end_message": "It's Christmas! 🎄",
+        "grace_days": 6,
+        "cta_label": "See the Christmas countdown",
+        "cta_link": "/pages/christmas-countdown",
+        "transparent_bg": false
+      }
+    },
     "custom_html_xJpEXA": {
       "type": "custom-html",
       "blocks": {
@@ -324,6 +340,7 @@
   },
   "order": [
     "main",
+    "countdown_xmas",
     "custom_html_xJpEXA",
     "featured_products_3X66Cw",
     "song_about_mDzcLq",

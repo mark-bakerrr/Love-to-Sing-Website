@@ -1,0 +1,129 @@
+/* =========================================================================
+   Love to Sing — Countdown skins + floating widget
+   Ported from countdown-preview.html. Every selector is scoped under
+   .lts-cd (section skins) or .lts-cdw (floating widget) so nothing leaks
+   into the rest of the theme. Theme root is 62.5% (1rem = 10px), same as
+   the preview, so rem values are ported verbatim.
+
+   Halloween skins use the Creepster Google font — the section/widget adds
+   the <link>; here we just reference font-family:'Creepster',...
+
+   Shipping skins: s-advent, s-globe, s-sleigh (Christmas)
+                   s-jack, s-neon, s-cauldron (Halloween)
+   ========================================================================= */
+
+/* ---------- shared skin scaffold ---------- */
+.lts-cd .skin{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;
+  border-radius:1.2rem;padding:1.8rem 1.4rem 1.8rem;overflow:hidden}
+.lts-cd .artbox{position:relative;z-index:1;display:flex;justify-content:center;margin-bottom:-16px;pointer-events:none}
+.lts-cd .art{display:block}
+.lts-cd .cd{position:relative;z-index:2;width:100%}
+.lts-cd .row{display:flex;justify-content:center;gap:1.4rem;flex-wrap:nowrap}
+.lts-cd .tile{display:flex;flex-direction:column;align-items:center;padding:.2rem .3rem;min-width:5rem}
+.lts-cd .num{font-size:4.8rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;will-change:transform}
+.lts-cd .lab{font-size:.92rem;letter-spacing:.14em;text-transform:uppercase;margin-top:.6rem;opacity:.8}
+/* boxed 'card' skins keep their containers */
+.lts-cd .s-advent .tile{border-radius:1rem;padding:1rem .9rem .8rem;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.lts-cd .s-advent .num{font-size:3.8rem}
+.lts-cd .sep{display:none}
+.lts-cd .msg{font-size:2.1rem;font-weight:800;text-align:center;padding:1rem .5rem}
+.lts-cd [hidden]{display:none!important}
+.lts-cd .ctaWrap{margin-top:1.5rem;z-index:2}
+.lts-cd .cta{display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;font-size:1.22rem;font-weight:800;
+  letter-spacing:.01em;padding:.75rem 1.5rem;border-radius:2.4rem;cursor:pointer;border:2px solid transparent}
+.lts-cd .cta .arw{display:inline-block}
+
+/* particles */
+.lts-cd .flake{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff;pointer-events:none;z-index:1}
+.lts-cd .bub{position:absolute;width:9px;height:9px;border-radius:50%;background:rgba(120,255,180,.85);box-shadow:0 0 7px rgba(120,255,180,.9);pointer-events:none;z-index:1}
+
+/* ===================== CHRISTMAS ===================== */
+/* 1 Advent */
+.lts-cd .s-advent{background:linear-gradient(160deg,#7a0f18,#4a0910);font-family:Georgia,serif;position:relative}
+.lts-cd .snowfield{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.lts-cd .s-advent .cd,.lts-cd .s-advent .ctaWrap{position:relative;z-index:2}
+.lts-cd .s-advent .tile{background:linear-gradient(#8f1420,#6d0e18);border:1px solid #b9863f}
+.lts-cd .s-advent .num{color:#f5d689;text-shadow:0 2px 3px rgba(0,0,0,.4)}
+.lts-cd .s-advent .lab{color:#f0d9a8}
+.lts-cd .s-advent .msg{color:#f5d689}
+.lts-cd .s-advent .cta{background:#f5d689;color:#5a0c14}
+
+/* 2 Snow Globe */
+.lts-cd .s-globe{background:radial-gradient(120% 120% at 50% 20%,#2a4a6e,#0e1c30)}
+.lts-cd .s-globe .artbox{width:150px;height:150px}
+.lts-cd .s-globe .art{width:150px;filter:drop-shadow(0 8px 16px rgba(0,0,0,.5))}
+.lts-cd .s-globe .num{color:#eaf6ff;text-shadow:0 2px 12px rgba(120,190,240,.75)}
+.lts-cd .s-globe .lab{color:#bcd8f0}
+.lts-cd .s-globe .msg{color:#dff0ff}
+.lts-cd .s-globe .cta{background:#c9283e;color:#fff}
+
+/* 3 Sleigh */
+.lts-cd .s-sleigh{background:linear-gradient(#0d3b2e,#0a2c22)}
+.lts-cd .s-sleigh .art{width:220px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.45))}
+.lts-cd .s-sleigh .num{color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.lts-cd .s-sleigh .lab{color:#e8c98a}
+.lts-cd .s-sleigh .msg{color:#fff}
+.lts-cd .s-sleigh .cta{background:#d8b45a;color:#0a2c22}
+
+/* ===================== HALLOWEEN ===================== */
+/* 4 Jack-o'-Lantern — pumpkin behind the numbers */
+.lts-cd .s-jack{background:radial-gradient(120% 120% at 50% 15%,#5a2a0d,#1c0f06);position:relative;min-height:220px;justify-content:center}
+.lts-cd .s-jack .artbox{position:absolute;top:50%;left:50%;transform:translate(-50%,-56%);margin:0;z-index:1}
+.lts-cd .s-jack .art{width:205px;filter:drop-shadow(0 0 22px rgba(255,120,20,.45))}
+.lts-cd .s-jack .cd{position:relative;z-index:2}
+.lts-cd .s-jack .num{color:#fff3d8;text-shadow:0 0 12px rgba(255,140,30,.95),0 2px 4px rgba(0,0,0,.7)}
+.lts-cd .s-jack .lab{color:#ffcf8a}
+.lts-cd .s-jack .msg{color:#ff9a2e;text-shadow:0 0 16px rgba(255,140,30,.6)}
+.lts-cd .s-jack .cta{background:#ff8a1e;color:#2a1000}
+
+/* 5 Neon */
+.lts-cd .s-neon{background:#08060d}
+.lts-cd .s-neon .bat{position:absolute;color:#5a2b8f;opacity:.55;z-index:1}
+.lts-cd .s-neon .num{color:#b6f24e;text-shadow:0 0 6px #9bff2e,0 0 14px #4f9c0e}
+.lts-cd .s-neon .lab{color:#b06bff;text-shadow:0 0 8px #7a2bd4}
+.lts-cd .s-neon .msg{color:#c6ff5a;text-shadow:0 0 14px #9bff2e}
+.lts-cd .s-neon .cta{background:transparent;border-color:#c6ff5a;color:#c6ff5a;box-shadow:0 0 12px rgba(155,255,46,.4)}
+
+/* 6 Cauldron */
+.lts-cd .s-cauldron{background:radial-gradient(120% 120% at 50% 20%,#123024,#08150f)}
+.lts-cd .s-cauldron .artbox{width:135px;height:120px;margin-bottom:-18px}
+.lts-cd .s-cauldron .art{width:135px}
+.lts-cd .s-cauldron .num{color:#5fffbb;text-shadow:0 0 14px rgba(60,255,160,.7)}
+.lts-cd .s-cauldron .lab{color:#7fe6bf}
+.lts-cd .s-cauldron .msg{color:#4dffb0}
+.lts-cd .s-cauldron .cta{background:#4dffb0;color:#08251a}
+
+/* Halloween display font — Creepster */
+.lts-cd .s-jack .num,.lts-cd .s-neon .num,.lts-cd .s-cauldron .num,
+.lts-cd .s-jack .lab,.lts-cd .s-neon .lab,.lts-cd .s-cauldron .lab,
+.lts-cd .s-jack .cta,.lts-cd .s-neon .cta,.lts-cd .s-cauldron .cta,
+.lts-cd .s-jack .msg,.lts-cd .s-neon .msg,.lts-cd .s-cauldron .msg{font-family:'Creepster',system-ui,cursive;font-weight:400;letter-spacing:.05em}
+.lts-cd .s-jack .num,.lts-cd .s-neon .num,.lts-cd .s-cauldron .num{font-size:5.4rem}
+.lts-cd .s-jack .lab,.lts-cd .s-neon .lab,.lts-cd .s-cauldron .lab{letter-spacing:.14em;opacity:.9}
+.lts-cd .s-jack .cta,.lts-cd .s-neon .cta,.lts-cd .s-cauldron .cta{font-size:1.55rem;letter-spacing:.06em}
+
+/* Optional heading above the skin */
+.lts-cd__heading{text-align:center;margin:0 0 1.6rem;font-size:2.2rem;font-weight:800}
+
+/* Transparent background toggle (removes the skin's background panel) */
+.lts-cd--transparent .skin{background:transparent!important}
+
+/* ===================== FLOATING WIDGET ===================== */
+.lts-cdw{position:fixed;right:2.2rem;bottom:2.2rem;z-index:100;cursor:pointer;border:none;border-radius:1.4rem;
+  padding:1rem 1.3rem 1rem 1rem;display:flex;align-items:center;gap:.8rem;box-shadow:0 14px 34px rgba(0,0,0,.55);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;text-decoration:none}
+.lts-cdw__hit{position:absolute;inset:0;z-index:1;border-radius:inherit}
+.lts-cdw .close{position:absolute;top:-.8rem;right:-.8rem;width:2.2rem;height:2.2rem;border-radius:50%;border:none;
+  background:#222;color:#fff;font-size:1.3rem;cursor:pointer;line-height:2rem;z-index:3;padding:0}
+.lts-cdw .art,.lts-cdw__body{position:relative;z-index:2;pointer-events:none}
+.lts-cdw .art{width:58px;height:58px;object-fit:contain;flex:none}
+.lts-cdw .num{font-size:1.9rem;font-weight:800;font-variant-numeric:tabular-nums}
+.lts-cdw .row{display:flex;gap:.5rem}
+.lts-cdw .tile{display:flex;flex-direction:column;align-items:center;min-width:3rem;padding:0;background:none;box-shadow:none;border:none}
+.lts-cdw .lab{font-size:.68rem;margin-top:.15rem;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.lts-cdw .cap{font-size:1.05rem;opacity:.92;display:block;margin-bottom:.15rem;font-weight:800}
+.lts-cdw.w-xmas{background:linear-gradient(140deg,#8f1420,#5a0c14);color:#f5d689;border:1px solid #b9863f}
+.lts-cdw.w-xmas .lab{color:#e8c98a}
+.lts-cdw.w-hall{background:linear-gradient(140deg,#2a1508,#120a04);color:#ff9a2e;border:1px solid #b5540a}
+.lts-cdw.w-hall .lab{color:#c79a5a}
+.lts-cdw [hidden]{display:none!important}

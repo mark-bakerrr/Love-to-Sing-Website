@@ -1,0 +1,80 @@
+{%- comment -%}
+  countdown-season — resolves which seasonal countdown (if any) is currently
+  "active" for the global floating widget.
+
+  Reads THEME SETTINGS (added to settings_schema.json separately):
+    settings.countdown_widget_mode  auto | halloween | christmas | off
+    settings.countdown_widget_tz    IANA tz (fallback America/New_York)
+    settings.cd_hall_link           URL to the Halloween countdown page
+    settings.cd_hall_month          default 10
+    settings.cd_hall_day            default 31
+    settings.cd_xmas_link           URL to the Christmas countdown page
+    settings.cd_xmas_month          default 12
+    settings.cd_xmas_day            default 25
+
+  Auto logic (server-side, using the shop's clock via Liquid 'now'):
+    Halloween window ~ Sept 15 – Oct 31
+    Christmas window ~ Nov 1  – Dec 25
+    otherwise: none
+
+  OUTPUT VARIABLES (available to the caller after `render`/`include`):
+    cd_season        'halloween' | 'christmas' | '' (empty = show nothing)
+    cd_link          the season's countdown page URL
+    cd_month         target month for the season
+    cd_day           target day for the season
+    cd_tz            reference timezone
+
+  NOTE: `render` isolates scope, so the widget snippet uses this via variables
+  it re-derives, OR includes it with {% include %}. This snippet is written to
+  be safe under {% include 'countdown-season' %} (shared scope) so the caller
+  can read cd_season / cd_link / cd_month / cd_day / cd_tz directly.
+{%- endcomment -%}
+
+{%- liquid
+  assign mode = settings.countdown_widget_mode | default: 'auto'
+  assign cd_tz = settings.countdown_widget_tz | default: 'America/New_York'
+
+  assign hall_month = settings.cd_hall_month | default: 10
+  assign hall_day = settings.cd_hall_day | default: 31
+  assign xmas_month = settings.cd_xmas_month | default: 12
+  assign xmas_day = settings.cd_xmas_day | default: 25
+
+  assign cd_season = ''
+
+  if mode == 'off'
+    assign cd_season = ''
+  elsif mode == 'halloween'
+    assign cd_season = 'halloween'
+  elsif mode == 'christmas'
+    assign cd_season = 'christmas'
+  else
+    # Auto: decide from today's date using numeric month*100+day for ranges.
+    assign m = 'now' | date: '%m' | plus: 0
+    assign d = 'now' | date: '%d' | plus: 0
+    assign md = m | times: 100 | plus: d
+
+    # Halloween window: Sept 15 (915) .. Oct 31 (1031)
+    if md >= 915 and md <= 1031
+      assign cd_season = 'halloween'
+    # Christmas window: Nov 1 (1101) .. Dec 25 (1225)
+    elsif md >= 1101 and md <= 1225
+      assign cd_season = 'christmas'
+    else
+      assign cd_season = ''
+    endif
+  endif
+
+  assign cd_link = ''
+  assign cd_month = 0
+  assign cd_day = 0
+
+  if cd_season == 'halloween'
+    assign cd_link = settings.cd_hall_link
+    assign cd_month = hall_month
+    assign cd_day = hall_day
+  elsif cd_season == 'christmas'
+    assign cd_link = settings.cd_xmas_link
+    assign cd_month = xmas_month
+    assign cd_day = xmas_day
+  endif
+-%}

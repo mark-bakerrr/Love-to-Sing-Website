@@ -1,0 +1,255 @@
+{%- comment -%}
+  Countdown — reusable seasonal countdown block.
+
+  Merchants add this section to any template, pick a design (skin), set the
+  target month/day + reference timezone, and choose what happens at zero.
+
+  Six shipping designs:
+    xmas-advent    -> class s-advent   fx advent    (CSS + falling snow, no art)
+    xmas-globe     -> class s-globe    fx globe     (art lts-cd-xmas-snowglobe)
+    xmas-sleigh    -> class s-sleigh   fx sleigh    (art lts-cd-xmas-sleigh)
+    hall-jack      -> class s-jack     fx pumpkin   (art lts-cd-hall-pumpkin)
+    hall-neon      -> class s-neon     fx neon      (CSS bats, no art)
+    hall-cauldron  -> class s-cauldron fx cauldron  (art lts-cd-hall-cauldron)
+
+  Numbers are timezone-correct in lts-countdown.js. QA: ?now=<ISO>.
+{%- endcomment -%}
+
+{{ 'lts-countdown.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%} Creepster is only used by Halloween skins, but it's cheap and dedup'd. {%- endcomment -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+
+{%- liquid
+  assign design = section.settings.design
+  assign fx = ''
+  assign skin = ''
+  assign art = ''
+
+  assign art_w = 0
+  assign art_h = 0
+  case design
+    when 'xmas-advent'
+      assign skin = 's-advent'
+      assign fx = 'advent'
+    when 'xmas-globe'
+      assign skin = 's-globe'
+      assign fx = 'globe'
+      assign art = 'lts-cd-xmas-snowglobe.png'
+      assign art_w = 150
+      assign art_h = 150
+    when 'xmas-sleigh'
+      assign skin = 's-sleigh'
+      assign fx = 'sleigh'
+      assign art = 'lts-cd-xmas-sleigh.png'
+      assign art_w = 220
+      assign art_h = 126
+    when 'hall-jack'
+      assign skin = 's-jack'
+      assign fx = 'pumpkin'
+      assign art = 'lts-cd-hall-pumpkin.png'
+      assign art_w = 205
+      assign art_h = 205
+    when 'hall-neon'
+      assign skin = 's-neon'
+      assign fx = 'neon'
+    when 'hall-cauldron'
+      assign skin = 's-cauldron'
+      assign fx = 'cauldron'
+      assign art = 'lts-cd-hall-cauldron.png'
+      assign art_w = 135
+      assign art_h = 135
+    else
+      assign skin = 's-globe'
+      assign fx = 'globe'
+      assign art = 'lts-cd-xmas-snowglobe.png'
+      assign art_w = 150
+      assign art_h = 150
+  endcase
+
+  assign root_class = 'lts-cd'
+  if section.settings.transparent_bg
+    assign root_class = root_class | append: ' lts-cd--transparent'
+  endif
+-%}
+
+<div
+  class="{{ root_class }}"
+  data-fx="{{ fx }}"
+  data-countdown
+  data-target-month="{{ section.settings.target_month | default: 12 }}"
+  data-target-day="{{ section.settings.target_day | default: 25 }}"
+  data-tz="{{ section.settings.reference_tz }}"
+  data-end="{{ section.settings.end_behavior }}"
+  data-grace-days="{{ section.settings.grace_days | default: 6 }}"
+  data-recurring="{% if section.settings.recurring %}true{% else %}false{% endif %}"
+>
+  {%- if section.settings.heading != blank -%}
+    <h2 class="lts-cd__heading">{{ section.settings.heading | escape }}</h2>
+  {%- endif -%}
+
+  <div class="{{ skin }} skin">
+    {%- comment -%} Per-skin decoration in front of the number row {%- endcomment -%}
+    {%- if design == 'xmas-advent' -%}
+      <div class="snowfield"></div>
+    {%- elsif design == 'hall-neon' -%}
+      <span class="bat" style="top:1.4rem;left:2rem;font-size:1.6rem">🦇</span>
+      <span class="bat" style="top:2.2rem;right:3rem;font-size:1.1rem">🦇</span>
+    {%- elsif art != blank -%}
+      <div class="artbox"><img class="art" src="{{ art | asset_url }}" alt="" width="{{ art_w }}" height="{{ art_h }}" loading="lazy"></div>
+    {%- endif -%}
+
+    <div class="cd">
+      <div class="row">
+        <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
+        <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
+        <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
+        <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
+      </div>
+      {%- if section.settings.end_message != blank -%}
+        <div class="msg" data-countdown-message hidden>{{ section.settings.end_message }}</div>
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.cta_link != blank and section.settings.cta_label != blank -%}
+      <div class="ctaWrap">
+        <a class="cta" href="{{ section.settings.cta_link }}">{{ section.settings.cta_label | escape }} <span class="arw">→</span></a>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+<script src="{{ 'gsap.min.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'lts-countdown.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Countdown",
+  "tag": "section",
+  "class": "lts-cd-section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "design",
+      "label": "Design",
+      "default": "xmas-globe",
+      "options": [
+        { "group": "Christmas", "value": "xmas-advent", "label": "Christmas — Advent Cards" },
+        { "group": "Christmas", "value": "xmas-globe", "label": "Christmas — Snow Globe" },
+        { "group": "Christmas", "value": "xmas-sleigh", "label": "Christmas — Sleigh" },
+        { "group": "Halloween", "value": "hall-jack", "label": "Halloween — Jack-o'-Lantern" },
+        { "group": "Halloween", "value": "hall-neon", "label": "Halloween — Spooky Neon" },
+        { "group": "Halloween", "value": "hall-cauldron", "label": "Halloween — Cauldron" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading (optional)"
+    },
+    {
+      "type": "header",
+      "content": "Countdown target"
+    },
+    {
+      "type": "number",
+      "id": "target_month",
+      "label": "Target month",
+      "default": 12,
+      "info": "Month the countdown ends (1–12). E.g. 12 for December."
+    },
+    {
+      "type": "number",
+      "id": "target_day",
+      "label": "Target day",
+      "default": 25,
+      "info": "Day of that month the countdown reaches zero. The timer hits 00:00:00 at the start of this day in the reference timezone below."
+    },
+    {
+      "type": "select",
+      "id": "reference_tz",
+      "label": "Reference timezone",
+      "default": "America/New_York",
+      "info": "The countdown hits zero at midnight in this timezone, so every visitor sees exactly the same numbers regardless of where they are.",
+      "options": [
+        { "value": "America/New_York", "label": "New York (Eastern)" },
+        { "value": "America/Chicago", "label": "Chicago (Central)" },
+        { "value": "America/Denver", "label": "Denver (Mountain)" },
+        { "value": "America/Los_Angeles", "label": "Los Angeles (Pacific)" },
+        { "value": "UTC", "label": "UTC / London (GMT)" },
+        { "value": "Europe/London", "label": "London (UK)" },
+        { "value": "Pacific/Auckland", "label": "Auckland (New Zealand)" },
+        { "value": "Australia/Sydney", "label": "Sydney (Australia)" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "recurring",
+      "label": "Repeat every year",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "When the countdown reaches zero"
+    },
+    {
+      "type": "select",
+      "id": "end_behavior",
+      "label": "At zero",
+      "default": "message",
+      "options": [
+        { "value": "hide", "label": "Hide" },
+        { "value": "message", "label": "Show message" },
+        { "value": "message-then-hide", "label": "Show message then hide" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "end_message",
+      "label": "End message",
+      "default": "It's here!"
+    },
+    {
+      "type": "number",
+      "id": "grace_days",
+      "label": "Grace days",
+      "default": 6,
+      "info": "For \"Show message then hide\": how many days the message stays up after zero before it hides. Ignored for the other modes and when \"Repeat every year\" is on."
+    },
+    {
+      "type": "header",
+      "content": "Call to action"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button label",
+      "default": "See the countdown"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button link",
+      "info": "The button only appears when a link is set."
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_bg",
+      "label": "Transparent background",
+      "default": false,
+      "info": "Removes the skin's coloured background panel so it sits on your page's own background."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Countdown"
+    }
+  ]
+}
+{% endschema %}

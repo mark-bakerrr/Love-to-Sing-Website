@@ -53,6 +53,22 @@
         "share_title": "Share this song"
       }
     },
+    "countdown_hall": {
+      "type": "countdown",
+      "settings": {
+        "design": "hall-jack",
+        "target_month": 10,
+        "target_day": 31,
+        "reference_tz": "America/New_York",
+        "recurring": true,
+        "end_behavior": "message",
+        "end_message": "Happy Halloween! 🎃",
+        "grace_days": 6,
+        "cta_label": "See the Halloween countdown",
+        "cta_link": "/pages/halloween-countdown",
+        "transparent_bg": false
+      }
+    },
     "custom_html_xJpEXA": {
       "type": "custom-html",
       "blocks": {
@@ -357,6 +373,7 @@
   },
   "order": [
     "main",
+    "countdown_hall",
     "custom_html_xJpEXA",
     "featured_products_3X66Cw",
     "song_about_mDzcLq",

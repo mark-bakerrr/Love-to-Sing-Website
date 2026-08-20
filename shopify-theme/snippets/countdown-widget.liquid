@@ -1,0 +1,70 @@
+{%- comment -%}
+  countdown-widget — global floating bottom-right countdown widget.
+
+  Decides the active season via countdown-season (included so it shares scope
+  and exposes cd_season / cd_link / cd_month / cd_day / cd_tz). If no season
+  is active (off / out of window), renders nothing.
+
+  Otherwise renders a compact .lts-cdw widget for the season: dismiss ✕,
+  season art, a caption, and a [data-countdown][data-widget] block that hides
+  itself at zero. The whole widget links to the season's countdown page.
+
+  Dismiss is remembered per-season in localStorage (handled in
+  lts-countdown.js via data-widget-key / [data-cdw-close]).
+
+  Include once in layout/theme.liquid, e.g.:
+    {% render 'countdown-widget' %}
+{%- endcomment -%}
+
+{%- include 'countdown-season' -%}
+
+{%- if cd_season != blank -%}
+  {%- liquid
+    if cd_season == 'halloween'
+      assign w_class = 'w-hall'
+      assign w_art = 'lts-cd-hall-pumpkin.png'
+      assign w_cap = 'Halloween countdown'
+    else
+      assign w_class = 'w-xmas'
+      assign w_art = 'lts-cd-xmas-snowglobe.png'
+      assign w_cap = 'Christmas countdown'
+    endif
+    assign w_tag = 'div'
+  -%}
+
+  {{ 'lts-countdown.css' | asset_url | stylesheet_tag }}
+
+  <div
+    class="lts-cdw {{ w_class }}"
+    data-widget-key="{{ cd_season }}"
+  >
+    {%- if cd_link != blank -%}
+      <a class="lts-cdw__hit" href="{{ cd_link }}" aria-label="{{ w_cap | escape }}"></a>
+    {%- endif -%}
+    <button class="close" type="button" aria-label="Dismiss" data-cdw-close>✕</button>
+    <img class="art" src="{{ w_art | asset_url }}" alt="" width="58" height="58" loading="lazy">
+    <div class="lts-cdw__body">
+      <span class="cap">{{ w_cap }}</span>
+      <div
+        class="cd"
+        data-countdown
+        data-widget="1"
+        data-target-month="{{ cd_month }}"
+        data-target-day="{{ cd_day }}"
+        data-tz="{{ cd_tz }}"
+        data-end="hide"
+        data-recurring="true"
+      >
+        <div class="row">
+          <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
+          <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
+          <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
+          <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ 'gsap.min.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'lts-countdown.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
