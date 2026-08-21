@@ -44,45 +44,6 @@
       class="megamenu__inner megamenu__inner--songs"
       megamenu="main-wrapper"
     >
-      {%- comment -%} Category logo (swaps with the active category tab, sits above "Categories"). {%- endcomment -%}
-      {%- if active_count > 0 -%}
-        <div
-          class="megamenu__logo megamenu__logo--songs"
-          megamenu="logo-container"
-        >
-          {%- assign slot_index = 0 -%}
-          {%- for i in (1..6) -%}
-            {%- liquid
-              assign prefix = 'songs_cat' | append: i
-              assign k_coll = prefix | append: '_collection'
-              assign k_logo = prefix | append: '_logo'
-              assign k_label = prefix | append: '_label'
-              assign coll = block_settings[k_coll]
-              assign logo = block_settings[k_logo]
-              assign label = block_settings[k_label]
-            -%}
-            {%- if coll != blank -%}
-              {%- assign slot_index = slot_index | plus: 1 -%}
-              {%- assign cat_label = label | default: coll.title -%}
-              <div
-                class="megamenu__songs-logo media media--transparent{% unless slot_index == 1 %} hidden{% endunless %}"
-                data-logo-index="{{ slot_index }}"
-                megamenu="logo-item"
-              >
-                {%- if logo != blank -%}
-                  {%- assign logo_src = logo | image_url: width: 600 -%}
-                  {%- render 'image', src: logo_src, width: 600, height: 600, alt: cat_label -%}
-                {%- else -%}
-                  <span class="megamenu__songs-logo-mark">
-                    {%- render 'icon', icon: 'music-note-single' -%}
-                  </span>
-                {%- endif -%}
-              </div><!-- /.megamenu__songs-logo -->
-            {%- endif -%}
-          {%- endfor -%}
-        </div><!-- /.megamenu__logo -->
-      {%- endif -%}
-
       <p class="megamenu__title megamenu__title--songs">Categories</p>
 
       <ul
@@ -169,6 +130,45 @@
           {%- endif -%}
         {%- endfor -%}
       </ul><!-- /.megamenu__list -->
+
+      {%- comment -%} Category logo (swaps with the active category tab, pinned to the BOTTOM of the rail). {%- endcomment -%}
+      {%- if active_count > 0 -%}
+        <div
+          class="megamenu__logo megamenu__logo--songs"
+          megamenu="logo-container"
+        >
+          {%- assign slot_index = 0 -%}
+          {%- for i in (1..6) -%}
+            {%- liquid
+              assign prefix = 'songs_cat' | append: i
+              assign k_coll = prefix | append: '_collection'
+              assign k_logo = prefix | append: '_logo'
+              assign k_label = prefix | append: '_label'
+              assign coll = block_settings[k_coll]
+              assign logo = block_settings[k_logo]
+              assign label = block_settings[k_label]
+            -%}
+            {%- if coll != blank -%}
+              {%- assign slot_index = slot_index | plus: 1 -%}
+              {%- assign cat_label = label | default: coll.title -%}
+              <div
+                class="megamenu__songs-logo media media--transparent{% unless slot_index == 1 %} hidden{% endunless %}"
+                data-logo-index="{{ slot_index }}"
+                megamenu="logo-item"
+              >
+                {%- if logo != blank -%}
+                  {%- assign logo_src = logo | image_url: width: 600 -%}
+                  {%- render 'image', src: logo_src, width: 600, height: 600, alt: cat_label -%}
+                {%- else -%}
+                  <span class="megamenu__songs-logo-mark">
+                    {%- render 'icon', icon: 'music-note-single' -%}
+                  </span>
+                {%- endif -%}
+              </div><!-- /.megamenu__songs-logo -->
+            {%- endif -%}
+          {%- endfor -%}
+        </div><!-- /.megamenu__logo -->
+      {%- endif -%}
     </div><!-- /.megamenu__inner -->
   </header-megamenu><!-- /.megamenu -->
 </div><!-- /.header__megamenu -->

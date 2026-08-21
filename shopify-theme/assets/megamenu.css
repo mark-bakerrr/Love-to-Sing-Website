@@ -220,15 +220,15 @@
   border-bottom-left-radius: var(--radius-l);
 }
 
-/* Category logo block — override the legacy bottom-pinned .megamenu__logo
-   so it sits ABOVE the "Categories" label at the top of the rail. */
+/* Category logo block — pinned to the BOTTOM of the flex-column rail
+   (below the "Categories" list), matching the legacy menu. */
 .megamenu__logo--songs {
-  margin-top: 0;
+  margin-top: auto;
   max-width: none;
   width: 100%;
-  padding-top: 0;
+  padding-top: 3.2rem;
   padding-right: 1.6rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
 }
 
 /* Just the transparent logo image — no box, shadow, border or padding.
