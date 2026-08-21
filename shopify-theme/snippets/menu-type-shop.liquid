@@ -1,12 +1,147 @@
 {%- comment -%}
-  Shop (ecommerce) menu type — PLACEHOLDER.
-  TODO Task 6: build the shop panel from block_settings.shop_menu / shop_feature_product.
+  Shop (ecommerce) menu type.
+  A single static panel (no category switching): a row of link COLUMNS built from
+  `block_settings.shop_menu` (a link_list / Shopify menu) plus an optional featured
+  product card from `block_settings.shop_feature_product`.
+
+  Layout (mirrors the approved wireframe — docs/plans/megamenu-wireframes/index.html,
+  the "TYPE 2 · SHOP" panel):
+    - For each TOP-LEVEL link in `shop_menu.links`:
+        * its title becomes a column heading, linked to `link.url`
+        * its children (`link.links`) render as the column's items
+        * a top-level link with NO children renders as a single standalone link
+    - The featured product (if `shop_feature_product` is set) is a tinted "album" card
+      on the right: cover image, title, price and a "Shop now →" button to product.url.
+
+  Height / JS note:
+    Shop has NO `megamenu="item"` / `megamenu="products-container"` / logo hooks, so
+    header-megamenu.js (assets/header-megamenu.js) measures 0 for every source and sets
+    `--megamenu-height: 0px` on <header-megamenu>. That would collapse the card, so the
+    appended CSS forces `.megamenu--shop { height: auto; min-height: 32rem; }` (see the
+    "Shop menu type" block in assets/megamenu.css) — source order beats the base
+    `.megamenu { height: var(--megamenu-height, auto) }` rule, so the panel is
+    content-driven and never collapses. We keep `megamenu="main-wrapper"` only so the
+    JS padding read is harmless (it never finds items to switch).
+
   Accepts: block_settings, link
 {%- endcomment -%}
+
+{%- liquid
+  assign shop_menu = block_settings.shop_menu
+  assign feature = block_settings.shop_feature_product
+  assign has_columns = false
+  if shop_menu != blank and shop_menu.links.size > 0
+    assign has_columns = true
+  endif
+-%}
+
 <div class="header__megamenu">
-  <header-megamenu class="megamenu">
-    <div class="megamenu__inner" megamenu="main-wrapper">
-      <p class="megamenu__title">{{ link.title | escape }}</p>
+  <header-megamenu class="megamenu megamenu--shop">
+    <div
+      class="megamenu__inner megamenu__inner--shop"
+      megamenu="main-wrapper"
+    >
+      <div class="megamenu__shop-grid{% if feature != blank %} megamenu__shop-grid--has-feature{% endif %}">
+        {%- if has_columns -%}
+          {%- for parent in shop_menu.links -%}
+            <div class="megamenu__shop-col">
+              {%- if parent.links.size > 0 -%}
+                {%- comment -%} Heading + child links. {%- endcomment -%}
+                <a
+                  href="{{ parent.url }}"
+                  class="megamenu__shop-heading full-unstyled-link focus-inset"
+                >
+                  {{ parent.title | escape }}
+                </a>
+
+                <ul class="megamenu__shop-links list-unstyled">
+                  {%- for child in parent.links -%}
+                    <li class="megamenu__shop-item">
+                      <a
+                        href="{{ child.url }}"
+                        class="megamenu__shop-link full-unstyled-link focus-inset{% if child.active %} is-active{% endif %}"
+                      >
+                        <span class="megamenu__shop-link-label">{{ child.title | escape }}</span>
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                </ul><!-- /.megamenu__shop-links -->
+              {%- else -%}
+                {%- comment -%} No children: render the top-level link as a standalone link. {%- endcomment -%}
+                <ul class="megamenu__shop-links list-unstyled">
+                  <li class="megamenu__shop-item">
+                    <a
+                      href="{{ parent.url }}"
+                      class="megamenu__shop-link megamenu__shop-link--standalone full-unstyled-link focus-inset{% if parent.active %} is-active{% endif %}"
+                    >
+                      <span class="megamenu__shop-link-label">{{ parent.title | escape }}</span>
+                    </a>
+                  </li>
+                </ul><!-- /.megamenu__shop-links -->
+              {%- endif -%}
+            </div><!-- /.megamenu__shop-col -->
+          {%- endfor -%}
+        {%- endif -%}
+
+        {%- if feature != blank -%}
+          {%- liquid
+            assign feature_image = feature.featured_media
+            assign shop_now_label = 'Shop now'
+          -%}
+          <aside class="megamenu__shop-feature">
+            <a
+              href="{{ feature.url }}"
+              class="megamenu__shop-feature-cover full-unstyled-link focus-inset"
+              tabindex="-1"
+              aria-hidden="true"
+            >
+              {%- if feature_image != blank -%}
+                <div class="media megamenu__shop-feature-media">
+                  {%- liquid
+                    assign feature_src = feature_image | image_url: width: 600
+                    capture feature_srcset
+                      render 'srcset', image: feature_image
+                    endcapture
+                    render 'image', src: feature_src, srcset: feature_srcset, sizes: '32rem', alt: feature.title, width: feature_image.width, height: feature_image.height, class: 'megamenu__shop-feature-img'
+                  -%}
+                </div>
+              {%- else -%}
+                <span class="megamenu__shop-feature-placeholder">
+                  {%- render 'icon', icon: 'music-note-single' -%}
+                </span>
+              {%- endif -%}
+            </a>
+
+            <div class="megamenu__shop-feature-body">
+              <p class="megamenu__shop-feature-eyebrow">Featured</p>
+
+              <a
+                href="{{ feature.url }}"
+                class="megamenu__shop-feature-title full-unstyled-link focus-inset"
+              >
+                {{ feature.title | escape }}
+              </a>
+
+              <p class="megamenu__shop-feature-price">
+                {%- if feature.compare_at_price > feature.price -%}
+                  <span class="megamenu__shop-feature-now">{{ feature.price | money }}</span>
+                  <s class="megamenu__shop-feature-was">{{ feature.compare_at_price | money }}</s>
+                {%- else -%}
+                  <span class="megamenu__shop-feature-now">{{ feature.price | money }}</span>
+                {%- endif -%}
+              </p>
+
+              {%- render 'button',
+                type: 'link',
+                icon_position: 'right',
+                value: shop_now_label,
+                href: feature.url,
+                class: 'megamenu__shop-feature-cta'
+              -%}
+            </div><!-- /.megamenu__shop-feature-body -->
+          </aside><!-- /.megamenu__shop-feature -->
+        {%- endif -%}
+      </div><!-- /.megamenu__shop-grid -->
     </div><!-- /.megamenu__inner -->
   </header-megamenu><!-- /.megamenu -->
 </div><!-- /.header__megamenu -->

@@ -343,3 +343,215 @@
   padding-bottom: 0;
   min-height: 4.8rem;
 }
+
+/* ------------------------------------------------------------ *\
+  Shop menu type (menu-type-shop.liquid)
+  A single static panel: a responsive row of link COLUMNS built from
+  `shop_menu` (each column = a linked heading + its child links), plus an
+  optional tinted "album" feature card built from `shop_feature_product`
+  (cover image, title, price, "Shop now →").
+
+  Height: Shop has no `megamenu="item"` / products / logo hooks, so
+  header-megamenu.js measures 0 for every source and sets
+  `--megamenu-height: 0px` on <header-megamenu>. The base rule
+  `.megamenu { height: var(--megamenu-height, auto) }` would then collapse
+  the card to 0. We override it here — because this block is appended AFTER
+  the base `.megamenu` rule, equal-specificity source order wins — so the
+  Shop panel is content-driven and never collapses.
+\* ------------------------------------------------------------ */
+.megamenu--shop {
+  /* Clip to the card's rounded corners (matches .megamenu--songs) and defeat
+     the JS-set --megamenu-height:0px so the panel is sized by its content. */
+  overflow: hidden;
+  border-radius: var(--radius-l);
+  height: auto;
+  min-height: 32rem;
+}
+
+/* Full-bleed padded container — Shop is one block, not a left rail + products,
+   so the inner spans the whole card (unlike .megamenu__inner--songs). */
+.megamenu__inner--shop {
+  width: 100%;
+  flex-direction: row;
+  padding: 4rem;
+  background: var(--color-background-secondary);
+  border-radius: var(--radius-l);
+}
+
+/* Columns + feature grid. Link columns share the flexible space; the feature
+   card (when present) takes a fixed 32rem track on the right. */
+.megamenu__shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: var(--space-400, 3.2rem);
+  width: 100%;
+  align-items: start;
+}
+
+.megamenu__shop-grid--has-feature {
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)) 32rem;
+}
+
+.megamenu__shop-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+/* Column heading — the top-level shop_menu link. */
+.megamenu__shop-heading {
+  display: block;
+  padding: 1rem 1.2rem;
+  font-size: var(--fz-t);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-subdued);
+  transition: color var(--duration-default) ease-in-out;
+}
+
+.megamenu__shop-heading:hover {
+  color: var(--c-main-700, var(--c-red-700));
+}
+
+.megamenu__shop-links {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Each child (or standalone) link — hover tint matches the wireframe rows. */
+.megamenu__shop-link {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem;
+  border-radius: var(--radius-s);
+  color: var(--color-foreground);
+  font-size: var(--fz-s);
+  font-weight: 800;
+  line-height: 1.25;
+  transition: background var(--duration-default) ease-in-out, color var(--duration-default) ease-in-out;
+}
+
+.megamenu__shop-link:hover,
+.megamenu__shop-link.is-active {
+  background: var(--c-red-100, #fcdcdb);
+  color: var(--c-main-700, var(--c-red-700));
+}
+
+/* A top-level link with no children reads as a bolder standalone item. */
+.megamenu__shop-link--standalone {
+  font-weight: 800;
+}
+
+/* Featured product card — tinted "album" treatment. */
+.megamenu__shop-feature {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding: var(--space-200, 1.6rem);
+  background: var(--c-red-50, #fdefef);
+  border: 1px solid var(--c-red-100, #fcdcdb);
+  border-radius: var(--radius-m);
+}
+
+.megamenu__shop-feature-cover {
+  display: block;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  background: var(--color-media-background, var(--c-red-100));
+  box-shadow: var(--shadow-card);
+}
+
+.megamenu__shop-feature-media {
+  width: 100%;
+  height: 100%;
+}
+
+.megamenu__shop-feature-img,
+.megamenu__shop-feature-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.megamenu__shop-feature-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--c-main-500, var(--c-red-500));
+}
+
+.megamenu__shop-feature-placeholder svg {
+  width: 5.6rem;
+  height: 5.6rem;
+}
+
+.megamenu__shop-feature-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.megamenu__shop-feature-eyebrow {
+  margin: 0;
+  font-size: var(--fz-t);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-main-600, var(--c-red-600));
+}
+
+.megamenu__shop-feature-title {
+  font-size: var(--fz-m);
+  font-weight: 900;
+  line-height: 1.15;
+  color: var(--c-main-700, var(--c-red-700));
+}
+
+.megamenu__shop-feature-price {
+  margin: 0.2rem 0 0.4rem;
+  font-size: var(--fz-l);
+  font-weight: 900;
+  color: var(--color-foreground);
+}
+
+.megamenu__shop-feature-was {
+  margin-left: 0.6rem;
+  font-size: var(--fz-s);
+  font-weight: 700;
+  color: var(--color-subdued);
+}
+
+.megamenu__shop-feature-cta {
+  align-self: flex-start;
+  margin-top: 0.4rem;
+}
+
+/* Drop the fixed feature track first, then stack columns as the card narrows. */
+@media (max-width: 1180px) {
+  .megamenu__shop-grid,
+  .megamenu__shop-grid--has-feature {
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  }
+
+  .megamenu__shop-feature {
+    flex-direction: row;
+    align-items: center;
+    gap: 1.6rem;
+    grid-column: 1 / -1;
+  }
+
+  .megamenu__shop-feature-cover {
+    width: 12rem;
+    flex: none;
+  }
+
+  .megamenu__shop-feature-body {
+    flex: 1;
+  }
+}
