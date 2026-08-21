@@ -555,3 +555,310 @@
     flex: 1;
   }
 }
+
+/* ------------------------------------------------------------ *\
+  Discover menu type (menu-type-discover.liquid)
+  A single static panel, three columns inside the floating card:
+    LEFT   "Explore"       — icon-tile links from `discover_links`
+    MIDDLE "New this week"  — up to 3 recent `discover_blog` articles
+                             (thumb + tag + title + date), + a "See what's
+                             new" button; the whole column is omitted when no
+                             blog is set (grid reflows to 2 tracks).
+    RIGHT  feature card     — the Heart of Love to Sing gradient card built
+                             from `discover_feature_page` (+ optional
+                             `discover_feature_image` background).
+
+  Height: Discover has no `megamenu="item"` / products / logo hooks, so
+  header-megamenu.js measures 0 for every source and sets
+  `--megamenu-height: 0px` on <header-megamenu>. The base rule
+  `.megamenu { height: var(--megamenu-height, auto) }` would then collapse the
+  card to 0. This block is appended AFTER the base `.megamenu` rule, so
+  equal-specificity source order wins and the panel is content-driven.
+\* ------------------------------------------------------------ */
+.megamenu--discover {
+  /* Clip to the card's rounded corners (matches .megamenu--shop) and defeat
+     the JS-set --megamenu-height:0px so the panel is sized by its content. */
+  height: auto;
+  min-height: 32rem;
+  overflow: hidden;
+  border-radius: var(--radius-l);
+}
+
+/* Full-bleed padded container — Discover is one block, so the inner spans the
+   whole card (like .megamenu__inner--shop, unlike the songs left-rail). */
+.megamenu--discover .megamenu__inner--discover {
+  width: 100%;
+  flex-direction: row;
+  padding: 4rem;
+  background: var(--color-background-secondary);
+  border-radius: var(--radius-l);
+}
+
+/* Three tracks: two flexible link/news columns + a fixed feature card. */
+.megamenu__discover-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 34rem;
+  gap: var(--space-400, 3.2rem);
+  width: 100%;
+  align-items: stretch;
+}
+
+/* No blog configured: drop the middle column to two tracks. */
+.megamenu__discover-grid--no-blog {
+  grid-template-columns: 1fr 34rem;
+}
+
+.megamenu__discover-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Column eyebrow label — matches the shop heading / songs title treatment. */
+.megamenu__discover-eyebrow {
+  margin: 0 0 0.8rem;
+  padding: 0 1.2rem;
+  font-size: var(--fz-t);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-subdued);
+}
+
+/* --- LEFT: Explore icon-tile links --- */
+.megamenu__discover-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.megamenu__discover-link {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1rem 1.2rem;
+  border-radius: var(--radius-s);
+  color: var(--color-foreground);
+  transition: background var(--duration-default) ease-in-out;
+}
+
+.megamenu__discover-link:hover,
+.megamenu__discover-link.is-active {
+  background: var(--c-red-50, #fdefef);
+}
+
+.megamenu__discover-ic {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 3.8rem;
+  height: 3.8rem;
+  border-radius: var(--radius-s);
+  color: #fff;
+  background: var(--c-red-500, #b91f1c);
+}
+
+.megamenu__discover-ic svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+/* Cycled tile gradients (a..f) — brand-adjacent hues so the column reads clean
+   for any number of links. */
+.megamenu__discover-ic--a { background: linear-gradient(150deg, #f5928f, #b91f1c); }
+.megamenu__discover-ic--b { background: linear-gradient(150deg, #76aaea, #205fa9); }
+.megamenu__discover-ic--c { background: linear-gradient(150deg, #a5d0a9, #519659); }
+.megamenu__discover-ic--d { background: linear-gradient(150deg, #facc55, #b98a1e); }
+.megamenu__discover-ic--e { background: linear-gradient(150deg, #ec5450, #912422); }
+.megamenu__discover-ic--f { background: linear-gradient(150deg, #f5928f, #912422); }
+
+.megamenu__discover-link-text {
+  min-width: 0;
+}
+
+.megamenu__discover-link-label {
+  display: block;
+  font-size: var(--fz-s);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--color-foreground);
+}
+
+/* --- MIDDLE: New this week --- */
+.megamenu__discover-news {
+  min-width: 0;
+}
+
+.megamenu__discover-news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.megamenu__discover-news-item {
+  display: flex;
+  gap: 1.2rem;
+  padding: 0.8rem;
+  border-radius: var(--radius-m);
+  color: inherit;
+  transition: background var(--duration-default) ease-in-out;
+}
+
+.megamenu__discover-news-item:hover {
+  background: var(--c-red-50, #fdefef);
+}
+
+.megamenu__discover-news-thumb {
+  display: block;
+  flex: none;
+  width: 6.4rem;
+  height: 6.4rem;
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  background: var(--c-red-100, #fcdcdb);
+}
+
+.megamenu__discover-news-thumb img,
+.megamenu__discover-news-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.megamenu__discover-news-thumb-fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--c-main-500, var(--c-red-500));
+}
+
+.megamenu__discover-news-thumb-fallback svg {
+  width: 2.8rem;
+  height: 2.8rem;
+}
+
+.megamenu__discover-news-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.megamenu__discover-news-tag {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-main-600, var(--c-red-600));
+}
+
+.megamenu__discover-news-title {
+  font-size: var(--fz-s);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--color-foreground);
+}
+
+.megamenu__discover-news-date {
+  font-size: var(--fz-t);
+  font-weight: 700;
+  color: var(--color-subdued);
+}
+
+.megamenu__discover-news-cta {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+/* --- RIGHT: Heart of Love to Sing feature card --- */
+.megamenu__discover-feature {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 33rem;
+  padding: var(--space-300, 2.4rem);
+  border-radius: var(--radius-l);
+  overflow: hidden;
+  color: #fff;
+  background: linear-gradient(160deg, #ec5450 0%, #912422 60%, #521b1a 100%);
+  background-size: cover;
+  background-position: center;
+  transition: transform var(--duration-default) ease-in-out;
+}
+
+.megamenu__discover-feature:hover {
+  transform: translateY(-2px);
+}
+
+/* Decorative heart watermark, bled off the top-right corner. */
+.megamenu__discover-feature-wm {
+  position: absolute;
+  top: -1.5rem;
+  right: -2rem;
+  width: 16rem;
+  height: 16rem;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.megamenu__discover-feature-wm svg {
+  width: 100%;
+  height: 100%;
+}
+
+.megamenu__discover-feature-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.megamenu__discover-feature-eyebrow {
+  font-size: var(--fz-t);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.megamenu__discover-feature-title {
+  margin: 0.4rem 0 0.8rem;
+  font-size: 2.6rem;
+  font-weight: 900;
+  line-height: 1.08;
+  color: #fff;
+}
+
+.megamenu__discover-feature-text {
+  margin: 0 0 var(--space-250, 2rem);
+  max-width: 32ch;
+  font-size: var(--fz-s);
+  font-weight: 600;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* White "Read our story →" pill on the gradient. */
+.megamenu__discover-feature-cta {
+  align-self: flex-start;
+  background: #fff;
+  color: var(--c-main-600, var(--c-red-600));
+}
+
+.megamenu__discover-feature:hover .megamenu__discover-feature-cta {
+  background: var(--c-red-50, #fdefef);
+}
+
+/* Reflow: drop the fixed feature track and stack columns as the card narrows. */
+@media (max-width: 1180px) {
+  .megamenu__discover-grid,
+  .megamenu__discover-grid--no-blog {
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  }
+
+  .megamenu__discover-feature {
+    min-height: 24rem;
+    grid-column: 1 / -1;
+  }
+}
