@@ -30,7 +30,8 @@
   # but first count how many are active so the logo container / list only render when needed.
   assign active_count = 0
   for i in (1..6)
-    assign coll = block_settings['songs_cat' | append: i | append: '_collection']
+    assign k_coll = 'songs_cat' | append: i | append: '_collection'
+    assign coll = block_settings[k_coll]
     if coll != blank
       assign active_count = active_count | plus: 1
     endif
@@ -52,9 +53,13 @@
           {%- assign slot_index = 0 -%}
           {%- for i in (1..6) -%}
             {%- liquid
-              assign coll = block_settings['songs_cat' | append: i | append: '_collection']
-              assign logo = block_settings['songs_cat' | append: i | append: '_logo']
-              assign label = block_settings['songs_cat' | append: i | append: '_label']
+              assign prefix = 'songs_cat' | append: i
+              assign k_coll = prefix | append: '_collection'
+              assign k_logo = prefix | append: '_logo'
+              assign k_label = prefix | append: '_label'
+              assign coll = block_settings[k_coll]
+              assign logo = block_settings[k_logo]
+              assign label = block_settings[k_label]
             -%}
             {%- if coll != blank -%}
               {%- assign slot_index = slot_index | plus: 1 -%}
@@ -94,9 +99,13 @@
         {%- assign slot_index = 0 -%}
         {%- for i in (1..6) -%}
           {%- liquid
-            assign coll = block_settings['songs_cat' | append: i | append: '_collection']
-            assign label = block_settings['songs_cat' | append: i | append: '_label']
-            assign scheme = block_settings['songs_cat' | append: i | append: '_scheme']
+            assign prefix = 'songs_cat' | append: i
+            assign k_coll = prefix | append: '_collection'
+            assign k_label = prefix | append: '_label'
+            assign k_scheme = prefix | append: '_scheme'
+            assign coll = block_settings[k_coll]
+            assign label = block_settings[k_label]
+            assign scheme = block_settings[k_scheme]
           -%}
           {%- if coll != blank -%}
             {%- assign slot_index = slot_index | plus: 1 -%}
