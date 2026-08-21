@@ -152,7 +152,7 @@
               {%- assign slot_index = slot_index | plus: 1 -%}
               {%- assign cat_label = label | default: coll.title -%}
               <div
-                class="megamenu__songs-logo media media--transparent{% unless slot_index == 1 %} hidden{% endunless %}"
+                class="megamenu__songs-logo{% unless slot_index == 1 %} hidden{% endunless %}"
                 data-logo-index="{{ slot_index }}"
                 megamenu="logo-item"
               >
