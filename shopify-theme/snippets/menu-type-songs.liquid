@@ -70,20 +70,13 @@
                 megamenu="logo-item"
               >
                 {%- if logo != blank -%}
-                  {%- assign logo_src = logo | image_url: width: 300 -%}
-                  {%- render 'image', src: logo_src, width: 300, height: 300, alt: cat_label -%}
+                  {%- assign logo_src = logo | image_url: width: 600 -%}
+                  {%- render 'image', src: logo_src, width: 600, height: 600, alt: cat_label -%}
                 {%- else -%}
                   <span class="megamenu__songs-logo-mark">
                     {%- render 'icon', icon: 'music-note-single' -%}
                   </span>
                 {%- endif -%}
-
-                <span class="megamenu__songs-logo-text">
-                  <b>{{ cat_label | escape }}</b>
-                  <small>
-                    {{- coll.products_count }} {% if coll.products_count == 1 %}song{% else %}songs{% endif -%}
-                  </small>
-                </span>
               </div><!-- /.megamenu__songs-logo -->
             {%- endif -%}
           {%- endfor -%}
@@ -123,7 +116,6 @@
                 <span>{{ cat_label | escape }}</span>
 
                 <span class="megamenu__link-meta">
-                  <small>{{ coll.products_count }}</small>
                   <i>{%- render 'icon', icon: 'chevron-right' -%}</i>
                 </span>
               </a>

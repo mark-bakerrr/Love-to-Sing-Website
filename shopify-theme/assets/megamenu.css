@@ -196,74 +196,80 @@
   padding-top: 3.2rem;
 }
 
+/* Clean rounded corners: the coloured left rail is a rectangle inside the
+   card's rounded overflow:hidden clip. To stop a thin red seam/arc appearing
+   at the top-left and bottom-left corners on hover (the rail colour catching
+   the clip edge with a sub-pixel gap against the card's --radius-l), clip the
+   host itself and round the rail's own left corners to match, so the rail
+   paint stops exactly on the arc rather than being sliced by it. No borders. */
+.megamenu--songs {
+  overflow: hidden;
+  border-radius: var(--radius-l);
+  /* Always tall enough for the logo + up to 6 categories, even when the active
+     collection is short (e.g. Celebration = 3 songs) and the JS-set
+     --megamenu-height would otherwise shrink the panel and clip the lower rail
+     labels. min-height wins over the JS height because the inline
+     --megamenu-height only feeds `height:` (see .megamenu rule above);
+     min-height clamps a shorter used height back up. */
+  min-height: 44rem;
+}
+
+.megamenu--songs .megamenu__inner--songs {
+  border: 0;
+  border-top-left-radius: var(--radius-l);
+  border-bottom-left-radius: var(--radius-l);
+}
+
 /* Category logo block — override the legacy bottom-pinned .megamenu__logo
    so it sits ABOVE the "Categories" label at the top of the rail. */
 .megamenu__logo--songs {
   margin-top: 0;
   max-width: none;
-  width: auto;
+  width: 100%;
   padding-top: 0;
-  margin-right: 1.6rem;
+  padding-right: 1.6rem;
   margin-bottom: 2rem;
 }
 
+/* Just the transparent logo image — no box, shadow, border or padding.
+   `.megamenu__songs-logo` IS the .media container (the `image` snippet renders
+   a bare <img> directly inside it), so size the box here and let the image
+   fill it. Sized to roughly fill the rail width above the "Categories" label. */
 .megamenu__songs-logo {
   display: flex;
   align-items: center;
-  gap: 1.2rem;
-  min-height: 7.2rem;
-  padding: 1.2rem 1.6rem;
-  border-radius: var(--radius-m);
-  background-color: var(--color-background-accent, var(--c-main-500, var(--c-red-500)));
-  color: var(--c-neutral-50, #fff);
-  box-shadow: var(--shadow-card);
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 17rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
 }
 
 .megamenu__songs-logo.hidden {
   display: none;
 }
 
-.megamenu__songs-logo .media,
+.megamenu__songs-logo img {
+  width: 100%;
+  height: auto;
+  max-height: 18rem;
+  object-fit: contain;
+}
+
 .megamenu__songs-logo-mark {
-  width: 4.4rem;
-  height: 4.4rem;
-  flex: 0 0 4.4rem;
-  border-radius: 50%;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.22);
-  color: var(--c-neutral-50, #fff);
-}
-
-.megamenu__songs-logo .media img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  aspect-ratio: 1 / 1;
+  color: var(--color-megamenu-left-text, inherit);
 }
 
 .megamenu__songs-logo-mark svg {
-  width: 2.4rem;
-  height: 2.4rem;
-}
-
-.megamenu__songs-logo-text {
-  min-width: 0;
-}
-
-.megamenu__songs-logo-text b {
-  display: block;
-  font-size: var(--fz-r);
-  font-weight: 900;
-  line-height: 1.1;
-}
-
-.megamenu__songs-logo-text small {
-  display: block;
-  font-size: var(--fz-t);
-  font-weight: 700;
-  opacity: 0.85;
+  width: 6.4rem;
+  height: 6.4rem;
 }
 
 /* "Categories" eyebrow label */
@@ -300,10 +306,16 @@
   color: var(--c-neutral-950);
 }
 
-/* Right side: icon-left song rows in a responsive multi-column grid. */
+/* Right side: icon-left song rows in a responsive multi-column grid.
+   Fill the full panel height so the actions row can be pinned to the very
+   bottom regardless of how many songs the active collection has. The
+   products box is position:absolute with top:0/bottom:0 via min-height:100%;
+   as a flex column the grid takes the top and the actions row is pushed down
+   by margin-top:auto. */
 .megamenu__products--songs {
   display: flex;
   flex-direction: column;
+  min-height: 100%;
 }
 
 .megamenu__songs-list {
@@ -311,7 +323,7 @@
   display: grid;
   grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
   gap: 0 2rem;
-  flex: 1;
+  align-content: start;
 }
 
 @media (max-width: 1180px) {
@@ -323,6 +335,7 @@
 /* Equal-height "View all" button + search pinned at the base of the panel. */
 .megamenu__songs-actions {
   align-items: stretch;
+  margin-top: auto;
 }
 
 .megamenu__songs-actions > .button {
