@@ -308,6 +308,9 @@
 
 .megamenu__songs-list {
   --grid-cols: 3;
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+  gap: 0 2rem;
   flex: 1;
 }
 
