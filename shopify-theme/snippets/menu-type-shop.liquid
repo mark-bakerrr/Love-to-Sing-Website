@@ -1,17 +1,28 @@
 {%- comment -%}
   Shop (ecommerce) menu type.
-  A single static panel (no category switching): a row of link COLUMNS built from
-  `block_settings.shop_menu` (a link_list / Shopify menu) plus an optional featured
-  product card from `block_settings.shop_feature_product`.
+  A single static panel (no category switching): a links AREA built from
+  `block_settings.shop_menu` (a link_list / Shopify menu) plus an optional,
+  compactly-sized featured product card from `block_settings.shop_feature_product`.
 
-  Layout (mirrors the approved wireframe — docs/plans/megamenu-wireframes/index.html,
-  the "TYPE 2 · SHOP" panel):
-    - For each TOP-LEVEL link in `shop_menu.links`:
-        * its title becomes a column heading, linked to `link.url`
-        * its children (`link.links`) render as the column's items
-        * a top-level link with NO children renders as a single standalone link
-    - The featured product (if `shop_feature_product` is set) is a tinted "album" card
-      on the right: cover image, title, price and a "Shop now →" button to product.url.
+  Two link layouts, chosen automatically from the menu shape:
+
+    - NESTED — if ANY top-level link has children, the whole menu renders as a
+      classic multi-column shop menu: each top-level link is a bold column
+      heading (→ link.url) with its child links listed beneath. A childless
+      top-level link in this mode becomes a single standalone column link.
+
+    - FLAT — if NO top-level link has children (the common case for `shop_menu`),
+      the links render as a 2-column grid of RICH ROWS. Each row shows the link
+      label (bold) plus a short muted descriptor pulled from the linked resource:
+        * collections → `link.object.description`
+        * pages       → `link.object.content | strip_html | truncatewords: 12`
+      The descriptor is omitted when the resource has none (or it's a URL-only
+      link). This mirrors the Discover "Explore" treatment and fills the panel.
+
+  The featured product (if `shop_feature_product` is set) is a compact tinted
+  "album" card sized to the Discover feature card's visual weight (~32rem track,
+  a 4/3 cover rather than a giant square): cover image, "FEATURED" eyebrow,
+  title, price and a "Shop now →" pill to product.url.
 
   Height / JS note:
     Shop has NO `megamenu="item"` / `megamenu="products-container"` / logo hooks, so
@@ -29,9 +40,21 @@
 {%- liquid
   assign shop_menu = block_settings.shop_menu
   assign feature = block_settings.shop_feature_product
-  assign has_columns = false
+
+  assign has_links = false
   if shop_menu != blank and shop_menu.links.size > 0
-    assign has_columns = true
+    assign has_links = true
+  endif
+
+  # Detect the menu shape: nested if ANY top-level link has children.
+  assign is_nested = false
+  if has_links
+    for parent in shop_menu.links
+      if parent.links.size > 0
+        assign is_nested = true
+        break
+      endif
+    endfor
   endif
 -%}
 
@@ -42,45 +65,82 @@
       megamenu="main-wrapper"
     >
       <div class="megamenu__shop-grid{% if feature != blank %} megamenu__shop-grid--has-feature{% endif %}">
-        {%- if has_columns -%}
-          {%- for parent in shop_menu.links -%}
-            <div class="megamenu__shop-col">
-              {%- if parent.links.size > 0 -%}
-                {%- comment -%} Heading + child links. {%- endcomment -%}
-                <a
-                  href="{{ parent.url }}"
-                  class="megamenu__shop-heading full-unstyled-link focus-inset"
-                >
-                  {{ parent.title | escape }}
-                </a>
-
-                <ul class="megamenu__shop-links list-unstyled">
-                  {%- for child in parent.links -%}
-                    <li class="megamenu__shop-item">
-                      <a
-                        href="{{ child.url }}"
-                        class="megamenu__shop-link full-unstyled-link focus-inset{% if child.active %} is-active{% endif %}"
-                      >
-                        <span class="megamenu__shop-link-label">{{ child.title | escape }}</span>
-                      </a>
-                    </li>
-                  {%- endfor -%}
-                </ul><!-- /.megamenu__shop-links -->
-              {%- else -%}
-                {%- comment -%} No children: render the top-level link as a standalone link. {%- endcomment -%}
-                <ul class="megamenu__shop-links list-unstyled">
-                  <li class="megamenu__shop-item">
+        {%- if has_links -%}
+          <div class="megamenu__shop-links-area{% if is_nested %} megamenu__shop-links-area--nested{% else %} megamenu__shop-links-area--flat{% endif %}">
+            {%- if is_nested -%}
+              {%- comment -%} NESTED — a column per top-level link. {%- endcomment -%}
+              {%- for parent in shop_menu.links -%}
+                <div class="megamenu__shop-col">
+                  {%- if parent.links.size > 0 -%}
                     <a
                       href="{{ parent.url }}"
-                      class="megamenu__shop-link megamenu__shop-link--standalone full-unstyled-link focus-inset{% if parent.active %} is-active{% endif %}"
+                      class="megamenu__shop-heading full-unstyled-link focus-inset"
                     >
-                      <span class="megamenu__shop-link-label">{{ parent.title | escape }}</span>
+                      {{ parent.title | escape }}
+                    </a>
+
+                    <ul class="megamenu__shop-links list-unstyled">
+                      {%- for child in parent.links -%}
+                        <li class="megamenu__shop-item">
+                          <a
+                            href="{{ child.url }}"
+                            class="megamenu__shop-link full-unstyled-link focus-inset{% if child.active %} is-active{% endif %}"
+                          >
+                            <span class="megamenu__shop-link-label">{{ child.title | escape }}</span>
+                          </a>
+                        </li>
+                      {%- endfor -%}
+                    </ul><!-- /.megamenu__shop-links -->
+                  {%- else -%}
+                    {%- comment -%} No children in a nested menu: standalone column link. {%- endcomment -%}
+                    <ul class="megamenu__shop-links list-unstyled">
+                      <li class="megamenu__shop-item">
+                        <a
+                          href="{{ parent.url }}"
+                          class="megamenu__shop-link megamenu__shop-link--standalone full-unstyled-link focus-inset{% if parent.active %} is-active{% endif %}"
+                        >
+                          <span class="megamenu__shop-link-label">{{ parent.title | escape }}</span>
+                        </a>
+                      </li>
+                    </ul><!-- /.megamenu__shop-links -->
+                  {%- endif -%}
+                </div><!-- /.megamenu__shop-col -->
+              {%- endfor -%}
+            {%- else -%}
+              {%- comment -%}
+                FLAT — a 2-column grid of rich rows (label + descriptor). The
+                descriptor comes from the linked resource: a collection's
+                `description`, or a page's `content` (stripped + truncated).
+                URL-only links (no object) and description-less resources show
+                just the label.
+              {%- endcomment -%}
+              <ul class="megamenu__shop-rich list-unstyled">
+                {%- for parent in shop_menu.links -%}
+                  {%- liquid
+                    assign shop_descriptor = ''
+                    if parent.object != blank
+                      if parent.object.description != blank
+                        assign shop_descriptor = parent.object.description | strip_html | truncatewords: 14
+                      elsif parent.object.content != blank
+                        assign shop_descriptor = parent.object.content | strip_html | truncatewords: 12
+                      endif
+                    endif
+                  -%}
+                  <li class="megamenu__shop-rich-item">
+                    <a
+                      href="{{ parent.url }}"
+                      class="megamenu__shop-rich-link full-unstyled-link focus-inset{% if parent.active %} is-active{% endif %}"
+                    >
+                      <b class="megamenu__shop-rich-label">{{ parent.title | escape }}</b>
+                      {%- if shop_descriptor != blank -%}
+                        <span class="megamenu__shop-rich-desc">{{ shop_descriptor | escape }}</span>
+                      {%- endif -%}
                     </a>
                   </li>
-                </ul><!-- /.megamenu__shop-links -->
-              {%- endif -%}
-            </div><!-- /.megamenu__shop-col -->
-          {%- endfor -%}
+                {%- endfor -%}
+              </ul><!-- /.megamenu__shop-rich -->
+            {%- endif -%}
+          </div><!-- /.megamenu__shop-links-area -->
         {%- endif -%}
 
         {%- if feature != blank -%}
@@ -102,7 +162,7 @@
                     capture feature_srcset
                       render 'srcset', image: feature_image
                     endcapture
-                    render 'image', src: feature_src, srcset: feature_srcset, sizes: '32rem', alt: feature.title, width: feature_image.width, height: feature_image.height, class: 'megamenu__shop-feature-img'
+                    render 'image', src: feature_src, srcset: feature_srcset, sizes: '30rem', alt: feature.title, width: feature_image.width, height: feature_image.height, class: 'megamenu__shop-feature-img'
                   -%}
                 </div>
               {%- else -%}

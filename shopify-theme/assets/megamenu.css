@@ -378,18 +378,37 @@
   border-radius: var(--radius-l);
 }
 
-/* Columns + feature grid. Link columns share the flexible space; the feature
-   card (when present) takes a fixed 32rem track on the right. */
+/* Panel grid: the links area takes the flexible space; the feature card (when
+   present) sits in a fixed ~32rem track on the right — the same visual weight
+   as the Discover feature card's `1fr 1fr 34rem`. */
 .megamenu__shop-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-400, 3.2rem);
   width: 100%;
   align-items: start;
 }
 
 .megamenu__shop-grid--has-feature {
-  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)) 32rem;
+  grid-template-columns: minmax(0, 1fr) 32rem;
+}
+
+/* ---------- Links area (two layouts) ---------- */
+
+/* NESTED: a responsive row of link columns sharing the flexible space. */
+.megamenu__shop-links-area--nested {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--space-400, 3.2rem);
+  align-items: start;
+}
+
+/* FLAT: a 2-column grid of rich rows (label + descriptor). */
+.megamenu__shop-links-area--flat {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem 1.6rem;
+  align-content: start;
 }
 
 .megamenu__shop-col {
@@ -447,7 +466,56 @@
   font-weight: 800;
 }
 
-/* Featured product card — tinted "album" treatment. */
+/* ---------- FLAT layout: rich rows (label + descriptor) ---------- */
+/* Mirrors the Discover "Explore" treatment: bold label, muted one/two-line
+   descriptor, rounded row with a subtle tinted hover. EXPLICIT colours so the
+   rows never inherit white from the header colour context when the floating
+   card desyncs the header's `.menu-open` class. */
+.megamenu__shop-rich-item {
+  min-width: 0;
+}
+
+.megamenu__shop-rich-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  height: 100%;
+  padding: 1rem 1.2rem;
+  border-radius: var(--radius-s);
+  color: var(--c-neutral-950);
+  transition: background var(--duration-default) ease-in-out;
+}
+
+.megamenu__shop-rich-link:hover,
+.megamenu__shop-rich-link.is-active {
+  background: var(--c-red-50, #fdefef);
+}
+
+.megamenu__shop-rich-label {
+  display: block;
+  font-size: var(--fz-s);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--c-neutral-950);
+  transition: color var(--duration-default) ease-in-out;
+}
+
+.megamenu__shop-rich-link:hover .megamenu__shop-rich-label,
+.megamenu__shop-rich-link.is-active .megamenu__shop-rich-label {
+  color: var(--c-main-700, var(--c-red-700));
+}
+
+.megamenu__shop-rich-desc {
+  display: block;
+  font-size: var(--fz-t);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-subdued, var(--c-neutral-600));
+}
+
+/* Featured product card — compact tinted "album" treatment, sized to the
+   Discover feature card's weight (a ~32rem track with a 4/3 cover, not a giant
+   square). */
 .megamenu__shop-feature {
   display: flex;
   flex-direction: column;
@@ -460,7 +528,8 @@
 
 .megamenu__shop-feature-cover {
   display: block;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
+  max-height: 20rem;
   border-radius: var(--radius-s);
   overflow: hidden;
   background: var(--color-media-background, var(--c-red-100));
@@ -534,11 +603,16 @@
   margin-top: 0.4rem;
 }
 
-/* Drop the fixed feature track first, then stack columns as the card narrows. */
+/* Drop the fixed feature track first (feature becomes a full-width banner row),
+   then let the link layouts reflow as the card narrows. */
 @media (max-width: 1180px) {
   .megamenu__shop-grid,
   .megamenu__shop-grid--has-feature {
-    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .megamenu__shop-links-area--flat {
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
   }
 
   .megamenu__shop-feature {
@@ -549,7 +623,8 @@
   }
 
   .megamenu__shop-feature-cover {
-    width: 12rem;
+    width: 16rem;
+    max-height: none;
     flex: none;
   }
 
