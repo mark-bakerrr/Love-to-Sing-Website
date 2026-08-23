@@ -80,14 +80,13 @@
                 {%- if top.links.size == 0 -%}{%- assign use_leaf = true -%}{%- endif -%}
                 {%- for child in top.links -%}
                   {%- liquid
+                    # Descriptor from the linked page's CONTENT (its body copy),
+                    # regardless of link type — as long as the item links to a
+                    # resource with content (a page). URL-only links have no
+                    # object, so they show label-only.
                     assign ex_descriptor = ''
-                    if child.type == 'page_link' and child.object != blank
-                      assign ex_page = child.object
-                      if ex_page.metafields.global.description_tag != blank
-                        assign ex_descriptor = ex_page.metafields.global.description_tag
-                      elsif ex_page.content != blank
-                        assign ex_descriptor = ex_page.content | strip_html | truncatewords: 12
-                      endif
+                    if child.object != blank and child.object.content != blank
+                      assign ex_descriptor = child.object.content | strip_html | truncatewords: 24
                     endif
                   -%}
                   <li class="megamenu__discover-item">
@@ -102,13 +101,8 @@
                 {%- if use_leaf -%}
                   {%- liquid
                     assign ex_descriptor = ''
-                    if top.type == 'page_link' and top.object != blank
-                      assign ex_page = top.object
-                      if ex_page.metafields.global.description_tag != blank
-                        assign ex_descriptor = ex_page.metafields.global.description_tag
-                      elsif ex_page.content != blank
-                        assign ex_descriptor = ex_page.content | strip_html | truncatewords: 12
-                      endif
+                    if top.object != blank and top.object.content != blank
+                      assign ex_descriptor = top.object.content | strip_html | truncatewords: 24
                     endif
                   -%}
                   <li class="megamenu__discover-item">
