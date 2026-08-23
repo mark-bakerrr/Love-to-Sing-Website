@@ -1,12 +1,134 @@
 {%- comment -%}
-  Countdown (multiple countdowns) menu type — PLACEHOLDER.
-  TODO Task 8: build the countdown panel from block_settings.cd1_*..cd4_* fields.
+  Countdown (multiple countdowns) menu type.
+  A single static panel (no category switching) mirroring the approved wireframe
+  (docs/plans/megamenu-wireframes/index.html — the "TYPE 4 · COUNTDOWN" panel):
+  a responsive grid of bold COLOURED cards, each showing a "LIVE" badge, a big
+  day-count number + unit, the countdown name and a sub-line (formatted date).
+
+  Four slots (1..4) read from block_settings:
+    - cdN_title  : text          (the countdown name; e.g. "Christmas")
+    - cdN_date   : text          ("YYYY-MM-DD" target date)
+    - cdN_link   : url           (optional; the whole card links here)
+    - cdN_scheme : color_scheme  (per-card colour — applied as `color-{{ scheme }}`)
+  A slot is ACTIVE when cdN_title OR cdN_date is set.
+
+  Day count (computed in Liquid, no JS):
+    target = cdN_date | date: '%s'   → unix seconds of the target date
+    now    = 'now'    | date: '%s'   → unix seconds right now
+    days   = (target - now) / 86400  → whole days remaining
+    A blank/past date yields days <= 0; we clamp to 0 so it never errors.
+
+  Per-card colour:
+    Each card carries `color-{{ scheme }}`, so the scheme's CSS custom
+    properties (--color-background-accent, --color-red, --color-headings …)
+    resolve to THAT scheme's palette on the card. The CSS builds the bold card
+    background as a gradient from the scheme's accent colour down to a dark
+    overlay, with explicit white text — so every card reads as a distinct colour
+    and nothing depends on the header's `.menu-open` state.
+
+  Height / JS note (same as Shop/Discover):
+    Countdown has NO `megamenu="item"` / products / logo hooks, so
+    header-megamenu.js measures 0 for every source and sets
+    `--megamenu-height: 0px` on <header-megamenu>. The base rule
+    `.megamenu { height: var(--megamenu-height, auto) }` would then collapse the
+    card. The appended CSS forces `.megamenu--countdown { height: auto;
+    min-height: 32rem }` — source order beats the base rule — so the panel is
+    content-driven and never collapses. `megamenu="main-wrapper"` is kept only so
+    the JS padding read is harmless (it never finds items to switch).
+
   Accepts: block_settings, link
 {%- endcomment -%}
+
+{%- liquid
+  # Count active slots first so we can render an empty state when none are set.
+  assign active_count = 0
+  for i in (1..4)
+    assign k_title = 'cd' | append: i | append: '_title'
+    assign k_date = 'cd' | append: i | append: '_date'
+    assign cd_title = block_settings[k_title]
+    assign cd_date = block_settings[k_date]
+    if cd_title != blank or cd_date != blank
+      assign active_count = active_count | plus: 1
+    endif
+  endfor
+-%}
+
 <div class="header__megamenu">
-  <header-megamenu class="megamenu">
-    <div class="megamenu__inner" megamenu="main-wrapper">
-      <p class="megamenu__title">{{ link.title | escape }}</p>
+  <header-megamenu class="megamenu megamenu--countdown">
+    <div
+      class="megamenu__inner megamenu__inner--countdown"
+      megamenu="main-wrapper"
+    >
+      {%- if active_count > 0 -%}
+        <div class="megamenu__cd-cards">
+          {%- for i in (1..4) -%}
+            {%- liquid
+              assign k_title = 'cd' | append: i | append: '_title'
+              assign k_date = 'cd' | append: i | append: '_date'
+              assign k_link = 'cd' | append: i | append: '_link'
+              assign k_scheme = 'cd' | append: i | append: '_scheme'
+              assign cd_title = block_settings[k_title]
+              assign cd_date = block_settings[k_date]
+              assign cd_link = block_settings[k_link]
+              assign cd_scheme = block_settings[k_scheme]
+            -%}
+            {%- if cd_title != blank or cd_date != blank -%}
+              {%- liquid
+                # Day-count in Liquid. A blank date parses to 0 (epoch) → large
+                # negative days → clamped to 0 below, so it degrades gracefully.
+                assign target = cd_date | date: '%s' | plus: 0
+                assign now = 'now' | date: '%s' | plus: 0
+                assign days = target | minus: now | divided_by: 86400
+                if days < 0
+                  assign days = 0
+                endif
+
+                # "sleeps" for a Christmas countdown, "days" otherwise.
+                assign unit = 'days'
+                assign title_down = cd_title | downcase
+                if title_down contains 'christmas'
+                  assign unit = 'sleeps'
+                endif
+
+                # Sub-line: the formatted target date (only when a real date is set).
+                assign sub_line = ''
+                if cd_date != blank
+                  assign sub_line = cd_date | date: '%B %-d'
+                endif
+
+                # The whole card is a link when cd_link is set; otherwise a
+                # non-interactive div (rendered via the `card_tag` we pick here).
+                assign card_tag = 'div'
+                if cd_link != blank
+                  assign card_tag = 'a'
+                endif
+              -%}
+              <{{ card_tag }}
+                class="megamenu__cd-card color-{{ cd_scheme }}"
+                {%- if cd_link != blank %} href="{{ cd_link }}"{% endif -%}
+              >
+                <span class="megamenu__cd-snow" aria-hidden="true"></span>
+                <span class="megamenu__cd-live">LIVE</span>
+
+                <span class="megamenu__cd-num">
+                  {{- days -}}
+                  <small class="megamenu__cd-unit">{{ unit }}</small>
+                </span>
+
+                {%- if cd_title != blank -%}
+                  <span class="megamenu__cd-name">{{ cd_title | escape }}</span>
+                {%- endif -%}
+
+                {%- if sub_line != blank -%}
+                  <span class="megamenu__cd-sub">{{ sub_line | escape }}</span>
+                {%- endif -%}
+              </{{ card_tag }}><!-- /.megamenu__cd-card -->
+            {%- endif -%}
+          {%- endfor -%}
+        </div><!-- /.megamenu__cd-cards -->
+      {%- else -%}
+        <p class="megamenu__cd-empty">Add a countdown in the block settings.</p>
+      {%- endif -%}
     </div><!-- /.megamenu__inner -->
-  </header-megamenu><!-- /.header__megamenu -->
+  </header-megamenu><!-- /.megamenu -->
 </div><!-- /.header__megamenu -->

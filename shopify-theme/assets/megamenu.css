@@ -890,3 +890,162 @@
     grid-column: 1 / -1;
   }
 }
+
+/* ------------------------------------------------------------ *\
+  Countdown menu type (menu-type-countdown.liquid)
+  A single static panel: a responsive grid of bold COLOURED cards built from
+  the cd1_*..cd4_* slots. Each card shows a "LIVE" badge, a big Liquid-computed
+  day-count + unit ("sleeps"/"days"), the countdown name and a formatted date.
+
+  Colour: every card carries `color-{{ cdN_scheme }}`, so the scheme's CSS
+  custom properties resolve on the card. We build the bold background as a
+  gradient from the scheme's accent colour (--color-background-accent, falling
+  back to --color-red / brand red) down to a dark overlay, so each card reads as
+  a distinct colour with white text.
+
+  Height: like Shop/Discover, Countdown has no `megamenu="item"` / products /
+  logo hooks, so header-megamenu.js measures 0 and sets `--megamenu-height:0px`
+  on <header-megamenu>. Because this block is appended AFTER the base `.megamenu`
+  rule, equal-specificity source order wins and the panel is content-driven.
+\* ------------------------------------------------------------ */
+.megamenu--countdown {
+  overflow: hidden;
+  border-radius: var(--radius-l);
+  height: auto;
+  min-height: 32rem;
+}
+
+/* Full-bleed padded container — one block, spans the whole card. */
+.megamenu__inner--countdown {
+  width: 100%;
+  flex-direction: column;
+  padding: 4rem;
+  background: var(--color-background-secondary);
+  border-radius: var(--radius-l);
+}
+
+/* 2-up grid of countdown cards (1-up when the card narrows). */
+.megamenu__cd-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-200, 1.6rem);
+  width: 100%;
+}
+
+/* A single bold coloured card. Explicit white text so nothing depends on the
+   header's `.menu-open` state. The gradient is derived from the card's scheme:
+   the accent colour up top fading into a translucent-black base for depth. */
+.megamenu__cd-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 15rem;
+  padding: var(--space-250, 2rem);
+  border-radius: var(--radius-l);
+  overflow: hidden;
+  color: #fff;
+  text-decoration: none;
+  background-color: var(--color-background-accent, var(--color-red, var(--c-red-500, #ec5450)));
+  background-image: linear-gradient(
+    160deg,
+    var(--color-background-accent, var(--color-red, var(--c-red-500, #ec5450))) 0%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  transition: transform var(--duration-normal, 0.25s) var(--ease-smooth, ease);
+}
+
+a.megamenu__cd-card:hover {
+  transform: translateY(-2px);
+}
+
+a.megamenu__cd-card:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Subtle snow speckle (mostly meaningful on the Christmas card, harmless else). */
+.megamenu__cd-snow {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  pointer-events: none;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+    radial-gradient(2px 2px at 70% 22%, #fff, transparent),
+    radial-gradient(2px 2px at 42% 68%, #fff, transparent),
+    radial-gradient(2px 2px at 85% 55%, #fff, transparent);
+}
+
+/* Small "LIVE" pill, top-right. */
+.megamenu__cd-live {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.megamenu__cd-live::before {
+  content: "";
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* Big day-count number + unit. */
+.megamenu__cd-num {
+  position: relative;
+  font-size: 5rem;
+  font-weight: 900;
+  line-height: 0.85;
+  color: #fff;
+}
+
+.megamenu__cd-unit {
+  margin-left: 0.6rem;
+  font-size: var(--fz-s, 1.4rem);
+  font-weight: 800;
+  opacity: 0.85;
+}
+
+.megamenu__cd-name {
+  position: relative;
+  margin-top: 0.4rem;
+  font-size: var(--fz-m, 1.8rem);
+  font-weight: 900;
+  color: #fff;
+}
+
+.megamenu__cd-sub {
+  position: relative;
+  font-size: var(--fz-t, 1.2rem);
+  font-weight: 700;
+  opacity: 0.85;
+  color: #fff;
+}
+
+/* Muted empty state when no slots are configured. */
+.megamenu__cd-empty {
+  margin: 0;
+  padding: 2rem 0;
+  color: var(--color-subdued, var(--c-neutral-600));
+  font-size: var(--fz-s, 1.4rem);
+  font-weight: 600;
+}
+
+/* Reflow to a single column as the floating card narrows. */
+@media (max-width: 1180px) {
+  .megamenu__cd-cards {
+    grid-template-columns: 1fr;
+  }
+}
