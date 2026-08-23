@@ -65,26 +65,48 @@
             <p class="megamenu__discover-eyebrow">Explore</p>
 
             <ul class="megamenu__discover-list list-unstyled">
-              {%- for exlink in discover_links.links -%}
-                {%- liquid
-                  assign icon_i = forloop.index0 | modulo: explore_icons.size
-                  assign tint_i = forloop.index0 | modulo: explore_tints.size
-                  assign ex_icon = explore_icons[icon_i]
-                  assign ex_tint = explore_tints[tint_i]
-                -%}
-                <li class="megamenu__discover-item">
-                  <a
-                    href="{{ exlink.url }}"
-                    class="megamenu__discover-link full-unstyled-link focus-inset{% if exlink.active %} is-active{% endif %}"
-                  >
-                    <span class="megamenu__discover-ic megamenu__discover-ic--{{ ex_tint }}">
-                      {%- render 'icon', icon: ex_icon -%}
-                    </span>
-                    <span class="megamenu__discover-link-text">
-                      <b class="megamenu__discover-link-label">{{ exlink.title | escape }}</b>
-                    </span>
-                  </a>
-                </li>
+              {%- comment -%}
+                Flatten one level: if a top-level menu item has children (e.g. the
+                merchant nested the links under a "Discover" parent), render the
+                children; otherwise render the top-level link itself. `ex_i` is a
+                running index across the flattened list so the icon/tint palette
+                cycles cleanly. `exlinks` is the child list for a parent, or a
+                single-item list wrapping the leaf link.
+              {%- endcomment -%}
+              {%- assign ex_i = 0 -%}
+              {%- for top in discover_links.links -%}
+                {%- assign use_leaf = false -%}
+                {%- if top.links.size == 0 -%}{%- assign use_leaf = true -%}{%- endif -%}
+                {%- for child in top.links -%}
+                  {%- liquid
+                    assign icon_i = ex_i | modulo: explore_icons.size
+                    assign tint_i = ex_i | modulo: explore_tints.size
+                    assign ex_icon = explore_icons[icon_i]
+                    assign ex_tint = explore_tints[tint_i]
+                    assign ex_i = ex_i | plus: 1
+                  -%}
+                  <li class="megamenu__discover-item">
+                    <a href="{{ child.url }}" class="megamenu__discover-link full-unstyled-link focus-inset{% if child.active %} is-active{% endif %}">
+                      <span class="megamenu__discover-ic megamenu__discover-ic--{{ ex_tint }}">{%- render 'icon', icon: ex_icon -%}</span>
+                      <span class="megamenu__discover-link-text"><b class="megamenu__discover-link-label">{{ child.title | escape }}</b></span>
+                    </a>
+                  </li>
+                {%- endfor -%}
+                {%- if use_leaf -%}
+                  {%- liquid
+                    assign icon_i = ex_i | modulo: explore_icons.size
+                    assign tint_i = ex_i | modulo: explore_tints.size
+                    assign ex_icon = explore_icons[icon_i]
+                    assign ex_tint = explore_tints[tint_i]
+                    assign ex_i = ex_i | plus: 1
+                  -%}
+                  <li class="megamenu__discover-item">
+                    <a href="{{ top.url }}" class="megamenu__discover-link full-unstyled-link focus-inset{% if top.active %} is-active{% endif %}">
+                      <span class="megamenu__discover-ic megamenu__discover-ic--{{ ex_tint }}">{%- render 'icon', icon: ex_icon -%}</span>
+                      <span class="megamenu__discover-link-text"><b class="megamenu__discover-link-label">{{ top.title | escape }}</b></span>
+                    </a>
+                  </li>
+                {%- endif -%}
               {%- endfor -%}
             </ul><!-- /.megamenu__discover-list -->
           </div><!-- /.megamenu__discover-explore -->
