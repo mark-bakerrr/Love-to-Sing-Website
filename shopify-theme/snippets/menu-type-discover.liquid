@@ -36,6 +36,10 @@
   assign feature_page = block_settings.discover_feature_page
   assign feature_image = block_settings.discover_feature_image
 
+  assign explore_heading = block_settings.discover_explore_heading | default: 'Explore'
+  assign new_heading = block_settings.discover_new_heading | default: 'New this week'
+  assign new_cta_text = block_settings.discover_new_cta_text | default: 'Read the latest'
+
   assign has_links = false
   if discover_links != blank and discover_links.links.size > 0
     assign has_links = true
@@ -45,11 +49,6 @@
   if discover_blog != blank and discover_blog.articles.size > 0
     assign has_blog = true
   endif
-
-  # Small palette of icon + tile-gradient pairs, cycled by link index so the
-  # Explore column reads cleanly regardless of how many links are configured.
-  assign explore_icons = 'music-note-single,send,download,star,calendar,heart-with-note' | split: ','
-  assign explore_tints = 'a,b,c,d,e,f' | split: ','
 -%}
 
 <div class="header__megamenu">
@@ -62,48 +61,62 @@
         {%- comment -%} LEFT — Explore links. {%- endcomment -%}
         {%- if has_links -%}
           <div class="megamenu__discover-col megamenu__discover-explore">
-            <p class="megamenu__discover-eyebrow">Explore</p>
+            <p class="megamenu__discover-eyebrow">{{ explore_heading | escape }}</p>
 
             <ul class="megamenu__discover-list list-unstyled">
               {%- comment -%}
                 Flatten one level: if a top-level menu item has children (e.g. the
                 merchant nested the links under a "Discover" parent), render the
-                children; otherwise render the top-level link itself. `ex_i` is a
-                running index across the flattened list so the icon/tint palette
-                cycles cleanly. `exlinks` is the child list for a parent, or a
-                single-item list wrapping the leaf link.
+                children; otherwise render the top-level link itself.
+
+                Each item is a bold label with a short muted descriptor beneath.
+                The descriptor is sourced from the linked resource when it's a
+                page: its SEO description meta (description_tag) if present, else
+                its content stripped + truncated. Non-page links (or pages with no
+                description) show just the label.
               {%- endcomment -%}
-              {%- assign ex_i = 0 -%}
               {%- for top in discover_links.links -%}
                 {%- assign use_leaf = false -%}
                 {%- if top.links.size == 0 -%}{%- assign use_leaf = true -%}{%- endif -%}
                 {%- for child in top.links -%}
                   {%- liquid
-                    assign icon_i = ex_i | modulo: explore_icons.size
-                    assign tint_i = ex_i | modulo: explore_tints.size
-                    assign ex_icon = explore_icons[icon_i]
-                    assign ex_tint = explore_tints[tint_i]
-                    assign ex_i = ex_i | plus: 1
+                    assign ex_descriptor = ''
+                    if child.type == 'page_link' and child.object != blank
+                      assign ex_page = child.object
+                      if ex_page.metafields.global.description_tag != blank
+                        assign ex_descriptor = ex_page.metafields.global.description_tag
+                      elsif ex_page.content != blank
+                        assign ex_descriptor = ex_page.content | strip_html | truncatewords: 12
+                      endif
+                    endif
                   -%}
                   <li class="megamenu__discover-item">
                     <a href="{{ child.url }}" class="megamenu__discover-link full-unstyled-link focus-inset{% if child.active %} is-active{% endif %}">
-                      <span class="megamenu__discover-ic megamenu__discover-ic--{{ ex_tint }}">{%- render 'icon', icon: ex_icon -%}</span>
-                      <span class="megamenu__discover-link-text"><b class="megamenu__discover-link-label">{{ child.title | escape }}</b></span>
+                      <b class="megamenu__discover-link-label">{{ child.title | escape }}</b>
+                      {%- if ex_descriptor != blank -%}
+                        <span class="megamenu__discover-link-desc">{{ ex_descriptor | escape }}</span>
+                      {%- endif -%}
                     </a>
                   </li>
                 {%- endfor -%}
                 {%- if use_leaf -%}
                   {%- liquid
-                    assign icon_i = ex_i | modulo: explore_icons.size
-                    assign tint_i = ex_i | modulo: explore_tints.size
-                    assign ex_icon = explore_icons[icon_i]
-                    assign ex_tint = explore_tints[tint_i]
-                    assign ex_i = ex_i | plus: 1
+                    assign ex_descriptor = ''
+                    if top.type == 'page_link' and top.object != blank
+                      assign ex_page = top.object
+                      if ex_page.metafields.global.description_tag != blank
+                        assign ex_descriptor = ex_page.metafields.global.description_tag
+                      elsif ex_page.content != blank
+                        assign ex_descriptor = ex_page.content | strip_html | truncatewords: 12
+                      endif
+                    endif
                   -%}
                   <li class="megamenu__discover-item">
                     <a href="{{ top.url }}" class="megamenu__discover-link full-unstyled-link focus-inset{% if top.active %} is-active{% endif %}">
-                      <span class="megamenu__discover-ic megamenu__discover-ic--{{ ex_tint }}">{%- render 'icon', icon: ex_icon -%}</span>
-                      <span class="megamenu__discover-link-text"><b class="megamenu__discover-link-label">{{ top.title | escape }}</b></span>
+                      <b class="megamenu__discover-link-label">{{ top.title | escape }}</b>
+                      {%- if ex_descriptor != blank -%}
+                        <span class="megamenu__discover-link-desc">{{ ex_descriptor | escape }}</span>
+                      {%- endif -%}
                     </a>
                   </li>
                 {%- endif -%}
@@ -115,7 +128,7 @@
         {%- comment -%} MIDDLE — New this week (recent blog articles). {%- endcomment -%}
         {%- if has_blog -%}
           <div class="megamenu__discover-col megamenu__discover-news">
-            <p class="megamenu__discover-eyebrow">New this week</p>
+            <p class="megamenu__discover-eyebrow">{{ new_heading | escape }}</p>
 
             <div class="megamenu__discover-news-list">
               {%- for article in discover_blog.articles limit: 3 -%}
@@ -154,14 +167,13 @@
             </div><!-- /.megamenu__discover-news-list -->
 
             {%- if discover_blog.url != blank -%}
-              {%- render 'button',
-                type: 'link',
-                style: 'secondary',
-                icon_position: 'right',
-                value: 'See what’s new',
-                href: discover_blog.url,
-                class: 'megamenu__discover-news-cta'
-              -%}
+              <a
+                href="{{ discover_blog.url }}"
+                class="megamenu__discover-news-cta full-unstyled-link focus-inset"
+              >
+                <span>{{ new_cta_text | escape }}</span>
+                <i>{%- render 'icon', icon: 'chevron-right' -%}</i>
+              </a>
             {%- endif -%}
           </div><!-- /.megamenu__discover-news -->
         {%- endif -%}
