@@ -101,8 +101,14 @@
   color: var(--c-neutral-950);
 }
 
+/* Keep the centre logo visible and IN FRONT of the mega panel when a menu is open. */
 .header.menu-open .header__logo {
-  opacity: 0;
+  opacity: 1;
+  z-index: calc(var(--z-modals) + 1);
+}
+
+.header__logo {
+  z-index: calc(var(--z-modals) + 1);
 }
 
 .header__inner {
