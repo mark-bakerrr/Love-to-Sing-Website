@@ -132,7 +132,7 @@
   <div class="container container--fullwidth">
     <div class="header__inner">
       {%- if linklists[section.settings.menu].links.size > 0 -%}
-        {%- render 'navigation-mobile', menu: linklists[section.settings.menu_mobile] -%}
+        {%- render 'navigation-mobile', menu: linklists[section.settings.menu_mobile], menu_item_blocks: menu_item_blocks -%}
 
         {%- render 'navigation-desktop', menu: linklists[section.settings.menu], megamenu_blocks: menu_blocks, menu_item_blocks: menu_item_blocks -%}
       {%- endif -%}
