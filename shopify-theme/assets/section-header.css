@@ -834,7 +834,7 @@
 .search-overlay__top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 1.6rem;
   width: 100%;
   max-width: 96rem;
@@ -843,9 +843,7 @@
 }
 
 .search-overlay__logo {
-  display: inline-flex;
-  align-items: center;
-  line-height: 0;
+  display: none; /* hidden per design — the centred header logo already shows */
 }
 
 .search-overlay__logo img {
