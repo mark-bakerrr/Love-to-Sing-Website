@@ -96,6 +96,26 @@
   background: linear-gradient(180deg, var(--c-main-500) 0%, var(--c-main-600) 100%);
 }
 
+/* On solid-header templates (product/collection pages etc.) the floating pill's
+   transparent top/side margins reveal the white page behind the fixed header
+   ("white space behind menu"). Those pages don't have a full-bleed hero to fill
+   the gap, so DOCK the header full-width there. Hero/transparent pages (which
+   only gain `.is-solid` on scroll, not `.header--solid`) keep the floating pill. */
+.header--floating.header--solid {
+  width: 100%;
+  margin-top: 0;
+  margin-inline: 0;
+  border-radius: 0;
+}
+
+.header--floating.header--solid:before {
+  border-radius: 0;
+}
+
+.header--floating.header--solid .header__megamenu {
+  top: 100%;
+}
+
 .header.menu-open {
   background: #fff;
   color: var(--c-neutral-950);
