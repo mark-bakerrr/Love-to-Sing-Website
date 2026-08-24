@@ -1351,14 +1351,29 @@
 
 /* Reflow: drop the fixed feature track and stack columns as the card narrows. */
 @media (max-width: 1180px) {
-  .megamenu__discover-grid,
+  /* Explicit tracks — NOT auto-fit. The feature card spans 1 / -1 (full width)
+     on its own row; with auto-fit those extra tracks stay open in the first row
+     too, squashing Explore + News into a sliver with dead space on the right.
+     Two equal columns keep Explore | News filling the width; feature sits full
+     width below. --no-blog (Explore + feature only) collapses to one column. */
+  .megamenu__discover-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .megamenu__discover-grid--no-blog {
-    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .megamenu__discover-feature {
     min-height: 24rem;
     grid-column: 1 / -1;
+  }
+}
+
+/* ≤820px: Explore + News stack so titles aren't cramped near the burger break. */
+@media (max-width: 820px) {
+  .megamenu__discover-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1590,8 +1605,10 @@ a.megamenu__cd-cta:hover .megamenu__cd-cta-chevron {
   font-weight: 600;
 }
 
-/* Reflow to a single column as the floating card narrows. */
-@media (max-width: 1180px) {
+/* Keep the two-up grid through the tablet band (990–1180) — a single column
+   there stacks 3–4 full-width cards into a very tall panel. Only collapse to
+   one column once the card is genuinely narrow. */
+@media (max-width: 750px) {
   .megamenu__cd-cards {
     grid-template-columns: 1fr;
   }
