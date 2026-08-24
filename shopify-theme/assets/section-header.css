@@ -792,3 +792,285 @@
     transform: none;
   }
 }
+
+/* ==========================================================================
+   FULL-SCREEN SEARCH OVERLAY  (snippets/search-overlay.liquid + search-overlay.js)
+   Frosted full-screen surface wrapping the theme's <predictive-search> engine.
+   Local fallbacks are declared for tokens that aren't defined globally
+   (--ease-spring/--ease-smooth/--duration-fast/--shadow-card).
+   ========================================================================== */
+.search-overlay {
+  --so-ease-spring: cubic-bezier(0.35, 1.55, 0.65, 1);
+  --so-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --so-duration: 240ms;
+  --so-shadow-card: var(--shadow-card, 0 6px 20px rgba(20, 20, 20, 0.1));
+
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modals, 800);
+
+  display: flex;
+  flex-direction: column;
+
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--so-duration) var(--so-ease-smooth),
+    visibility var(--so-duration) var(--so-ease-smooth);
+}
+
+.search-overlay[hidden] {
+  display: none;
+}
+
+.search-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.search-overlay__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6rem;
+  width: 100%;
+  max-width: 96rem;
+  margin: 0 auto;
+  padding: var(--space-300, 2.4rem) var(--space-400, 3.2rem);
+}
+
+.search-overlay__logo {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.search-overlay__logo img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-height: 5.6rem;
+  max-width: 22rem;
+}
+
+.search-overlay__logo-text {
+  font-size: var(--fz-l, 2rem);
+  font-weight: 900;
+  color: var(--c-red-600, #912422);
+}
+
+.search-overlay__close {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  border: 0;
+  background: var(--c-neutral-100, #f4f4f4);
+  color: var(--color-foreground, #141414);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex: none;
+  transition: transform var(--so-duration) var(--so-ease-spring),
+    background var(--so-duration) var(--so-ease-smooth);
+}
+
+.search-overlay__close:hover {
+  background: var(--c-red-100, #fcdcdb);
+  transform: rotate(90deg);
+}
+
+.search-overlay__close svg {
+  width: 2.2rem;
+  height: 2.2rem;
+}
+
+.search-overlay__body {
+  flex: 1;
+  width: 100%;
+  max-width: 96rem;
+  margin: 0 auto;
+  padding: 2rem var(--space-400, 3.2rem) var(--space-500, 4rem);
+  overflow-y: auto;
+}
+
+/* The <predictive-search> disclosure is required by the JS element, but the
+   overlay itself is the disclosure surface — so keep the details permanently
+   open and flatten it visually. */
+.search-overlay__disclosure {
+  display: block;
+}
+
+.search-overlay__summary {
+  display: block;
+}
+
+.search-overlay__field-wrap {
+  position: relative;
+}
+
+/* Big input with an animated red underline. */
+.search-overlay__form {
+  display: block;
+}
+
+.search-overlay__form .field {
+  position: relative;
+  margin: 0;
+}
+
+.search-overlay__form .field__input,
+.search-overlay__form input[type='search'] {
+  width: 100%;
+  border: 0;
+  border-bottom: 3px solid var(--c-neutral-200, #e8e8e8);
+  border-radius: 0;
+  outline: 0;
+  background: none;
+  padding: 1.2rem 0.4rem;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  color: var(--color-foreground, #141414);
+  transition: border-color var(--so-duration) var(--so-ease-smooth);
+}
+
+.search-overlay__form .field__input::placeholder,
+.search-overlay__form input[type='search']::placeholder {
+  color: var(--c-neutral-300, #b0b0b0);
+  font-weight: 700;
+}
+
+/* Animated red underline that grows in on focus. */
+.search-overlay__form .field::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 0;
+  background: var(--c-red-500, #b91f1c);
+  transition: width var(--so-duration) var(--so-ease-smooth);
+}
+
+.search-overlay__form .field:focus-within::after {
+  width: 100%;
+}
+
+.search-overlay__results {
+  display: block;
+  margin-top: var(--space-250, 2rem);
+}
+
+/* Chips row. */
+.search-overlay__chips {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin: var(--space-300, 2.4rem) 0 var(--space-250, 2rem);
+}
+
+.search-overlay__chip {
+  border: 0;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: var(--fz-s, 1.4rem);
+  padding: 0.8rem 1.6rem;
+  border-radius: 999px;
+  background: var(--c-neutral-100, #f4f4f4);
+  color: var(--color-foreground, #141414);
+  cursor: pointer;
+  transition: background var(--so-duration) var(--so-ease-smooth),
+    color var(--so-duration) var(--so-ease-smooth);
+}
+
+.search-overlay__chip:hover {
+  background: var(--c-neutral-200, #e8e8e8);
+}
+
+.search-overlay__chip.is-active {
+  background: var(--c-red-500, #b91f1c);
+  color: #fff;
+}
+
+/* Popular searches. */
+.search-overlay__sec {
+  margin-top: var(--space-300, 2.4rem);
+}
+
+.search-overlay__sec-title {
+  margin: 0 0 var(--space-150, 1.2rem);
+  color: var(--color-subdued, #6b6b6b);
+}
+
+.search-overlay__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.search-overlay__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: var(--so-shadow-card);
+  text-decoration: none;
+  color: var(--color-foreground, #141414);
+  font-weight: 700;
+  font-size: var(--fz-s, 1.4rem);
+  transition: transform var(--so-duration) var(--so-ease-spring);
+}
+
+.search-overlay__pill:hover {
+  transform: translateY(-2px);
+}
+
+/* Entrance stagger: each [style="--i:N"] child rises + fades in. */
+.search-overlay__top > [style*='--i'],
+.search-overlay__body > [style*='--i'] {
+  opacity: 0;
+  transform: translateY(1.2rem);
+}
+
+.search-overlay.is-open .search-overlay__top > [style*='--i'],
+.search-overlay.is-open .search-overlay__body > [style*='--i'] {
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--so-duration) var(--so-ease-smooth),
+    transform var(--so-duration) var(--so-ease-spring);
+  transition-delay: calc(var(--i, 0) * 45ms + 60ms);
+}
+
+@media screen and (max-width: 749px) {
+  .search-overlay__top {
+    padding: var(--space-250, 2rem) var(--space-250, 2rem);
+  }
+
+  .search-overlay__body {
+    padding: 1.6rem var(--space-250, 2rem) var(--space-400, 3.2rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-overlay,
+  .search-overlay.is-open .search-overlay__top > [style*='--i'],
+  .search-overlay.is-open .search-overlay__body > [style*='--i'],
+  .search-overlay__form .field::after,
+  .search-overlay__close,
+  .search-overlay__pill {
+    transition: opacity var(--so-duration) linear,
+      visibility var(--so-duration) linear;
+    transform: none;
+  }
+
+  .search-overlay__top > [style*='--i'],
+  .search-overlay__body > [style*='--i'] {
+    opacity: 1;
+    transform: none;
+  }
+}

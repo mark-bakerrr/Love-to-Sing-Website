@@ -187,58 +187,32 @@
       <nav class="header__utils">
         <ul class="header__utils-items list-unstyled">
           <li class="header__utils-item">
-            {%- capture search_link_html -%}
+            {%- comment -%}
+              Search icon opens the full-screen search overlay (rendered near the
+              end of this section). The overlay wraps the SAME <predictive-search>
+              engine, so live results still work. noscript falls back to /search.
+            {%- endcomment -%}
+            <noscript>
               <a
                 href="{{- routes.search_url -}}"
                 class="header__utils-link full-unstyled-link focus-inset"
                 title="{{- 'accessibility.search' | t -}}"
-                data-header="mobile-search-open"
               >
                 {%- render 'icon', icon: 'search' -%}
               </a>
-            {%- endcapture -%}
+            </noscript>
 
-            {%- if settings.enable_predictive_search -%}
-              <noscript>
-                {{- search_link_html -}}
-              </noscript>
-
-              <span class="large-up-hide">
-                {{- search_link_html }}
-              </span>
-
-              <predictive-search class="no-js-hidden medium-hide small-hide">
-                <details class="disclosure-has-popup header__search-wrapper motion-reduce">
-                  <summary class="header__utils-link">
-                    {%- render 'icon', icon: 'search' -%}
-                  </summary>
-
-                  <div class="header__search motion-reduce">
-                    {%-
-                      liquid
-                      capture search_input_attr
-                        echo 'role="combobox" '
-                        echo 'aria-expanded="false" '
-                        echo 'aria-owns="predictive-search-results-list" '
-                        echo 'aria-controls="predictive-search-results-list" '
-                        echo 'aria-haspopup="listbox" '
-                        echo 'aria-autocomplete="list" '
-                        echo 'autocorrect="off" '
-                        echo 'autocomplete="off" '
-                        echo 'autocapitalize="off" '
-                        echo 'spellcheck="false"'
-                      endcapture
-
-                      render 'form-search', namespace: 'Header', input_attr: search_input_attr, class: 'header__search-form'
-                    -%}
-
-                    <predictive-search-results class="header__search-results"></predictive-search-results>
-                  </div>
-                </details>
-              </predictive-search>
-            {%- else -%}
-              {{- search_link_html -}}
-            {%- endif -%}
+            <button
+              type="button"
+              class="button-reset header__utils-link no-js-hidden"
+              data-search-open
+              aria-haspopup="dialog"
+              aria-controls="SearchOverlay"
+              title="{{- 'accessibility.search' | t -}}"
+            >
+              <span class="visually-hidden">{{- 'accessibility.search' | t -}}</span>
+              {%- render 'icon', icon: 'search' -%}
+            </button>
           </li><!-- /.header__utils-item -->
 
           <li class="header__utils-item header__utils-item--cart">
@@ -259,6 +233,10 @@
     </div><!-- /.header__inner -->
   </div><!-- /.container -->
 </header><!-- /.header -->
+
+{%- comment -%} Full-screen search overlay (opens from the header search icon). {%- endcomment -%}
+{%- render 'search-overlay' -%}
+<script src="{{ 'search-overlay.js' | asset_url }}" defer="defer"></script>
 
 <script type="application/ld+json">
   {
