@@ -8,9 +8,21 @@
   Four slots (1..4) read from block_settings:
     - cdN_title  : text          (the countdown name; e.g. "Christmas")
     - cdN_date   : text          ("YYYY-MM-DD" target date)
-    - cdN_link   : url           (optional; the whole card links here)
+    - cdN_link   : url           (optional; the whole card links here + CTA target)
     - cdN_scheme : color_scheme  (per-card colour — applied as `color-{{ scheme }}`)
+    - cdN_image  : image_picker  (optional themed background; e.g. festive/spooky/Santa)
   A slot is ACTIVE when cdN_title OR cdN_date is set.
+
+  Card background (never grey):
+    - If cdN_image is set → the image is used as a cover background with a dark
+      gradient scrim (--card--image) so white text stays legible.
+    - Else → a vivid colour gradient (--card--colour) built in CSS from the
+      scheme's real header colour / --c-main-500, darkened toward the bottom,
+      with a brand-red fallback (--c-red-500 → --c-red-900) when no scheme is set.
+
+  Each card carries a "Follow countdown →" CTA pill (a real <a> to cdN_link when
+  the card itself isn't already a link; a decorative pill when the whole card is
+  the link, so we never nest <a> inside <a>).
 
   Day count (computed in Liquid, no JS):
     target = cdN_date | date: '%s'   → unix seconds of the target date
@@ -67,10 +79,12 @@
               assign k_date = 'cd' | append: i | append: '_date'
               assign k_link = 'cd' | append: i | append: '_link'
               assign k_scheme = 'cd' | append: i | append: '_scheme'
+              assign k_image = 'cd' | append: i | append: '_image'
               assign cd_title = block_settings[k_title]
               assign cd_date = block_settings[k_date]
               assign cd_link = block_settings[k_link]
               assign cd_scheme = block_settings[k_scheme]
+              assign cd_image = block_settings[k_image]
             -%}
             {%- if cd_title != blank or cd_date != blank -%}
               {%- liquid
@@ -102,9 +116,23 @@
                 if cd_link != blank
                   assign card_tag = 'a'
                 endif
+
+                # CTA always has a target; fall back to '#' when no link is set.
+                assign cta_href = cd_link
+                if cta_href == blank
+                  assign cta_href = '#'
+                endif
+
+                # Card modifier: image-backed cards get a scrim; colour cards get
+                # a vivid scheme/brand-red gradient (see megamenu.css). Never grey.
+                assign card_mod = 'megamenu__cd-card--colour'
+                if cd_image != blank
+                  assign card_mod = 'megamenu__cd-card--image'
+                endif
               -%}
               <{{ card_tag }}
-                class="megamenu__cd-card color-{{ cd_scheme }}"
+                class="megamenu__cd-card {{ card_mod }} color-{{ cd_scheme }}"
+                {%- if cd_image != blank %} style="background-image: linear-gradient(160deg, rgba(0,0,0,.15), rgba(0,0,0,.62)), url({{ cd_image | image_url: width: 900 }});"{% endif -%}
                 {%- if cd_link != blank %} href="{{ cd_link }}"{% endif -%}
               >
                 <span class="megamenu__cd-snow" aria-hidden="true"></span>
@@ -121,6 +149,22 @@
 
                 {%- if sub_line != blank -%}
                   <span class="megamenu__cd-sub">{{ sub_line | escape }}</span>
+                {%- endif -%}
+
+                {%- if card_tag == 'a' -%}
+                  <span class="megamenu__cd-cta">
+                    Follow countdown
+                    <svg class="megamenu__cd-cta-chevron" viewBox="0 0 8 12" width="8" height="12" fill="none" aria-hidden="true" focusable="false">
+                      <path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                {%- else -%}
+                  <a class="megamenu__cd-cta" href="{{ cta_href }}">
+                    Follow countdown
+                    <svg class="megamenu__cd-cta-chevron" viewBox="0 0 8 12" width="8" height="12" fill="none" aria-hidden="true" focusable="false">
+                      <path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </a>
                 {%- endif -%}
               </{{ card_tag }}><!-- /.megamenu__cd-card -->
             {%- endif -%}

@@ -1368,11 +1368,17 @@
   the cd1_*..cd4_* slots. Each card shows a "LIVE" badge, a big Liquid-computed
   day-count + unit ("sleeps"/"days"), the countdown name and a formatted date.
 
-  Colour: every card carries `color-{{ cdN_scheme }}`, so the scheme's CSS
-  custom properties resolve on the card. We build the bold background as a
-  gradient from the scheme's accent colour (--color-background-accent, falling
-  back to --color-red / brand red) down to a dark overlay, so each card reads as
-  a distinct colour with white text.
+  Background (never grey): each card is either image-backed or colour-backed.
+    - .megamenu__cd-card--image carries a cover background image (set inline in
+      the snippet) with a dark gradient scrim baked in, so white text stays legible.
+    - .megamenu__cd-card--colour carries `color-{{ cdN_scheme }}`, so the scheme's
+      CSS custom properties resolve on the card. We build a vivid gradient from the
+      scheme's real header colour (--color-header-background, falling back to
+      --c-main-500) down to a darker --c-main-900, with a saturated brand-red
+      fallback (--c-red-500 → --c-red-900) when no scheme is set — never a flat
+      grey accent. Both variants use explicit white text.
+
+  Each card has a "Follow countdown" CTA pill pinned bottom-right.
 
   Height: like Shop/Discover, Countdown has no `megamenu="item"` / products /
   logo hooks, so header-megamenu.js measures 0 and sets `--megamenu-height:0px`
@@ -1403,31 +1409,49 @@
   width: 100%;
 }
 
-/* A single bold coloured card. Explicit white text so nothing depends on the
-   header's `.menu-open` state. The gradient is derived from the card's scheme:
-   the accent colour up top fading into a translucent-black base for depth. */
+/* A single bold card. Explicit white text so nothing depends on the header's
+   `.menu-open` state. Shared box; the background is supplied by the --image /
+   --colour modifiers below so a card is NEVER a flat neutral grey. */
 .megamenu__cd-card {
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  min-height: 15rem;
+  min-height: 16rem;
   padding: var(--space-250, 2rem);
   border-radius: var(--radius-l);
   overflow: hidden;
   color: #fff;
   text-decoration: none;
-  background-color: var(--color-background-accent, var(--color-red, var(--c-red-500, #ec5450)));
+  box-shadow: var(--shadow-card, 0 6px 20px rgba(0, 0, 0, 0.14));
+  transition:
+    transform var(--duration-normal, 0.25s) var(--ease-smooth, ease),
+    box-shadow var(--duration-normal, 0.25s) var(--ease-smooth, ease);
+}
+
+/* Vivid colour card. Brand-red fallback keeps it saturated even with no scheme;
+   when `color-{{ scheme }}` is present, the scheme's real header colour wins. */
+.megamenu__cd-card--colour {
+  background-color: var(--c-red-500, #ec5450);
   background-image: linear-gradient(
     160deg,
-    var(--color-background-accent, var(--color-red, var(--c-red-500, #ec5450))) 0%,
-    rgba(0, 0, 0, 0.55) 100%
+    var(--color-header-background, var(--c-main-500, var(--c-red-500, #ec5450))) 0%,
+    var(--c-main-900, var(--c-red-900, #7a1f1c)) 100%
   );
-  transition: transform var(--duration-normal, 0.25s) var(--ease-smooth, ease);
+}
+
+/* Image card. The cover image + dark scrim gradient are set inline in the
+   snippet; here we just size/position it and provide a safe fallback tint. */
+.megamenu__cd-card--image {
+  background-color: var(--c-red-900, #7a1f1c);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 a.megamenu__cd-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover, 0 12px 30px rgba(0, 0, 0, 0.22));
 }
 
 a.megamenu__cd-card:focus-visible {
@@ -1503,6 +1527,55 @@ a.megamenu__cd-card:focus-visible {
   font-weight: 700;
   opacity: 0.85;
   color: #fff;
+  /* Reserve room so the bottom-right CTA pill never overlaps the date text. */
+  padding-right: 13rem;
+}
+
+/* "Follow countdown" CTA pill — translucent-white on the card, pinned to the
+   bottom-right so it sits alongside the day-count/title without covering them. */
+.megamenu__cd-cta {
+  position: absolute;
+  right: var(--space-250, 2rem);
+  bottom: var(--space-250, 2rem);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--c-neutral-900, #1a1a1a);
+  font-size: var(--fz-t, 1.2rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  transition:
+    background var(--duration-normal, 0.25s) var(--ease-smooth, ease),
+    transform var(--duration-normal, 0.25s) var(--ease-smooth, ease);
+}
+
+/* Nudge the CTA on hover — works whether the card or the CTA is the link. */
+.megamenu__cd-card:hover .megamenu__cd-cta,
+a.megamenu__cd-cta:hover {
+  background: #fff;
+  transform: translateX(2px);
+}
+
+a.megamenu__cd-cta:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.megamenu__cd-cta-chevron {
+  flex: none;
+  transition: transform var(--duration-normal, 0.25s) var(--ease-smooth, ease);
+}
+
+.megamenu__cd-card:hover .megamenu__cd-cta-chevron,
+a.megamenu__cd-cta:hover .megamenu__cd-cta-chevron {
+  transform: translateX(2px);
 }
 
 /* Muted empty state when no slots are configured. */
