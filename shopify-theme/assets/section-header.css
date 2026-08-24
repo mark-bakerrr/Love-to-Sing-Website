@@ -85,6 +85,16 @@
   box-shadow: 0 1.8rem 4.4rem #00000033;
 }
 
+/* Docked header (floating toggle OFF): the full-width panel attaches directly
+   under the header, so its rounded TOP corners would reveal the page behind
+   them. Square off the top so the panel meets the header edge-to-edge; keep the
+   bottom corners rounded. Higher specificity than the per-type
+   `.megamenu--* { border-radius }` rules, so it overrides them. */
+.header:not(.header--floating) .megamenu {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
 @media (max-width: 990px) {
   .header--floating {
     width: calc(100% - 1.6rem);
