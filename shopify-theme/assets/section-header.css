@@ -759,9 +759,13 @@
   justify-content: center;
 }
 
-/* Full-page overlay shell — the brand deep-red gradient. */
+/* Full-page overlay shell — the gradient adopts the current page/product colour
+   scheme via --c-main-* (inherited from the header's main-color-* class), with a
+   dark scrim layered on top for depth. Falls back to brand red. */
 .header-drawer__content.mobile-overlay {
-  background: linear-gradient(160deg, #b91f1c, #7d1512, #2d0b0a);
+  background:
+    linear-gradient(160deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.28) 45%, rgba(0, 0, 0, 0.66) 100%),
+    var(--c-main-500, #b91f1c);
   width: 100%;
   height: 100dvh;
   position: fixed;
