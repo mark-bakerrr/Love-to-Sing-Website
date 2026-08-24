@@ -95,6 +95,13 @@
   border-top-right-radius: 0;
 }
 
+/* Songs: the coloured left rail rounds its own top-left corner to match the
+   card clip. When docked (square top) that leaves a white wedge in the corner,
+   so square the rail's top-left too. Bottom-left stays rounded. */
+.header:not(.header--floating) .megamenu--songs .megamenu__inner--songs {
+  border-top-left-radius: 0;
+}
+
 @media (max-width: 990px) {
   .header--floating {
     width: calc(100% - 1.6rem);
