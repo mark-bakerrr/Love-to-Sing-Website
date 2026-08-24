@@ -378,22 +378,58 @@
   border-radius: var(--radius-l);
 }
 
-/* Panel grid: the links area takes the flexible space; the feature card (when
-   present) sits in a fixed ~32rem track on the right — the same visual weight
-   as the Discover feature card's `1fr 1fr 34rem`. */
+/* Panel grid: up to three parts — a narrow LEFT category rail, a flexible
+   CENTRE stack of composable sections, and a fixed ~30rem RIGHT feature card.
+   The template is built from modifier classes so any combination lays out
+   without dead space. Base: a single flexible track. */
 .megamenu__shop-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-400, 3.2rem);
   width: 100%;
   align-items: start;
+  /* Cap the grid to the card's usable height and let the CENTRE stack scroll
+     (rather than the whole card) when the composed content is tall. */
+  max-height: calc(85vh - 8rem);
+  min-height: 0;
 }
 
-.megamenu__shop-grid--has-feature {
-  grid-template-columns: minmax(0, 1fr) 32rem;
+/* Links only (no centre, no feature): keep the flexible single track so the
+   flat rich rows / nested columns fill the width, as before. */
+
+/* LEFT rail becomes a fixed narrow track whenever there's a centre stack or a
+   feature card to sit beside it. */
+.megamenu__shop-grid--has-links.megamenu__shop-grid--has-centre,
+.megamenu__shop-grid--has-links.megamenu__shop-grid--has-feature {
+  grid-template-columns: 24rem minmax(0, 1fr);
+}
+
+/* Feature card, no centre: links rail + flexible gap + fixed feature track. */
+.megamenu__shop-grid--has-links.megamenu__shop-grid--has-feature:not(.megamenu__shop-grid--has-centre) {
+  grid-template-columns: minmax(0, 1fr) 30rem;
+}
+
+/* Centre + feature (with or without links): flexible centre + fixed feature. */
+.megamenu__shop-grid--has-centre.megamenu__shop-grid--has-feature:not(.megamenu__shop-grid--has-links) {
+  grid-template-columns: minmax(0, 1fr) 30rem;
+}
+
+.megamenu__shop-grid--has-links.megamenu__shop-grid--has-centre.megamenu__shop-grid--has-feature {
+  grid-template-columns: 24rem minmax(0, 1fr) 30rem;
+}
+
+/* Feature only (no links, no centre): centre the compact card, don't stretch. */
+.megamenu__shop-grid--has-feature:not(.megamenu__shop-grid--has-links):not(.megamenu__shop-grid--has-centre) {
+  grid-template-columns: minmax(0, 30rem);
+  justify-content: start;
 }
 
 /* ---------- Links area (two layouts) ---------- */
+/* The links area sits in the flexible track when it's the ONLY content, and in
+   the fixed 24rem LEFT rail when a centre stack / feature card sits beside it.
+   These base rules cover the "links fill the width" case; the rail overrides
+   below (scoped by the grid modifier) collapse both layouts to a single column
+   so they read as a clean category rail. */
 
 /* NESTED: a responsive row of link columns sharing the flexible space. */
 .megamenu__shop-links-area--nested {
@@ -401,6 +437,7 @@
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
   gap: var(--space-400, 3.2rem);
   align-items: start;
+  min-width: 0;
 }
 
 /* FLAT: a 2-column grid of rich rows (label + descriptor). */
@@ -409,6 +446,20 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.4rem 1.6rem;
   align-content: start;
+  min-width: 0;
+}
+
+/* When the links area is a narrow rail (centre and/or feature present), stack
+   both layouts into a single column so they fit the 24rem track cleanly. */
+.megamenu__shop-grid--has-centre .megamenu__shop-links-area--nested,
+.megamenu__shop-grid--has-feature .megamenu__shop-links-area--nested {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.6rem;
+}
+
+.megamenu__shop-grid--has-centre .megamenu__shop-links-area--flat,
+.megamenu__shop-grid--has-feature .megamenu__shop-links-area--flat {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .megamenu__shop-col {
@@ -513,6 +564,304 @@
   color: var(--color-subdued, var(--c-neutral-600));
 }
 
+/* ---------- CENTRE stack: composable toggleable sections ---------- */
+/* The flexible middle column. Scrolls VERTICALLY (not the whole card) when the
+   composed sections are tall, so the panel respects its max-height. A little
+   right padding + negative margin keeps card shadows from being clipped by the
+   scroll box. */
+.megamenu__shop-centre {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-500, 4rem);
+  min-width: 0;
+  min-height: 0;
+  max-height: calc(85vh - 8rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.4rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-neutral-300, #d9d9d9) transparent;
+}
+
+.megamenu__shop-centre::-webkit-scrollbar {
+  width: 0.6rem;
+}
+
+.megamenu__shop-centre::-webkit-scrollbar-thumb {
+  background: var(--c-neutral-300, #d9d9d9);
+  border-radius: 999px;
+}
+
+.megamenu__shop-section {
+  min-width: 0;
+}
+
+/* Section eyebrow — matches the Discover eyebrow / shop heading treatment.
+   EXPLICIT colour so it never inherits white from the header colour context. */
+.megamenu__shop-eyebrow {
+  margin: 0 0 1.2rem;
+  font-size: var(--fz-t);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-subdued, var(--c-neutral-600));
+}
+
+/* Shared cover fallback (music-note glyph on a tinted block). */
+.megamenu__shop-cover-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--c-main-400, var(--c-red-400));
+  background: var(--c-red-50, #fdefef);
+}
+
+.megamenu__shop-cover-fallback svg {
+  width: 3.6rem;
+  height: 3.6rem;
+}
+
+/* ---- Featured products grid (3 across, responsive) ---- */
+.megamenu__shop-products {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.6rem;
+}
+
+.megamenu__shop-pcard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-width: 0;
+  border-radius: var(--radius-m);
+  transition: transform var(--duration-default) ease-in-out;
+}
+
+.megamenu__shop-pcard:hover {
+  transform: translateY(-0.3rem);
+}
+
+.megamenu__shop-pcard-cover {
+  display: block;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  background: var(--color-media-background, var(--c-red-100));
+  box-shadow: var(--shadow-card);
+}
+
+.megamenu__shop-pcard-img,
+.megamenu__shop-pcard-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.megamenu__shop-pcard-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.megamenu__shop-pcard-title {
+  font-size: var(--fz-s);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--c-neutral-950);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color var(--duration-default) ease-in-out;
+}
+
+.megamenu__shop-pcard:hover .megamenu__shop-pcard-title {
+  color: var(--c-main-700, var(--c-red-700));
+}
+
+.megamenu__shop-pcard-price {
+  font-size: var(--fz-s);
+  font-weight: 900;
+  color: var(--c-neutral-950);
+}
+
+.megamenu__shop-pcard-was {
+  margin-left: 0.4rem;
+  font-size: var(--fz-t);
+  font-weight: 700;
+  color: var(--color-subdued, var(--c-neutral-600));
+}
+
+/* ---- Collections carousel (CSS-only scroll-snap, no JS) ---- */
+.megamenu__shop-carousel {
+  display: flex;
+  gap: 1.6rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 0.2rem;
+  padding-bottom: 0.8rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-neutral-300, #d9d9d9) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.megamenu__shop-carousel::-webkit-scrollbar {
+  height: 0.6rem;
+}
+
+.megamenu__shop-carousel::-webkit-scrollbar-thumb {
+  background: var(--c-neutral-300, #d9d9d9);
+  border-radius: 999px;
+}
+
+.megamenu__shop-tile {
+  flex: 0 0 auto;
+  width: 18rem;
+  scroll-snap-align: start;
+  border-radius: var(--radius-m);
+  transition: transform var(--duration-default) ease-in-out;
+}
+
+.megamenu__shop-tile:hover {
+  transform: translateY(-0.3rem);
+}
+
+.megamenu__shop-tile-cover {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  background: var(--color-media-background, var(--c-red-100));
+  box-shadow: var(--shadow-card);
+}
+
+.megamenu__shop-tile-img,
+.megamenu__shop-tile-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-default) ease-in-out;
+}
+
+.megamenu__shop-tile:hover .megamenu__shop-tile-img,
+.megamenu__shop-tile:hover .megamenu__shop-tile-cover img {
+  transform: scale(1.04);
+}
+
+/* Title overlaid on a bottom gradient scrim — WHITE, explicit, so it reads on
+   the cover regardless of the header colour context. */
+.megamenu__shop-tile-title {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 2.4rem 1.2rem 1rem;
+  font-size: var(--fz-s);
+  font-weight: 900;
+  line-height: 1.15;
+  color: #fff;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+/* ---- Featured albums row ---- */
+.megamenu__shop-albums {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 1.6rem;
+}
+
+.megamenu__shop-acard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.megamenu__shop-acard-cover {
+  display: block;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  background: var(--color-media-background, var(--c-red-100));
+  box-shadow: var(--shadow-card);
+  transition: transform var(--duration-default) ease-in-out;
+}
+
+.megamenu__shop-acard-cover:hover {
+  transform: translateY(-0.3rem);
+}
+
+.megamenu__shop-acard-img,
+.megamenu__shop-acard-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.megamenu__shop-acard-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.megamenu__shop-acard-title {
+  font-size: var(--fz-s);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--c-neutral-950);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color var(--duration-default) ease-in-out;
+}
+
+.megamenu__shop-acard-title:hover {
+  color: var(--c-main-700, var(--c-red-700));
+}
+
+.megamenu__shop-acard-price {
+  font-size: var(--fz-s);
+  font-weight: 900;
+  color: var(--c-neutral-950);
+}
+
+.megamenu__shop-acard-was {
+  margin-left: 0.4rem;
+  font-size: var(--fz-t);
+  font-weight: 700;
+  color: var(--color-subdued, var(--c-neutral-600));
+}
+
+.megamenu__shop-acard-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-top: 0.2rem;
+  font-size: var(--fz-t);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--c-main-600, var(--c-red-600));
+  transition: gap var(--duration-default) ease-in-out, color var(--duration-default) ease-in-out;
+}
+
+.megamenu__shop-acard-cta:hover {
+  gap: 0.6rem;
+  color: var(--c-main-700, var(--c-red-700));
+}
+
+.megamenu__shop-acard-cta i {
+  display: inline-flex;
+}
+
+.megamenu__shop-acard-cta svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
 /* Featured product card — compact tinted "album" treatment, sized to the
    Discover feature card's weight (a ~32rem track with a 4/3 cover, not a giant
    square). */
@@ -603,18 +952,35 @@
   margin-top: 0.4rem;
 }
 
-/* Drop the fixed feature track first (feature becomes a full-width banner row),
-   then let the link layouts reflow as the card narrows. */
+/* ≤1180px: the right feature card drops to a full-width banner row, the layout
+   collapses to a LEFT rail + CENTRE stack (or a single column), and the centre
+   grids reflow to fewer columns. */
 @media (max-width: 1180px) {
-  .megamenu__shop-grid,
-  .megamenu__shop-grid--has-feature {
+  /* Feature no longer holds its own track — with a centre present, keep the
+     rail + centre two-up; otherwise go single-column. Feature spans full width
+     via grid-column below. */
+  .megamenu__shop-grid--has-links.megamenu__shop-grid--has-centre,
+  .megamenu__shop-grid--has-links.megamenu__shop-grid--has-centre.megamenu__shop-grid--has-feature {
+    grid-template-columns: 22rem minmax(0, 1fr);
+  }
+
+  .megamenu__shop-grid--has-links.megamenu__shop-grid--has-feature:not(.megamenu__shop-grid--has-centre),
+  .megamenu__shop-grid--has-centre.megamenu__shop-grid--has-feature:not(.megamenu__shop-grid--has-links),
+  .megamenu__shop-grid--has-feature:not(.megamenu__shop-grid--has-links):not(.megamenu__shop-grid--has-centre) {
     grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
   }
 
   .megamenu__shop-links-area--flat {
-    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
   }
 
+  /* Products reflow 3 -> 2 across. */
+  .megamenu__shop-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Feature becomes a full-width horizontal banner row. */
   .megamenu__shop-feature {
     flex-direction: row;
     align-items: center;
@@ -630,6 +996,19 @@
 
   .megamenu__shop-feature-body {
     flex: 1;
+  }
+}
+
+/* ≤750px: single column everywhere; centre sections stack full width. */
+@media (max-width: 750px) {
+  .megamenu__shop-grid,
+  .megamenu__shop-grid--has-links.megamenu__shop-grid--has-centre,
+  .megamenu__shop-grid--has-links.megamenu__shop-grid--has-centre.megamenu__shop-grid--has-feature {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .megamenu__shop-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

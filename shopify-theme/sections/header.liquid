@@ -581,6 +581,74 @@
           "label": "Featured album/product"
         },
         {
+          "type": "checkbox",
+          "id": "shop_show_products",
+          "label": "Show featured products grid",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "shop_products_heading",
+          "label": "Featured products — heading",
+          "default": "Featured products"
+        },
+        {
+          "type": "collection",
+          "id": "shop_products_collection",
+          "label": "Featured products — collection"
+        },
+        {
+          "type": "range",
+          "id": "shop_products_limit",
+          "min": 3,
+          "max": 12,
+          "step": 1,
+          "default": 6,
+          "label": "Products to show"
+        },
+        {
+          "type": "checkbox",
+          "id": "shop_show_collections",
+          "label": "Show collections carousel",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "shop_collections_heading",
+          "label": "Collections — heading",
+          "default": "Browse collections"
+        },
+        {
+          "type": "collection_list",
+          "id": "shop_collections",
+          "label": "Collections",
+          "limit": 10
+        },
+        {
+          "type": "checkbox",
+          "id": "shop_show_albums",
+          "label": "Show featured albums row",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "shop_albums_heading",
+          "label": "Featured albums — heading",
+          "default": "Featured albums"
+        },
+        {
+          "type": "product_list",
+          "id": "shop_albums",
+          "label": "Featured albums",
+          "limit": 8
+        },
+        {
+          "type": "checkbox",
+          "id": "shop_show_feature",
+          "label": "Show featured card (right)",
+          "default": true
+        },
+        {
           "type": "header",
           "content": "Discover"
         },
