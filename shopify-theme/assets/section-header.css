@@ -86,20 +86,19 @@
 }
 
 /* Docked header (floating toggle OFF): the full-width panel attaches directly
-   under the header, so its rounded TOP corners would reveal the page behind
-   them. Square off the top so the panel meets the header edge-to-edge; keep the
-   bottom corners rounded. Higher specificity than the per-type
-   `.megamenu--* { border-radius }` rules, so it overrides them. */
+   under the header as a flush rectangle. Rounded corners only make sense for
+   the floating (detached card) mode — when docked they reveal the page behind
+   the corners (a white wedge against the Songs red rail; invisible white-on-
+   white on the other panels). Square ALL corners. Higher specificity than the
+   per-type `.megamenu--* { border-radius }` rules, so it overrides them. */
 .header:not(.header--floating) .megamenu {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+  border-radius: 0;
 }
 
-/* Songs: the coloured left rail rounds its own top-left corner to match the
-   card clip. When docked (square top) that leaves a white wedge in the corner,
-   so square the rail's top-left too. Bottom-left stays rounded. */
+/* Songs: the coloured left rail rounds its own left corners to match the card
+   clip — square them too when docked so the red fills flush to the edges. */
 .header:not(.header--floating) .megamenu--songs .megamenu__inner--songs {
-  border-top-left-radius: 0;
+  border-radius: 0;
 }
 
 @media (max-width: 990px) {
