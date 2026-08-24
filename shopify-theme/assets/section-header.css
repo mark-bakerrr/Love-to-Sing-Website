@@ -96,24 +96,21 @@
   background: linear-gradient(180deg, var(--c-main-500) 0%, var(--c-main-600) 100%);
 }
 
-/* On solid-header templates (product/collection pages etc.) the floating pill's
-   transparent top/side margins reveal the white page behind the fixed header
-   ("white space behind menu"). Those pages don't have a full-bleed hero to fill
-   the gap, so DOCK the header full-width there. Hero/transparent pages (which
-   only gain `.is-solid` on scroll, not `.header--solid`) keep the floating pill. */
-.header--floating.header--solid {
-  width: 100%;
-  margin-top: 0;
-  margin-inline: 0;
-  border-radius: 0;
-}
-
-.header--floating.header--solid:before {
-  border-radius: 0;
-}
-
-.header--floating.header--solid .header__megamenu {
-  top: 100%;
+/* White-space-behind-the-pill fix.
+   On solid inner templates (e.g. product pages) the main section reserves the
+   header height with TRANSPARENT top padding, so the FLOATING pill's transparent
+   top/side margins reveal the white page behind the fixed header. Paint just that
+   reserved strip in the page's own scheme colour (var(--c-main-*) is set by the
+   template's main-color-* class) so the pill floats over colour, not white.
+   Scoped to floating mode via :has(); when the header is docked it covers this
+   strip completely, so the band is never seen. */
+body:has(.header--floating) .main-song {
+  background-image: linear-gradient(
+    var(--c-main-500) 0,
+    var(--c-main-500) 9rem,
+    transparent 9rem
+  );
+  background-repeat: no-repeat;
 }
 
 .header.menu-open {
