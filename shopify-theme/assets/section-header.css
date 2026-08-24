@@ -828,6 +828,9 @@ body:has(.header--floating) .main-song {
 
   display: flex;
   flex-direction: column;
+  /* Scroll the whole fixed overlay so the scrollbar sits on the viewport edge
+     (browser-style), not on an inset parent div. */
+  overflow-y: auto;
 
   background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(14px) saturate(1.1);
@@ -856,6 +859,10 @@ body:has(.header--floating) .main-song {
   width: 100%;
   max-width: 96rem;
   margin: 0 auto;
+  /* Keep the close button pinned while the overlay scrolls. */
+  position: sticky;
+  top: 0;
+  z-index: 2;
   padding: var(--space-300, 2.4rem) var(--space-400, 3.2rem);
 }
 
@@ -903,12 +910,12 @@ body:has(.header--floating) .main-song {
 }
 
 .search-overlay__body {
-  flex: 1;
+  flex: 0 0 auto;
   width: 100%;
   max-width: 96rem;
   margin: 0 auto;
-  padding: 2rem var(--space-400, 3.2rem) var(--space-500, 4rem);
-  overflow-y: auto;
+  /* Extra top padding so the search field clears the centred logo badge. */
+  padding: 3.2rem var(--space-400, 3.2rem) var(--space-500, 4rem);
 }
 
 /* The <predictive-search> disclosure is required by the JS element, but the
@@ -940,7 +947,7 @@ body:has(.header--floating) .main-song {
 .search-overlay__form input[type='search'] {
   width: 100%;
   border: 0;
-  border-bottom: 3px solid var(--c-neutral-200, #e8e8e8);
+  border-bottom: 2px solid var(--c-neutral-200, #e8e8e8);
   border-radius: 0;
   outline: 0;
   background: none;
@@ -958,15 +965,15 @@ body:has(.header--floating) .main-song {
   font-weight: 700;
 }
 
-/* Animated red underline that grows in on focus. */
+/* Animated underline that grows in on focus — softened so it isn't so harshly red. */
 .search-overlay__form .field::after {
   content: '';
   position: absolute;
   left: 0;
   bottom: 0;
-  height: 3px;
+  height: 2px;
   width: 0;
-  background: var(--c-red-500, #b91f1c);
+  background: var(--c-red-400, #d15a57);
   transition: width var(--so-duration) var(--so-ease-smooth);
 }
 
