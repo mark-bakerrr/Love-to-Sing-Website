@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+
+    <!-- Embeddable replica of lovetosing.com/pages/santa-tracker (Shopify blocks iframing). -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <title>Santa Tracker — Love to Sing</title>
+
+    <style>
+      /* Theme-level tokens the santa styles depend on (from theme.liquid on live). */
+      :root {
+        --font-body-family: Nunito, sans-serif;
+        --font-body-style: normal;
+        --font-body-weight: 400;
+        --font-heading-family: Nunito, sans-serif;
+        --font-heading-style: normal;
+        --font-heading-weight: 700;
+        --font-body-scale: 1;
+        --font-heading-scale: 1;
+        --page-width: 1356px;
+        --spacing-grid-col: 3.2rem;
+        --spacing-grid-row: 7.2rem;
+        --spacing-grid-col-mobile: 2.4rem;
+        --spacing-grid-row-mobile: 3.8rem;
+        --duration-short: 100ms;
+        --duration-default: 200ms;
+        --duration-long: 500ms;
+        --z-header: 400;
+        --z-modals: 800;
+      }
+    </style>
+    <link rel="stylesheet" href="/assets/reset.css">
+    <link rel="stylesheet" href="/assets/base.css">
+    <link rel="stylesheet" href="/assets/santa-tracker.css">
+  </head>
+  <body>
+<santa-tracker
+  class="santa-tracker has-video"
+  data-departure="2026-12-24T10:00:00Z"
+  data-route-url="/assets/santa-route.json"
+  data-three-js="/assets/three.min.js"
+  data-orbit-js="/assets/orbit-controls.js"
+  data-gltf-js="/assets/gltf-loader.js"
+  data-sleigh-glb="/media/santa/sleigh.glb"
+  data-reindeer-glb="/media/santa/reindeer.glb"
+  data-rudolph-glb="/media/santa/rudolph.glb"
+  data-earth-day="/media/santa/earth.jpg"
+  data-earth-night="/media/santa/earth-night.jpg"
+  data-earth-clouds="/media/santa/earth-clouds.png"
+  data-earth-spec="/media/santa/earth-spec.jpg"
+  
+  data-sound="true"
+  data-snow="true"
+><div class="santa-scene" aria-hidden="true"><video
+        class="santa-scene__video"
+        data-scene-video
+        src="/media/santa/village-bg.mp4"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+      ></video>
+      <div class="santa-scene__scrim"></div><div class="santa-scene__dawn"></div>
+    <div class="santa-scene__aurora santa-scene__aurora--1"></div>
+    <div class="santa-scene__aurora santa-scene__aurora--2"></div>
+    <div class="santa-scene__aurora santa-scene__aurora--3"></div>
+    <div class="santa-scene__stars" data-stars></div>
+    <div class="santa-scene__moon"></div>
+    <div class="santa-scene__sun"></div>
+    <svg class="santa-scene__hills" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" focusable="false">
+      <path class="santa-scene__hill-back" d="M0,220 C240,150 480,190 720,170 C960,150 1200,200 1440,160 L1440,320 L0,320 Z"/>
+      <g class="santa-scene__village">
+        <path d="M180,258 l14,-34 14,34 z"/>
+        <path d="M215,262 l11,-26 11,26 z"/>
+        <path d="M1150,252 l13,-32 13,32 z"/>
+        <g transform="translate(260,230)">
+          <rect x="0" y="12" width="46" height="34"/>
+          <path d="M-4,14 L23,-8 L50,14 Z"/>
+          <rect class="santa-scene__window" x="10" y="22" width="8" height="10"/>
+          <rect class="santa-scene__window santa-scene__window--slow" x="28" y="22" width="8" height="10"/>
+        </g>
+        <g transform="translate(340,238)">
+          <rect x="0" y="10" width="36" height="28"/>
+          <path d="M-4,12 L18,-6 L40,12 Z"/>
+          <rect class="santa-scene__window santa-scene__window--late" x="14" y="18" width="7" height="9"/>
+        </g>
+        <g transform="translate(1000,234)">
+          <rect x="0" y="12" width="42" height="32"/>
+          <path d="M-4,14 L21,-8 L46,14 Z"/>
+          <rect class="santa-scene__window" x="8" y="22" width="8" height="10"/>
+          <rect class="santa-scene__window santa-scene__window--slow" x="26" y="22" width="8" height="10"/>
+        </g>
+        <g transform="translate(1080,242)">
+          <rect x="0" y="8" width="30" height="24"/>
+          <path d="M-3,10 L15,-5 L33,10 Z"/>
+          <rect class="santa-scene__window santa-scene__window--late" x="11" y="15" width="7" height="9"/>
+        </g>
+      </g>
+      <path class="santa-scene__hill-front" d="M0,270 C300,230 560,290 860,255 C1120,225 1300,285 1440,250 L1440,320 L0,320 Z"/>
+    </svg>
+    <div class="santa-scene__shooting" data-shooting></div>
+  </div><svg class="santa-glass-defs" aria-hidden="true" focusable="false">
+    <filter id="santa-glass-distortion" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92" result="noise"/>
+      <feGaussianBlur in="noise" stdDeviation="2" result="blurred"/>
+      <feDisplacementMap in="SourceGraphic" in2="blurred" scale="70" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <div data-snow-layer></div>
+
+  <div class="santa-tracker__inner container">
+    <a class="santa-tracker__logo" href="/" aria-label="Love to Sing — home"><img
+        srcset="/media/santa/logo-180.png 1x, /media/santa/logo-360.png 2x"
+        src="/media/santa/logo-180.png"
+        alt="Christmas Songs, Lyrics and Download Videos by Love to Sing"
+        width="180"
+        height="195"
+        loading="eager"
+      ></a><div data-state="pre" hidden><h1 class="santa-tracker__title h1">The Countdown to Christmas is here!</h1><div class="santa-countdown-card">
+        <p class="santa-countdown-card__label">Santa takes flight in</p>
+
+        <div class="santa-countdown" role="timer" aria-label="Countdown until Santa takes off">
+          <div class="santa-countdown__unit">
+            <span class="santa-countdown__value" data-unit="days">–</span>
+            <span class="santa-countdown__label">Days</span>
+          </div>
+          <div class="santa-countdown__unit">
+            <span class="santa-countdown__value" data-unit="hours">–</span>
+            <span class="santa-countdown__label">Hours</span>
+          </div>
+          <div class="santa-countdown__unit">
+            <span class="santa-countdown__value" data-unit="minutes">–</span>
+            <span class="santa-countdown__label">Minutes</span>
+          </div>
+          <div class="santa-countdown__unit">
+            <span class="santa-countdown__value" data-unit="seconds">–</span>
+            <span class="santa-countdown__label">Seconds</span>
+          </div>
+        </div>
+
+        <p class="santa-countdown__status" data-prep aria-hidden="true"></p>
+
+        <div class="santa-wait" aria-hidden="true">
+          <div class="santa-wait__fill" data-wait-fill></div>
+        </div>
+      </div>
+    </div><div data-state="post" hidden>
+      <div class="santa-post">
+        <div class="santa-post__intro">
+          <h1 class="santa-tracker__title h1">Merry <em class="santa-accent">Christmas!</em></h1><p class="santa-tracker__subtitle">Santa has delivered all the presents and is back at the North Pole having a well-earned rest. Merry Christmas from Love to Sing!</p></div>
+
+        <div class="santa-post-card">
+          <div class="santa-post-card__check" aria-hidden="true">✓</div>
+          <h2 class="santa-post-card__heading">Every gift delivered! 🎄</h2>
+          <p class="santa-post-card__tally"><span data-tally>7.8 billion</span> gifts delivered this year.</p>
+
+          <div class="santa-post-card__actions"><a class="santa-post-card__cta santa-post-card__cta--primary" href="https://lovetosing.com/collections/song-christmas">Sing our Christmas songs 🎄</a></div>
+
+          <button class="santa-post-card__replay" type="button" data-action="replay">
+            ↻ Replay Santa’s journey
+          </button><p class="santa-post-card__closing">See you next year! Love, Love to Sing 💛</p></div>
+      </div>
+    </div>
+
+    <noscript>
+      <p>Turn on JavaScript to see the countdown and follow Santa around the world!</p>
+    </noscript>
+  </div><!-- /.santa-tracker__inner --><div class="santa-live" data-state="live" hidden>
+    <div class="santa-live__globe" data-globe aria-label="3D globe showing Santa's live position"></div><div class="santa-live__brand"><a class="santa-tracker__logo" href="/" aria-label="Love to Sing — home"><img
+        srcset="/media/santa/logo-180.png 1x, /media/santa/logo-360.png 2x"
+        src="/media/santa/logo-180.png"
+        alt="Christmas Songs, Lyrics and Download Videos by Love to Sing"
+        width="180"
+        height="195"
+        loading="eager"
+      ></a></div>
+
+    <button
+      class="santa-live__sound"
+      type="button"
+      data-action="toggle-sound"
+      aria-pressed="false"
+      aria-label="Turn sound on"
+      hidden
+    >
+      <span class="santa-live__sound-on" aria-hidden="true">🔊</span>
+      <span class="santa-live__sound-off" aria-hidden="true">🔇</span>
+    </button>
+
+    <button
+      class="santa-live__share"
+      type="button"
+      data-action="share"
+      aria-label="Share Santa's location"
+    >
+      <span aria-hidden="true">📤</span>
+    </button>
+
+    <aside class="santa-live__panel" data-panel aria-label="Santa tracker stats">
+      <button
+        class="santa-live__collapse"
+        type="button"
+        data-action="collapse-panel"
+        aria-expanded="true"
+        aria-label="Collapse panel"
+      >
+        <span class="santa-live__collapse-icon" aria-hidden="true">‹</span>
+      </button>
+
+      <header class="santa-live__head">
+        <div class="santa-live__topbar">
+          <p class="santa-live__eyebrow"><span class="santa-live__live-dot" aria-hidden="true"></span>Santa is live</p>
+          <div class="santa-live__clock">
+            <span class="santa-live__clock-time" data-info="local-clock">—</span>
+            <span class="santa-live__clock-label">your local time</span>
+          </div>
+        </div>
+        <p class="santa-live__status" data-info="status" aria-live="polite">Santa is on his way…</p>
+      </header><ol class="santa-rail" data-rail aria-label="Santa's route — cities visited and upcoming"></ol>
+
+      <div class="santa-progress">
+        <div class="santa-progress__track" aria-hidden="true">
+          <div class="santa-progress__fill" data-journey-fill></div>
+        </div>
+        <span class="santa-progress__label" data-info="journey">Santa’s journey is underway…</span>
+      </div><div class="santa-you" data-you data-you-state="closed">
+        <button class="santa-you__trigger" type="button" data-action="open-location">
+          📍 Select your location
+        </button>
+
+        <div class="santa-you__panel">
+          <p class="santa-you__prompt">When does Santa reach you?</p>
+          <div class="santa-you__actions">
+            <button class="santa-you__btn" type="button" data-action="locate">📍 Use my location</button>
+            <select class="santa-you__select" data-city-picker aria-label="Choose your city">
+              <option value="">Choose your city…</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="santa-you__result">
+          <p class="santa-you__eta" data-info="you-eta"></p>
+          <p class="santa-you__city" data-info="you-city"></p>
+          <button class="santa-you__change" type="button" data-action="open-location">Change location</button>
+        </div>
+      </div><a class="santa-tracker__cta santa-live__cta" href="https://lovetosing.com/collections/song-christmas">Sing our Christmas songs 🎄</a></aside><aside class="santa-live__stats" aria-label="Journey statistics">
+      <button
+        class="santa-live__stats-head"
+        type="button"
+        data-action="toggle-panel"
+        aria-expanded="false"
+        aria-label="Show Santa's full itinerary"
+      >
+        <span aria-hidden="true">🎅</span>
+        <span class="santa-live__stats-status" data-info="status">Santa is on his way…</span>
+        <span class="santa-live__stats-chevron" aria-hidden="true">▲</span>
+      </button>
+      <div class="santa-stat">
+        <span class="santa-stat__num" data-info="presents" data-odometer>0</span>
+        <span class="santa-stat__label">presents delivered</span>
+      </div>
+      <div class="santa-stat">
+        <span class="santa-stat__num" data-info="distance" data-odometer>0 km</span>
+        <span class="santa-stat__label">travelled</span>
+      </div>
+    </aside>
+
+    <button
+      class="santa-live__follow"
+      type="button"
+      data-action="follow"
+      hidden
+    >
+      🎅 Follow Santa
+    </button>
+
+    <p class="santa-live__error" data-tracker-error hidden>
+      Ho ho ho — the globe elves are having trouble! Santa is still flying; try refreshing the page.
+    </p>
+  </div><!-- /.santa-live -->
+
+  <p class="santa-copyright">Copyright of Love to Sing 2026 &copy; www.lovetosing.com</p>
+</santa-tracker>
+
+    <script src="/assets/santa-tracker.js" defer="defer"></script>
+  </body>
+</html>

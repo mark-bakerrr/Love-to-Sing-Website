@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+
+    <!-- Embeddable replica of lovetosing.com/pages/christmas-countdown (Shopify blocks iframing). -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <title>Christmas Countdown — Love to Sing</title>
+
+    <link rel="stylesheet" href="/assets/christmas-countdown.css">
+  </head>
+  <body class="cc-body">
+    <div class="cc-stage" id="cc-stage" style="background-image: url('/media/christmas/background.jpg');">
+
+      <video class="cc-bg-video" autoplay muted loop playsinline preload="auto" poster="/media/christmas/background.jpg" aria-hidden="true">
+        <source src="/media/christmas/background-video.mp4" type="video/mp4">
+      </video>
+
+      <a class="cc-brand" href="https://lovetosing.com" target="_blank" rel="noopener" aria-label="Love to Sing">
+        <img src="/media/christmas/logo.png" alt="Love to Sing" width="360" height="120">
+      </a>
+
+      <div class="cc-countdown" id="cc-countdown">
+        <div class="cc-unit"><span class="cc-value" data-unit="days">--</span><span class="cc-label">Days</span></div>
+        <span class="cc-sep">:</span>
+        <div class="cc-unit"><span class="cc-value" data-unit="hours">--</span><span class="cc-label">Hours</span></div>
+        <span class="cc-sep">:</span>
+        <div class="cc-unit"><span class="cc-value" data-unit="minutes">--</span><span class="cc-label">Minutes</span></div>
+        <span class="cc-sep">:</span>
+        <div class="cc-unit"><span class="cc-value" data-unit="seconds">--</span><span class="cc-label">Seconds</span></div>
+      </div>
+
+      <div class="cc-message" id="cc-message">🎄Merry Christmas! 🎄</div>
+    </div>
+
+    <script type="application/json" id="cc-config">
+    {
+      "referenceTz": "America/New_York",
+      "targetMonth": 12,
+      "targetDay": 25,
+      "playlist": []
+    }
+    </script>
+
+    <script src="/assets/christmas-countdown.js" defer="defer"></script>
+  </body>
+</html>
