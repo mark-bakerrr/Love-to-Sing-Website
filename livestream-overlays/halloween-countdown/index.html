@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+
+    <!-- Embeddable replica of lovetosing.com/pages/halloween-countdown (Shopify blocks iframing). -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+
+    <title>Halloween Countdown — Love to Sing</title>
+
+    <link rel="stylesheet" href="/assets/halloween-countdown.css">
+  </head>
+  <body class="hc-body">
+    <div class="hc-stage" id="hc-stage" style="background-image: url('/media/halloween/background.png');">
+
+      <video class="hc-bg-video" autoplay muted loop playsinline preload="auto" poster="/media/halloween/background.png" aria-hidden="true">
+        <source src="/media/halloween/background-video.mp4" type="video/mp4">
+      </video>
+
+      <a class="hc-brand" href="https://lovetosing.com" target="_blank" rel="noopener" aria-label="Love to Sing">
+        <img src="/media/halloween/logo.png" alt="Love to Sing" width="360" height="120">
+      </a>
+
+      <div class="hc-countdown" id="hc-countdown">
+        <div class="hc-unit"><span class="hc-value" data-unit="days">--</span><span class="hc-label">Days</span></div>
+        <span class="hc-sep">:</span>
+        <div class="hc-unit"><span class="hc-value" data-unit="hours">--</span><span class="hc-label">Hours</span></div>
+        <span class="hc-sep">:</span>
+        <div class="hc-unit"><span class="hc-value" data-unit="minutes">--</span><span class="hc-label">Minutes</span></div>
+        <span class="hc-sep">:</span>
+        <div class="hc-unit"><span class="hc-value" data-unit="seconds">--</span><span class="hc-label">Seconds</span></div>
+      </div>
+
+      <div class="hc-message" id="hc-message">🎃 Happy Halloween! 🎃</div>
+    </div>
+
+    <script type="application/json" id="hc-config">
+    {
+      "referenceTz": "America/New_York",
+      "targetMonth": 10,
+      "targetDay": 31,
+      "postDays": 1,
+      "playlist": []
+    }
+    </script>
+
+    <script src="/assets/halloween-countdown.js" defer="defer"></script>
+  </body>
+</html>
