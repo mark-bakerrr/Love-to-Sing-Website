@@ -11,7 +11,7 @@ pages can't be iframed — these static copies can.
 | `/halloween-countdown` | lovetosing.com/pages/halloween-countdown |
 | `/santa-tracker` | lovetosing.com/pages/santa-tracker |
 
-- `?overlay=1` on the countdowns hides the music player (broadcast mode); `?now=<ISO>` fakes the clock for QA.
+- The music player is **removed** from the countdown replicas (these are broadcast overlays); `?now=<ISO>` still fakes the clock for QA.
 - `vercel.json` sets `Content-Security-Policy: frame-ancestors *` so any host (upstream.so) may embed.
 
 ## Structure
