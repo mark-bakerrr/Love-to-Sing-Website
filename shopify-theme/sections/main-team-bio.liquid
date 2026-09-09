@@ -89,11 +89,11 @@
             {%- endif -%}
 
           {%- when 'photo' -%}
+            {%- comment -%} Direct handle lookup — iterating metaobjects.photo_wall.values is capped at 50 entries. {%- endcomment -%}
             {%- assign pw = blank -%}
             {%- if block.settings.pw_handle != blank -%}
-              {%- for e in metaobjects.photo_wall.values -%}
-                {%- if e.system.handle == block.settings.pw_handle -%}{%- assign pw = e -%}{%- break -%}{%- endif -%}
-              {%- endfor -%}
+              {%- assign pw_key = block.settings.pw_handle | strip -%}
+              {%- assign pw = metaobjects.photo_wall[pw_key] -%}
             {%- endif -%}
             {%- liquid
               assign ph_img = pw.photo.value
