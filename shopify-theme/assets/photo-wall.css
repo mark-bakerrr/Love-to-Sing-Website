@@ -161,6 +161,9 @@ html,body.pw-body{margin:0;height:100%;overflow:hidden;background:#c49a63;
 .pw-empty{position:fixed;inset:0;display:grid;place-items:center;text-align:center;color:#3a2a12;
   font-weight:700;padding:24px;z-index:20}
 
+/* When GSAP drives the modal, CSS transitions must not fight the timeline */
+.pw-modal.pw-gsap .pw-dialog,.pw-modal.pw-gsap .pw-backdrop{transition:none}
+
 @media (max-width:720px){
   .pw-dialog{flex-direction:column;max-height:90vh}
   .pw-photo{border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:14px}
