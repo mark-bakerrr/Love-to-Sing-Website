@@ -26,28 +26,32 @@
     return function(){ seed|=0; seed=seed+0x6D2B79F5|0; var t=Math.imul(seed^seed>>>15,1|seed);
       t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
   }
-  var COLS=Math.max(1, Math.ceil(Math.sqrt(Math.max(1,PHOTOS.length)*1.6)));
-  var CELL_W=420, CELL_H=380;
-  PHOTOS.forEach(function(p,i){
-    var r=rng(i*97+13);
-    var col=i%COLS, row=Math.floor(i/COLS);
-    var w=220+Math.round(r()*120);
-    var jx=(r()-.5)*160, jy=(r()-.5)*140;
-    var x=col*CELL_W + jx + 120;
-    var y=row*CELL_H + jy + 120;
-    var rot=(r()-.5)*12;
-    var card=document.createElement('div');
-    card.className='pw-card';
-    card.style.width=w+'px'; card.style.left=x+'px'; card.style.top=y+'px';
-    card.style.transform='rotate('+rot.toFixed(2)+'deg)';
-    card.dataset.i=i;
-    card.innerHTML='<span class="pw-cardpin"></span><span class="pw-pill">'+esc(p.year)+'</span>'
-      +'<img loading="lazy" src="'+esc(p.thumb||p.src)+'" alt="'+esc(p.title||'')+'">';
-    world.appendChild(card);
-  });
-  var worldW=COLS*CELL_W+240, worldH=Math.ceil(Math.max(1,PHOTOS.length)/COLS)*CELL_H+240;
-  var wm=document.getElementById('pw-watermark');
-  if(wm){ wm.style.left=worldW/2+'px'; wm.style.top=worldH/2+'px'; }
+  var CELL_W=420, CELL_H=380, COLS=1, worldW=0, worldH=0;
+  function buildWall(){
+    Array.prototype.slice.call(world.querySelectorAll('.pw-card')).forEach(function(n){ n.parentNode.removeChild(n); });
+    COLS=Math.max(1, Math.ceil(Math.sqrt(Math.max(1,PHOTOS.length)*1.6)));
+    PHOTOS.forEach(function(p,i){
+      var r=rng(i*97+13);
+      var col=i%COLS, row=Math.floor(i/COLS);
+      var w=220+Math.round(r()*120);
+      var jx=(r()-.5)*160, jy=(r()-.5)*140;
+      var x=col*CELL_W + jx + 120;
+      var y=row*CELL_H + jy + 120;
+      var rot=(r()-.5)*12;
+      var card=document.createElement('div');
+      card.className='pw-card';
+      card.style.width=w+'px'; card.style.left=x+'px'; card.style.top=y+'px';
+      card.style.transform='rotate('+rot.toFixed(2)+'deg)';
+      card.dataset.i=i;
+      card.innerHTML='<span class="pw-cardpin"></span><span class="pw-pill">'+esc(p.year)+'</span>'
+        +'<img loading="lazy" src="'+esc(p.thumb||p.src)+'" alt="'+esc(p.title||'')+'">';
+      world.appendChild(card);
+    });
+    worldW=COLS*CELL_W+240; worldH=Math.ceil(Math.max(1,PHOTOS.length)/COLS)*CELL_H+240;
+    var wm=document.getElementById('pw-watermark');
+    if(wm){ wm.style.left=worldW/2+'px'; wm.style.top=worldH/2+'px'; }
+  }
+  buildWall();
 
   /* ---------- Pan + zoom ---------- */
   var tx=0, ty=0, scale=1, MIN=.35, MAX=2.2;
@@ -58,6 +62,56 @@
     tx=(vw-worldW*scale)/2; ty=(vh-worldH*scale)/2; apply();
   }
   centre();
+
+  /* ---------- Fetch ALL entries via the Storefront API ----------
+     Liquid's metaobjects drop returns at most 50 entries, so #pw-data is a
+     partial fallback. Paginate the full set client-side and rebuild. */
+  (function fetchAll(){
+    if(!window.fetch) return;
+    var API='https://christmas-songs-carols.myshopify.com/api/2024-10/graphql.json';
+    var TOKEN='c8a4184e06fafbe91bb6835a3a4eccca'; // public storefront token (unauthenticated read)
+    var QUERY='query($cursor:String){ metaobjects(type:"photo_wall", first:100, after:$cursor){'
+      +' pageInfo{hasNextPage endCursor} nodes{'
+      +' photo:field(key:"photo"){reference{... on MediaImage{ src:image{url(transform:{maxWidth:1000})} thumb:image{url(transform:{maxWidth:520})} }}}'
+      +' year:field(key:"year"){value} title:field(key:"title"){value} desc:field(key:"description"){value}'
+      +' location:field(key:"location"){value} category:field(key:"category"){value} link:field(key:"link"){value}'
+      +' people:field(key:"people"){references(first:10){nodes{... on Metaobject{ name:field(key:"name"){value} onlineStoreUrl }}}}'
+      +' product:field(key:"product"){reference{... on Product{ onlineStoreUrl featuredImage{url(transform:{maxWidth:200})} }}}'
+      +' } } }';
+    var all=[];
+    function page(cursor){
+      return fetch(API,{method:'POST',headers:{'X-Shopify-Storefront-Access-Token':TOKEN,'Content-Type':'application/json'},
+        body:JSON.stringify({query:QUERY,variables:{cursor:cursor}})})
+        .then(function(r){ return r.json(); })
+        .then(function(j){
+          if(!j.data || !j.data.metaobjects) throw new Error('no data');
+          var m=j.data.metaobjects; all=all.concat(m.nodes);
+          return m.pageInfo.hasNextPage ? page(m.pageInfo.endCursor) : all;
+        });
+    }
+    page(null).then(function(nodes){
+      var mapped=nodes.map(function(n){
+        var ref=n.photo && n.photo.reference;
+        return {
+          src: ref && ref.src ? ref.src.url : null,
+          thumb: ref && ref.thumb ? ref.thumb.url : null,
+          year: n.year ? n.year.value : null,
+          title: n.title ? n.title.value : null,
+          desc: n.desc ? n.desc.value : null,
+          location: n.location ? n.location.value : null,
+          category: n.category ? n.category.value : null,
+          link: n.link ? n.link.value : null,
+          people: n.people && n.people.references ? n.people.references.nodes.filter(Boolean).map(function(t){
+            return { name: t.name ? t.name.value : '', url: t.onlineStoreUrl }; }) : [],
+          product: n.product && n.product.reference ? {
+            img: n.product.reference.featuredImage ? n.product.reference.featuredImage.url : '',
+            url: n.product.reference.onlineStoreUrl } : null
+        };
+      }).filter(function(p){ return p && p.src; });
+      mapped.sort(function(a,b){ return String(a.year||'').localeCompare(String(b.year||'')); });
+      if(mapped.length > PHOTOS.length){ PHOTOS=mapped; buildWall(); centre(); }
+    }).catch(function(){ /* keep the Liquid-rendered first-50 fallback */ });
+  })();
 
   var down=false, moved=false, sx=0, sy=0, lx=0, ly=0, vX=0, vY=0, lastT=0, raf=0, startCard=null;
   vp.addEventListener('pointerdown',function(e){
