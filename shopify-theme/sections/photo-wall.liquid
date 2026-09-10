@@ -36,7 +36,15 @@
   <button id="pw-recentre" aria-label="Recentre" title="Recentre">&#9673;</button>
 </div>
 
-{%- if section.settings.show_music_player and section.blocks.size > 0 -%}
+<div class="pw-filters" id="pw-filters" hidden>
+  <select id="pw-f-year" aria-label="Filter by year"></select>
+  <select id="pw-f-person" aria-label="Filter by person"></select>
+  <select id="pw-f-cat" aria-label="Filter by category"></select>
+  <button id="pw-f-clear" type="button" hidden>Clear</button>
+  <span class="pw-f-count" id="pw-f-count"></span>
+</div>
+
+{%- if section.settings.show_music_player -%}
   <div class="pw-player" id="pw-player">
     <img class="art" id="pw-part" alt="" width="44" height="44">
     <div class="meta"><div class="t" id="pw-ptitle">&mdash;</div><div class="a" id="pw-partist">&mdash;</div></div>
@@ -88,12 +96,18 @@
 ]
 </script>
 
-{%- comment -%} Music playlist from Track blocks {%- endcomment -%}
+{%- comment -%}
+  Music playlist. Track blocks in the theme editor take priority; with no
+  blocks configured, a built-in Love to Sing playlist (30s previews from the
+  song catalogue) plays instead.
+{%- endcomment -%}
+{%- assign track_blocks = section.blocks | where: 'type', 'track' -%}
 <script type="application/json" id="pw-tracks">
+{%- if track_blocks.size > 0 -%}
 [
   {%- assign first = true -%}
-  {%- for block in section.blocks -%}
-    {%- if block.type == 'track' and block.settings.audio_url != blank -%}
+  {%- for block in track_blocks -%}
+    {%- if block.settings.audio_url != blank -%}
       {%- unless first -%},{%- endunless -%}{%- assign first = false -%}
       {
         "title": {{ block.settings.title | json }},
@@ -104,6 +118,22 @@
     {%- endif -%}
   {%- endfor -%}
 ]
+{%- else -%}
+[
+  {"title":"Jingle Bells","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/Jingle_Bells_Video_Song_Download_-_Love_to_Sing.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-4122443841570.mp3"},
+  {"title":"We Wish You a Merry Christmas","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/We_Wish_You_a_Merry_Christmas_Video__Download_-_Love_to_Sing.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-4124764930082.mp3"},
+  {"title":"Rudolph the Red Nosed Reindeer","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/Rudolph_the_Red_Nosed_Reindeer_Lyrics_-_Love_to_Sing_adf607ff-0fae-4231-9317-4d3935d878e2.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-4124442820642.mp3"},
+  {"title":"Santa Claus is Coming to Town","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/SantaClausisComingtoTown.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-6804489469986.mp3"},
+  {"title":"12 Days of Christmas","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/12_Days_of_Christmas_Video_Song_Download_-_Love_to_Sing.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-4124727771170.mp3"},
+  {"title":"Feliz Navidad","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/FelizNavidad.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-6802222317602.mp3"},
+  {"title":"Deck the Halls","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/Deck_the_Halls_Video_Song_Download_-_Love_to_Sing.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-4119867785250.mp3"},
+  {"title":"Silent Night","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/Silent_Night_Video_Song_Download_-_Love_to_Sing.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-4124449603618.mp3"},
+  {"title":"The Wheels On The Bus","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/Transport_Songs_Thumbnails-2-The_Wheels_On_The_Bus_100a600e-ec2d-469d-a36e-3e738344a9e4.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-10931443040529.mp3"},
+  {"title":"Twinkle, Twinkle Little Star","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/Nursery_Rhymes_Thumbnails-60-Twinkle_Twinkle_Little_Star_069ec0db-95d3-4064-90be-a028b3e5052f.png?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-10762838278417.mp3"},
+  {"title":"Incy Wincy Spider","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/Nursery_Rhymes_Thumbnails-15-Incy_Wincy_Spider_52440eaa-a902-499a-9263-182dd21f7328.png?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-10762836377873.mp3"},
+  {"title":"Five Little Speckled Frogs","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/Animal_Songs-10-Five_Little_Speckled_Frogs_e92c711f-cb33-4830-8953-955745631728.png?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-10738343870737.mp3"}
+]
+{%- endif -%}
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer="defer"></script>

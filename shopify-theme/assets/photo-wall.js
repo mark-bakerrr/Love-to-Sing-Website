@@ -17,6 +17,7 @@
     catch (e) { return []; }
   }
   var PHOTOS = readJSON('pw-data').filter(function (p) { return p && p.src; });
+  var ALL = PHOTOS; /* unfiltered master list; PHOTOS is the currently visible subset */
   var TRACKS = readJSON('pw-tracks').filter(function (t) { return t && t.src; });
 
   function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
@@ -62,6 +63,55 @@
     tx=(vw-worldW*scale)/2; ty=(vh-worldH*scale)/2; apply();
   }
   centre();
+
+  /* ---------- Filters (Year / Person / Category) ---------- */
+  var fWrap=document.getElementById('pw-filters');
+  var fYear=document.getElementById('pw-f-year'), fPerson=document.getElementById('pw-f-person');
+  var fCat=document.getElementById('pw-f-cat'), fClear=document.getElementById('pw-f-clear');
+  var fCount=document.getElementById('pw-f-count');
+  function fillSelect(sel, values, allLabel){
+    var cur=sel.value;
+    sel.innerHTML='<option value="">'+allLabel+'</option>'+values.map(function(v){
+      return '<option value="'+esc(v)+'"'+(v===cur?' selected':'')+'>'+esc(v)+'</option>'; }).join('');
+  }
+  function populateFilters(){
+    if(!fWrap) return;
+    var years={}, people={}, cats={};
+    ALL.forEach(function(p){
+      if(p.year) years[p.year]=1;
+      if(p.category) cats[p.category]=1;
+      (p.people||[]).forEach(function(t){ if(t&&t.name) people[t.name]=1; });
+    });
+    fillSelect(fYear,Object.keys(years).sort(),'All years');
+    fillSelect(fPerson,Object.keys(people).sort(),'Everyone');
+    fillSelect(fCat,Object.keys(cats).sort(),'All categories');
+    fWrap.hidden=false;
+  }
+  function applyFilters(){
+    var y=fWrap?fYear.value:'', pe=fWrap?fPerson.value:'', c=fWrap?fCat.value:'';
+    PHOTOS=ALL.filter(function(p){
+      if(y && String(p.year)!==y) return false;
+      if(c && p.category!==c) return false;
+      if(pe && !(p.people||[]).some(function(t){ return t&&t.name===pe; })) return false;
+      return true;
+    });
+    buildWall(); centre();
+    if(fWrap){
+      var active=!!(y||pe||c);
+      fClear.hidden=!active;
+      fCount.textContent=active?(PHOTOS.length+' of '+ALL.length+' photos'):'';
+    }
+    if(typeof window.gsap!=='undefined' && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)){
+      var cards=world.querySelectorAll('.pw-card');
+      if(cards.length) gsap.from(cards,{autoAlpha:0,scale:.85,duration:.5,ease:'power2.out',
+        stagger:{each:0.004,from:'random'}});
+    }
+  }
+  if(fWrap){
+    [fYear,fPerson,fCat].forEach(function(s){ s.addEventListener('change',applyFilters); });
+    fClear.addEventListener('click',function(){ fYear.value=''; fPerson.value=''; fCat.value=''; applyFilters(); });
+    populateFilters();
+  }
 
   /* ---------- Fetch ALL entries via the Storefront API ----------
      Liquid's metaobjects drop returns at most 50 entries, so #pw-data is a
@@ -109,7 +159,7 @@
         };
       }).filter(function(p){ return p && p.src; });
       mapped.sort(function(a,b){ return String(a.year||'').localeCompare(String(b.year||'')); });
-      if(mapped.length > PHOTOS.length){ PHOTOS=mapped; buildWall(); centre(); }
+      if(mapped.length >= ALL.length){ ALL=mapped; populateFilters(); applyFilters(); }
     }).catch(function(){ /* keep the Liquid-rendered first-50 fallback */ });
   })();
 
