@@ -1,0 +1,78 @@
+{%- comment -%}
+  countdown-widget — global floating bottom-right countdown overlay.
+
+  Renders the SAME skin as the block/section (snippets/countdown-card) inside a
+  floating wrapper, so it follows the identical pattern: art on top, responsive
+  numbers with colons, and a CTA button (link from theme settings).
+
+  Season resolved inline (no include → no scope dependency):
+    settings.countdown_widget_mode  auto | halloween | christmas | off
+    settings.countdown_widget_tz    IANA tz (default America/New_York)
+    Halloween: cd_hall_link, cd_hall_month(10), cd_hall_day(31),
+               cd_hall_design(hall-jack), cd_hall_cta_label
+    Christmas: cd_xmas_link, cd_xmas_month(12), cd_xmas_day(25),
+               cd_xmas_design(xmas-globe), cd_xmas_cta_label
+  Auto windows: Halloween Sep 15–Oct 31, Christmas Nov 1–Dec 25; else nothing.
+
+  Removed by lts-countdown.js (and hidden by CSS :has()) on any page that
+  already shows an inline countdown (.lts-cd--inline), so it never doubles up.
+
+  Rendered once in layout/theme.liquid: {% render 'countdown-widget' %}
+{%- endcomment -%}
+
+{%- liquid
+  assign mode = settings.countdown_widget_mode | default: 'auto'
+  assign cd_tz = settings.countdown_widget_tz | default: 'America/New_York'
+
+  assign cd_season = ''
+  if mode == 'halloween'
+    assign cd_season = 'halloween'
+  elsif mode == 'christmas'
+    assign cd_season = 'christmas'
+  elsif mode == 'off'
+    assign cd_season = ''
+  else
+    assign m = 'now' | date: '%m' | plus: 0
+    assign d = 'now' | date: '%d' | plus: 0
+    assign md = m | times: 100 | plus: d
+    if md >= 915 and md <= 1031
+      assign cd_season = 'halloween'
+    elsif md >= 1101 and md <= 1225
+      assign cd_season = 'christmas'
+    endif
+  endif
+
+  if cd_season == 'halloween'
+    assign w_class = 'w-hall'
+    assign w_design = settings.cd_hall_design | default: 'hall-jack'
+    assign w_link = settings.cd_hall_link
+    assign w_month = settings.cd_hall_month | default: 10
+    assign w_day = settings.cd_hall_day | default: 31
+    assign w_cta = settings.cd_hall_cta_label | default: 'See the Halloween countdown'
+  elsif cd_season == 'christmas'
+    assign w_class = 'w-xmas'
+    assign w_design = settings.cd_xmas_design | default: 'xmas-globe'
+    assign w_link = settings.cd_xmas_link
+    assign w_month = settings.cd_xmas_month | default: 12
+    assign w_day = settings.cd_xmas_day | default: 25
+    assign w_cta = settings.cd_xmas_cta_label | default: 'See the Christmas countdown'
+  endif
+-%}
+
+{%- if cd_season != blank -%}
+  <div class="lts-cdw {{ w_class }}{% if settings.countdown_widget_transparent %} lts-cdw--transparent{% endif %}" data-widget-key="{{ cd_season }}">
+    <button class="close" type="button" aria-label="Dismiss" data-cdw-close>✕</button>
+    {% render 'countdown-card',
+      design: w_design,
+      is_widget: true,
+      target_month: w_month,
+      target_day: w_day,
+      reference_tz: cd_tz,
+      recurring: true,
+      end_behavior: 'hide',
+      cta_label: w_cta,
+      cta_link: w_link,
+      transparent_bg: settings.countdown_widget_transparent
+    %}
+  </div>
+{%- endif -%}

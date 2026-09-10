@@ -1,0 +1,226 @@
+{%- comment -%}
+  Discover (page listing) menu type.
+  A single static panel (no category switching) mirroring the approved wireframe
+  (docs/plans/megamenu-wireframes/index.html — the "TYPE 3 · DISCOVER" panel):
+
+    - LEFT  "Explore" column  ← block_settings.discover_links  (link_list)
+        For each link in `discover_links.links`: an icon tile + label linking to
+        `link.url`. Icons/tile gradients cycle a small palette by index so the
+        column stays clean for any number of links.
+    - MIDDLE "New this week" column ← block_settings.discover_blog  (blog)
+        `discover_blog.articles limit: 3` — each row: a thumbnail (article.image,
+        tinted fallback block), a small tag/eyebrow, the article title (→
+        article.url) and the published date. Omitted entirely if no blog is set.
+    - RIGHT  feature card ← discover_feature_page (page) + discover_feature_image (image)
+        A gradient card (the feature image as background if set, else the brand red
+        gradient) with an eyebrow, the page title (default "The Heart of Love to
+        Sing"), a short excerpt (page content, stripped + truncated) and a
+        "Read our story →" button to `discover_feature_page.url` (falls back to /).
+
+  Height / JS note (same as Shop):
+    Discover has NO `megamenu="item"` / `products-container` / logo hooks, so
+    header-megamenu.js (assets/header-megamenu.js) measures 0 for every source and
+    sets `--megamenu-height: 0px` on <header-megamenu>. The base rule
+    `.megamenu { height: var(--megamenu-height, auto) }` would then collapse the
+    card. The appended CSS forces `.megamenu--discover { height: auto;
+    min-height: 32rem }` — source order beats the base rule — so the panel is
+    content-driven and never collapses. `megamenu="main-wrapper"` is kept only so
+    the JS padding read is harmless (it never finds items to switch).
+
+  Accepts: block_settings, link
+{%- endcomment -%}
+
+{%- liquid
+  assign discover_links = block_settings.discover_links
+  assign discover_blog = block_settings.discover_blog
+  assign feature_page = block_settings.discover_feature_page
+  assign feature_image = block_settings.discover_feature_image
+
+  assign explore_heading = block_settings.discover_explore_heading | default: 'Explore'
+  assign new_heading = block_settings.discover_new_heading | default: 'New this week'
+  assign new_cta_text = block_settings.discover_new_cta_text | default: 'Read the latest'
+
+  assign has_links = false
+  if discover_links != blank and discover_links.links.size > 0
+    assign has_links = true
+  endif
+
+  assign has_blog = false
+  if discover_blog != blank and discover_blog.articles.size > 0
+    assign has_blog = true
+  endif
+-%}
+
+<div class="header__megamenu">
+  <header-megamenu class="megamenu megamenu--discover">
+    <div
+      class="megamenu__inner megamenu__inner--discover"
+      megamenu="main-wrapper"
+    >
+      <div class="megamenu__discover-grid{% unless has_blog %} megamenu__discover-grid--no-blog{% endunless %}">
+        {%- comment -%} LEFT — Explore links. {%- endcomment -%}
+        {%- if has_links -%}
+          <div class="megamenu__discover-col megamenu__discover-explore">
+            <p class="megamenu__discover-eyebrow">{{ explore_heading | escape }}</p>
+
+            <ul class="megamenu__discover-list list-unstyled">
+              {%- comment -%}
+                Flatten one level: if a top-level menu item has children (e.g. the
+                merchant nested the links under a "Discover" parent), render the
+                children; otherwise render the top-level link itself.
+
+                Each item is a bold label with a short muted descriptor beneath.
+                The descriptor is sourced from the linked resource when it's a
+                page: its SEO description meta (description_tag) if present, else
+                its content stripped + truncated. Non-page links (or pages with no
+                description) show just the label.
+              {%- endcomment -%}
+              {%- for top in discover_links.links -%}
+                {%- assign use_leaf = false -%}
+                {%- if top.links.size == 0 -%}{%- assign use_leaf = true -%}{%- endif -%}
+                {%- for child in top.links -%}
+                  {%- liquid
+                    # Descriptor: prefer the linked resource's CONTENT (page body);
+                    # for resources without content (e.g. a blog), fall back to its
+                    # SEO meta description. URL-only links have no object -> label only.
+                    assign ex_descriptor = ''
+                    if child.object != blank
+                      if child.object.content != blank
+                        assign ex_descriptor = child.object.content | strip_html | truncatewords: 24
+                      elsif child.object.metafields.global.description_tag != blank
+                        assign ex_descriptor = child.object.metafields.global.description_tag
+                      endif
+                    endif
+                  -%}
+                  <li class="megamenu__discover-item">
+                    <a href="{{ child.url }}" class="megamenu__discover-link full-unstyled-link focus-inset{% if child.active %} is-active{% endif %}">
+                      <b class="megamenu__discover-link-label">{{ child.title | escape }}</b>
+                      {%- if ex_descriptor != blank -%}
+                        <span class="megamenu__discover-link-desc">{{ ex_descriptor | escape }}</span>
+                      {%- endif -%}
+                    </a>
+                  </li>
+                {%- endfor -%}
+                {%- if use_leaf -%}
+                  {%- liquid
+                    assign ex_descriptor = ''
+                    if top.object != blank
+                      if top.object.content != blank
+                        assign ex_descriptor = top.object.content | strip_html | truncatewords: 24
+                      elsif top.object.metafields.global.description_tag != blank
+                        assign ex_descriptor = top.object.metafields.global.description_tag
+                      endif
+                    endif
+                  -%}
+                  <li class="megamenu__discover-item">
+                    <a href="{{ top.url }}" class="megamenu__discover-link full-unstyled-link focus-inset{% if top.active %} is-active{% endif %}">
+                      <b class="megamenu__discover-link-label">{{ top.title | escape }}</b>
+                      {%- if ex_descriptor != blank -%}
+                        <span class="megamenu__discover-link-desc">{{ ex_descriptor | escape }}</span>
+                      {%- endif -%}
+                    </a>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul><!-- /.megamenu__discover-list -->
+          </div><!-- /.megamenu__discover-explore -->
+        {%- endif -%}
+
+        {%- comment -%} MIDDLE — New this week (recent blog articles). {%- endcomment -%}
+        {%- if has_blog -%}
+          <div class="megamenu__discover-col megamenu__discover-news">
+            <p class="megamenu__discover-eyebrow">{{ new_heading | escape }}</p>
+
+            <div class="megamenu__discover-news-list">
+              {%- for article in discover_blog.articles limit: 3 -%}
+                <a
+                  href="{{ article.url }}"
+                  class="megamenu__discover-news-item full-unstyled-link focus-inset"
+                >
+                  <span class="megamenu__discover-news-thumb">
+                    {%- if article.image != blank -%}
+                      {%- liquid
+                        assign thumb_src = article.image | image_url: width: 200
+                        capture thumb_srcset
+                          render 'srcset', image: article.image
+                        endcapture
+                        render 'image', src: thumb_src, srcset: thumb_srcset, sizes: '6.4rem', alt: article.title, width: article.image.width, height: article.image.height, class: 'megamenu__discover-news-img'
+                      -%}
+                    {%- else -%}
+                      <span class="megamenu__discover-news-thumb-fallback" aria-hidden="true">
+                        {%- render 'icon', icon: 'music-note-single' -%}
+                      </span>
+                    {%- endif -%}
+                  </span>
+
+                  <span class="megamenu__discover-news-body">
+                    <span class="megamenu__discover-news-tag">{{ discover_blog.title | escape }}</span>
+                    <b class="megamenu__discover-news-title">{{ article.title | escape }}</b>
+                    <time
+                      class="megamenu__discover-news-date"
+                      datetime="{{ article.published_at | date: '%Y-%m-%d' }}"
+                    >
+                      {{- article.published_at | date: '%b %-d' -}}
+                    </time>
+                  </span>
+                </a>
+              {%- endfor -%}
+            </div><!-- /.megamenu__discover-news-list -->
+
+            {%- if discover_blog.url != blank -%}
+              <a
+                href="{{ discover_blog.url }}"
+                class="megamenu__discover-news-cta full-unstyled-link focus-inset"
+              >
+                <span>{{ new_cta_text | escape }}</span>
+                <i>{%- render 'icon', icon: 'chevron-right' -%}</i>
+              </a>
+            {%- endif -%}
+          </div><!-- /.megamenu__discover-news -->
+        {%- endif -%}
+
+        {%- comment -%} RIGHT — Heart of Love to Sing feature card. {%- endcomment -%}
+        {%- liquid
+          assign feature_title = 'The Heart of Love to Sing'
+          if feature_page != blank and feature_page.title != blank
+            assign feature_title = feature_page.title
+          endif
+
+          assign feature_url = '/'
+          if feature_page != blank and feature_page.url != blank
+            assign feature_url = feature_page.url
+          endif
+
+          assign feature_excerpt = ''
+          if feature_page != blank and feature_page.content != blank
+            assign feature_excerpt = feature_page.content | strip_html | truncatewords: 20
+          endif
+        -%}
+        <a
+          href="{{ feature_url }}"
+          class="megamenu__discover-feature full-unstyled-link focus-inset{% if feature_image != blank %} megamenu__discover-feature--image{% endif %}"
+          {%- if feature_image != blank %} style="background-image: linear-gradient(160deg, rgba(82,27,26,.25) 0%, rgba(82,27,26,.78) 100%), url('{{ feature_image | image_url: width: 800 }}');"{% endif -%}
+        >
+          <span class="megamenu__discover-feature-wm" aria-hidden="true">
+            {%- render 'icon', icon: 'heart-with-note' -%}
+          </span>
+
+          <span class="megamenu__discover-feature-body">
+            <span class="megamenu__discover-feature-eyebrow">Our story</span>
+            <span class="megamenu__discover-feature-title">{{ feature_title | escape }}</span>
+            {%- if feature_excerpt != blank -%}
+              <span class="megamenu__discover-feature-text">{{ feature_excerpt | escape }}</span>
+            {%- else -%}
+              <span class="megamenu__discover-feature-text">Why a little family in New Zealand has helped millions of children find their voice.</span>
+            {%- endif -%}
+
+            <span class="megamenu__discover-feature-cta button button--sm">
+              <span>Read our story</span>
+              <i>{%- render 'icon', icon: 'chevron-right' -%}</i>
+            </span>
+          </span>
+        </a><!-- /.megamenu__discover-feature -->
+      </div><!-- /.megamenu__discover-grid -->
+    </div><!-- /.megamenu__inner -->
+  </header-megamenu><!-- /.megamenu -->
+</div><!-- /.header__megamenu -->

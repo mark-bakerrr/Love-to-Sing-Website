@@ -1,0 +1,36 @@
+{%- comment -%}
+  One recommended product in the cart drawer's extras rail.
+  Accepts: product {Product}
+  Usage: {%- render 'cart-upsell-card', product: some_product -%}
+{%- endcomment -%}
+{%- assign v = product.selected_or_first_available_variant -%}
+<div class="cart-upsell">
+  <a href="{{ product.url }}" class="cart-upsell__media" tabindex="-1" aria-hidden="true">
+    {%- if product.featured_image != blank -%}
+      <img
+        src="{{ product.featured_image | image_url: width: 160 }}"
+        srcset="{{ product.featured_image | image_url: width: 120 }} 120w, {{ product.featured_image | image_url: width: 240 }} 240w"
+        sizes="64px"
+        width="64"
+        height="64"
+        alt=""
+        loading="lazy"
+      >
+    {%- endif -%}
+  </a>
+  <div class="cart-upsell__info">
+    <a href="{{ product.url }}" class="cart-upsell__title">{{ product.title | escape }}</a>
+    <span class="cart-upsell__price">{{ product.price | money }}</span>
+  </div>
+  <button
+    type="button"
+    class="cart-upsell__add"
+    data-cart-upsell-add
+    data-variant-id="{{ v.id }}"
+    {% unless v.available %}disabled{% endunless %}
+    aria-label="{{ 'products.product.add_to_cart' | t | default: 'Add to cart' }} — {{ product.title | escape }}"
+  >
+    {%- render 'icon-cart' -%}
+    <span class="cart-upsell__add-check" aria-hidden="true">&#10003;</span>
+  </button>
+</div>

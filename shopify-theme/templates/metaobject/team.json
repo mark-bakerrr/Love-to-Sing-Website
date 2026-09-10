@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "main_team_bio_dHNpNq": {
+      "type": "main-team-bio",
+      "name": "Team bio",
+      "settings": {
+        "hero_heart_opacity": 7
+      }
+    }
+  },
+  "order": [
+    "main_team_bio_dHNpNq"
+  ]
+}

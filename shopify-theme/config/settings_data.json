@@ -32,6 +32,13 @@
         "settings": {
           "enabled": true
         }
+      },
+      "82640071553099820001": {
+        "type": "shopify://apps/love-to-sing-studio/blocks/shop-drawer-embed/019d28e6-2806-70a0-bdbd-e95fa91f79ff",
+        "disabled": false,
+        "settings": {
+          "enabled": true
+        }
       }
     },
     "color_schemes": {

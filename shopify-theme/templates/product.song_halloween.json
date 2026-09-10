@@ -35,12 +35,29 @@
             "title": "Youtube Music",
             "link": "https://music.youtube.com/channel/UCjDkTzwSifCid5vl3gLtfbQ"
           }
+        },
+        "countdown_block": {
+          "type": "countdown",
+          "settings": {
+            "design": "hall-jack",
+            "target_month": 10,
+            "target_day": 31,
+            "reference_tz": "America/New_York",
+            "recurring": true,
+            "end_behavior": "message",
+            "end_message": "Happy Halloween! 🎃",
+            "grace_days": 6,
+            "cta_label": "See the Halloween countdown",
+            "cta_link": "/pages/halloween-countdown",
+            "transparent_bg": false
+          }
         }
       },
       "block_order": [
         "icon_button_iRFNKY",
         "icon_button_hapJGT",
-        "icon_button_MYCCeP"
+        "icon_button_MYCCeP",
+        "countdown_block"
       ],
       "settings": {
         "background_image": "shopify://shop_images/hearts-background.png",
@@ -328,6 +345,31 @@
         "title": "Join Our Newsletter",
         "subtitle": "Sign up to our newsletter and we will send you a free song!"
       }
+    },
+    "faq_downloads": {
+      "type": "faq",
+      "blocks": {
+        "grp": {
+          "type": "faq_group",
+          "settings": {
+            "faq_group": "faq-downloads",
+            "max_items": 0
+          }
+        }
+      },
+      "block_order": [
+        "grp"
+      ],
+      "name": "FAQ",
+      "settings": {
+        "border_top": false,
+        "border_bottom": false,
+        "open_first": false,
+        "title": "How to get your music",
+        "subtitle": "Downloading your songs is quick and easy — here's everything you need to know.",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
     }
   },
   "order": [
@@ -335,6 +377,7 @@
     "custom_html_xJpEXA",
     "featured_products_3X66Cw",
     "song_about_mDzcLq",
+    "faq_downloads",
     "featured_articles_qKk6Fr",
     "custom_html_kicEzH",
     "videos_C7Cgkr",

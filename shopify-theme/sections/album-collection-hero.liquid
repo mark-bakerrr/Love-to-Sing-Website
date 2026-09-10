@@ -1,0 +1,226 @@
+{%- comment -%}
+  Album collection hero — red hearts banner with a fanned spread of the
+  collection's OWN real album covers (pulled live from collection.products).
+  Used by templates/collection.albums.json. Works for any album collection:
+  Digital Albums, Christmas Albums, Kids Music Albums — each fans its own covers.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign max = s.cover_count | default: 5
+  # collect album products that actually have artwork
+  assign covers = collection.products | where: 'featured_image'
+-%}
+
+<section
+  class="album-hero"
+  data-section-id="{{ section.id }}"
+  style="background: {{ s.background }}; --content: {{ s.content_color | default: '#ffffff' }};"
+>
+  {%- comment -%} Background treatment mirrors the Hero Banner: bg colour → image at media_opacity → overlay. {%- endcomment -%}
+  {%- if s.image != blank -%}
+    <span
+      class="album-hero__media"
+      aria-hidden="true"
+      style="background-image: url({{ s.image | image_url: width: 2200 }}); opacity: {{ s.media_opacity | default: 5 | divided_by: 100.0 }};"
+    ></span>
+  {%- endif -%}
+  {%- if s.overlay_color != blank and s.overlay_opacity > 0 -%}
+    <span
+      class="album-hero__overlay"
+      aria-hidden="true"
+      style="background: {{ s.overlay_color }}; opacity: {{ s.overlay_opacity | divided_by: 100.0 }};"
+    ></span>
+  {%- endif -%}
+
+  <div class="album-hero__inner">
+    <div class="album-hero__copy">
+      {%- if s.eyebrow != blank -%}<p class="album-hero__eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+      {%- if s.title != blank -%}
+        {%- liquid
+          assign tag = 'h2'
+          if section.index == 1
+            assign tag = 'h1'
+          endif
+        -%}
+        <{{ tag }} class="album-hero__title">{{ s.title | escape }}</{{ tag }}>
+      {%- endif -%}
+      {%- if s.content != blank -%}<p class="album-hero__text">{{ s.content }}</p>{%- endif -%}
+    </div>
+
+    {%- if covers.size > 0 -%}
+      <div class="album-hero__stage" aria-hidden="true">
+        <ul class="album-hero__fan" style="--count: {{ covers.size | at_most: max }};">
+          {%- for product in covers limit: max -%}
+            <li class="album-hero__cover" style="--n: {{ forloop.index0 }};">
+              <img
+                src="{{ product.featured_image | image_url: width: 600 }}"
+                srcset="{{ product.featured_image | image_url: width: 300 }} 300w, {{ product.featured_image | image_url: width: 600 }} 600w"
+                sizes="24rem"
+                width="300" height="300"
+                alt="" loading="eager">
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{%- style -%}
+  .album-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    /* background colour comes from the section setting (inline style) */
+    color: var(--content, #fff);
+  }
+  /* Background image layer (hearts) — sits over the bg colour at media_opacity.
+     Full-width natural scale (not cover-zoom) keeps the heart pattern legible at
+     a low opacity, matching the video-downloads hero. Normal blend, no screen. */
+  .album-hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% auto;
+  }
+  /* Tint overlay over the image, under the content. */
+  .album-hero__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .album-hero__inner {
+    position: relative;
+    z-index: 2;
+    width: min(120rem, 100% - 4rem);
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    align-items: center;
+    gap: clamp(2rem, 5vw, 6rem);
+    /* Top padding reserves space for the transparent overlay header (position:
+       absolute on non-solid templates), matching the hero-banner section. */
+    padding: clamp(11rem, 4vw + 9rem, 14rem) 0 clamp(4rem, 6vw, 7rem);
+    min-height: clamp(38rem, 48vw, 56rem);
+  }
+
+  /* ── Copy ───────────────────────────────────────────────────────────── */
+  .album-hero__copy { max-width: 46rem; }
+  .album-hero__eyebrow {
+    margin: 0 0 1.2rem;
+    font-size: var(--fz-xs, 1.2rem);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--content, #fff), transparent 18%);
+  }
+  .album-hero__title {
+    margin: 0;
+    color: var(--content, #fff); /* theme sets a dark heading colour on h1/h2 — override */
+    font-size: clamp(3.2rem, 5vw, 5.4rem);
+    font-weight: 800;
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .album-hero__text {
+    margin: 1.6rem 0 0;
+    font-size: var(--fz-r, 1.6rem);
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--content, #fff), transparent 10%);
+    max-width: 42ch;
+  }
+
+  /* ── Fanned real covers ─────────────────────────────────────────────── */
+  .album-hero__stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: clamp(30rem, 40vw, 40rem);
+  }
+  .album-hero__fan {
+    list-style: none;
+    margin: 0; padding: 0;
+    position: relative;
+    z-index: 2;
+    width: clamp(18rem, 24vw, 24rem);
+    aspect-ratio: 1 / 1;
+  }
+  .album-hero__cover {
+    position: absolute;
+    inset: 0;
+    /* fan around the centre card: index 0..count-1, centred on (count-1)/2 */
+    --mid: calc((var(--count) - 1) / 2);
+    --offset: calc(var(--n) - var(--mid));
+    transform: rotate(calc(var(--offset) * 9deg)) translateX(calc(var(--offset) * 3.6rem));
+    transform-origin: bottom center;
+    border-radius: 0.9rem;
+    overflow: hidden;
+    box-shadow: 0 1.6rem 3.2rem rgba(0,0,0,0.34);
+    transition: transform 0.5s cubic-bezier(0.22,1,0.36,1);
+  }
+  .album-hero__cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* gentle spread on hover of the whole stage */
+  .album-hero__stage:hover .album-hero__cover {
+    transform: rotate(calc(var(--offset) * 11deg)) translateX(calc(var(--offset) * 4.4rem)) translateY(-0.5rem);
+  }
+
+  /* ── Responsive ─────────────────────────────────────────────────────── */
+  @media (max-width: 749px) {
+    .album-hero__inner {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 3.2rem;
+    }
+    .album-hero__copy { max-width: none; margin-inline: auto; }
+    .album-hero__text { margin-inline: auto; }
+    .album-hero__stage { order: 2; min-height: 26rem; }
+    .album-hero__fan { width: clamp(17rem, 60vw, 21rem); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .album-hero__cover { transition: none; }
+    .album-hero__stage:hover .album-hero__cover {
+      transform: rotate(calc(var(--offset) * 9deg)) translateX(calc(var(--offset) * 3.6rem));
+    }
+  }
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Album hero",
+  "settings": [
+    { "type": "header", "content": "Background" },
+    {
+      "type": "color_background",
+      "id": "background",
+      "label": "Background colour",
+      "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+    },
+    {
+      "type": "range", "id": "media_opacity", "label": "Background image opacity",
+      "unit": "%", "min": 0, "max": 100, "step": 1, "default": 6
+    },
+    { "type": "image_picker", "id": "image", "label": "Background image" },
+    {
+      "type": "color_background",
+      "id": "overlay_color",
+      "label": "Overlay colour",
+      "default": "radial-gradient(50% 50% at 50% 50%, #B91F1C 0%, #781D1B 100%)"
+    },
+    {
+      "type": "range", "id": "overlay_opacity", "label": "Overlay opacity",
+      "unit": "%", "min": 0, "max": 100, "step": 1, "default": 20
+    },
+    { "type": "color", "id": "content_color", "label": "Text colour", "default": "#ffffff" },
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Buy Music Albums" },
+    { "type": "text", "id": "title", "label": "Title", "default": "Share the joy of Love to Sing Music" },
+    { "type": "richtext", "id": "content", "label": "Text", "default": "<p>Take our music offline — every album as instant MP3 downloads.</p>" },
+    { "type": "range", "id": "cover_count", "label": "Album covers in the fan", "min": 3, "max": 7, "step": 1, "default": 5 }
+  ],
+  "presets": [{ "name": "Album hero" }]
+}
+{% endschema %}

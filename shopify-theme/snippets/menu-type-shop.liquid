@@ -1,0 +1,416 @@
+{%- comment -%}
+  Shop (ecommerce) menu type — a composable, merchant-driven panel.
+
+  A 3-part grid inside the floating card:
+
+    - LEFT  category links ← block_settings.shop_menu (link_list). Narrow rail.
+        Keeps the original two shapes:
+          * NESTED — if ANY top-level link has children: a column per top-level
+            link (bold linked heading + its child links).
+          * FLAT — otherwise: a single stack of RICH ROWS (bold label + a short
+            muted descriptor pulled from the linked collection's `description`
+            or page's `content`).
+    - CENTRE stack (flexible) ← up to three INDEPENDENTLY TOGGLEABLE sections,
+        each rendered only when its checkbox is on, each led by its own heading:
+          * Featured products (`shop_show_products`) — a responsive grid of
+            compact product cards from `shop_products_collection.products`
+            (limited by `shop_products_limit`): cover → product.url, title,
+            price.
+          * Collections carousel (`shop_show_collections`) — a CSS-only
+            horizontal scroll-snap row of collection tiles from
+            `shop_collections`: cover (collection.image → featured_image →
+            first product image), title overlaid, → collection.url.
+          * Featured albums (`shop_show_albums`) — a row of album cards from
+            `shop_albums` (product_list): cover, title, price, a small "Shop →".
+        The centre stack scrolls vertically if the composed content is tall, so
+        the whole card never exceeds its max-height.
+    - RIGHT featured card ← shop_feature_product, shown only when
+        `shop_show_feature` is on AND a product is set. Compact tinted "album"
+        card: cover, "FEATURED" eyebrow, title, price, "Shop now →".
+
+  Graceful fallback: if none of the three centre toggles are on and there's no
+  featured card, the panel still renders the links (and, if present, the
+  featured card) — an unconfigured Shop block looks fine.
+
+  Height / JS note:
+    Shop has NO `megamenu="item"` / `products-container` / logo hooks, so
+    header-megamenu.js measures 0 for every source and sets
+    `--megamenu-height: 0px` on <header-megamenu>. The appended CSS forces
+    `.megamenu--shop { height: auto; min-height: 32rem }` (see the "Shop menu
+    type" block in assets/megamenu.css) — source order beats the base
+    `.megamenu { height: var(--megamenu-height, auto) }` rule — so the panel is
+    content-driven and never collapses. `megamenu="main-wrapper"` is kept only
+    so the JS padding read is harmless (it never finds items to switch).
+
+  ALL text is explicitly coloured (dark on the white panel, white on the
+  coloured feature/collection covers) so nothing inherits the header's colour
+  context when the floating card desyncs the header's `.menu-open` class.
+
+  Accepts: block_settings, link
+{%- endcomment -%}
+
+{%- liquid
+  assign shop_menu = block_settings.shop_menu
+  assign feature = block_settings.shop_feature_product
+
+  assign show_feature = block_settings.shop_show_feature
+  assign show_products = block_settings.shop_show_products
+  assign show_collections = block_settings.shop_show_collections
+  assign show_albums = block_settings.shop_show_albums
+
+  # Resolve which centre sections actually have content to show.
+  assign products_coll = block_settings.shop_products_collection
+  assign products_limit = block_settings.shop_products_limit | default: 6
+  assign has_products = false
+  if show_products and products_coll != blank and products_coll.products.size > 0
+    assign has_products = true
+  endif
+
+  assign collections_list = block_settings.shop_collections
+  assign has_collections = false
+  if show_collections and collections_list != blank and collections_list.size > 0
+    assign has_collections = true
+  endif
+
+  assign albums_list = block_settings.shop_albums
+  assign has_albums = false
+  if show_albums and albums_list != blank and albums_list.size > 0
+    assign has_albums = true
+  endif
+
+  assign has_centre = false
+  if has_products or has_collections or has_albums
+    assign has_centre = true
+  endif
+
+  assign has_feature_card = false
+  if show_feature and feature != blank
+    assign has_feature_card = true
+  endif
+
+  assign products_heading = block_settings.shop_products_heading | default: 'Featured products'
+  assign collections_heading = block_settings.shop_collections_heading | default: 'Browse collections'
+  assign albums_heading = block_settings.shop_albums_heading | default: 'Featured albums'
+
+  assign has_links = false
+  if shop_menu != blank and shop_menu.links.size > 0
+    assign has_links = true
+  endif
+
+  # Detect the menu shape: nested if ANY top-level link has children.
+  assign is_nested = false
+  if has_links
+    for parent in shop_menu.links
+      if parent.links.size > 0
+        assign is_nested = true
+        break
+      endif
+    endfor
+  endif
+-%}
+
+<div class="header__megamenu">
+  <header-megamenu class="megamenu megamenu--shop">
+    <div
+      class="megamenu__inner megamenu__inner--shop"
+      megamenu="main-wrapper"
+    >
+      <div
+        class="megamenu__shop-grid
+          {%- if has_links %} megamenu__shop-grid--has-links{% endif -%}
+          {%- if has_centre %} megamenu__shop-grid--has-centre{% endif -%}
+          {%- if has_feature_card %} megamenu__shop-grid--has-feature{% endif -%}"
+      >
+        {%- comment -%} LEFT — category links (narrow rail). {%- endcomment -%}
+        {%- if has_links -%}
+          <div class="megamenu__shop-links-area{% if is_nested %} megamenu__shop-links-area--nested{% else %} megamenu__shop-links-area--flat{% endif %}">
+            {%- if is_nested -%}
+              {%- comment -%} NESTED — a column per top-level link. {%- endcomment -%}
+              {%- for parent in shop_menu.links -%}
+                <div class="megamenu__shop-col">
+                  {%- if parent.links.size > 0 -%}
+                    <a
+                      href="{{ parent.url }}"
+                      class="megamenu__shop-heading full-unstyled-link focus-inset"
+                    >
+                      {{ parent.title | escape }}
+                    </a>
+
+                    <ul class="megamenu__shop-links list-unstyled">
+                      {%- for child in parent.links -%}
+                        <li class="megamenu__shop-item">
+                          <a
+                            href="{{ child.url }}"
+                            class="megamenu__shop-link full-unstyled-link focus-inset{% if child.active %} is-active{% endif %}"
+                          >
+                            <span class="megamenu__shop-link-label">{{ child.title | escape }}</span>
+                          </a>
+                        </li>
+                      {%- endfor -%}
+                    </ul><!-- /.megamenu__shop-links -->
+                  {%- else -%}
+                    {%- comment -%} No children in a nested menu: standalone column link. {%- endcomment -%}
+                    <ul class="megamenu__shop-links list-unstyled">
+                      <li class="megamenu__shop-item">
+                        <a
+                          href="{{ parent.url }}"
+                          class="megamenu__shop-link megamenu__shop-link--standalone full-unstyled-link focus-inset{% if parent.active %} is-active{% endif %}"
+                        >
+                          <span class="megamenu__shop-link-label">{{ parent.title | escape }}</span>
+                        </a>
+                      </li>
+                    </ul><!-- /.megamenu__shop-links -->
+                  {%- endif -%}
+                </div><!-- /.megamenu__shop-col -->
+              {%- endfor -%}
+            {%- else -%}
+              {%- comment -%}
+                FLAT — a stack of rich rows (label + descriptor). The descriptor
+                comes from the linked resource: a collection's `description`, or
+                a page's `content` (stripped + truncated). URL-only links (no
+                object) and description-less resources show just the label.
+              {%- endcomment -%}
+              <ul class="megamenu__shop-rich list-unstyled">
+                {%- for parent in shop_menu.links -%}
+                  {%- liquid
+                    assign shop_descriptor = ''
+                    if parent.object != blank
+                      if parent.object.description != blank
+                        assign shop_descriptor = parent.object.description | strip_html | truncatewords: 14
+                      elsif parent.object.content != blank
+                        assign shop_descriptor = parent.object.content | strip_html | truncatewords: 12
+                      endif
+                    endif
+                  -%}
+                  <li class="megamenu__shop-rich-item">
+                    <a
+                      href="{{ parent.url }}"
+                      class="megamenu__shop-rich-link full-unstyled-link focus-inset{% if parent.active %} is-active{% endif %}"
+                    >
+                      <b class="megamenu__shop-rich-label">{{ parent.title | escape }}</b>
+                      {%- if shop_descriptor != blank -%}
+                        <span class="megamenu__shop-rich-desc">{{ shop_descriptor | escape }}</span>
+                      {%- endif -%}
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul><!-- /.megamenu__shop-rich -->
+            {%- endif -%}
+          </div><!-- /.megamenu__shop-links-area -->
+        {%- endif -%}
+
+        {%- comment -%} CENTRE — composable, toggleable sections (scrolls if tall). {%- endcomment -%}
+        {%- if has_centre -%}
+          <div class="megamenu__shop-centre">
+            {%- comment -%} ---- Featured products grid ---- {%- endcomment -%}
+            {%- if has_products -%}
+              <section class="megamenu__shop-section megamenu__shop-section--products">
+                <p class="megamenu__shop-eyebrow">{{ products_heading | escape }}</p>
+
+                <div class="megamenu__shop-products">
+                  {%- for product in products_coll.products limit: products_limit -%}
+                    <a
+                      href="{{ product.url }}"
+                      class="megamenu__shop-pcard full-unstyled-link focus-inset"
+                    >
+                      <span class="megamenu__shop-pcard-cover">
+                        {%- if product.featured_media != blank -%}
+                          {%- liquid
+                            assign p_img = product.featured_media.preview_image
+                            assign p_src = p_img | image_url: width: 320
+                            capture p_srcset
+                              render 'srcset', image: p_img
+                            endcapture
+                            render 'image', src: p_src, srcset: p_srcset, sizes: '16rem', alt: product.title, width: p_img.width, height: p_img.height, class: 'megamenu__shop-pcard-img'
+                          -%}
+                        {%- else -%}
+                          <span class="megamenu__shop-cover-fallback" aria-hidden="true">
+                            {%- render 'icon', icon: 'music-note-single' -%}
+                          </span>
+                        {%- endif -%}
+                      </span>
+
+                      <span class="megamenu__shop-pcard-body">
+                        <span class="megamenu__shop-pcard-title">{{ product.title | escape }}</span>
+                        <span class="megamenu__shop-pcard-price">
+                          {%- if product.compare_at_price > product.price -%}
+                            <span class="megamenu__shop-pcard-now">{{ product.price | money }}</span>
+                            <s class="megamenu__shop-pcard-was">{{ product.compare_at_price | money }}</s>
+                          {%- else -%}
+                            {{ product.price | money }}
+                          {%- endif -%}
+                        </span>
+                      </span>
+                    </a>
+                  {%- endfor -%}
+                </div><!-- /.megamenu__shop-products -->
+              </section>
+            {%- endif -%}
+
+            {%- comment -%} ---- Collections carousel (CSS scroll-snap) ---- {%- endcomment -%}
+            {%- if has_collections -%}
+              <section class="megamenu__shop-section megamenu__shop-section--collections">
+                <p class="megamenu__shop-eyebrow">{{ collections_heading | escape }}</p>
+
+                <div class="megamenu__shop-carousel" role="list">
+                  {%- for coll in collections_list -%}
+                    {%- liquid
+                      assign coll_img = coll.image
+                      if coll_img == blank
+                        assign coll_img = coll.featured_image
+                      endif
+                      if coll_img == blank and coll.products.first != blank
+                        assign coll_img = coll.products.first.featured_media.preview_image
+                      endif
+                    -%}
+                    <a
+                      href="{{ coll.url }}"
+                      class="megamenu__shop-tile full-unstyled-link focus-inset"
+                      role="listitem"
+                    >
+                      <span class="megamenu__shop-tile-cover">
+                        {%- if coll_img != blank -%}
+                          {%- liquid
+                            assign c_src = coll_img | image_url: width: 360
+                            capture c_srcset
+                              render 'srcset', image: coll_img
+                            endcapture
+                            render 'image', src: c_src, srcset: c_srcset, sizes: '18rem', alt: coll.title, width: coll_img.width, height: coll_img.height, class: 'megamenu__shop-tile-img'
+                          -%}
+                        {%- else -%}
+                          <span class="megamenu__shop-cover-fallback" aria-hidden="true">
+                            {%- render 'icon', icon: 'music-note-single' -%}
+                          </span>
+                        {%- endif -%}
+                        <span class="megamenu__shop-tile-title">{{ coll.title | escape }}</span>
+                      </span>
+                    </a>
+                  {%- endfor -%}
+                </div><!-- /.megamenu__shop-carousel -->
+              </section>
+            {%- endif -%}
+
+            {%- comment -%} ---- Featured albums row ---- {%- endcomment -%}
+            {%- if has_albums -%}
+              <section class="megamenu__shop-section megamenu__shop-section--albums">
+                <p class="megamenu__shop-eyebrow">{{ albums_heading | escape }}</p>
+
+                <div class="megamenu__shop-albums">
+                  {%- for album in albums_list -%}
+                    <div class="megamenu__shop-acard">
+                      <a
+                        href="{{ album.url }}"
+                        class="megamenu__shop-acard-cover full-unstyled-link focus-inset"
+                        tabindex="-1"
+                        aria-hidden="true"
+                      >
+                        {%- if album.featured_media != blank -%}
+                          {%- liquid
+                            assign a_img = album.featured_media.preview_image
+                            assign a_src = a_img | image_url: width: 320
+                            capture a_srcset
+                              render 'srcset', image: a_img
+                            endcapture
+                            render 'image', src: a_src, srcset: a_srcset, sizes: '14rem', alt: album.title, width: a_img.width, height: a_img.height, class: 'megamenu__shop-acard-img'
+                          -%}
+                        {%- else -%}
+                          <span class="megamenu__shop-cover-fallback" aria-hidden="true">
+                            {%- render 'icon', icon: 'music-note-single' -%}
+                          </span>
+                        {%- endif -%}
+                      </a>
+
+                      <div class="megamenu__shop-acard-body">
+                        <a
+                          href="{{ album.url }}"
+                          class="megamenu__shop-acard-title full-unstyled-link focus-inset"
+                        >
+                          {{ album.title | escape }}
+                        </a>
+                        <span class="megamenu__shop-acard-price">
+                          {%- if album.compare_at_price > album.price -%}
+                            <span class="megamenu__shop-acard-now">{{ album.price | money }}</span>
+                            <s class="megamenu__shop-acard-was">{{ album.compare_at_price | money }}</s>
+                          {%- else -%}
+                            {{ album.price | money }}
+                          {%- endif -%}
+                        </span>
+                        <a
+                          href="{{ album.url }}"
+                          class="megamenu__shop-acard-cta full-unstyled-link focus-inset"
+                        >
+                          <span>Shop</span>
+                          <i>{%- render 'icon', icon: 'chevron-right' -%}</i>
+                        </a>
+                      </div><!-- /.megamenu__shop-acard-body -->
+                    </div><!-- /.megamenu__shop-acard -->
+                  {%- endfor -%}
+                </div><!-- /.megamenu__shop-albums -->
+              </section>
+            {%- endif -%}
+          </div><!-- /.megamenu__shop-centre -->
+        {%- endif -%}
+
+        {%- comment -%} RIGHT — featured product card. {%- endcomment -%}
+        {%- if has_feature_card -%}
+          {%- liquid
+            assign feature_image = feature.featured_media
+            assign shop_now_label = 'Shop now'
+          -%}
+          <aside class="megamenu__shop-feature">
+            <a
+              href="{{ feature.url }}"
+              class="megamenu__shop-feature-cover full-unstyled-link focus-inset"
+              tabindex="-1"
+              aria-hidden="true"
+            >
+              {%- if feature_image != blank -%}
+                <div class="media megamenu__shop-feature-media">
+                  {%- liquid
+                    assign feature_src = feature_image | image_url: width: 600
+                    capture feature_srcset
+                      render 'srcset', image: feature_image
+                    endcapture
+                    render 'image', src: feature_src, srcset: feature_srcset, sizes: '30rem', alt: feature.title, width: feature_image.width, height: feature_image.height, class: 'megamenu__shop-feature-img'
+                  -%}
+                </div>
+              {%- else -%}
+                <span class="megamenu__shop-feature-placeholder">
+                  {%- render 'icon', icon: 'music-note-single' -%}
+                </span>
+              {%- endif -%}
+            </a>
+
+            <div class="megamenu__shop-feature-body">
+              <p class="megamenu__shop-feature-eyebrow">Featured</p>
+
+              <a
+                href="{{ feature.url }}"
+                class="megamenu__shop-feature-title full-unstyled-link focus-inset"
+              >
+                {{ feature.title | escape }}
+              </a>
+
+              <p class="megamenu__shop-feature-price">
+                {%- if feature.compare_at_price > feature.price -%}
+                  <span class="megamenu__shop-feature-now">{{ feature.price | money }}</span>
+                  <s class="megamenu__shop-feature-was">{{ feature.compare_at_price | money }}</s>
+                {%- else -%}
+                  <span class="megamenu__shop-feature-now">{{ feature.price | money }}</span>
+                {%- endif -%}
+              </p>
+
+              {%- render 'button',
+                type: 'link',
+                icon_position: 'right',
+                value: shop_now_label,
+                href: feature.url,
+                class: 'megamenu__shop-feature-cta'
+              -%}
+            </div><!-- /.megamenu__shop-feature-body -->
+          </aside><!-- /.megamenu__shop-feature -->
+        {%- endif -%}
+      </div><!-- /.megamenu__shop-grid -->
+    </div><!-- /.megamenu__inner -->
+  </header-megamenu><!-- /.megamenu -->
+</div><!-- /.header__megamenu -->

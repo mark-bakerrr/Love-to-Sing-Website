@@ -31,8 +31,7 @@
         "custom_template_logo_bA9Xdc": {
           "type": "custom_template_logo",
           "settings": {
-            "title": "product.song_christmas\ncollection.song-christmas",
-            "logo": "shopify://shop_images/logoHeader_137cd39d-c209-4893-829a-35ae85565d8c.png"
+            "title": "product.song_christmas\ncollection.song-christmas"
           }
         },
         "custom_template_logo_4Lp77c": {
@@ -45,7 +44,7 @@
         "custom_color_scheme_YXaibp": {
           "type": "custom_color_scheme",
           "settings": {
-            "title": "collection.song\ncollection\nproduct.song_christmas",
+            "title": "collection.song\ncollection\nproduct.song_christmas\nproduct.album",
             "color_scheme": "primary"
           }
         },
@@ -87,7 +86,7 @@
         "solid_header_zXUe4i": {
           "type": "solid_header",
           "settings": {
-            "title": "blog\narticle\nproduct\nproduct.song_lyrics\nproduct.song_christmas\nproduct.celebration-song-lyrics\nproduct.song_halloween\nproduct.song_kids\nproduct.video_download\nproduct.licenses\nproduct.single.album\ncollection\npage\npage.ai-content-studio"
+            "title": "blog\narticle\nproduct\nproduct.song_lyrics\nproduct.song_christmas\nproduct.celebration-song-lyrics\nproduct.song_halloween\nproduct.song_kids\nproduct.video_download\nproduct.licenses\nproduct.single.album\ncollection\npage\npage.ai-content-studio\nproduct.album\npage.licence-builder"
           }
         }
       },

@@ -1,0 +1,562 @@
+{%- comment -%}
+  Love to Sing - Licence Pricing section (Task 4, pricing-visibility plan).
+
+  The top pricing surface. A sticky org-type + size picker drives LIVE prices for
+  four option cards (Copyright / All-in-One [featured] / Streaming / Membership
+  [premium]). Replaces lts-licence-choices as the headline pricing block.
+
+  Live prices + variant ids are SSR'd from the four published licence products by an
+  EXPLICIT handle->grant map (NOT product.metafields.custom.license_type): the
+  org-membership product ALSO carries license_type=all_in_one, which would collide
+  with the real All-in-One licence. The map gives each product a distinct grant key.
+
+  Number->band thresholds (BANDS/RANGES/SIZE_WORD in the JS) mirror
+  studio/lib/services/license-config.ts SIZE_BANDS - the source of truth.
+
+  On every picker change (and once on load) the section dispatches a
+  `lts:size-change` document event {detail:{org,size,band}} so the Task 5
+  comparison table can react. Card buttons deep-link into /pages/licence-builder
+  with ?licence=<grant>&org=<org>[&size=<n>].
+{%- endcomment -%}
+
+{%- comment -%} ── SSR the live price/variant blob from the licence products ── {%- endcomment -%}
+{%- assign lic_map = "copyright-licence:copyright,streaming-licence:streaming,all-in-one-licence:all_in_one,organisation-membership:membership" | split: "," -%}
+{%- capture pricing_data -%}{"grants":{
+{%- assign emitted = 0 -%}
+{%- for pair in lic_map -%}
+  {%- assign kv = pair | split: ":" -%}{%- assign p = all_products[kv[0]] -%}{%- assign key = kv[1] -%}
+  {%- if p != blank -%}
+    {%- if emitted > 0 -%},{%- endif -%}
+    "{{ key }}":{"from":{{ p.price_min | money_without_currency | remove: ',' }},"variants":{ {%- for v in p.variants -%}"{{ v.option1 | remove: 'Band ' }}":{"id":{{ v.id }},"price":{{ v.price | money_without_currency | remove: ',' }}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%} }}
+    {%- assign emitted = emitted | plus: 1 -%}
+  {%- endif -%}
+{%- endfor -%}
+}}{%- endcapture -%}
+<script id="lts-lp-data" type="application/json">{{ pricing_data }}</script>
+
+<section class="lts-lp-blk" id="lts-lp-{{ section.id }}">
+  <div class="lts-lp-wrap">
+    <div class="lts-lp-headc">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="lts-lp-eyebrow lts-lp-rise">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="lts-lp-rise" style="animation-delay:.06s">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="lts-lp-sub lts-lp-rise" style="animation-delay:.1s">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} ── sticky picker bar ── {%- endcomment -%}
+    <div class="lts-lp-picker lts-lp-rise" style="animation-delay:.14s">
+      <div class="lts-lp-picker-inner">
+        <div class="lts-lp-pfield">
+          <span class="lts-lp-plabel">Who is it for</span>
+          <div class="lts-lp-seg-row" id="lts-lp-org" role="group" aria-label="Who is it for">
+            <button type="button" class="lts-lp-seg" data-org="church" aria-pressed="true">{{ section.settings.org_church | escape }}</button>
+            <button type="button" class="lts-lp-seg" data-org="school" aria-pressed="false">{{ section.settings.org_school | escape }}</button>
+            <button type="button" class="lts-lp-seg" data-org="community" aria-pressed="false">{{ section.settings.org_community | escape }}</button>
+          </div>
+        </div>
+        <div class="lts-lp-pfield lts-lp-pfield-size">
+          <label class="lts-lp-plabel" id="lts-lp-sizeLabel" for="lts-lp-sizeNum">{{ section.settings.size_church | escape }}</label>
+          <input class="lts-lp-num" id="lts-lp-sizeNum" type="number" min="1" inputmode="numeric" placeholder="e.g. 180" />
+        </div>
+        <div class="lts-lp-pfield lts-lp-pfield-band">
+          <span class="lts-lp-plabel">Your price band</span>
+          <div class="lts-lp-bandnote lts-lp-bandnote--empty" id="lts-lp-bandNote" aria-live="polite">Enter a size</div>
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} ── four option cards ── {%- endcomment -%}
+    <div class="lts-lp-grid">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'card' -%}
+          {%- assign grant = block.settings.grant -%}
+          <div
+            class="lts-lp-card lts-lp-rise{% if block.settings.featured %} lts-lp-feature{% endif %}{% if block.settings.premium %} lts-lp-premium{% endif %}"
+            style="animation-delay:{{ forloop.index0 | times: 0.06 | plus: 0.16 }}s"
+            data-card-grant="{{ grant }}"
+            {{ block.shopify_attributes }}
+          >
+            {%- if block.settings.featured and block.settings.pill_text != blank -%}
+              <span class="lts-lp-pop">{{ block.settings.pill_text | escape }}</span>
+            {%- elsif block.settings.premium and block.settings.pill_text != blank -%}
+              <span class="lts-lp-pop lts-lp-pop-premium">{{ block.settings.pill_text | escape }}</span>
+            {%- endif -%}
+
+            {%- if block.settings.icon != blank -%}
+              <div class="lts-lp-ic" aria-hidden="true">{{ block.settings.icon }}</div>
+            {%- endif -%}
+            {%- if block.settings.name != blank -%}
+              <h3>{{ block.settings.name | escape }}</h3>
+            {%- endif -%}
+            {%- if block.settings.tagline != blank -%}
+              <p class="lts-lp-tag">{{ block.settings.tagline | escape }}</p>
+            {%- endif -%}
+
+            <div class="lts-lp-pricebox">
+              <span class="lts-lp-price" data-grant="{{ grant }}">from ...</span>
+              <span class="lts-lp-per">a year</span>
+            </div>
+
+            {%- if block.settings.features != blank -%}
+              <ul>
+                {%- assign feats = block.settings.features | newline_to_br | split: '<br />' -%}
+                {%- for feat in feats -%}
+                  {%- assign feat_clean = feat | strip -%}
+                  {%- if feat_clean != blank -%}
+                    <li>
+                      <span class="lts-lp-tick" aria-hidden="true">&#10003;</span>
+                      <span class="lts-lp-sronly">Included: </span>{{ feat_clean | escape }}
+                    </li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+
+            {%- if block.settings.button_label != blank -%}
+              <a
+                class="lts-lp-btn{% if block.settings.featured %} lts-lp-btn-solid{% endif %}{% if block.settings.premium %} lts-lp-btn-premium{% endif %}"
+                data-grant-btn="{{ grant }}"
+                href="/pages/licence-builder?licence={{ grant }}&org=church"
+              >{{ block.settings.button_label | escape }}</a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lts-lp-blk{
+    --lc-red:#c8102e; --lc-red-strong:#b0102a; --lc-red-deep:#8f0f24; --lc-red-ink:#5e0a18;
+    --lc-red-50:#fdeef0; --lc-red-100:#fbdbe0;
+    --lc-ink:#241a17; --lc-body:#4a423e; --lc-muted:#736a65; --lc-line:#efe7e3; --lc-hair:#f4eeeb;
+    --lc-bg:#fffefe; --lc-surface:#fff;
+    --lc-r:14px; --lc-r-lg:18px;
+    --lc-shadow-sm:0 1px 2px rgba(60,20,25,.06);
+    --lc-shadow:0 10px 24px -14px rgba(90,20,30,.30);
+    --lc-ok:0 8px 30px -12px rgba(200,16,46,.35);
+    --lc-e:cubic-bezier(.2,.7,.2,1);
+    font-family:'Nunito',system-ui,'Segoe UI',Roboto,sans-serif;color:var(--lc-body);line-height:1.55;-webkit-font-smoothing:antialiased;
+    padding:clamp(44px,7vw,72px) 0;background:var(--lc-bg);
+  }
+  .lts-lp-blk *{box-sizing:border-box}
+  .lts-lp-blk .lts-lp-sronly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  .lts-lp-blk .lts-lp-wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+  .lts-lp-blk h2,.lts-lp-blk h3{color:var(--lc-ink);text-wrap:balance;margin:0}
+  .lts-lp-blk h2{font-size:clamp(22px,3.6vw,30px);font-weight:900;letter-spacing:-.02em}
+  .lts-lp-blk a{color:inherit}
+  .lts-lp-blk .lts-lp-eyebrow{display:inline-block;font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--lc-red);margin-bottom:10px}
+  .lts-lp-blk .lts-lp-headc{text-align:center;max-width:64ch;margin:0 auto 6px}
+  .lts-lp-blk .lts-lp-sub{font-size:clamp(15px,2.2vw,18px);color:var(--lc-muted);max-width:60ch;text-wrap:pretty;margin:8px auto 0}
+
+  /* reveal */
+  .lts-lp-blk .lts-lp-rise{opacity:0;transform:translateY(14px);animation:lts-lp-rise .7s var(--lc-e) forwards}
+  @keyframes lts-lp-rise{to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){.lts-lp-blk .lts-lp-rise{animation:none;opacity:1;transform:none}}
+
+  /* ===== sticky picker =====
+     Offset by the theme's fixed header. Dawn/Santa's header is
+     position:fixed;top:0 and the theme exposes --header-top-position
+     (7.4rem desktop / 5.6rem mobile) as its header height. We tuck the sticky
+     picker just below it (+8px breathing room), falling back to a safe static
+     offset if the var is ever absent. The sticky_offset setting can override. */
+  .lts-lp-blk{--lts-lp-sticky-top:calc(var(--header-top-position, {{ section.settings.sticky_offset | default: 76 }}px) + 8px)}
+  .lts-lp-blk .lts-lp-picker{position:sticky;top:var(--lts-lp-sticky-top);z-index:20;margin-top:26px;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(10px);-webkit-backdrop-filter:saturate(180%) blur(10px);border:1px solid var(--lc-line);border-radius:var(--lc-r-lg);box-shadow:var(--lc-shadow-sm)}
+  .lts-lp-blk .lts-lp-picker-inner{--lts-lp-ctl:46px;display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 22px;padding:16px 22px}
+  .lts-lp-blk .lts-lp-pfield{display:flex;flex-direction:column;gap:9px}
+  .lts-lp-blk .lts-lp-pfield-size{min-width:150px}
+  .lts-lp-blk .lts-lp-pfield-band{margin-left:auto;align-items:flex-end;text-align:right}
+  .lts-lp-blk .lts-lp-plabel{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--lc-muted);line-height:1}
+  .lts-lp-blk .lts-lp-seg-row{display:flex;gap:8px}
+  .lts-lp-blk .lts-lp-seg{height:var(--lts-lp-ctl);display:inline-flex;align-items:center;border:1.5px solid var(--lc-line);border-radius:var(--lc-r);padding:0 16px;cursor:pointer;background:#fff;font:inherit;font-weight:800;font-size:14px;color:var(--lc-ink);transition:.18s var(--lc-e)}
+  .lts-lp-blk .lts-lp-seg[aria-pressed="true"]{border-color:var(--lc-red);background:var(--lc-red-50);color:var(--lc-red-ink);box-shadow:0 0 0 3px rgba(200,16,46,.10)}
+  .lts-lp-blk .lts-lp-num{height:var(--lts-lp-ctl);width:150px;font:inherit;font-size:16px;font-weight:800;padding:0 14px;border:1.5px solid var(--lc-line);border-radius:var(--lc-r);color:var(--lc-ink)}
+  .lts-lp-blk .lts-lp-num:focus{outline:none;border-color:var(--lc-red);box-shadow:0 0 0 3px rgba(200,16,46,.12)}
+  .lts-lp-blk .lts-lp-bandnote{display:inline-flex;align-items:center;gap:6px;height:var(--lts-lp-ctl);padding:0 16px;background:var(--lc-red-50);color:var(--lc-red-ink);border-radius:var(--lc-r);font-size:14px;font-weight:800;white-space:nowrap}
+  .lts-lp-blk .lts-lp-bandnote b{color:var(--lc-red)}
+  .lts-lp-blk .lts-lp-bandnote.lts-lp-bandnote--empty{background:transparent;color:var(--lc-muted);padding:0;font-weight:700;height:auto;align-self:center}
+
+  /* ===== four cards ===== */
+  .lts-lp-blk .lts-lp-grid{margin-top:34px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:stretch}
+  .lts-lp-blk .lts-lp-card{position:relative;display:flex;flex-direction:column;background:var(--lc-surface);border-radius:var(--lc-r-lg);padding:26px 22px;box-shadow:var(--lc-shadow-sm);border:1px solid var(--lc-hair);transition:transform .35s var(--lc-e),box-shadow .35s var(--lc-e)}
+  .lts-lp-blk .lts-lp-card:hover{transform:translateY(-4px);box-shadow:var(--lc-shadow)}
+  .lts-lp-blk .lts-lp-card.lts-lp-feature{border:0;background:#fff;box-shadow:var(--lc-ok);outline:2px solid var(--lc-red);outline-offset:0;transform:scale(1.04);z-index:2}
+  .lts-lp-blk .lts-lp-card.lts-lp-feature:hover{transform:scale(1.04) translateY(-5px)}
+  .lts-lp-blk .lts-lp-card.lts-lp-premium{border:0;background:linear-gradient(160deg,#fff 0%,#fff5f6 100%);box-shadow:var(--lc-shadow);outline:2px solid var(--lc-red-deep);outline-offset:0}
+  .lts-lp-blk .lts-lp-card .lts-lp-ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--lc-red-50);color:var(--lc-red);font-size:22px}
+  .lts-lp-blk .lts-lp-card.lts-lp-premium .lts-lp-ic{background:var(--lc-red-deep);color:#fff}
+  .lts-lp-blk .lts-lp-card h3{font-size:20px;font-weight:900;margin:13px 0 0;letter-spacing:-.01em}
+  .lts-lp-blk .lts-lp-card .lts-lp-tag{font-size:13.5px;color:var(--lc-muted);font-weight:700;margin:4px 0 0}
+  .lts-lp-blk .lts-lp-card .lts-lp-pop{position:absolute;top:14px;right:14px;font-size:10px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--lc-red);padding:4px 10px;border-radius:999px}
+  .lts-lp-blk .lts-lp-card .lts-lp-pop-premium{background:var(--lc-red-deep)}
+  .lts-lp-blk .lts-lp-pricebox{margin:16px 0 4px;display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+  .lts-lp-blk .lts-lp-price{font-size:30px;font-weight:900;color:var(--lc-ink);line-height:1;letter-spacing:-.02em}
+  .lts-lp-blk .lts-lp-per{font-size:13px;font-weight:700;color:var(--lc-muted)}
+  .lts-lp-blk .lts-lp-card ul{list-style:none;padding:0;margin:14px 0 0;flex:1}
+  .lts-lp-blk .lts-lp-card li{position:relative;padding:6px 0 6px 28px;font-size:14px;color:var(--lc-body);font-weight:600}
+  .lts-lp-blk .lts-lp-card li .lts-lp-tick{position:absolute;left:0;top:7px;width:18px;height:18px;border-radius:50%;background:var(--lc-red-50);color:var(--lc-red);font-size:10.5px;font-weight:900;display:grid;place-items:center;line-height:1}
+  .lts-lp-blk .lts-lp-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;font:inherit;font-weight:800;font-size:14px;padding:12px 20px;border-radius:999px;cursor:pointer;text-decoration:none;border:1.5px solid var(--lc-red);background:#fff;color:var(--lc-red);transition:transform .2s var(--lc-e),box-shadow .2s var(--lc-e),background .2s}
+  .lts-lp-blk .lts-lp-btn:hover{transform:translateY(-2px)}
+  .lts-lp-blk .lts-lp-btn.lts-lp-btn-solid{background:var(--lc-red);color:#fff;border-color:var(--lc-red);box-shadow:var(--lc-ok)}
+  .lts-lp-blk .lts-lp-btn.lts-lp-btn-solid:hover{background:var(--lc-red-strong)}
+  .lts-lp-blk .lts-lp-btn.lts-lp-btn-premium{background:var(--lc-red-deep);color:#fff;border-color:var(--lc-red-deep);box-shadow:var(--lc-shadow)}
+  .lts-lp-blk .lts-lp-btn.lts-lp-btn-premium:hover{background:var(--lc-red-ink)}
+
+  @media(max-width:1000px){
+    .lts-lp-blk .lts-lp-grid{grid-template-columns:repeat(2,1fr)}
+    .lts-lp-blk .lts-lp-card.lts-lp-feature{transform:none}
+    .lts-lp-blk .lts-lp-card.lts-lp-feature:hover{transform:translateY(-4px)}
+  }
+  @media(max-width:640px){
+    .lts-lp-blk .lts-lp-grid{grid-template-columns:1fr}
+    .lts-lp-blk .lts-lp-picker-inner{gap:14px}
+    .lts-lp-blk .lts-lp-bandnote{margin-left:0;text-align:left;width:100%}
+    .lts-lp-blk .lts-lp-seg-row{flex-wrap:wrap}
+  }
+{% endstylesheet %}
+
+<script>
+(function(){
+  var root = document.getElementById('lts-lp-{{ section.id }}');
+  if(!root) return;
+
+  // Live prices + variant ids SSR'd from the products (never hardcoded).
+  var DATA = {};
+  try { DATA = JSON.parse(document.getElementById('lts-lp-data').textContent) || {}; } catch(e) { DATA = {}; }
+  var GRANTS = DATA.grants || {};
+
+  // Number->band thresholds - mirror studio/lib/services/license-config.ts SIZE_BANDS.
+  // church/community share church thresholds; band 9 is open-ended (Infinity).
+  var BANDS = {
+    church:   [24,49,99,149,199,499,999,1499,Infinity],
+    school:   [30,75,150,250,400,750,1200,1800,Infinity],
+    community:[24,49,99,149,199,499,999,1499,Infinity]
+  };
+  var RANGES = {
+    church:   ["1-24","25-49","50-99","100-149","150-199","200-499","500-999","1,000-1,499","1,500+"],
+    school:   ["1-30","31-75","76-150","151-250","251-400","401-750","751-1,200","1,201-1,800","1,800+"],
+    community:["1-24","25-49","50-99","100-149","150-199","200-499","500-999","1,000-1,499","1,500+"]
+  };
+  var SIZE_WORD = {
+    church:{{ section.settings.size_church | json }},
+    school:{{ section.settings.size_school | json }},
+    community:{{ section.settings.size_community | json }}
+  };
+
+  var org = "church";
+
+  function $(id){ return document.getElementById(id); }
+
+  function bandFor(n){
+    var b = BANDS[org];
+    for (var i=0;i<b.length;i++){ if(n<=b[i]) return i+1; }
+    return 9;
+  }
+
+  // "from" fallback for a grant - from the SSR blob's price_min, else band 1.
+  function fromPrice(g){
+    var gd = GRANTS[g];
+    if (!gd) return null;
+    if (typeof gd.from === 'number') return gd.from;
+    if (gd.variants && gd.variants["1"]) return gd.variants["1"].price;
+    return null;
+  }
+
+  // Resolve the variant object for a grant+band, or null if missing.
+  function variantFor(g, band){
+    var gd = GRANTS[g];
+    if (!gd || !gd.variants) return null;
+    return gd.variants[String(band)] || null;
+  }
+
+  function money(n){
+    // Whole-dollar prices; show cents only if present.
+    return '$' + (n % 1 === 0 ? String(n) : n.toFixed(2));
+  }
+
+  var priceEls = root.querySelectorAll('.lts-lp-price[data-grant]');
+  var btnEls = root.querySelectorAll('.lts-lp-btn[data-grant-btn]');
+
+  function render(){
+    // reflect org toggle
+    var osegs = root.querySelectorAll('#lts-lp-org .lts-lp-seg');
+    for (var j=0;j<osegs.length;j++){ osegs[j].setAttribute('aria-pressed', osegs[j].getAttribute('data-org')===org); }
+
+    // size label follows org type
+    $('lts-lp-sizeLabel').textContent = SIZE_WORD[org];
+
+    var num = parseInt($('lts-lp-sizeNum').value, 10);
+    var hasSize = num > 0;
+    var band = hasSize ? bandFor(num) : null;
+
+    // band note in the picker (a labelled result chip, aligned with the fields)
+    var bn = $('lts-lp-bandNote');
+    if (hasSize){
+      bn.classList.remove('lts-lp-bandnote--empty');
+      bn.innerHTML = '<b>Band '+band+'</b> &middot; '+RANGES[org][band-1];
+    } else {
+      bn.classList.add('lts-lp-bandnote--empty');
+      bn.textContent = 'Enter a size';
+    }
+
+    // update each card price element
+    for (var i=0;i<priceEls.length;i++){
+      var el = priceEls[i];
+      var g = el.getAttribute('data-grant');
+      if (hasSize){
+        var variant = variantFor(g, band);
+        el.textContent = variant ? money(variant.price) : 'Price unavailable';
+      } else {
+        var fp = fromPrice(g);
+        el.textContent = fp != null ? ('from '+money(fp)) : 'Price unavailable';
+      }
+    }
+
+    // update each button href live
+    for (var b2=0;b2<btnEls.length;b2++){
+      var bEl = btnEls[b2];
+      var bg = bEl.getAttribute('data-grant-btn');
+      var href = '/pages/licence-builder?licence='+bg+'&org='+org;
+      if (hasSize){ href += '&size='+num; }
+      bEl.setAttribute('href', href);
+    }
+
+    // Broadcast so the comparison table (Task 5) can react.
+    document.dispatchEvent(new CustomEvent('lts:size-change', {
+      detail: { org: org, size: hasSize ? num : null, band: band }
+    }));
+  }
+
+  // wire up
+  var osegs2 = root.querySelectorAll('#lts-lp-org .lts-lp-seg');
+  for (var a=0;a<osegs2.length;a++){
+    osegs2[a].addEventListener('click', function(){ org = this.getAttribute('data-org'); render(); });
+  }
+  $('lts-lp-sizeNum').addEventListener('input', render);
+
+  // Initial render (dispatches lts:size-change once on load).
+  render();
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Licence pricing",
+  "tag": "section",
+  "class": "lts-lp-section",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Simple, size-based pricing"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Pick your size and see your exact price"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Tell us who it is for and how big you are. Every option below updates to your real yearly price."
+    },
+    {
+      "type": "range",
+      "id": "sticky_offset",
+      "label": "Sticky picker offset (fallback, px)",
+      "info": "Used only if the theme's --header-top-position variable is unavailable. Keeps the sticky picker below a fixed header.",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 76
+    },
+    {
+      "type": "header",
+      "content": "Picker: organisation types"
+    },
+    {
+      "type": "text",
+      "id": "org_church",
+      "label": "Org type 1 label",
+      "default": "Church"
+    },
+    {
+      "type": "text",
+      "id": "org_school",
+      "label": "Org type 2 label",
+      "default": "School"
+    },
+    {
+      "type": "text",
+      "id": "org_community",
+      "label": "Org type 3 label",
+      "default": "Community"
+    },
+    {
+      "type": "header",
+      "content": "Picker: size question labels"
+    },
+    {
+      "type": "text",
+      "id": "size_church",
+      "label": "Size question (Church)",
+      "default": "Average weekly attendance"
+    },
+    {
+      "type": "text",
+      "id": "size_school",
+      "label": "Size question (School)",
+      "default": "Number of students"
+    },
+    {
+      "type": "text",
+      "id": "size_community",
+      "label": "Size question (Community)",
+      "default": "Regular attendees"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Option card",
+      "settings": [
+        {
+          "type": "select",
+          "id": "grant",
+          "label": "Grant (drives live price)",
+          "options": [
+            { "value": "copyright", "label": "Copyright" },
+            { "value": "all_in_one", "label": "All-in-One" },
+            { "value": "streaming", "label": "Streaming" },
+            { "value": "membership", "label": "Membership" }
+          ],
+          "default": "copyright"
+        },
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icon (emoji)",
+          "default": "🔊"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Copyright"
+        },
+        {
+          "type": "text",
+          "id": "tagline",
+          "label": "Tagline",
+          "default": "In the room"
+        },
+        {
+          "type": "textarea",
+          "id": "features",
+          "label": "Features (one per line)",
+          "default": "Play, sing and perform live\nPrint lyrics and project words\nShow our videos in the room\nRecord your own performances"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Choose"
+        },
+        {
+          "type": "checkbox",
+          "id": "featured",
+          "label": "Featured (elevated, red outline, pill)",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "premium",
+          "label": "Premium (darker accent, pill)",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "pill_text",
+          "label": "Pill text (featured / premium only)",
+          "default": "Most popular"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "Licence pricing",
+      "blocks": [
+        {
+          "type": "card",
+          "settings": {
+            "grant": "copyright",
+            "icon": "🔊",
+            "name": "Copyright",
+            "tagline": "In the room",
+            "features": "Play, sing and perform live\nPrint lyrics and project words\nShow our videos in the room\nRecord your own performances",
+            "button_label": "Choose",
+            "featured": false,
+            "premium": false,
+            "pill_text": "Most popular"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "grant": "all_in_one",
+            "icon": "✨",
+            "name": "All-in-One",
+            "tagline": "Room and online",
+            "features": "Everything in Copyright\nLivestream your services\nUpload to YouTube and social\nShare with your community",
+            "button_label": "Choose",
+            "featured": true,
+            "premium": false,
+            "pill_text": "Most popular"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "grant": "streaming",
+            "icon": "🎬",
+            "name": "Streaming",
+            "tagline": "Online only",
+            "features": "Livestream your performances\nUpload to YouTube and social\nShare with your audience\nFor online-only ministries",
+            "button_label": "Choose",
+            "featured": false,
+            "premium": false,
+            "pill_text": "Most popular"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "grant": "membership",
+            "icon": "★",
+            "name": "Membership",
+            "tagline": "Our whole catalogue",
+            "features": "Everything in All-in-One\nStream our whole catalogue\nDownload our whole catalogue\nOne annual signup for your organisation",
+            "button_label": "Join",
+            "featured": false,
+            "premium": true,
+            "pill_text": "★ Best value"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

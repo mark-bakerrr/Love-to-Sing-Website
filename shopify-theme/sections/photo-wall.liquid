@@ -1,0 +1,202 @@
+{%- comment -%}
+  Photo Wall — a pannable corkboard of pinned photos. Click a photo for a popup
+  with its data. Photos come from the `photo_wall` metaobject; each person in a
+  photo's `people` list is a `team` metaobject that links to their bio page.
+
+  Use with the chrome-free layout: set the page's theme template to "photo-wall"
+  (templates/page.photo-wall.liquid).
+{%- endcomment -%}
+
+{%- liquid
+  assign entries = metaobjects.photo_wall.values | sort: 'year.value'
+-%}
+
+{{ 'photo-wall.css' | asset_url | stylesheet_tag }}
+
+<div class="pw-viewport" id="pw-viewport">
+  <div class="pw-world" id="pw-world">
+    <div class="pw-watermark" id="pw-watermark">{{ section.settings.watermark | escape | newline_to_br }}</div>
+  </div>
+</div>
+
+<a class="pw-topbar" href="{{ routes.root_url }}">
+  {%- if section.settings.logo != blank -%}
+    <img src="{{ section.settings.logo | image_url: width: 220 }}" alt="{{ shop.name | escape }}" width="110" height="26">
+  {%- else -%}
+    <span class="logo">{{ shop.name | escape }}</span>
+  {%- endif -%}
+  {%- if section.settings.subtitle != blank -%}<span class="sub">{{ section.settings.subtitle | escape }}</span>{%- endif -%}
+</a>
+
+<div class="pw-hint" id="pw-hint">Drag to explore · Scroll to zoom</div>
+
+<div class="pw-controls">
+  <button id="pw-zoom-in" aria-label="Zoom in">+</button>
+  <button id="pw-zoom-out" aria-label="Zoom out">&minus;</button>
+  <button id="pw-recentre" aria-label="Recentre" title="Recentre">&#9673;</button>
+</div>
+
+<div class="pw-filters" id="pw-filters" hidden>
+  <span class="pw-f-count" id="pw-f-count"></span>
+</div>
+
+{%- if section.settings.show_music_player -%}
+  <div class="pw-player" id="pw-player" data-playlist="{{ 'photo-wall-playlist.json' | asset_url }}">
+    <img class="art" id="pw-part" alt="" width="44" height="44">
+    <div class="meta"><div class="t" id="pw-ptitle">&mdash;</div><div class="a" id="pw-partist">&mdash;</div></div>
+    <div class="ctrl">
+      <button class="side tog" id="pw-pshuf" aria-label="Shuffle" aria-pressed="true" title="Shuffle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg></button>
+      <button class="side" id="pw-pprev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+      <button class="play" id="pw-pplay" aria-label="Play">
+        <svg id="pw-iplay" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="pw-ipause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+      </button>
+      <button class="side" id="pw-pnext" aria-label="Next"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
+      <button class="side" id="pw-pmute" aria-label="Mute">
+        <svg id="pw-ivol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        <svg id="pw-imute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor" stroke="none"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg>
+      </button>
+    </div>
+    <div class="bar">
+      <span class="tm" id="pw-pcur">0:00</span>
+      <div class="seek" id="pw-pseek" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><div class="fill" id="pw-pfill"></div></div>
+      <span class="tm" id="pw-pdur">0:00</span>
+    </div>
+  </div>
+{%- endif -%}
+
+<div class="pw-modal" id="pw-modal">
+  <div class="pw-backdrop" data-close></div>
+  <div class="pw-dialog">
+    <button class="pw-close" data-close aria-label="Close">&#10005;</button>
+    <div class="pw-photo"><img id="pw-mphoto" alt="" width="1000" height="750"></div>
+    <div class="pw-info" id="pw-minfo"></div>
+  </div>
+</div>
+
+{%- if entries.size == 0 and request.design_mode -%}
+  <div class="pw-empty">Add entries to your <strong>Photo wall</strong> metaobject to populate this wall.</div>
+{%- endif -%}
+
+{%- comment -%} Photo data for the canvas + popup {%- endcomment -%}
+<script type="application/json" id="pw-data">
+[
+  {%- for e in entries -%}
+    {
+      "src": {{ e.photo.value | image_url: width: 1000 | json }},
+      "thumb": {{ e.photo.value | image_url: width: 520 | json }},
+      "year": {{ e.year.value | json }},
+      "title": {{ e.title.value | json }},
+      "desc": {{ e.description.value | json }},
+      "location": {{ e.location.value | json }},
+      "category": {{ e.category.value | json }},
+      "link": {{ e.link.value | json }},
+      "people": [
+        {%- for person in e.people.value -%}
+          {"name": {{ person.name.value | json }}, "url": {{ person.system.url | json }}}{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ],
+      "product": {% if e.product.value != blank %}{"img": {{ e.product.value.featured_image | image_url: width: 200 | json }}, "url": {{ e.product.value.url | json }}}{% else %}null{% endif %}
+    }{%- unless forloop.last -%},{%- endunless -%}
+  {%- endfor -%}
+]
+</script>
+
+{%- comment -%}
+  Music playlist. Track blocks in the theme editor take priority; with no
+  blocks configured, a built-in Love to Sing playlist (30s previews from the
+  song catalogue) plays instead.
+{%- endcomment -%}
+{%- assign track_blocks = section.blocks | where: 'type', 'track' -%}
+<script type="application/json" id="pw-tracks" data-source="{% if track_blocks.size > 0 %}blocks{% else %}default{% endif %}">
+{%- if track_blocks.size > 0 -%}
+[
+  {%- assign first = true -%}
+  {%- for block in track_blocks -%}
+    {%- if block.settings.audio_url != blank -%}
+      {%- unless first -%},{%- endunless -%}{%- assign first = false -%}
+      {
+        "title": {{ block.settings.title | json }},
+        "artist": {{ block.settings.artist | json }},
+        "art": {% if block.settings.artwork != blank %}{{ block.settings.artwork | image_url: width: 120 | json }}{% else %}""{% endif %},
+        "src": {{ block.settings.audio_url | json }}
+      }
+    {%- endif -%}
+  {%- endfor -%}
+]
+{%- else -%}
+[
+  {"title":"Jingle Bells","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/Jingle_Bells_Video_Song_Download_-_Love_to_Sing.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-4122443841570.mp3"},
+  {"title":"We Wish You a Merry Christmas","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/We_Wish_You_a_Merry_Christmas_Video__Download_-_Love_to_Sing.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-4124764930082.mp3"},
+  {"title":"Rudolph the Red Nosed Reindeer","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/Rudolph_the_Red_Nosed_Reindeer_Lyrics_-_Love_to_Sing_adf607ff-0fae-4231-9317-4d3935d878e2.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-4124442820642.mp3"},
+  {"title":"Santa Claus is Coming to Town","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/SantaClausisComingtoTown.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-6804489469986.mp3"},
+  {"title":"12 Days of Christmas","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/12_Days_of_Christmas_Video_Song_Download_-_Love_to_Sing.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-4124727771170.mp3"},
+  {"title":"Feliz Navidad","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/FelizNavidad.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-6802222317602.mp3"},
+  {"title":"Deck the Halls","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/Deck_the_Halls_Video_Song_Download_-_Love_to_Sing.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-4119867785250.mp3"},
+  {"title":"Silent Night","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/products/Silent_Night_Video_Song_Download_-_Love_to_Sing.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-4124449603618.mp3"},
+  {"title":"The Wheels On The Bus","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/Transport_Songs_Thumbnails-2-The_Wheels_On_The_Bus_100a600e-ec2d-469d-a36e-3e738344a9e4.jpg?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-10931443040529.mp3"},
+  {"title":"Twinkle, Twinkle Little Star","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/Nursery_Rhymes_Thumbnails-60-Twinkle_Twinkle_Little_Star_069ec0db-95d3-4064-90be-a028b3e5052f.png?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-10762838278417.mp3"},
+  {"title":"Incy Wincy Spider","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/Nursery_Rhymes_Thumbnails-15-Incy_Wincy_Spider_52440eaa-a902-499a-9263-182dd21f7328.png?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-10762836377873.mp3"},
+  {"title":"Five Little Speckled Frogs","artist":"Love to Sing","art":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/Animal_Songs-10-Five_Little_Speckled_Frogs_e92c711f-cb33-4830-8953-955745631728.png?width=120","src":"https://cdn.shopify.com/s/files/1/0053/3505/6418/files/preview-10738343870737.mp3"}
+]
+{%- endif -%}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer="defer"></script>
+<script src="{{ 'photo-wall.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Photo Wall",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo (top-left)",
+      "info": "Links to the homepage. Falls back to the shop name if empty."
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "The Heart of Love to Sing"
+    },
+    {
+      "type": "text",
+      "id": "watermark",
+      "label": "Background watermark",
+      "default": "LOVE TO\nSING",
+      "info": "Faint text in the middle of the board. Use a line break for two lines."
+    },
+    {
+      "type": "header",
+      "content": "Music player"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_music_player",
+      "label": "Show music player",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "track",
+      "name": "Track",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Song title" },
+        { "type": "text", "id": "artist", "label": "Artist", "default": "Love to Sing" },
+        { "type": "image_picker", "id": "artwork", "label": "Artwork" },
+        { "type": "url", "id": "audio_url", "label": "Audio URL", "info": "Full/lo-fi track (Shopify Files URL is fine)." }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "Photo Wall" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,1701 @@
+/* Santa Tracker â€” christmas-countdown section */
+
+.santa-tracker {
+  display: block; /* custom elements default to inline, which kills the background */
+  position: relative;
+  overflow: hidden;
+  /* the live globe is absolutely positioned and the countdown inner is
+     display:none while live, so the section must hold its own height */
+  min-height: 100vh;
+  min-height: 100svh;
+  color: var(--c-neutral-50);
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -10%, var(--c-blue-800) 0%, transparent 60%),
+    linear-gradient(180deg, var(--c-blue-950) 0%, var(--c-blue-900) 55%, var(--c-blue-800) 100%);
+}
+
+/* Twinkling stars (two layered speckle patterns) */
+.santa-tracker::before,
+.santa-tracker::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 28% 64%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 41% 32%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 57% 12%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 66% 48%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 78% 26%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 88% 58%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 8% 81%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 49% 79%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 94% 86%, #fff 50%, transparent 51%);
+  opacity: 0.7;
+  animation: santa-twinkle 4s ease-in-out infinite alternate;
+}
+
+.santa-tracker::after {
+  transform: scaleX(-1);
+  animation-delay: -2s;
+  opacity: 0.45;
+}
+
+@keyframes santa-twinkle {
+  from { opacity: 0.25; }
+  to { opacity: 0.8; }
+}
+
+.santa-tracker__inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-block: var(--space-400) var(--space-400);
+  text-align: center;
+}
+
+/* lock page scroll while the full-page globe is up */
+html.santa-live-active {
+  overflow: hidden;
+}
+
+/* hide the fixed site header during the immersive globe so its logo/nav
+   doesn't float over the tracker â€” restored for countdown/post states */
+html.santa-live-active .header,
+html.santa-live-active .announcement-bar {
+  display: none;
+}
+
+/* the countdown container (and its own logo) is irrelevant during the
+   live globe â€” hide it so only the panel logo shows */
+html.santa-live-active .santa-tracker__inner {
+  display: none;
+}
+
+/* This page is immersive across every state: hide the theme header,
+   announcement bar and footer entirely (the tracker renders its own logo).
+   Scoped to .santa-page (added by the tracker) so the rest of the site is
+   unaffected. */
+html.santa-page .header,
+html.santa-page .announcement-bar,
+html.santa-page .footer {
+  display: none;
+}
+
+/* centre the active state in the space between logo and bottom edge */
+.santa-tracker__inner > [data-state]:not([hidden]) {
+  margin-block: auto;
+}
+
+/* Countdown state: the workshop video fills the screen and all content
+   (logo, headline, countdown) is stacked at the bottom over the fade, so the
+   video stays fully visible above it. */
+.santa-tracker.is-pre .santa-tracker__inner {
+  height: 100vh;
+  height: 100svh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;         /* logo pinned top, countdown pinned bottom */
+  padding-top: var(--space-150);  /* logo up near the top edge */
+  padding-bottom: 7vh;            /* countdown low over the floor, but lifted
+                                     clear of the absolute copyright line */
+}
+
+.santa-tracker.is-pre .santa-tracker__logo {
+  margin-bottom: 0;               /* stays at the top */
+}
+
+.santa-tracker.is-pre .santa-tracker__logo img {
+  max-width: 100px;               /* smaller logo */
+}
+
+.santa-tracker__inner > [data-state="pre"]:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: auto;               /* push the countdown block to the bottom... */
+  margin-bottom: 0;               /* ...and override the generic margin-block:auto
+                                     that was centering it vertically */
+  width: 100%;
+}
+
+[data-state="pre"] .santa-countdown-card {
+  margin-top: var(--space-200);
+  margin-bottom: 0;
+}
+
+[data-state="pre"] .santa-tracker__subtitle {
+  margin-bottom: var(--space-200);
+}
+
+/* Remove the grey "wait" progress track under the countdown */
+[data-state="pre"] .santa-wait {
+  display: none;
+}
+
+/* Countdown page: all text white over the workshop video */
+.santa-tracker.is-pre [data-state="pre"],
+.santa-tracker.is-pre [data-state="pre"] p,
+.santa-tracker.is-pre [data-state="pre"] span,
+.santa-tracker.is-pre [data-state="pre"] h1,
+.santa-tracker.is-pre [data-state="pre"] .santa-countdown__value,
+.santa-tracker.is-pre [data-state="pre"] .santa-countdown__label,
+.santa-tracker.is-pre [data-state="pre"] .santa-countdown-card__label,
+.santa-tracker.is-pre .santa-tracker__logo-text {
+  color: #fff !important;
+}
+
+.santa-glass-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.santa-tracker__logo {
+  display: inline-flex;
+  justify-content: center;
+  margin-bottom: var(--space-300);
+  text-decoration: none;
+}
+
+.santa-tracker__logo img {
+  display: block;
+  height: auto;
+}
+
+.santa-tracker__logo-text {
+  color: var(--c-neutral-50);
+  margin: 0;
+}
+
+.santa-tracker__eyebrow {
+  color: var(--c-yellow-300);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: var(--fz-s);
+  margin-bottom: var(--space-150);
+}
+
+.santa-tracker h1,
+.santa-tracker h2,
+.santa-tracker h3 {
+  color: var(--c-neutral-50);
+}
+
+.santa-tracker__title {
+  margin-block: 0 var(--space-200);
+}
+
+.santa-tracker__subtitle {
+  max-width: 1024px;
+  margin-inline: auto;
+  margin-bottom: var(--space-500);
+  color: var(--c-blue-100);
+  font-size: var(--fz-m);
+}
+
+/* *word* headline accent — lighter italic within the theme's own Nunito */
+.santa-accent {
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* ---------- Ambient scene (countdown + Christmas morning) ---------- */
+
+.santa-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* above the base gradient + star speckles, below the content */
+  pointer-events: none;
+  overflow: hidden;
+}
+
+html.santa-live-active .santa-scene {
+  display: none; /* the 3D globe brings its own sky */
+}
+
+/* Looping village video background (countdown state) + legibility scrim */
+.santa-scene__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 1.6s ease;
+}
+
+.santa-scene__scrim {
+  position: absolute;
+  inset: 0;
+  /* Bottom-only fade: the top of the workshop video stays clear and viewable,
+     while the lower third darkens so the content stacked there stays legible. */
+  background:
+    linear-gradient(180deg,
+      rgba(5, 8, 22, 0) 0%,
+      rgba(5, 8, 22, 0) 40%,
+      rgba(5, 8, 22, 0.55) 68%,
+      rgba(5, 8, 22, 0.92) 100%);
+  transition: opacity 1.6s ease;
+}
+
+/* The painted night layers stand down while the video plays the countdown */
+.santa-tracker.has-video:not(.is-post):not(.video-failed) .santa-scene__aurora,
+.santa-tracker.has-video:not(.is-post):not(.video-failed) .santa-scene__stars,
+.santa-tracker.has-video:not(.is-post):not(.video-failed) .santa-scene__moon,
+.santa-tracker.has-video:not(.is-post):not(.video-failed) .santa-scene__hills {
+  opacity: 0;
+}
+
+/* Christmas morning: video bows out, painted dawn takes over */
+.santa-tracker.is-post .santa-scene__video,
+.santa-tracker.is-post .santa-scene__scrim {
+  opacity: 0;
+}
+
+/* JS adds this if the video errors — painted scene returns */
+.santa-tracker.video-failed .santa-scene__video,
+.santa-tracker.video-failed .santa-scene__scrim {
+  display: none;
+}
+
+.santa-tracker.has-video .santa-scene__hills {
+  transition: opacity 1.6s ease;
+}
+
+/* Christmas-morning dawn: fades in over the night sky when the journey ends */
+.santa-scene__dawn {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #f7c6a3 0%, #e58a9b 55%, #4b3a6b 100%);
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+
+.santa-tracker.is-post .santa-scene__dawn { opacity: 1; }
+
+/* Aurora: big blurred colour blobs drifting slowly near the top of the sky */
+.santa-scene__aurora {
+  position: absolute;
+  width: 60vw;
+  height: 60vh;
+  border-radius: 50%;
+  filter: blur(64px);
+  mix-blend-mode: screen;
+  opacity: 0.35;
+  animation: santa-aurora 18s ease-in-out infinite alternate;
+  transition: opacity 1.6s ease;
+}
+
+.santa-scene__aurora--1 {
+  top: -12%;
+  left: -8%;
+  background: radial-gradient(closest-side, rgba(6, 214, 160, 0.55), transparent 70%);
+}
+
+.santa-scene__aurora--2 {
+  top: -6%;
+  right: -12%;
+  background: radial-gradient(closest-side, rgba(76, 201, 240, 0.5), transparent 70%);
+  animation-delay: -6s;
+  animation-duration: 22s;
+}
+
+.santa-scene__aurora--3 {
+  top: 18%;
+  left: 30%;
+  width: 50vw;
+  height: 40vh;
+  background: radial-gradient(closest-side, rgba(155, 93, 229, 0.4), transparent 70%);
+  animation-delay: -12s;
+  animation-duration: 26s;
+}
+
+.santa-tracker.is-post .santa-scene__aurora { opacity: 0; }
+
+@keyframes santa-aurora {
+  from { transform: translate3d(-4%, 0, 0) scale(1); }
+  to { transform: translate3d(5%, 6%, 0) scale(1.15); }
+}
+
+/* Twinkling stars (JS sprinkles ~80 of these at random positions) */
+.santa-scene__stars {
+  position: absolute;
+  inset: 0;
+  transition: opacity 1.6s ease;
+}
+
+.santa-tracker.is-post .santa-scene__stars { opacity: 0; }
+
+.santa-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+  animation: santa-star-twinkle 4s ease-in-out infinite;
+}
+
+@keyframes santa-star-twinkle {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.9; }
+}
+
+/* Glowing moon (night) / rising sun (Christmas morning) */
+.santa-scene__moon {
+  position: absolute;
+  top: 8%;
+  right: 12%;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #fffdf4 0%, #f4ecd2 60%, #e8dcb8 100%);
+  box-shadow:
+    0 0 48px 16px rgba(255, 250, 224, 0.35),
+    0 0 128px 48px rgba(255, 250, 224, 0.18);
+  transition: opacity 1.6s ease;
+}
+
+.santa-tracker.is-post .santa-scene__moon { opacity: 0; }
+
+.santa-scene__sun {
+  position: absolute;
+  bottom: 20%;
+  left: 14%;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 42% 40%, #fff8e0 0%, #ffd98a 55%, #ffb45e 100%);
+  box-shadow:
+    0 0 64px 24px rgba(255, 200, 120, 0.5),
+    0 0 176px 64px rgba(255, 170, 90, 0.3);
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+
+.santa-tracker.is-post .santa-scene__sun { opacity: 1; }
+
+/* Hills + a cosy village silhouette with flickering warm windows */
+.santa-scene__hills {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  width: 100%;
+  height: clamp(140px, 24vh, 260px);
+}
+
+.santa-scene__hill-back { fill: #0d1330; transition: fill 1.6s ease; }
+.santa-scene__hill-front { fill: #070b1d; transition: fill 1.6s ease; }
+
+.santa-scene__village path,
+.santa-scene__village rect {
+  fill: #10173a;
+  transition: fill 1.6s ease;
+}
+
+.santa-scene__village .santa-scene__window {
+  fill: var(--c-yellow-300);
+  animation: santa-window-flicker 3.2s ease-in-out infinite;
+}
+
+.santa-scene__window--slow { animation-duration: 4.7s; animation-delay: -1.2s; }
+.santa-scene__window--late { animation-duration: 5.6s; animation-delay: -2.6s; }
+
+@keyframes santa-window-flicker {
+  0%, 100% { opacity: 1; }
+  45% { opacity: 0.55; }
+  60% { opacity: 0.85; }
+  75% { opacity: 0.45; }
+}
+
+/* At dawn the silhouettes soften to plum and the window lights go out */
+.santa-tracker.is-post .santa-scene__hill-back { fill: #3a2d55; }
+.santa-tracker.is-post .santa-scene__hill-front { fill: #2c2244; }
+.santa-tracker.is-post .santa-scene__village path,
+.santa-tracker.is-post .santa-scene__village rect { fill: #443461; }
+.santa-tracker.is-post .santa-scene__village .santa-scene__window { animation: none; }
+
+/* Shooting stars (spawned by JS every ~12s during the countdown) */
+.santa-scene__shooting {
+  position: absolute;
+  inset: 0;
+}
+
+.santa-shooting-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.7);
+  animation: santa-shoot 1.4s ease-out forwards;
+}
+
+.santa-shooting-star::before {
+  content: '';
+  position: absolute;
+  right: 1px;
+  top: 0;
+  width: 120px;
+  height: 1.5px;
+  background: linear-gradient(270deg, rgba(255, 255, 255, 0.9), transparent);
+  transform-origin: right center;
+  transform: rotate(-27deg);
+}
+
+@keyframes santa-shoot {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translate3d(-180px, 90px, 0); opacity: 0; }
+}
+
+/* One-off confetti burst as the Christmas-morning state lands */
+.santa-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 9;            /* above the globe + panels for the your-city burst */
+  pointer-events: none;
+}
+
+.santa-confetti span {
+  position: absolute;
+  top: -3%;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  animation: santa-confetti-fall 3s ease-in forwards;
+}
+
+@keyframes santa-confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(105vh) rotate(540deg); opacity: 0.4; }
+}
+
+/* Keep the headline readable over the lighter dawn sky */
+.santa-tracker.is-post .santa-tracker__title,
+.santa-tracker.is-post .santa-tracker__subtitle {
+  text-shadow: 0 2px 24px rgba(52, 28, 76, 0.45);
+}
+
+.santa-tracker.is-post .santa-tracker__subtitle {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* ---------- Countdown ---------- */
+
+.santa-countdown {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-200);
+  margin-bottom: var(--space-400);
+  flex-wrap: wrap;
+}
+
+.santa-countdown__unit {
+  min-width: 176px;
+  padding: var(--space-300) var(--space-200);
+  border-radius: var(--radius-m);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+}
+
+.santa-countdown__value {
+  display: block;
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight);
+  font-size: clamp(57.6px, 8vw, 102.4px);
+  line-height: 1;
+  color: var(--c-yellow-300);
+  font-variant-numeric: tabular-nums;
+}
+
+.santa-countdown__value.is-ticking {
+  animation: santa-tick 0.45s ease-out;
+}
+
+@keyframes santa-tick {
+  0% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.santa-countdown__label {
+  display: block;
+  margin-top: var(--space-100);
+  font-size: var(--fz-s);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-blue-100);
+}
+
+/* Glass card wrapping the digits, status line and wait bar — compact, so
+   the village video behind it stays the hero */
+.santa-countdown-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-150);
+  width: min(560px, 100%);
+  margin-inline: auto;
+  margin-bottom: var(--space-300);
+  padding: var(--space-200) var(--space-300);
+  border-radius: var(--radius-l);
+  background: rgba(10, 16, 38, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+}
+
+/* Apple-style "liquid glass" pill over the video's white snow: bright
+   refractive glass with dark ink. The url() line adds the turbulence
+   refraction in browsers that support SVG backdrop filters; others keep
+   the plain blur + saturation. */
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card {
+  border-radius: 36px;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.06));
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  -webkit-backdrop-filter: blur(7px) saturate(160%);
+  backdrop-filter: blur(7px) saturate(160%);
+  backdrop-filter: blur(7px) saturate(160%) url(#santa-glass-distortion);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.25),
+    0 12px 40px rgba(10, 16, 38, 0.25);
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card .santa-countdown__unit {
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card__label {
+  color: rgba(11, 16, 38, 0.66);
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card .santa-countdown__value {
+  color: var(--c-red-500);
+  text-shadow: none;
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card .santa-countdown__label {
+  color: rgba(11, 16, 38, 0.6);
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card .santa-countdown__status {
+  color: rgba(11, 16, 38, 0.72);
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card .santa-wait {
+  background: rgba(11, 16, 38, 0.16);
+}
+
+.santa-tracker.has-video:not(.video-failed) .santa-countdown-card .santa-wait__fill {
+  background: linear-gradient(90deg, var(--c-red-500), #ff8f5e);
+}
+
+.santa-countdown-card__label {
+  margin: 0;
+  font-size: var(--fz-s);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* inside the card the unit tiles lose their own heavy chrome */
+.santa-countdown-card .santa-countdown {
+  margin-bottom: 0;
+}
+
+.santa-countdown-card .santa-countdown__unit {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: var(--space-150) var(--space-100);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.santa-countdown-card .santa-countdown__value {
+  font-size: clamp(28px, 3.2vw, 48px);
+}
+
+.santa-countdown-card .santa-countdown__label {
+  margin-top: var(--space-50);
+  font-size: var(--fz-t);
+}
+
+/* Rotating "elves are getting ready" status line */
+.santa-countdown__status {
+  margin: 0;
+  min-height: 1.4em;
+  color: var(--c-blue-100);
+  font-size: var(--fz-s);
+  transition: opacity 0.25s ease;
+}
+
+.santa-countdown__status.is-fading {
+  opacity: 0;
+}
+
+/* Thin "how far through the wait" progress bar (fills 1 Dec until lift-off) */
+.santa-wait {
+  height: 6px;
+  border-radius: 1584px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+
+.santa-wait__fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--c-yellow-300), #fff);
+  transition: width 1s linear;
+}
+
+.santa-tracker__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-100);
+  padding: var(--space-200) var(--space-500);
+  border-radius: 1584px;
+  background: var(--c-red-500);
+  color: var(--c-neutral-50);
+  font-weight: 700;
+  font-size: var(--fz-m);
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.santa-tracker__cta:hover {
+  background: var(--c-red-400);
+  transform: translateY(-2px);
+}
+
+/* Small copyright, bottom-right, shown in every state and on every device */
+.santa-copyright {
+  position: absolute;
+  z-index: 8;
+  right: var(--space-200);
+  bottom: var(--space-100);
+  margin: 0;
+  font-size: 9.92px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.55);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+@media screen and (max-width: 749px) {
+  .santa-copyright {
+    font-size: 8.8px;
+    right: var(--space-150);
+  }
+}
+
+/* ---------- Live tracker (full-page 3D globe) ---------- */
+
+.santa-live {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+
+  /* Liquid-glass panel over the night globe. Brand vocabulary:
+     red = live/now (Love to Sing main), gold = the journey (matches the
+     globe's golden trail), frosted white = chrome. */
+  --sp-bg: rgba(13, 19, 42, 0.52);
+  --sp-ink: #f7f8fc;
+  --sp-ink-soft: rgba(247, 248, 252, 0.62);
+  --sp-line: rgba(255, 255, 255, 0.14);
+  --sp-red: var(--c-red-500);
+  --sp-gold: var(--c-yellow-300);
+}
+
+.santa-live__globe {
+  position: absolute;
+  inset: 0;
+}
+
+.santa-live__globe canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Brand — centred at the top of the screen during the live globe */
+.santa-live__brand {
+  position: absolute;
+  z-index: 7;
+  top: var(--space-300);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.santa-live__brand .santa-tracker__logo {
+  display: block;
+  margin: 0;
+}
+
+.santa-live__brand .santa-tracker__logo img {
+  width: auto;
+  height: auto;
+  max-width: 90px;
+}
+
+/* ---------- Compact stats panel ("flight log") ---------- */
+
+.santa-live__panel {
+  position: absolute;
+  z-index: 6;
+  left: var(--space-400);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-200);
+  width: min(288px, calc(100vw - 2 * var(--space-400)));
+  max-height: min(860px, calc(100vh - 48px));
+  padding: var(--space-250) var(--space-300);
+  transition: width 0.3s ease;
+  border-radius: 28px;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03)),
+    var(--sp-bg);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%) url(#santa-glass-distortion);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.35),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.12),
+    0 25.6px 64px rgba(20, 30, 60, 0.4);
+  color: var(--sp-ink);
+  text-align: left;
+}
+
+/* Collapse / expand tab on the panel's right edge */
+.santa-live__collapse {
+  position: absolute;
+  top: 50%;
+  right: -24px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-left: 0;
+  border-radius: 0 var(--radius-m) var(--radius-m) 0;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03)),
+    var(--sp-bg);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  color: var(--sp-ink-soft);
+  font-size: 17.6px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.santa-live__collapse-icon {
+  transition: transform 0.3s ease;
+}
+
+.santa-live__panel.is-collapsed .santa-live__collapse-icon {
+  transform: rotate(180deg);
+}
+
+/* Collapsed: just the logo + a compact city list */
+.santa-live__panel.is-collapsed {
+  width: min(184px, calc(100vw - 2 * var(--space-400)));
+}
+
+.santa-live__panel.is-collapsed .santa-live__clock,
+.santa-live__panel.is-collapsed .santa-live__status,
+.santa-live__panel.is-collapsed .santa-you,
+.santa-live__panel.is-collapsed .santa-live__cta {
+  display: none;
+}
+
+.santa-live__panel.is-collapsed .santa-rail__row {
+  padding: 4.48px 0;
+}
+
+.santa-live__panel.is-collapsed .santa-rail__city {
+  font-size: var(--fz-t);
+}
+
+.santa-live__panel.is-collapsed .santa-rail__region {
+  font-size: 9.6px;
+}
+
+.santa-live__panel.is-collapsed .santa-rail__row.is-current .santa-rail__city {
+  font-size: var(--fz-s);
+}
+
+.santa-live__panel.is-collapsed .santa-rail__city::after,
+.santa-live__panel.is-collapsed .santa-rail__row.is-current.is-delivering .santa-rail__city::after {
+  display: none; /* hide NOW/NEXT pills in the narrow view */
+}
+
+.santa-live__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-150);
+}
+
+.santa-live__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-200);
+}
+
+.santa-live__clock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  flex: none;
+}
+
+.santa-live__clock-time {
+  font-family: var(--font-heading-family);
+  font-weight: 800;
+  font-size: var(--fz-m);
+  line-height: 1.1;
+  color: var(--sp-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.santa-live__clock-label {
+  font-size: 9.6px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--sp-ink-soft);
+}
+
+/* "Santa is live" eyebrow with a pulsing red dot */
+.santa-live__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-100);
+  margin: 0;
+  font-size: 9.92px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sp-ink-soft);
+}
+
+.santa-live__live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--c-red-500);
+  animation: santa-live-dot 1.6s ease-in-out infinite;
+}
+
+@keyframes santa-live-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(185, 31, 28, 0.55); }
+  50% { box-shadow: 0 0 0 5px rgba(185, 31, 28, 0); }
+}
+
+.santa-live__status {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  padding: var(--space-50) var(--space-200);
+  border-radius: 1584px;
+  background: var(--sp-red);
+  color: #fff;
+  font-size: var(--fz-s);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* ---------- Itinerary rail ---------- */
+
+.santa-rail {
+  position: relative; /* offset parent for row offsetTop â†’ correct auto-scroll */
+  flex: 1 1 auto;
+  min-height: 176px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(250, 204, 85, 0.45) transparent;
+  -webkit-overflow-scrolling: touch;
+  /* fade the list at the top and bottom edges */
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 11%, #000 89%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 11%, #000 89%, transparent);
+}
+
+.santa-rail::-webkit-scrollbar { width: 4px; }
+.santa-rail::-webkit-scrollbar-thumb {
+  background: rgba(250, 204, 85, 0.45);
+  border-radius: 1584px;
+}
+
+.santa-rail__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 20.8px 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: var(--space-150);
+  padding: 6.72px 0;
+  transition: opacity 0.4s ease;
+}
+
+/* the connecting route thread, drawn behind the nodes */
+.santa-rail__row::before {
+  content: '';
+  position: absolute;
+  left: 9.6px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--sp-line);
+}
+.santa-rail__row:first-child::before { top: 50%; }
+.santa-rail__row:last-child::before { bottom: 50%; }
+
+/* travelled route thread: quiet frosted white */
+.santa-rail__row.is-visited::before,
+.santa-rail__row.is-current::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.22));
+}
+
+.santa-rail__node {
+  grid-row: 1 / 3;
+  justify-self: center;
+  width: 9.92px;
+  height: 9.92px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.25);
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.santa-rail__city {
+  grid-column: 2;
+  grid-row: 1;
+  font-weight: 600;
+  font-size: var(--fz-s);
+  line-height: 1.15;
+  color: var(--sp-ink);
+}
+
+.santa-rail__region {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: var(--fz-t);
+  color: var(--sp-ink-soft);
+}
+
+/* state: already visited */
+.santa-rail__row.is-visited { opacity: 0.72; }
+.santa-rail__row.is-visited .santa-rail__node {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+/* state: upcoming */
+.santa-rail__row.is-upcoming { opacity: 0.5; }
+.santa-rail__row.is-next { opacity: 1; }
+.santa-rail__row.is-next .santa-rail__node {
+  border-color: rgba(255, 255, 255, 0.65);
+}
+
+/* state: where Santa is right now */
+.santa-rail__row.is-current { opacity: 1; }
+.santa-rail__row.is-current .santa-rail__node {
+  width: 13.6px;
+  height: 13.6px;
+  background: var(--c-red-500);
+  border-color: #fff;
+  box-shadow: 0 0 0 4px rgba(185, 31, 28, 0.3), 0 0 12px rgba(185, 31, 28, 0.55);
+}
+.santa-rail__row.is-current.is-delivering .santa-rail__node {
+  animation: santa-pulse 1.4s ease-in-out infinite;
+}
+.santa-rail__row.is-current .santa-rail__city {
+  font-family: var(--font-heading-family);
+  font-weight: 800;
+  font-size: var(--fz-m);
+  color: var(--sp-ink);
+}
+.santa-rail__row.is-current.is-delivering .santa-rail__city::after {
+  content: 'NOW';
+  margin-left: var(--space-100);
+  padding: 0.05em 0.45em;
+  border-radius: 1584px;
+  background: var(--sp-red);
+  color: #fff;
+  font-family: system-ui, sans-serif;
+  font-size: 9.6px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+}
+
+.santa-rail__row.is-next .santa-rail__city::after {
+  content: 'NEXT';
+  margin-left: var(--space-100);
+  padding: 0.05em 0.45em;
+  border-radius: 1584px;
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--sp-ink-soft);
+  font-family: system-ui, sans-serif;
+  font-size: 9.28px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+}
+
+@keyframes santa-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(185, 31, 28, 0.3), 0 0 12px rgba(185, 31, 28, 0.55); }
+  50% { box-shadow: 0 0 0 7px rgba(185, 31, 28, 0.12), 0 0 18px rgba(185, 31, 28, 0.75); }
+}
+
+/* ---------- Journey stats — companion glass panel, right side ---------- */
+
+.santa-live__stats {
+  position: absolute;
+  z-index: 6;
+  right: var(--space-400);
+  bottom: var(--space-400);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-200);
+  width: min(232px, calc(100vw - 2 * var(--space-400)));
+  padding: var(--space-250) var(--space-300);
+  border-radius: 28px;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03)),
+    var(--sp-bg);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%) url(#santa-glass-distortion);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.35),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.12),
+    0 25.6px 64px rgba(20, 30, 60, 0.4);
+  color: var(--sp-ink);
+  text-align: left;
+}
+
+.santa-live__stats .santa-stat + .santa-stat {
+  padding-top: var(--space-150);
+  border-top: 1px solid var(--sp-line);
+}
+
+/* Mobile only: the stats card doubles as the itinerary-sheet trigger */
+.santa-live__stats-head {
+  display: none;
+  align-items: center;
+  gap: var(--space-100);
+  width: 100%;
+  min-height: 44px;
+  padding: 0 0 var(--space-100);
+  border: 0;
+  border-bottom: 1px solid var(--sp-line);
+  background: none;
+  color: var(--sp-ink);
+  font-weight: 800;
+  font-size: var(--fz-s);
+  text-align: left;
+  cursor: pointer;
+}
+
+.santa-live__stats-status {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.santa-live__stats-chevron {
+  color: var(--sp-ink-soft);
+  font-size: 0.8em;
+  transition: transform 0.3s ease;
+}
+
+.santa-live.is-panel-open .santa-live__stats-chevron {
+  transform: rotate(180deg);
+}
+
+/* Overall journey progress across the whole route */
+.santa-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-50);
+}
+
+.santa-progress__track {
+  height: 5px;
+  border-radius: 1584px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.santa-progress__fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--c-yellow-300), var(--c-yellow-500));
+  transition: width 1s linear;
+}
+
+.santa-progress__label {
+  font-size: 9.92px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--sp-ink-soft);
+}
+
+.santa-stat { display: flex; flex-direction: column; }
+
+.santa-stat__num {
+  font-family: var(--font-heading-family);
+  font-weight: 800;
+  font-size: 20.8px;
+  line-height: 1.1;
+  color: var(--sp-gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.santa-stat:last-of-type .santa-stat__num { color: var(--sp-ink); }
+
+.santa-stat__label {
+  font-size: 9.92px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--sp-ink-soft);
+}
+
+.santa-live__cta {
+  margin-top: 0;
+  align-self: stretch;
+  justify-content: center;
+  font-size: var(--fz-s);
+  padding: var(--space-150) var(--space-300);
+  background: var(--sp-red);
+  color: #fff;
+}
+.santa-live__cta:hover { background: var(--c-red-600); }
+
+/* Sound toggle â€” top-right of the globe */
+.santa-live__sound {
+  position: absolute;
+  z-index: 7;
+  top: var(--space-300);
+  right: var(--space-300);
+  width: 70.4px;
+  height: 70.4px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  background: rgba(9, 20, 45, 0.6);
+  backdrop-filter: blur(6px);
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.santa-live__sound:hover {
+  background: rgba(9, 20, 45, 0.85);
+  transform: scale(1.06);
+}
+
+/* Share button — beside the sound toggle during the live globe */
+.santa-live__share {
+  position: absolute;
+  z-index: 7;
+  top: var(--space-300);
+  right: calc(var(--space-300) + 82px);
+  width: 70.4px;
+  height: 70.4px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  background: rgba(9, 20, 45, 0.6);
+  backdrop-filter: blur(6px);
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.santa-live__share:hover {
+  background: rgba(9, 20, 45, 0.85);
+  transform: scale(1.06);
+}
+
+/* show ðŸ”‡ by default, ðŸ”Š when on */
+.santa-live__sound .santa-live__sound-on {
+  display: none;
+}
+
+.santa-live__sound.is-on .santa-live__sound-on {
+  display: block;
+}
+
+.santa-live__sound.is-on .santa-live__sound-off {
+  display: none;
+}
+
+/* "Santa reaches you" personalised block â€” progressive disclosure */
+.santa-you { display: block; }
+
+/* Full-width trigger (default, no location chosen yet) */
+.santa-you__trigger {
+  display: none;
+  width: 100%;
+  padding: 8.8px 11.2px;
+  border-radius: var(--radius-m);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--sp-ink);
+  font-weight: 700;
+  font-size: var(--fz-s);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.santa-you__trigger:hover { background: rgba(255, 255, 255, 0.18); }
+
+/* The selector panel and the result sit on a quiet frosted inset */
+.santa-you__panel,
+.santa-you__result {
+  display: none;
+  flex-direction: column;
+  gap: var(--space-100);
+  padding: var(--space-150) var(--space-200);
+  border-radius: var(--radius-m);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.santa-you[data-you-state="closed"] .santa-you__trigger { display: block; }
+.santa-you[data-you-state="open"] .santa-you__panel { display: flex; }
+.santa-you[data-you-state="set"] .santa-you__result { display: flex; }
+
+.santa-you__prompt {
+  margin: 0;
+  font-size: var(--fz-t);
+  font-weight: 600;
+  color: var(--sp-ink-soft);
+}
+
+.santa-you__change {
+  align-self: flex-start;
+  margin-top: var(--space-50);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sp-ink-soft);
+  font-size: var(--fz-t);
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.santa-you__change:hover {
+  color: var(--sp-ink);
+}
+
+.santa-you__eta {
+  margin: 0;
+  font-family: var(--font-heading-family);
+  font-weight: 700;
+  font-size: var(--fz-s);
+  line-height: 1.2;
+  color: var(--sp-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.santa-you__city {
+  margin: 0;
+  font-size: var(--fz-t);
+  color: var(--sp-ink);
+  font-weight: 700;
+}
+
+.santa-you__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-100);
+}
+
+.santa-you__btn,
+.santa-you__select {
+  font-size: var(--fz-t);
+  padding: 4.8px 9.6px;
+  border-radius: 1584px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--sp-ink);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.santa-you__btn:hover,
+.santa-you__select:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Keyboard focus, everywhere on the panel */
+.santa-live button:focus-visible,
+.santa-live select:focus-visible,
+.santa-live a:focus-visible {
+  outline: 2px solid var(--c-yellow-300);
+  outline-offset: 2px;
+}
+
+.santa-you__select option {
+  color: #0f1530;
+  background: #fff;
+}
+
+.santa-you__select {
+  border-radius: var(--radius-m);
+  max-width: 100%;
+}
+
+/* Follow Santa button â€” shown only in free-orbit mode, below the brand */
+.santa-live__follow {
+  position: absolute;
+  z-index: 7;
+  top: calc(var(--space-300) + 112px); /* clears the ~90px logo below the brand */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-150) var(--space-400);
+  border: 0;
+  border-radius: 1584px;
+  background: var(--c-yellow-300);
+  color: var(--c-black-900);
+  font-weight: 700;
+  font-size: var(--fz-s);
+  cursor: pointer;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+.santa-live__error {
+  position: absolute;
+  z-index: 6;
+  bottom: var(--space-500);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 2 * var(--space-300));
+  padding: var(--space-150) var(--space-300);
+  border-radius: var(--radius-m);
+  background: rgba(9, 20, 45, 0.85);
+}
+
+@media screen and (max-width: 989px) {
+  /* One bottom card: status row (opens the sheet) + stats */
+  .santa-live__stats {
+    right: auto;
+    left: 50%;
+    bottom: var(--space-300);
+    transform: translateX(-50%);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-100) var(--space-200);
+    width: min(420px, calc(100vw - var(--space-300)));
+    padding: var(--space-150) var(--space-250);
+  }
+
+  .santa-live__stats-head {
+    display: flex;
+    grid-column: 1 / -1;
+  }
+
+  .santa-live__stats .santa-stat,
+  .santa-live__stats .santa-stat + .santa-stat {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .santa-live__stats .santa-stat__num {
+    font-size: var(--fz-m);
+  }
+
+  /* while the sheet is open, slim down to just the status row */
+  .santa-live.is-panel-open .santa-live__stats .santa-stat {
+    display: none;
+  }
+
+  .santa-live.is-panel-open .santa-live__stats-head {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  /* Panel becomes a bottom sheet, opened from the floating banner */
+  .santa-live__panel {
+    left: 50%;
+    top: auto;
+    bottom: 137.6px;
+    transform: translate(-50%, calc(100% + 256px));
+    width: min(640px, calc(100vw - var(--space-300)));
+    max-height: min(70vh, calc(100vh - 192px));
+    transition: transform 0.35s ease;
+    text-align: left;
+  }
+
+  .santa-rail { max-height: 38vh; }
+
+  .santa-live__collapse { display: none; } /* sheet opens from the stats card instead */
+
+  .santa-live.is-panel-open .santa-live__panel {
+    transform: translate(-50%, 0);
+  }
+}
+
+/* ---------- Finished / Christmas Day ---------- */
+
+.santa-post {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-400);
+}
+
+.santa-post__intro {
+  max-width: 640px;
+}
+
+/* Warm, solid morning card against the dawn sky */
+.santa-post-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-200);
+  width: min(480px, 100%);
+  padding: var(--space-400);
+  border-radius: var(--radius-l);
+  background: rgba(255, 255, 255, 0.92);
+  color: #20263a;
+  text-align: center;
+  box-shadow: 0 32px 80px rgba(30, 20, 50, 0.35);
+}
+
+.santa-post-card__check {
+  width: 48px;
+  height: 48px;
+  margin-inline: auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e7f6ec;
+  color: #1d7a46;
+  font-size: 22.4px;
+  font-weight: 700;
+}
+
+.santa-tracker .santa-post-card__heading {
+  margin: 0;
+  color: #20263a;
+  font-size: 22.4px;
+}
+
+.santa-post-card__tally {
+  margin: 0;
+  color: #5a6072;
+  font-size: var(--fz-s);
+}
+
+.santa-post-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-100);
+  margin-top: var(--space-100);
+}
+
+.santa-post-card__cta {
+  display: block;
+  width: 100%;
+  padding: var(--space-200);
+  border-radius: var(--radius-l);
+  font-weight: 700;
+  font-size: var(--fz-s);
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.santa-post-card__cta--primary {
+  background: var(--c-red-500);
+  color: #fff;
+}
+
+.santa-post-card__cta--primary:hover {
+  background: var(--c-red-400);
+  transform: translateY(-1px);
+}
+
+.santa-post-card__cta--secondary {
+  background: #eef0f4;
+  color: #20263a;
+}
+
+.santa-post-card__cta--secondary:hover {
+  background: #e2e5ec;
+}
+
+.santa-post-card__replay {
+  margin-top: var(--space-50);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #5a6072;
+  font-size: var(--fz-t);
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.santa-post-card__replay:hover {
+  color: #20263a;
+}
+
+.santa-post-card__closing {
+  margin: 0;
+  color: #8a7f74;
+  font-size: var(--fz-t);
+}
+
+/* Desktop: headline on the left, morning card on the right */
+@media screen and (min-width: 990px) {
+  .santa-post {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-600);
+    text-align: left;
+  }
+
+  .santa-post__intro {
+    text-align: left;
+  }
+
+  .santa-post__intro .santa-tracker__subtitle {
+    margin-inline: 0;
+    margin-bottom: 0;
+  }
+
+  .santa-post-card {
+    text-align: left;
+  }
+
+  .santa-post-card__check {
+    margin-inline: 0;
+  }
+}
+
+/* ---------- Snow ---------- */
+
+[data-snow-layer] {
+  position: absolute;
+  inset: 0;
+  z-index: 5; /* above the globe overlay so snow keeps falling over it */
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.santa-snowflake {
+  position: absolute;
+  top: -5%;
+  animation-name: santa-snowfall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.santa-snowflake::before {
+  content: 'â„';
+  color: #fff;
+}
+
+@keyframes santa-snowfall {
+  to { transform: translateY(110vh) rotate(300deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .santa-snowflake,
+  .santa-tracker::before,
+  .santa-tracker::after,
+  .santa-countdown__value.is-ticking,
+  .santa-rail__row.is-current.is-delivering .santa-rail__node,
+  .santa-scene__aurora,
+  .santa-star,
+  .santa-scene__village .santa-scene__window,
+  .santa-shooting-star,
+  .santa-confetti span,
+  .santa-live__live-dot {
+    animation: none;
+  }
+}
+
+/* ---------- Responsive ---------- */
+
+@media screen and (max-width: 749px) {
+  .santa-tracker__inner {
+    padding-block: var(--space-300) var(--space-300);
+  }
+
+  .santa-tracker__logo img {
+    max-width: 130px;
+  }
+
+  .santa-countdown {
+    gap: var(--space-100);
+  }
+
+  .santa-countdown__unit {
+    min-width: 118.4px;
+    padding: var(--space-200) var(--space-100);
+  }
+
+  .santa-countdown-card {
+    gap: var(--space-150);
+    padding: var(--space-200) var(--space-150);
+  }
+
+  .santa-scene__moon {
+    width: 64px;
+    height: 64px;
+    right: 8%;
+    top: 6%;
+  }
+
+  .santa-scene__sun {
+    width: 88px;
+    height: 88px;
+  }
+}

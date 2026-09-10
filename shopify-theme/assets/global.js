@@ -1202,6 +1202,48 @@ document.addEventListener('shopify:section:load', (event) => {
   );
 });
 
+/**
+ * Header transparent-on-scroll controller
+ * The header is transparent over the hero at the top of the page and gains
+ * `.is-solid` (fill + shadow, styled in section-header.css) once the page is
+ * scrolled. Colour is driven by scroll ONLY — opening a mega menu at the top
+ * must NOT solidify the header, so this never keys off menu state.
+ *
+ * @param {string} selector  Header root selector (default: '.header')
+ * @returns {Function}       cleanup() - call to remove the listener
+ */
+function headerSolidOnScroll(selector = '.header') {
+  const header = document.querySelector(selector);
+  if (!header) return () => {};
+
+  const THRESHOLD = 10;
+  let ticking = false;
+
+  function apply() {
+    ticking = false;
+    header.classList.toggle('is-solid', window.scrollY > THRESHOLD);
+  }
+
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(apply);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  apply(); // set initial state on load
+
+  return () => window.removeEventListener('scroll', onScroll);
+}
+
+headerSolidOnScroll('.header');
+
+document.addEventListener('shopify:section:load', (event) => {
+  if (event.target.querySelector('.header')) {
+    headerSolidOnScroll('.header');
+  }
+});
+
 // Set scrollbar width css variable.
 document.documentElement.style.setProperty(
   '--scrollbar-width',

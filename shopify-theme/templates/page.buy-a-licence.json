@@ -1,0 +1,438 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero_banner_8pUxwH": {
+      "type": "hero-banner",
+      "custom_css": [
+        ".hero__inner {padding-top: 12rem;}",
+        ".hero__content .button {background: #c8102e; border-color: #c8102e; color: #ffffff;}",
+        ".hero__content .button:hover {background: #b0102a; border-color: #b0102a; color: #ffffff;}"
+      ],
+      "name": "t:sections.hero-banner.name",
+      "settings": {
+        "background": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "video": "",
+        "video_mobile": "",
+        "overlay_color": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "overlay_opacity": 20,
+        "image_aside": "shopify://shop_images/buy-a-licence-hero.png",
+        "image_overlay_alignment": "center",
+        "image_overlay_width": 60,
+        "eyebrow": "",
+        "content_color": "#ffffff",
+        "title": "License Love to Sing music",
+        "content": "<p>Use our songs legally in your services, classrooms and online! We love to see our music being used around the globe and connecting people. </p>",
+        "button_text": "View pricing",
+        "button_url": "#pricing",
+        "round_aside": true
+      }
+    },
+    "lts_licence_pricing": {
+      "type": "lts-licence-pricing",
+      "blocks": {
+        "card_streaming": {
+          "type": "card",
+          "settings": {
+            "grant": "streaming",
+            "icon": "🎬",
+            "name": "Streaming",
+            "tagline": "Online only",
+            "features": "Livestream your performances\nUpload to YouTube and social\nShare with your audience\nFor online-only ministries",
+            "button_label": "Choose",
+            "featured": false,
+            "premium": false,
+            "pill_text": "Most popular"
+          }
+        },
+        "card_copyright": {
+          "type": "card",
+          "settings": {
+            "grant": "copyright",
+            "icon": "🔊",
+            "name": "Copyright",
+            "tagline": "In the room",
+            "features": "Play, sing and perform live\nPrint lyrics and project words\nShow our videos in the room\nRecord your own performances",
+            "button_label": "Choose",
+            "featured": false,
+            "premium": false,
+            "pill_text": "Most popular"
+          }
+        },
+        "card_allinone": {
+          "type": "card",
+          "settings": {
+            "grant": "all_in_one",
+            "icon": "✨",
+            "name": "All-in-One",
+            "tagline": "Room and online",
+            "features": "Everything in Copyright\nLivestream your services\nUpload to YouTube and social\nShare with your community",
+            "button_label": "Choose",
+            "featured": false,
+            "premium": false,
+            "pill_text": "Most popular"
+          }
+        },
+        "card_membership": {
+          "type": "card",
+          "settings": {
+            "grant": "membership",
+            "icon": "★",
+            "name": "Membership",
+            "tagline": "Our whole catalogue",
+            "features": "Everything in All-in-One\nPLUS\nStream our whole catalogue\nDownload our whole catalogue\nOne annual signup for your organisation",
+            "button_label": "Join",
+            "featured": false,
+            "premium": true,
+            "pill_text": "★ Best value"
+          }
+        }
+      },
+      "block_order": [
+        "card_streaming",
+        "card_copyright",
+        "card_allinone",
+        "card_membership"
+      ],
+      "settings": {
+        "eyebrow": "Simple, size-based pricing",
+        "heading": "Pick your size and see your exact price",
+        "subheading": "Tell us who it is for and how big you are. Every option below updates to your real yearly price.",
+        "sticky_offset": 76,
+        "org_church": "Church",
+        "org_school": "School",
+        "org_community": "Community",
+        "size_church": "Average weekly attendance",
+        "size_school": "Number of students",
+        "size_community": "Regular attendees"
+      }
+    },
+    "lts_licence_table": {
+      "type": "lts-licence-table",
+      "blocks": {
+        "grp_room": {
+          "type": "group",
+          "settings": {
+            "title": "In your services and lessons"
+          }
+        },
+        "row_printlyrics": {
+          "type": "row",
+          "settings": {
+            "label": "Print lyrics and song sheets",
+            "col_a": true,
+            "col_b": true,
+            "col_c": false
+          }
+        },
+        "row_projectwords": {
+          "type": "row",
+          "settings": {
+            "label": "Project words on screen",
+            "col_a": true,
+            "col_b": true,
+            "col_c": false
+          }
+        },
+        "row_showvideos": {
+          "type": "row",
+          "settings": {
+            "label": "Show our videos in the room",
+            "col_a": true,
+            "col_b": true,
+            "col_c": false
+          }
+        },
+        "row_recordlive": {
+          "type": "row",
+          "settings": {
+            "label": "Record your live performances",
+            "col_a": true,
+            "col_b": true,
+            "col_c": false
+          }
+        },
+        "row_translate": {
+          "type": "row",
+          "settings": {
+            "label": "Translate lyrics (with approval)",
+            "col_a": true,
+            "col_b": true,
+            "col_c": false
+          }
+        },
+        "grp_online": {
+          "type": "group",
+          "settings": {
+            "title": "Online"
+          }
+        },
+        "row_livestream": {
+          "type": "row",
+          "settings": {
+            "label": "Livestream your services",
+            "col_a": false,
+            "col_b": true,
+            "col_c": true
+          }
+        },
+        "row_youtube": {
+          "type": "row",
+          "settings": {
+            "label": "Upload to YouTube and socials",
+            "col_a": false,
+            "col_b": true,
+            "col_c": true
+          }
+        },
+        "row_share": {
+          "type": "row",
+          "settings": {
+            "label": "Share recordings with your community",
+            "col_a": false,
+            "col_b": true,
+            "col_c": true
+          }
+        },
+        "grp_every": {
+          "type": "group",
+          "settings": {
+            "title": "Every licence"
+          }
+        },
+        "row_covers": {
+          "type": "row",
+          "settings": {
+            "label": "Covers all your purchases",
+            "col_a": true,
+            "col_b": true,
+            "col_c": true
+          }
+        },
+        "row_worldwide": {
+          "type": "row",
+          "settings": {
+            "label": "Valid worldwide, 1 year",
+            "col_a": true,
+            "col_b": true,
+            "col_c": true
+          }
+        },
+        "row_download": {
+          "type": "row",
+          "settings": {
+            "label": "Download your files",
+            "col_a": true,
+            "col_b": true,
+            "col_c": true
+          }
+        }
+      },
+      "block_order": [
+        "grp_room",
+        "row_printlyrics",
+        "row_projectwords",
+        "row_showvideos",
+        "row_recordlive",
+        "row_translate",
+        "grp_online",
+        "row_livestream",
+        "row_youtube",
+        "row_share",
+        "grp_every",
+        "row_covers",
+        "row_worldwide",
+        "row_download"
+      ],
+      "settings": {
+        "anchor_id": "pricing",
+        "heading": "Copyright, Streaming, or All-in-One?",
+        "subheading": "Pick the licence that fits how you use the music.",
+        "price_prefix": "from",
+        "col_a_name": "Copyright",
+        "col_a_desc": "Just in the room",
+        "col_a_product": "copyright-licence",
+        "col_a_button_label": "Choose",
+        "col_a_button_url": "/pages/licence-builder?licence=copyright",
+        "col_b_name": "All-in-One",
+        "col_b_desc": "Room and online",
+        "col_b_badge": "Most popular",
+        "col_b_product": "all-in-one-licence",
+        "col_b_button_label": "Choose",
+        "col_b_button_url": "/pages/licence-builder?licence=all_in_one",
+        "col_c_name": "Streaming",
+        "col_c_desc": "Online only",
+        "col_c_product": "streaming-licence",
+        "col_c_button_label": "Choose",
+        "col_c_button_url": "/pages/licence-builder?licence=streaming"
+      }
+    },
+    "lts_licence_explainer": {
+      "type": "lts-licence-explainer",
+      "blocks": {
+        "lic_copyright": {
+          "type": "licence",
+          "settings": {
+            "icon": "🔊",
+            "name": "Copyright",
+            "tagline": "Just in the room",
+            "product": "copyright-licence",
+            "layout": "can_need",
+            "can_heading": "You can",
+            "can_list": "Play our tracks, sing and perform our songs live\nPrint lyrics in song sheets, slides, programmes and songbooks\nProject the words on screen\nShow our music videos on the screen in the room\nStore the files on your computers and presentation software\nRecord your own audio or video of your performance to keep and use within your church or school\nTranslate lyrics into another language (with our approval)",
+            "need_heading": "You will need All-in-One to",
+            "need_list": "Livestream your service or performance\nUpload your recording to YouTube, Facebook or social media\nPut any video containing our music on a website\nShare a recording publicly outside your church or school",
+            "full_intro": "",
+            "full_list": "",
+            "quiet": false,
+            "button_label": "Choose Copyright",
+            "button_url": "/pages/licence-builder?licence=copyright"
+          }
+        },
+        "lic_allinone": {
+          "type": "licence",
+          "settings": {
+            "icon": "✨",
+            "name": "All-in-One",
+            "tagline": "In the room and online",
+            "product": "all-in-one-licence",
+            "layout": "full",
+            "can_heading": "You can",
+            "can_list": "",
+            "need_heading": "You will need All-in-One to",
+            "need_list": "",
+            "full_intro": "Everything in the room, plus everything online, for less than buying the rights separately:",
+            "full_list": "Play, sing and perform live\nPrint, project and store lyrics\nShow our videos in the room\nRecord your own performances\nTranslate lyrics (with approval)\nLivestream your services and performances\nUpload to YouTube and social media\nShare recordings with your community",
+            "quiet": false,
+            "button_label": "Choose All-in-One",
+            "button_url": "/pages/licence-builder?licence=all_in_one"
+          }
+        },
+        "lic_streaming": {
+          "type": "licence",
+          "settings": {
+            "icon": "🎬",
+            "name": "Streaming only",
+            "tagline": "For online-only use",
+            "product": "streaming-licence",
+            "layout": "can_need",
+            "can_heading": "You can",
+            "can_list": "Livestream your performances online\nUpload to YouTube, Facebook and social media\nKeep recordings online for people to watch back\nShare recordings with your audience online",
+            "need_heading": "You will need Copyright (or All-in-One) to",
+            "need_list": "Print or project the lyrics in a room\nRecord and keep performances for in-room use",
+            "full_intro": "",
+            "full_list": "",
+            "quiet": true,
+            "button_label": "Choose Streaming",
+            "button_url": "/pages/licence-builder?licence=streaming"
+          }
+        }
+      },
+      "block_order": [
+        "lic_copyright",
+        "lic_allinone",
+        "lic_streaming"
+      ],
+      "settings": {
+        "heading": "Exactly what each licence includes",
+        "price_prefix": "from"
+      }
+    },
+    "licence_scenarios": {
+      "type": "lts-licence-scenarios",
+      "blocks": {
+        "scen_1": {
+          "type": "scenario",
+          "settings": {
+            "situation": "We sing along to backing tracks and print song sheets",
+            "badge_label": "Copyright",
+            "badge_url": "/pages/licence-builder?licence=copyright",
+            "solid": false
+          }
+        },
+        "scen_2": {
+          "type": "scenario",
+          "settings": {
+            "situation": "We project the words on screen in our services",
+            "badge_label": "Copyright",
+            "badge_url": "/pages/licence-builder?licence=copyright",
+            "solid": false
+          }
+        },
+        "scen_3": {
+          "type": "scenario",
+          "settings": {
+            "situation": "We record our nativity and keep it for parents",
+            "badge_label": "Copyright",
+            "badge_url": "/pages/licence-builder?licence=copyright",
+            "solid": false
+          }
+        },
+        "scen_4": {
+          "type": "scenario",
+          "settings": {
+            "situation": "We livestream our Sunday service on Facebook or YouTube",
+            "badge_label": "All-in-One",
+            "badge_url": "/pages/licence-builder?licence=all_in_one",
+            "solid": true
+          }
+        },
+        "scen_5": {
+          "type": "scenario",
+          "settings": {
+            "situation": "We upload our school concert to YouTube",
+            "badge_label": "All-in-One",
+            "badge_url": "/pages/licence-builder?licence=all_in_one",
+            "solid": true
+          }
+        },
+        "scen_6": {
+          "type": "scenario",
+          "settings": {
+            "situation": "We are online-only and never use the music in a room",
+            "badge_label": "Streaming only",
+            "badge_url": "/pages/licence-builder?licence=streaming",
+            "solid": false
+          }
+        },
+        "scen_7": {
+          "type": "scenario",
+          "settings": {
+            "situation": "We are using a song in a promo video or film",
+            "badge_label": "Sync licence, contact us",
+            "badge_url": "shopify://pages/contact-us",
+            "solid": false
+          }
+        }
+      },
+      "block_order": [
+        "scen_1",
+        "scen_2",
+        "scen_3",
+        "scen_4",
+        "scen_5",
+        "scen_6",
+        "scen_7"
+      ],
+      "settings": {
+        "heading": "Which licence do I need?"
+      }
+    }
+  },
+  "order": [
+    "hero_banner_8pUxwH",
+    "lts_licence_pricing",
+    "lts_licence_table",
+    "lts_licence_explainer",
+    "licence_scenarios"
+  ]
+}
