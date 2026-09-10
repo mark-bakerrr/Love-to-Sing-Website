@@ -117,6 +117,7 @@
   vp.addEventListener('pointerdown',function(e){
     down=true; moved=false; sx=lx=e.clientX; sy=ly=e.clientY; vX=vY=0; lastT=performance.now();
     startCard=e.target.closest('.pw-card');
+    if(startCard) preload(+startCard.dataset.i);
     cancelAnimationFrame(raf); vp.classList.add('is-panning'); vp.setPointerCapture(e.pointerId);
   });
   vp.addEventListener('pointermove',function(e){
@@ -175,6 +176,19 @@
   function modalParts(){
     return { dialog: modal.querySelector('.pw-dialog'), backdrop: modal.querySelector('.pw-backdrop') };
   }
+  /* warm the full-size image cache before the modal needs it */
+  var preloaded={};
+  function preload(i){
+    var p=PHOTOS[i];
+    if(!p || !p.src || preloaded[p.src]) return;
+    preloaded[p.src]=true;
+    var im=new Image(); im.decoding='async'; im.src=p.src;
+  }
+  world.addEventListener('pointerover',function(e){
+    var card=e.target.closest && e.target.closest('.pw-card');
+    if(card) preload(+card.dataset.i);
+  });
+
   function openModal(i){
     var p=PHOTOS[i]; if(!p) return;
     /* blank the previous photo so it never flashes on the next card */
@@ -203,13 +217,27 @@
     minfo.innerHTML=h;
     modal.classList.add('open');
 
-    /* photo fades/settles in only once the new image has decoded */
-    mphoto.onload=function(){
-      if(gsapOn()){ gsap.fromTo(mphoto,{autoAlpha:0,scale:.965},{autoAlpha:1,scale:1,duration:.5,ease:'power2.out',overwrite:'auto'}); }
-      else { mphoto.style.opacity='1'; }
+    /* show the wall thumbnail instantly (already in the browser cache),
+       then upgrade to the full-size photo in place once it has decoded */
+    mphoto.onload=null; mphoto.onerror=null;
+    mphoto.dataset.want=p.src;
+    if(p.thumb){
+      mphoto.src=p.thumb;
+      mphoto.style.opacity='1';
+    } else {
+      mphoto.onload=function(){
+        if(gsapOn()){ gsap.fromTo(mphoto,{autoAlpha:0,scale:.965},{autoAlpha:1,scale:1,duration:.5,ease:'power2.out',overwrite:'auto'}); }
+        else { mphoto.style.opacity='1'; }
+      };
+      mphoto.onerror=function(){ mphoto.style.opacity='1'; };
+    }
+    var full=new Image();
+    full.onload=function(){
+      var swap=function(){ if(mphoto.dataset.want===p.src){ mphoto.onload=null; mphoto.src=p.src; mphoto.style.opacity='1'; } };
+      if(full.decode){ full.decode().then(swap).catch(swap); } else swap();
     };
-    mphoto.onerror=function(){ mphoto.style.opacity='1'; };
-    mphoto.src=p.src;
+    full.src=p.src;
+    if(!p.thumb) mphoto.src=p.src;
 
     /* entrance: backdrop blurs in, the card settles like a photo being pinned,
        then the info column staggers up */
