@@ -37,24 +37,30 @@
 </div>
 
 <div class="pw-filters" id="pw-filters" hidden>
-  <select id="pw-f-year" aria-label="Filter by year"></select>
-  <select id="pw-f-person" aria-label="Filter by person"></select>
-  <select id="pw-f-cat" aria-label="Filter by category"></select>
-  <button id="pw-f-clear" type="button" hidden>Clear</button>
   <span class="pw-f-count" id="pw-f-count"></span>
 </div>
 
 {%- if section.settings.show_music_player -%}
-  <div class="pw-player" id="pw-player">
+  <div class="pw-player" id="pw-player" data-playlist="{{ 'photo-wall-playlist.json' | asset_url }}">
     <img class="art" id="pw-part" alt="" width="44" height="44">
     <div class="meta"><div class="t" id="pw-ptitle">&mdash;</div><div class="a" id="pw-partist">&mdash;</div></div>
     <div class="ctrl">
+      <button class="side tog" id="pw-pshuf" aria-label="Shuffle" aria-pressed="true" title="Shuffle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg></button>
       <button class="side" id="pw-pprev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
       <button class="play" id="pw-pplay" aria-label="Play">
         <svg id="pw-iplay" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         <svg id="pw-ipause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
       </button>
       <button class="side" id="pw-pnext" aria-label="Next"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
+      <button class="side" id="pw-pmute" aria-label="Mute">
+        <svg id="pw-ivol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        <svg id="pw-imute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor" stroke="none"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg>
+      </button>
+    </div>
+    <div class="bar">
+      <span class="tm" id="pw-pcur">0:00</span>
+      <div class="seek" id="pw-pseek" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><div class="fill" id="pw-pfill"></div></div>
+      <span class="tm" id="pw-pdur">0:00</span>
     </div>
   </div>
 {%- endif -%}
@@ -102,7 +108,7 @@
   song catalogue) plays instead.
 {%- endcomment -%}
 {%- assign track_blocks = section.blocks | where: 'type', 'track' -%}
-<script type="application/json" id="pw-tracks">
+<script type="application/json" id="pw-tracks" data-source="{% if track_blocks.size > 0 %}blocks{% else %}default{% endif %}">
 {%- if track_blocks.size > 0 -%}
 [
   {%- assign first = true -%}
