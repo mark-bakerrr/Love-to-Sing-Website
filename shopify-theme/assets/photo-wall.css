@@ -92,7 +92,7 @@ html,body.pw-body{margin:0;height:100%;overflow:hidden;background:#c49a63;
 
 /* ---------- Filters ---------- */
 .pw-filters{
-  position:fixed; top:18px; right:18px; z-index:30; display:flex; align-items:center; gap:8px;
+  position:fixed; right:74px; bottom:18px; z-index:30; display:flex; align-items:center; gap:8px;
   padding:8px 12px; border-radius:14px; background:rgba(20,21,26,.7);
   backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.1);
 }
