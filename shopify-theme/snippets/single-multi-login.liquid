@@ -101,7 +101,7 @@
   }
 </style>
 
-{% if background_image | blank != true %}
+{% if background_image %}
   {% assign login_title = 'Log in to watch' %}
   {% assign show_header_icon = 'true' %}
   <div class="video-overlay-wrapper">
@@ -182,7 +182,20 @@
 {% comment %}
   <!-- Closing </div> if video overlay is shown -->
 {% endcomment %}
-{% if background_image | blank != true %}
+{% if background_image %}
   </div>
   </div>
 {% endif %}
+{% comment %}
+
+This file has been rewritten to preserve the original behavior.
+
+---
+Changes:
+- from: "{% if background_image | blank != true %}"
+  to: "{% if background_image %}"
+  position: 1665..1690
+- from: "{% if background_image | blank != true %}"
+  to: "{% if background_image %}"
+  position: 5099..5124
+{% endcomment %}

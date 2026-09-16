@@ -40,6 +40,7 @@
           "type": "countdown",
           "settings": {
             "design": "hall-jack",
+            "heading": "",
             "target_month": 10,
             "target_day": 31,
             "reference_tz": "America/New_York",
@@ -47,7 +48,7 @@
             "end_behavior": "message",
             "end_message": "Happy Halloween! 🎃",
             "grace_days": 6,
-            "cta_label": "See the Halloween countdown",
+            "cta_label": "Halloween countdown",
             "cta_link": "/pages/halloween-countdown",
             "transparent_bg": false
           }
@@ -133,6 +134,31 @@
         "content": "{{ product.description }}",
         "aside_title": "Categories",
         "collections": "{{ product.collections }}"
+      }
+    },
+    "faq_downloads": {
+      "type": "faq",
+      "blocks": {
+        "grp": {
+          "type": "faq_group",
+          "settings": {
+            "faq_group": "faq-downloads",
+            "max_items": 0
+          }
+        }
+      },
+      "block_order": [
+        "grp"
+      ],
+      "name": "FAQ",
+      "settings": {
+        "border_top": false,
+        "border_bottom": false,
+        "open_first": false,
+        "title": "How to get your music",
+        "subtitle": "Downloading your songs is quick and easy — here's everything you need to know.",
+        "padding_top": 80,
+        "padding_bottom": 80
       }
     },
     "featured_articles_qKk6Fr": {
@@ -344,31 +370,6 @@
         "text_color": "#ffffff",
         "title": "Join Our Newsletter",
         "subtitle": "Sign up to our newsletter and we will send you a free song!"
-      }
-    },
-    "faq_downloads": {
-      "type": "faq",
-      "blocks": {
-        "grp": {
-          "type": "faq_group",
-          "settings": {
-            "faq_group": "faq-downloads",
-            "max_items": 0
-          }
-        }
-      },
-      "block_order": [
-        "grp"
-      ],
-      "name": "FAQ",
-      "settings": {
-        "border_top": false,
-        "border_bottom": false,
-        "open_first": false,
-        "title": "How to get your music",
-        "subtitle": "Downloading your songs is quick and easy — here's everything you need to know.",
-        "padding_top": 80,
-        "padding_bottom": 80
       }
     }
   },

@@ -26,6 +26,7 @@
         "overlay_color": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
         "overlay_opacity": 20,
         "image_aside": "shopify://shop_images/buy-a-licence-hero.png",
+        "round_aside": true,
         "image_overlay_alignment": "center",
         "image_overlay_width": 60,
         "eyebrow": "",
@@ -33,8 +34,7 @@
         "title": "License Love to Sing music",
         "content": "<p>Use our songs legally in your services, classrooms and online! We love to see our music being used around the globe and connecting people. </p>",
         "button_text": "View pricing",
-        "button_url": "#pricing",
-        "round_aside": true
+        "button_url": "#pricing"
       }
     },
     "lts_licence_pricing": {
@@ -114,6 +114,51 @@
         "size_church": "Average weekly attendance",
         "size_school": "Number of students",
         "size_community": "Regular attendees"
+      }
+    },
+    "featured_columns_TEGJmh": {
+      "type": "featured-columns",
+      "blocks": {
+        "feature_column_dabPMB": {
+          "type": "feature_column",
+          "settings": {
+            "image": "shopify://shop_images/underground-concert.jpg",
+            "heading": "Peace of Mind",
+            "text": "<p>A music license gives you peace of mind. Use your music with confidence, knowing you have the legal right to do so. Protect yourself from copyright issues and focus on your creative work.</p>",
+            "link": ""
+          }
+        },
+        "feature_column_xfCzmQ": {
+          "type": "feature_column",
+          "settings": {
+            "image": "shopify://shop_images/indie-music-concert.jpg",
+            "heading": "Every Love to Sing Song",
+            "text": "<p>Our extensive catalog of music is available for immediate access and use across all your projects. Browse, license, and start using quality music today with Love to Sing's simple, straightforward licensing process.</p>",
+            "link": ""
+          }
+        },
+        "feature_column_e3GrTR": {
+          "type": "feature_column",
+          "settings": {
+            "image": "shopify://shop_images/Starship_Auckland_Hospital_Christmas_Show_Love_to_Sing.jpg",
+            "heading": "Share the Joy",
+            "text": "<p>Music creates moments of genuine connection. Whether you're singing in a choir, jamming with friends, or sharing a favourite song, it brings people together in celebration, comfort, and joy.</p>",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "feature_column_dabPMB",
+        "feature_column_xfCzmQ",
+        "feature_column_e3GrTR"
+      ],
+      "name": "Feature Columns",
+      "settings": {
+        "border_bottom": true,
+        "title": "Unlock the Power of Music Licenses",
+        "subtitle": "<p>Obtaining music licenses allows Churches and Schools to use music legally and ethically. Enhance your programs and events while respecting artists' rights.</p>",
+        "padding_top": 80,
+        "padding_bottom": 56
       }
     },
     "lts_licence_table": {
@@ -253,6 +298,7 @@
         "row_worldwide",
         "row_download"
       ],
+      "disabled": true,
       "settings": {
         "anchor_id": "pricing",
         "heading": "Copyright, Streaming, or All-in-One?",
@@ -347,6 +393,31 @@
         "price_prefix": "from"
       }
     },
+    "faq_yemNiK": {
+      "type": "faq",
+      "blocks": {
+        "faq_group_LVWDAi": {
+          "type": "faq_group",
+          "settings": {
+            "faq_group": "faq-licenses",
+            "max_items": 0
+          }
+        }
+      },
+      "block_order": [
+        "faq_group_LVWDAi"
+      ],
+      "name": "FAQ",
+      "settings": {
+        "border_top": false,
+        "border_bottom": false,
+        "open_first": false,
+        "title": "FAQs",
+        "subtitle": "Find answers to your most pressing questions about music licenses for Churches and Schools.",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
     "licence_scenarios": {
       "type": "lts-licence-scenarios",
       "blocks": {
@@ -423,16 +494,50 @@
         "scen_6",
         "scen_7"
       ],
+      "disabled": true,
+      "custom_css": [
+        ".lts-lscen {background-color: #ffff;}"
+      ],
       "settings": {
         "heading": "Which licence do I need?"
+      }
+    },
+    "newsletter_banner_aLiWBL": {
+      "type": "newsletter-banner",
+      "blocks": {
+        "newsletter-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.newsletter.name",
+      "settings": {
+        "background_top": "#fff",
+        "background_bottom": "#790200",
+        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
+        "media_opacity": 5,
+        "image": "shopify://shop_images/hearts-background.png",
+        "text_color": "#fff",
+        "title": "Join Our Newsletter",
+        "subtitle": "Sign up to our newsletter and we will send you a free song!"
       }
     }
   },
   "order": [
     "hero_banner_8pUxwH",
     "lts_licence_pricing",
+    "featured_columns_TEGJmh",
     "lts_licence_table",
     "lts_licence_explainer",
-    "licence_scenarios"
+    "faq_yemNiK",
+    "licence_scenarios",
+    "newsletter_banner_aLiWBL"
   ]
 }

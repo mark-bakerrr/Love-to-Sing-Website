@@ -145,7 +145,7 @@
       %}
     {% endif %}
     {% assign livestream = true %}
-    {% include 'single-base-ajaxify' with livestream, livestream_id, single_host %}
+    {% include 'single-base-ajaxify' with livestream %}
     <script>
       window.SINGLE_LIVESTREAM = true;
       /* Open Links Externally */
@@ -165,3 +165,14 @@
     {% section 'single-video-content-expired' %}
   {% endif %}
 {% endif %}
+{% comment %}
+
+This file has been rewritten to preserve the original behavior.
+
+---
+Changes:
+- from: "{% include 'single-base-ajaxify' with livestream, livestream_id, single_host
+    %}"
+  to: "{% include 'single-base-ajaxify' with livestream %}"
+  position: 6232..6283
+{% endcomment %}
