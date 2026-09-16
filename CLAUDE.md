@@ -10,9 +10,11 @@ Theme lives in `shopify-theme/`. GitHub: <https://github.com/mark-bakerrr/Love-t
 | Role | Theme | ID |
 |------|-------|----|
 | **DEV / working** (push here) | **Love to Sing Website v3.2.0** `[unpublished]` | **`185067962641`** |
-| **LIVE** (never push here) | Love to Sing Website v3.1.3 `[live]` | `185049940241` |
+| **LIVE** (never push here) | Love to Sing Website v3.1.5 (photo wall fix) `[live]` | `185465241873` |
 
 - Theme roles change over time (e.g. 2026-08-20: v3.1.3 was promoted from dev → **live**; v3.2.0 is the new dev). **ALWAYS run `shopify theme list` and confirm `[live]` vs `[unpublished]` before ANY push. Never assume a theme id.**
+- 2026-09-16: v3.1.5 (photo wall fix) is live — the photo-wall fixes were applied to the 3.1.x line and published; they are also on v3.2.0 and in git. v3.1.3 is kept as the pre-photo-fix fallback; v3.1.0/v3.1.1/v3.1.2/v3.1.4 were deleted. Consolidation details: `docs/plans/2026-09-16-theme-consolidation-design.md`.
+- **Never publish a theme or push to the live theme without Mark's explicit permission.**
 - All development and testing pushes go to the current **unpublished** dev theme (currently v3.2.0).
 - **Theme-editor settings gotcha:** section settings (logo, message, background video, playlist tracks) are saved per-theme in `config/settings_data.json`. Configure them on the **current dev theme, then publish** — edits made on an old/stale theme-editor tab save to that unpublished theme and never reach the live site. (2026-08-19: Halloween video was set on an unpublished v3.1.0 tab; had to transplant it onto the dev theme before publishing.)
 
