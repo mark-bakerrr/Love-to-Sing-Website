@@ -85,7 +85,13 @@
         {%- if _section.image_aside != blank or _section.image_aside != blank -%}
           <div class="hero__content-media">
             {%- if _section.image_aside != blank -%}
-              <div class="hero__content-image-aside">
+              {%- if _section.round_aside -%}
+              <style data-lce-round-aside-style>
+                .hero__content-image-aside.is-rounded .media{padding-bottom:56.25% !important;border-radius:var(--radius-l,24px) !important;overflow:hidden !important}
+                .hero__content-image-aside.is-rounded .media img{border-radius:var(--radius-l,24px) !important;object-fit:cover !important}
+              </style>
+              {%- endif -%}
+              <div class="hero__content-image-aside{% if _section.round_aside %} is-rounded{% endif %}">
                 <div class="media media--transparent">
                   {%- render 'image', image: _section.image_aside -%}
                 </div><!-- /.media -->
@@ -197,6 +203,12 @@
       "label": "Image"
     },
     {
+      "type": "checkbox",
+      "id": "round_aside",
+      "label": "Rounded corners on side image",
+      "default": false
+    },
+    {
       "type": "image_picker",
       "id": "image_overlay",
       "label": "Overlay Image"
@@ -270,7 +282,9 @@
     }
   ],
   "disabled_on": {
-    "groups": ["header"]
+    "groups": [
+      "header"
+    ]
   },
   "presets": [
     {

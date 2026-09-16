@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Countdown System — Design Preview (Love to Sing)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+<style>
+  :root{--page-bg:#0f1115;--card-bg:#1a1d24;--ink:#e9ecf1;--muted:#9aa3b2;--line:#2a2f3a;--accent:#7cc4ff}
+  *{box-sizing:border-box}
+  html{font-size:62.5%}
+  body{margin:0;background:var(--page-bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:1.6rem;line-height:1.5;padding:0 0 11rem}
+  header.top{position:sticky;top:0;z-index:60;background:rgba(15,17,21,.92);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:1.4rem 2rem}
+  header.top h1{font-size:1.9rem;margin:0 0 .2rem}
+  header.top p{margin:0;color:var(--muted);font-size:1.3rem}
+  .controls{display:flex;gap:1.2rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
+  .controls label{font-size:1.3rem;color:var(--muted);display:flex;gap:.5rem;align-items:center}
+  .controls select,.controls button{font:inherit;font-size:1.3rem;background:var(--card-bg);color:var(--ink);
+    border:1px solid var(--line);border-radius:.8rem;padding:.5rem .9rem;cursor:pointer}
+  .controls button:hover,.controls select:hover{border-color:var(--accent)}
+  .wrap{max-width:1220px;margin:0 auto;padding:2.4rem 2rem}
+  .season-title{font-size:1.4rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+    margin:4rem 0 1.5rem;border-bottom:1px solid var(--line);padding-bottom:.8rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:2.4rem}
+  .card{background:var(--card-bg);border:1px solid var(--line);border-radius:1.4rem;overflow:hidden;display:flex;flex-direction:column}
+  .card .label{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.4rem;border-bottom:1px solid var(--line);font-size:1.3rem}
+  .card .label b{font-size:1.5rem}
+  .card .label .tag{font-size:1.05rem;color:var(--muted);border:1px solid var(--line);border-radius:2rem;padding:.2rem .8rem}
+  .card .label .tag.hf{color:#ffb454;border-color:#5a4423}
+  .stage{padding:2rem 1.6rem;display:flex;align-items:center;justify-content:center;min-height:250px;flex:1}
+
+  /* ---------- shared skin scaffold ---------- */
+  .skin{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;
+    border-radius:1.2rem;padding:1.8rem 1.4rem 1.8rem;overflow:hidden}
+  .artbox{position:relative;z-index:1;display:flex;justify-content:center;margin-bottom:-16px;pointer-events:none}
+  .art{display:block}
+  .cd{position:relative;z-index:2;width:100%}
+  .row{display:flex;justify-content:center;gap:1.4rem;flex-wrap:nowrap}
+  .tile{display:flex;flex-direction:column;align-items:center;padding:.2rem .3rem;min-width:5rem}
+  .num{font-size:4.8rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;will-change:transform}
+  .lab{font-size:.92rem;letter-spacing:.14em;text-transform:uppercase;margin-top:.6rem;opacity:.8}
+  /* boxed 'card' skins keep their containers */
+  .s-advent .tile,.s-stock .tile{border-radius:1rem;padding:1rem .9rem .8rem;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+  .s-advent .num,.s-stock .num{font-size:3.8rem}
+  .sep{display:none}
+  .msg{font-size:2.1rem;font-weight:800;text-align:center;padding:1rem .5rem}
+  [hidden]{display:none!important}
+  .ctaWrap{margin-top:1.5rem;z-index:2}
+  .cta{display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;font-size:1.22rem;font-weight:800;
+    letter-spacing:.01em;padding:.75rem 1.5rem;border-radius:2.4rem;cursor:pointer;border:2px solid transparent}
+  .cta .arw{display:inline-block}
+
+  /* particles */
+  .flake{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff;pointer-events:none;z-index:1}
+  .bub{position:absolute;width:9px;height:9px;border-radius:50%;background:rgba(120,255,180,.85);box-shadow:0 0 7px rgba(120,255,180,.9);pointer-events:none;z-index:1}
+
+  /* ===================== CHRISTMAS ===================== */
+  /* 1 Advent */
+  .s-advent{background:linear-gradient(160deg,#7a0f18,#4a0910);font-family:Georgia,serif;position:relative}
+  .snowfield{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+  .s-advent .cd,.s-advent .ctaWrap{position:relative;z-index:2}
+  .s-advent .tile{background:linear-gradient(#8f1420,#6d0e18);border:1px solid #b9863f}
+  .s-advent .num{color:#f5d689;text-shadow:0 2px 3px rgba(0,0,0,.4)}
+  .s-advent .lab{color:#f0d9a8}
+  .s-advent .msg{color:#f5d689}
+  .s-advent .cta{background:#f5d689;color:#5a0c14}
+
+  /* 2 Snow Globe */
+  .s-globe{background:radial-gradient(120% 120% at 50% 20%,#2a4a6e,#0e1c30)}
+  .s-globe .artbox{width:150px;height:150px}
+  .s-globe .art{width:150px;filter:drop-shadow(0 8px 16px rgba(0,0,0,.5))}
+  .s-globe .num{color:#eaf6ff;text-shadow:0 2px 12px rgba(120,190,240,.75)}
+  .s-globe .lab{color:#bcd8f0}
+  .s-globe .msg{color:#dff0ff}
+  .s-globe .cta{background:#c9283e;color:#fff}
+
+  /* 3 Sleigh */
+  .s-sleigh{background:linear-gradient(#0d3b2e,#0a2c22)}
+  .s-sleigh .art{width:220px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.45))}
+  .s-sleigh .num{color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+  .s-sleigh .lab{color:#e8c98a}
+  .s-sleigh .msg{color:#fff}
+  .s-sleigh .cta{background:#d8b45a;color:#0a2c22}
+
+  /* 4 Stockings */
+  .s-stock{background:radial-gradient(120% 100% at 50% 0,#3a2a4d,#241a30)}
+  .s-stock .art{width:290px}
+  .s-stock .artbox{margin-bottom:-6px}
+  .s-stock .tile{background:linear-gradient(#c9283e,#8f172a);border:2px solid #fff}
+  .s-stock .num{color:#fff}
+  .s-stock .lab{color:#ffd9df}
+  .s-stock .msg{color:#f3c85a}
+  .s-stock .cta{background:#c9283e;color:#fff}
+
+  /* 5 Starry */
+  .s-starry{background:radial-gradient(120% 140% at 80% 10%,#16305c,#070d1c)}
+  .s-starry .star{position:absolute;top:1.4rem;right:1.8rem;font-size:2rem;color:#f5d98b;filter:drop-shadow(0 0 8px #f5d98b);z-index:1}
+  .s-starry .num{color:#f2f5ff;font-weight:300;text-shadow:0 0 12px rgba(245,217,139,.35)}
+  .s-starry .lab{color:#8ea6c8;font-weight:300}
+  .s-starry .msg{color:#f5d98b;font-weight:300}
+  .s-starry .cta{background:transparent;border-color:#f5d98b;color:#f5d98b}
+
+  /* ===================== HALLOWEEN ===================== */
+  /* 6 Jack-o'-Lantern — pumpkin behind the numbers */
+  .s-jack{background:radial-gradient(120% 120% at 50% 15%,#5a2a0d,#1c0f06);position:relative;min-height:220px;justify-content:center}
+  .s-jack .artbox{position:absolute;top:50%;left:50%;transform:translate(-50%,-56%);margin:0;z-index:1}
+  .s-jack .art{width:205px;filter:drop-shadow(0 0 22px rgba(255,120,20,.45))}
+  .s-jack .cd{position:relative;z-index:2}
+  .s-jack .num{color:#fff3d8;text-shadow:0 0 12px rgba(255,140,30,.95),0 2px 4px rgba(0,0,0,.7)}
+  .s-jack .lab{color:#ffcf8a}
+  .s-jack .msg{color:#ff9a2e;text-shadow:0 0 16px rgba(255,140,30,.6)}
+  .s-jack .cta{background:#ff8a1e;color:#2a1000}
+
+  /* 7 Neon */
+  .s-neon{background:#08060d}
+  .s-neon .bat{position:absolute;color:#5a2b8f;opacity:.55;z-index:1}
+  .s-neon .num{color:#b6f24e;text-shadow:0 0 6px #9bff2e,0 0 14px #4f9c0e}
+  .s-neon .lab{color:#b06bff;text-shadow:0 0 8px #7a2bd4}
+  .s-neon .msg{color:#c6ff5a;text-shadow:0 0 14px #9bff2e}
+  .s-neon .cta{background:transparent;border-color:#c6ff5a;color:#c6ff5a;box-shadow:0 0 12px rgba(155,255,46,.4)}
+
+  /* 8 Tombstone — engraved numbers on the clean stone face (2x2) */
+  .s-tomb{background:linear-gradient(#2a2f2a,#12150f);position:relative;min-height:440px}
+  .s-tomb .artbox{position:absolute;top:10px;left:50%;margin-left:-172px;z-index:1}
+  .s-tomb .art{width:344px}
+  .s-tomb .cd{position:absolute;top:62%;left:0;right:0;transform:translateY(-50%);z-index:2}
+  .s-tomb .ctaWrap{position:absolute;bottom:1.4rem;left:0;right:0;text-align:center;z-index:2;margin-top:0}
+  .s-tomb .row{display:grid;grid-template-columns:repeat(2,auto);justify-content:center;gap:.25rem 1.1rem}
+  .s-tomb .tile{padding:.05rem;min-width:0}
+  .s-tomb .num{font-size:3.3rem;color:#454c47;
+    text-shadow:0 1px 0 rgba(255,255,255,.32),0 -1px 1px rgba(0,0,0,.5)}
+  .s-tomb .lab{color:#3a413b;font-size:.66rem;margin-top:.05rem}
+  .s-tomb .msg{color:#9bff9b}
+  .s-tomb .cta{background:#6d7a70;color:#0f130f}
+
+  /* 9 Cauldron */
+  .s-cauldron{background:radial-gradient(120% 120% at 50% 20%,#123024,#08150f)}
+  .s-cauldron .artbox{width:135px;height:120px;margin-bottom:-18px}
+  .s-cauldron .art{width:135px}
+  .s-cauldron .num{color:#5fffbb;text-shadow:0 0 14px rgba(60,255,160,.7)}
+  .s-cauldron .lab{color:#7fe6bf}
+  .s-cauldron .msg{color:#4dffb0}
+  .s-cauldron .cta{background:#4dffb0;color:#08251a}
+
+  /* Halloween display font — Creepster */
+  .s-jack .num,.s-neon .num,.s-cauldron .num,.s-tomb .num,
+  .s-jack .lab,.s-neon .lab,.s-cauldron .lab,.s-tomb .lab,
+  .s-jack .cta,.s-neon .cta,.s-cauldron .cta,.s-tomb .cta,
+  .s-jack .msg,.s-neon .msg,.s-cauldron .msg,.s-tomb .msg{font-family:'Creepster',system-ui,cursive;font-weight:400;letter-spacing:.05em}
+  .s-jack .num,.s-neon .num,.s-cauldron .num{font-size:5.4rem}
+  .s-jack .lab,.s-neon .lab,.s-cauldron .lab,.s-tomb .lab{letter-spacing:.14em;opacity:.9}
+  .s-jack .cta,.s-neon .cta,.s-cauldron .cta,.s-tomb .cta{font-size:1.55rem;letter-spacing:.06em}
+
+  .bg-transparent .skin{background:transparent!important}
+  .note{color:var(--muted);font-size:1.2rem;margin-top:2.2rem;text-align:center}
+
+  /* ===================== FLOATING WIDGET ===================== */
+  .float{position:fixed;right:2.2rem;bottom:2.2rem;z-index:100;cursor:pointer;border:none;border-radius:1.4rem;
+    padding:1rem 1.3rem 1rem 1rem;display:flex;align-items:center;gap:.8rem;box-shadow:0 14px 34px rgba(0,0,0,.55);font-family:inherit}
+  .float .close{position:absolute;top:-.8rem;right:-.8rem;width:2.2rem;height:2.2rem;border-radius:50%;border:none;
+    background:#222;color:#fff;font-size:1.3rem;cursor:pointer;line-height:2rem;z-index:2}
+  .float .art{width:58px;height:58px;object-fit:contain;flex:none}
+  .float .num{font-size:1.9rem;font-weight:800;font-variant-numeric:tabular-nums}
+  .float .row{gap:.5rem}
+  .float .tile{min-width:3rem;padding:0;background:none;box-shadow:none;border:none}
+  .float .lab{font-size:.68rem;margin-top:.15rem}
+  .float .cap{font-size:1.05rem;opacity:.92;display:block;margin-bottom:.15rem;font-weight:800}
+  .float.w-xmas{background:linear-gradient(140deg,#8f1420,#5a0c14);color:#f5d689;border:1px solid #b9863f}
+  .float.w-xmas .lab{color:#e8c98a}
+  .float.w-hall{background:linear-gradient(140deg,#2a1508,#120a04);color:#ff9a2e;border:1px solid #b5540a}
+  .float.w-hall .lab{color:#c79a5a}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Countdown System — design preview <span style="color:var(--muted);font-weight:400">· art + GSAP motion</span></h1>
+  <p>Legible tiled numbers · art topper overlapping behind · custom CTA per skin · hover each card for its flourish.</p>
+  <div class="controls">
+    <label>Show:
+      <select id="filter"><option value="all">All seasons</option><option value="xmas">Christmas only</option><option value="hall">Halloween only</option></select>
+    </label>
+    <label>Clock:
+      <select id="clock"><option value="live">Live (real countdown)</option><option value="near">~2 days out</option><option value="soon">~90 seconds out</option><option value="zero">At/after zero (end state)</option></select>
+    </label>
+    <label>Corner widget:
+      <select id="widget"><option value="w-xmas">Christmas</option><option value="w-hall">Halloween</option><option value="off">Off</option></select>
+    </label>
+    <label>Card bg:
+      <select id="bg"><option value="themed">Themed</option><option value="transparent">Transparent</option></select>
+    </label>
+    <button id="reset">↺ Reset</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="season-title" data-sec="xmas">🎄 Christmas — 3 block skins</div>
+  <div class="grid" data-secgrid="xmas">
+
+    <!-- 1 Advent -->
+    <div class="card" data-season="xmas" data-fx="advent">
+      <div class="label"><b>1 · Advent Cards</b><span class="tag">CSS only</span></div>
+      <div class="stage"><div class="s-advent skin">
+        <div class="snowfield"></div>
+        <div class="cd" data-countdown data-month="12" data-day="25" data-end="message">
+          <div class="row">
+            <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
+            <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
+            <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
+            <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
+          </div>
+          <div class="msg" data-countdown-message hidden>It's Christmas! 🎄</div>
+        </div>
+        <div class="ctaWrap"><a class="cta">Open the Christmas countdown <span class="arw">→</span></a></div>
+      </div></div>
+    </div>
+
+    <!-- 2 Snow Globe -->
+    <div class="card" data-season="xmas" data-fx="globe">
+      <div class="label"><b>2 · Snow Globe</b><span class="tag hf">◆ Higgsfield</span></div>
+      <div class="stage"><div class="s-globe skin">
+        <div class="artbox"><img class="art" src="countdown-art/xmas-snowglobe.png" alt=""></div>
+        <div class="cd" data-countdown data-month="12" data-day="25" data-end="message">
+          <div class="row">
+            <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
+            <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
+            <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
+            <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
+          </div>
+          <div class="msg" data-countdown-message hidden>Merry Christmas!</div>
+        </div>
+        <div class="ctaWrap"><a class="cta">Peek inside Christmas <span class="arw">→</span></a></div>
+      </div></div>
+    </div>
+
+    <!-- 3 Sleigh -->
+    <div class="card" data-season="xmas" data-fx="sleigh">
+      <div class="label"><b>3 · Sleigh Banner</b><span class="tag hf">◆ Higgsfield</span></div>
+      <div class="stage"><div class="s-sleigh skin">
+        <div class="artbox"><img class="art" src="countdown-art/xmas-sleigh.png" alt=""></div>
+        <div class="cd" data-countdown data-month="12" data-day="25" data-end="message">
+          <div class="row">
+            <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
+            <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
+            <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
+            <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
+          </div>
+          <div class="msg" data-countdown-message hidden>Ho ho ho!</div>
+        </div>
+        <div class="ctaWrap"><a class="cta">Follow Santa's countdown <span class="arw">→</span></a></div>
+      </div></div>
+    </div>
+
+  </div>
+
+  <div class="season-title" data-sec="hall">🎃 Halloween — 3 block skins</div>
+  <div class="grid" data-secgrid="hall">
+
+    <!-- 6 Jack -->
+    <div class="card" data-season="hall" data-fx="pumpkin">
+      <div class="label"><b>6 · Jack-o'-Lantern</b><span class="tag hf">◆ Higgsfield</span></div>
+      <div class="stage"><div class="s-jack skin">
+        <div class="artbox"><img class="art" src="countdown-art/hall-pumpkin.png" alt=""></div>
+        <div class="cd" data-countdown data-month="10" data-day="31" data-end="message">
+          <div class="row">
+            <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
+            <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
+            <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
+            <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
+          </div>
+          <div class="msg" data-countdown-message hidden>Happy Halloween! 🎃</div>
+        </div>
+        <div class="ctaWrap"><a class="cta">Enter if you dare <span class="arw">→</span></a></div>
+      </div></div>
+    </div>
+
+    <!-- 7 Neon -->
+    <div class="card" data-season="hall" data-fx="neon">
+      <div class="label"><b>7 · Spooky Neon</b><span class="tag">CSS only</span></div>
+      <div class="stage"><div class="s-neon skin">
+        <span class="bat" style="top:1.4rem;left:2rem;font-size:1.6rem">🦇</span>
+        <span class="bat" style="top:2.2rem;right:3rem;font-size:1.1rem">🦇</span>
+        <div class="cd" data-countdown data-month="10" data-day="31" data-end="message">
+          <div class="row">
+            <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
+            <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
+            <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
+            <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
+          </div>
+          <div class="msg" data-countdown-message hidden>Happy Halloween 🦇</div>
+        </div>
+        <div class="ctaWrap"><a class="cta">Light up Halloween <span class="arw">→</span></a></div>
+      </div></div>
+    </div>
+
+    <!-- 9 Cauldron -->
+    <div class="card" data-season="hall" data-fx="cauldron">
+      <div class="label"><b>9 · Cauldron Bubble</b><span class="tag hf">◆ Higgsfield</span></div>
+      <div class="stage"><div class="s-cauldron skin">
+        <div class="artbox"><img class="art" src="countdown-art/hall-cauldron.png" alt=""></div>
+        <div class="cd" data-countdown data-month="10" data-day="31" data-end="message">
+          <div class="row">
+            <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
+            <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
+            <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
+            <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
+          </div>
+          <div class="msg" data-countdown-message hidden>Bubble bubble… 🧪</div>
+        </div>
+        <div class="ctaWrap"><a class="cta">Stir up Halloween <span class="arw">→</span></a></div>
+      </div></div>
+    </div>
+
+  </div>
+
+  <p class="note">↘ Floating corner widget (bottom-right) = the site-wide overlay. Hover it to lift, click to visit the countdown page, ✕ to dismiss. Every CTA link is set per-instance in the theme editor.</p>
+</div>
+
+<!-- FLOATING WIDGET -->
+<button class="float w-xmas" id="floatWidget" title="Click → countdown page">
+  <button class="close" id="floatClose" title="Dismiss">✕</button>
+  <img class="art" id="floatArt" src="countdown-art/xmas-snowglobe.png" alt="">
+  <div>
+    <span class="cap" id="floatCap">Christmas countdown</span>
+    <div class="cd" data-countdown data-month="12" data-day="25" data-end="hide" data-widget="1">
+      <div class="row">
+        <div class="tile"><span class="num" data-unit="days">--</span><span class="lab">Days</span></div>
+        <div class="tile"><span class="num" data-unit="hours">--</span><span class="lab">Hrs</span></div>
+        <div class="tile"><span class="num" data-unit="minutes">--</span><span class="lab">Min</span></div>
+        <div class="tile"><span class="num" data-unit="seconds">--</span><span class="lab">Sec</span></div>
+      </div>
+    </div>
+  </div>
+</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+/* ---- Shared countdown engine (preview build) ---- */
+(function(){
+  var MODE='live', nodes=[];
+  function collect(){ nodes=[].slice.call(document.querySelectorAll('[data-countdown]')); }
+  function targetFor(node,now){
+    var m=+node.getAttribute('data-month'), d=+node.getAttribute('data-day'), y=now.getFullYear();
+    var t=new Date(y,m-1,d,0,0,0,0);
+    if(t-now<=0) t=new Date(y+1,m-1,d,0,0,0,0);
+    return t;
+  }
+  function fakeNow(node){
+    var real=new Date(), tgt=targetFor(node,real);
+    if(MODE==='near') return new Date(tgt.getTime()-2*864e5-3*36e5);
+    if(MODE==='soon') return new Date(tgt.getTime()-92*1e3);
+    if(MODE==='zero') return new Date(tgt.getTime()+5e3);
+    return real;
+  }
+  function pad(n){return (n<10?'0':'')+n;}
+  function set(node,u,v){
+    var el=node.querySelector('[data-unit="'+u+'"]'); if(!el) return;
+    if(el.textContent!==String(v)){ el.textContent=v; if(window.__pop) window.__pop(el); }
+  }
+  function tick(){
+    for(var i=0;i<nodes.length;i++){
+      var node=nodes[i], now=fakeNow(node), tgt=targetFor(node,now), diff=tgt-now;
+      var msg=node.querySelector('[data-countdown-message]'), row=node.querySelector('.row');
+      if(diff<=0){
+        if(node.getAttribute('data-widget')){ document.getElementById('floatWidget').style.display='none'; continue; }
+        var end=node.getAttribute('data-end')||'hide';
+        if(end==='hide'){ if(row) row.style.visibility='hidden'; if(msg) msg.hidden=true; }
+        else { if(row) row.style.display='none'; if(msg) msg.hidden=false; }
+        continue;
+      } else { if(row){row.style.display='';row.style.visibility='';} if(msg) msg.hidden=true; }
+      var s=Math.floor(diff/1e3);
+      var days=Math.floor(s/86400); s-=days*86400;
+      var hrs=Math.floor(s/3600); s-=hrs*3600;
+      var min=Math.floor(s/60); s-=min*60;
+      set(node,'days',days); set(node,'hours',pad(hrs)); set(node,'minutes',pad(min)); set(node,'seconds',pad(s));
+    }
+  }
+  collect(); tick(); setInterval(tick,1000);
+
+  document.getElementById('clock').addEventListener('change',function(e){MODE=e.target.value;tick();});
+  document.getElementById('filter').addEventListener('change',function(e){
+    var v=e.target.value;
+    document.querySelectorAll('[data-secgrid]').forEach(function(g){
+      var sec=g.getAttribute('data-secgrid'), show=(v==='all'||v===sec);
+      g.style.display=show?'':'none';
+      document.querySelector('[data-sec="'+sec+'"]').style.display=show?'':'none';
+    });
+  });
+  var widget=document.getElementById('floatWidget');
+  document.getElementById('widget').addEventListener('change',function(e){
+    var v=e.target.value;
+    if(v==='off'){widget.style.display='none';return;}
+    widget.style.display='';
+    var cd=widget.querySelector('[data-countdown]');
+    if(v==='w-xmas'){ widget.className='float w-xmas';
+      document.getElementById('floatArt').src='countdown-art/xmas-snowglobe.png';
+      document.getElementById('floatCap').textContent='Christmas countdown';
+      cd.setAttribute('data-month','12'); cd.setAttribute('data-day','25');
+    } else { widget.className='float w-hall';
+      document.getElementById('floatArt').src='countdown-art/hall-pumpkin.png';
+      document.getElementById('floatCap').textContent='Halloween countdown';
+      cd.setAttribute('data-month','10'); cd.setAttribute('data-day','31');
+    }
+    tick();
+  });
+  document.getElementById('bg').addEventListener('change',function(e){ document.body.classList.toggle('bg-transparent', e.target.value==='transparent'); });
+  document.getElementById('floatClose').addEventListener('click',function(ev){ev.stopPropagation();widget.style.display='none';});
+  widget.addEventListener('click',function(){alert('→ navigates to the season\'s countdown page (e.g. /pages/christmas-countdown)');});
+  document.querySelectorAll('.cta').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();alert('→ CTA link (set per-instance in the theme editor, e.g. /pages/christmas-countdown)');});});
+  document.getElementById('reset').addEventListener('click',function(){
+    document.getElementById('clock').value='live';MODE='live';
+    document.getElementById('filter').value='all';
+    document.querySelectorAll('[data-secgrid],[data-sec]').forEach(function(g){g.style.display='';});
+    widget.style.display='';tick();
+  });
+})();
+
+/* ---- GSAP delight ---- */
+window.addEventListener('load',function(){
+  if(!window.gsap) return;
+  gsap.defaults({ease:'power2.out'});
+  var mm=gsap.matchMedia();
+
+  mm.add('(prefers-reduced-motion: no-preference)',function(){
+    /* number pop on change */
+    window.__pop=function(el){ gsap.fromTo(el,{scale:1.28},{scale:1,duration:.4,ease:'back.out(2)'}); };
+
+    /* entrance */
+    gsap.from('.card',{autoAlpha:0,y:26,duration:.6,ease:'power3.out',stagger:{each:.06}});
+    gsap.from('.float',{autoAlpha:0,y:40,duration:.7,delay:.5,ease:'back.out(1.6)'});
+
+    /* particle helpers */
+    function snow(box){ if(!box) return; for(var i=0;i<9;i++){ var s=document.createElement('span'); s.className='flake'; box.appendChild(s);
+      gsap.set(s,{left:(Math.random()*88+6)+'%',top:'8%'});
+      gsap.fromTo(s,{y:0,autoAlpha:0},{y:box.offsetHeight*0.55,autoAlpha:1,duration:2.2+Math.random()*2,ease:'sine.in',repeat:-1,delay:Math.random()*3});
+      gsap.to(s,{x:Math.random()*18-9,duration:1.6+Math.random(),ease:'sine.inOut',repeat:-1,yoyo:true});
+    }}
+    function bubbles(box){ if(!box) return; for(var i=0;i<6;i++){ var b=document.createElement('span'); b.className='bub'; box.appendChild(b);
+      gsap.set(b,{left:(28+Math.random()*44)+'%',bottom:'40%',scale:.5+Math.random()*.6});
+      gsap.to(b,{keyframes:{autoAlpha:[0,.9,0],bottom:['40%','78%']},duration:1.5+Math.random()*.8,ease:'sine.out',repeat:-1,delay:Math.random()*2});
+    }}
+    function snowField(box){ if(!box) return; var h=box.offsetHeight||230; for(var i=0;i<16;i++){ var s=document.createElement('span'); s.className='flake'; box.appendChild(s);
+      gsap.set(s,{left:(Math.random()*100)+'%',top:0,scale:.6+Math.random()*.8});
+      gsap.to(s,{keyframes:{y:[0,h+12],autoAlpha:[0,1,1,0]},duration:3+Math.random()*3,ease:'none',repeat:-1,delay:Math.random()*4});
+      gsap.to(s,{x:Math.random()*26-13,duration:2+Math.random()*2,ease:'sine.inOut',repeat:-1,yoyo:true});
+    }}
+
+    /* idle ambience — animate the IMG (hover animates the box, no conflict) */
+    gsap.utils.toArray('[data-fx]').forEach(function(card){
+      var fx=card.getAttribute('data-fx'), art=card.querySelector('.art'), box=card.querySelector('.artbox');
+      if(fx==='globe'){ gsap.to(art,{y:-6,duration:2.6,ease:'sine.inOut',repeat:-1,yoyo:true}); snow(box); }
+      else if(fx==='sleigh'){ gsap.to(art,{y:-4,duration:2,ease:'sine.inOut',repeat:-1,yoyo:true}); }
+      else if(fx==='garland'){ gsap.set(art,{transformOrigin:'50% 0%'}); gsap.to(art,{rotation:2.2,duration:2.8,ease:'sine.inOut',repeat:-1,yoyo:true}); }
+      else if(fx==='pumpkin'){ gsap.to(box,{filter:'drop-shadow(0 0 20px rgba(255,150,40,.85))',duration:1.7,ease:'sine.inOut',repeat:-1,yoyo:true}); }
+      else if(fx==='cauldron'){ gsap.set(art,{transformOrigin:'50% 100%'}); gsap.to(art,{rotation:1.6,duration:2.2,ease:'sine.inOut',repeat:-1,yoyo:true}); bubbles(box); }
+      else if(fx==='tomb'){ gsap.to(art,{y:-3,duration:2.4,ease:'sine.inOut',repeat:-1,yoyo:true}); }
+      else if(fx==='starry'){ gsap.to(card.querySelector('.star'),{scale:1.3,autoAlpha:.6,duration:1.3,ease:'sine.inOut',repeat:-1,yoyo:true,transformOrigin:'50% 50%'}); }
+      else if(fx==='advent'){ snowField(card.querySelector('.snowfield')); }
+    });
+
+    /* hover flourishes */
+    gsap.utils.toArray('.card').forEach(function(card){
+      var fx=card.getAttribute('data-fx'), box=card.querySelector('.artbox'), arw=card.querySelector('.cta .arw');
+      card.addEventListener('mouseenter',function(){
+        if(arw) gsap.to(arw,{x:5,duration:.3});
+        if(fx==='globe') gsap.to(box,{rotation:6,scale:1.05,duration:.6,ease:'elastic.out(1,.45)',transformOrigin:'50% 85%'});
+        else if(fx==='sleigh') gsap.fromTo(box,{x:0},{x:16,duration:.6,ease:'power1.inOut',yoyo:true,repeat:1});
+        else if(fx==='garland') gsap.to(box,{scale:1.04,duration:.4,ease:'back.out(2)'});
+        else if(fx==='pumpkin'){ gsap.timeline()
+            .to(box,{scale:1.4,duration:.26,ease:'back.out(2.4)',transformOrigin:'50% 62%'})
+            .to(box,{keyframes:{rotation:[-5,5,-4,4,-2,0]},duration:.55,ease:'sine.inOut'});
+          gsap.to(card.querySelector('.art'),{filter:'brightness(1.4) drop-shadow(0 0 38px rgba(255,110,10,.95))',duration:.22}); }
+        else if(fx==='cauldron') gsap.to(box,{scale:1.07,duration:.4,ease:'back.out(2)',transformOrigin:'50% 100%'});
+        else if(fx==='tomb') gsap.to(box,{y:-10,duration:.45,ease:'back.out(2.6)'});
+        else if(fx==='advent') gsap.to(card.querySelectorAll('.tile'),{y:-8,rotationX:10,duration:.4,stagger:.05,transformOrigin:'50% 100%'});
+        else if(fx==='starry'){ gsap.to(card.querySelector('.star'),{rotation:'+=200',duration:.9,ease:'power2.out'}); gsap.to(card.querySelectorAll('.num'),{textShadow:'0 0 14px #f5d98b',duration:.4}); }
+        else if(fx==='neon') gsap.to(card.querySelector('.cd'),{filter:'brightness(1.3)',duration:.35});
+      });
+      card.addEventListener('mouseleave',function(){
+        if(arw) gsap.to(arw,{x:0,duration:.3});
+        if(fx==='globe') gsap.to(box,{rotation:0,scale:1,duration:.6});
+        else if(fx==='garland') gsap.to(box,{scale:1,duration:.4});
+        else if(fx==='pumpkin'){ gsap.to(box,{scale:1,rotation:0,duration:.45,ease:'power2.out'}); gsap.to(card.querySelector('.art'),{filter:'brightness(1)',duration:.45}); }
+        else if(fx==='cauldron') gsap.to(box,{scale:1,duration:.4});
+        else if(fx==='tomb') gsap.to(box,{y:0,duration:.4});
+        else if(fx==='advent') gsap.to(card.querySelectorAll('.tile'),{y:0,rotationX:0,duration:.4,stagger:.04});
+        else if(fx==='starry') gsap.to(card.querySelectorAll('.num'),{textShadow:'0 0 0px #f5d98b',duration:.4});
+        else if(fx==='neon') gsap.to(card.querySelector('.cd'),{filter:'brightness(1)',duration:.4});
+      });
+    });
+
+    /* widget: idle art bob + hover lift */
+    var fw=document.getElementById('floatWidget'), fart=document.getElementById('floatArt');
+    gsap.to(fart,{y:-3,duration:1.8,ease:'sine.inOut',repeat:-1,yoyo:true});
+    fw.addEventListener('mouseenter',function(){gsap.to(fw,{y:-4,scale:1.03,duration:.3});});
+    fw.addEventListener('mouseleave',function(){gsap.to(fw,{y:0,scale:1,duration:.3});});
+  });
+
+  /* reduced motion: no pop, static */
+  mm.add('(prefers-reduced-motion: reduce)',function(){ window.__pop=function(){}; });
+});
+</script>
+</body>
+</html>

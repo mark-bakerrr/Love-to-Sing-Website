@@ -327,6 +327,31 @@
         "title": "Join Our Newsletter",
         "subtitle": "Sign up to our newsletter and we will send you a free song!"
       }
+    },
+    "faq_downloads": {
+      "type": "faq",
+      "blocks": {
+        "grp": {
+          "type": "faq_group",
+          "settings": {
+            "faq_group": "faq-downloads",
+            "max_items": 0
+          }
+        }
+      },
+      "block_order": [
+        "grp"
+      ],
+      "name": "FAQ",
+      "settings": {
+        "border_top": false,
+        "border_bottom": false,
+        "open_first": false,
+        "title": "How to get your music",
+        "subtitle": "Downloading your songs is quick and easy — here's everything you need to know.",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
     }
   },
   "order": [
@@ -334,6 +359,7 @@
     "custom_html_3Y3iC8",
     "featured_products_3X66Cw",
     "song_about_mDzcLq",
+    "faq_downloads",
     "custom_html_kicEzH",
     "videos_C7Cgkr",
     "meta_articles_Ven36Q",

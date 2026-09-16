@@ -1,0 +1,172 @@
+{%- comment -%}
+  Songs (music finder) menu type.
+  Builds an interactive category rail (left) + a 3-column grid of icon-left song rows (right)
+  that reuses the existing `header-megamenu` JS (assets/header-megamenu.js) with NO new script.
+
+  Per-category slots (1..6) read from block_settings:
+    - songs_catN_collection : collection   (a slot is "active" only if this is set)
+    - songs_catN_label      : text          (optional; falls back to the collection title)
+    - songs_catN_logo       : image_picker  (optional; falls back to the music-note icon)
+    - songs_catN_scheme      : color_scheme  (per-category panel/rail colour)
+
+  Reuse map (mirrors the legacy metaobject path in navigation-desktop.liquid):
+    - Each active slot becomes a `megamenu="item"` in `megamenu="main-menu-list"`, carrying
+      data-item-index + data-color-scheme="color-{{ scheme }}", .is-active on the first.
+      Hovering a category fires updateActiveItem() -> swaps .is-active, removes any prior
+      `color-*` class on <header-megamenu> and adds this slot's `color-…` (so the panel/rail
+      recolour per category), toggles the matching logo-item by data-logo-index, and recomputes
+      --megamenu-height.
+    - Each item holds its OWN `megamenu="products-container"` so updateMenuHeight() measures the
+      active category's products via `.item.is-active > [megamenu="products-container"]`.
+    - The active category's logo lives in `megamenu="logo-container"` as `megamenu="logo-item"`
+      elements toggled by data-logo-index (same mechanism the JS already drives).
+
+  Accepts: block_settings, link
+{%- endcomment -%}
+
+{%- liquid
+  # Collect the active slots (those with a collection set) into a parallel index list.
+  # We render everything inline inside the range loop to avoid array-of-object gymnastics,
+  # but first count how many are active so the logo container / list only render when needed.
+  assign active_count = 0
+  for i in (1..6)
+    assign k_coll = 'songs_cat' | append: i | append: '_collection'
+    assign coll = block_settings[k_coll]
+    if coll != blank
+      assign active_count = active_count | plus: 1
+    endif
+  endfor
+-%}
+
+<div class="header__megamenu">
+  <header-megamenu class="megamenu megamenu--songs">
+    <div
+      class="megamenu__inner megamenu__inner--songs"
+      megamenu="main-wrapper"
+    >
+      <ul
+        class="megamenu__list megamenu__list--songs list-unstyled"
+        megamenu="main-menu-list"
+      >
+        {%- assign slot_index = 0 -%}
+        {%- for i in (1..6) -%}
+          {%- liquid
+            assign prefix = 'songs_cat' | append: i
+            assign k_coll = prefix | append: '_collection'
+            assign k_label = prefix | append: '_label'
+            assign k_scheme = prefix | append: '_scheme'
+            assign coll = block_settings[k_coll]
+            assign label = block_settings[k_label]
+            assign scheme = block_settings[k_scheme]
+          -%}
+          {%- if coll != blank -%}
+            {%- assign slot_index = slot_index | plus: 1 -%}
+            {%- assign cat_label = label | default: coll.title -%}
+            <li
+              class="megamenu__item{% if slot_index == 1 %} is-active{% endif %}"
+              data-color-scheme="color-{{ scheme }}"
+              data-item-index="{{ slot_index }}"
+              megamenu="item"
+            >
+              <a
+                href="{{ coll.url }}"
+                class="megamenu__link full-unstyled-link focus-inset"
+              >
+                <span>{{ cat_label | escape }}</span>
+
+                <span class="megamenu__link-meta">
+                  <i>{%- render 'icon', icon: 'chevron-right' -%}</i>
+                </span>
+              </a>
+
+              {%- comment -%} Right-hand products for THIS category (3-column icon-left song rows). {%- endcomment -%}
+              {%- liquid
+                assign products_limit = 21
+                assign search_placeholder = 'search.placeholder_songs' | t
+                assign view_all_label = cat_label | prepend: 'View all ' | append: ' '
+              -%}
+
+              <div
+                class="megamenu__products megamenu__products--songs"
+                megamenu="products-container"
+              >
+                <ul class="megamenu__products-list megamenu__songs-list list-unstyled">
+                  {%- for product in coll.products limit: products_limit -%}
+                    <li class="megamenu__product megamenu__songs-item">
+                      {%- render 'card-product-song', product_ref: product -%}
+                    </li><!-- /.megamenu__product -->
+                  {%- endfor -%}
+                </ul><!-- /.megamenu__products-list -->
+
+                <div class="megamenu__products-actions megamenu__songs-actions">
+                  {%- render 'button',
+                    type: 'link',
+                    style: 'secondary',
+                    icon_position: 'right',
+                    value: view_all_label,
+                    href: coll.url
+                  -%}
+
+                  {%- assign namespace = cat_label | handleize | prepend: 'megamenu-songs-' -%}
+                  <div class="megamenu__products-search form-search">
+                    {%- liquid
+                      capture search_input_attr
+                        echo 'role="combobox" '
+                        echo 'aria-autocomplete="list" '
+                        echo 'autocorrect="off" '
+                        echo 'autocomplete="off" '
+                        echo 'autocapitalize="off" '
+                        echo 'spellcheck="false"'
+                      endcapture
+
+                      render 'form-search', namespace: namespace, input_attr: search_input_attr, class: 'megamenu__search-form', placeholder: search_placeholder, type: 'product', tag: 'song'
+                    -%}
+                  </div><!-- /.megamenu__products-search -->
+                </div><!-- /.megamenu__products-actions -->
+              </div><!-- /.megamenu__products -->
+            </li><!-- /.megamenu__item -->
+          {%- endif -%}
+        {%- endfor -%}
+      </ul><!-- /.megamenu__list -->
+
+      {%- comment -%} Category logo (swaps with the active category tab, pinned to the BOTTOM of the rail). {%- endcomment -%}
+      {%- if active_count > 0 -%}
+        <div
+          class="megamenu__logo megamenu__logo--songs"
+          megamenu="logo-container"
+        >
+          {%- assign slot_index = 0 -%}
+          {%- for i in (1..6) -%}
+            {%- liquid
+              assign prefix = 'songs_cat' | append: i
+              assign k_coll = prefix | append: '_collection'
+              assign k_logo = prefix | append: '_logo'
+              assign k_label = prefix | append: '_label'
+              assign coll = block_settings[k_coll]
+              assign logo = block_settings[k_logo]
+              assign label = block_settings[k_label]
+            -%}
+            {%- if coll != blank -%}
+              {%- assign slot_index = slot_index | plus: 1 -%}
+              {%- assign cat_label = label | default: coll.title -%}
+              <div
+                class="megamenu__songs-logo{% unless slot_index == 1 %} hidden{% endunless %}"
+                data-logo-index="{{ slot_index }}"
+                megamenu="logo-item"
+              >
+                {%- if logo != blank -%}
+                  {%- assign logo_src = logo | image_url: width: 600 -%}
+                  {%- render 'image', src: logo_src, width: 600, height: 600, alt: cat_label -%}
+                {%- else -%}
+                  <span class="megamenu__songs-logo-mark">
+                    {%- render 'icon', icon: 'music-note-single' -%}
+                  </span>
+                {%- endif -%}
+              </div><!-- /.megamenu__songs-logo -->
+            {%- endif -%}
+          {%- endfor -%}
+        </div><!-- /.megamenu__logo -->
+      {%- endif -%}
+    </div><!-- /.megamenu__inner -->
+  </header-megamenu><!-- /.megamenu -->
+</div><!-- /.header__megamenu -->

@@ -1,0 +1,397 @@
+{%- comment -%}
+  Love to Sing - Licence Builder section (wireframe Screen 2).
+
+  The configure/buy flow. Reads the 3 published licence products for LIVE variant
+  prices + IDs (never hardcoded) and, on "Add to cart", posts the chosen variant
+  to /cart/add.js with the four line-item properties the purchase webhook consumes
+  (_lts_org_name / _lts_org_type / _lts_size_band / _lts_declared_size).
+
+  Number→band thresholds (BANDS/RANGES/SIZE_WORD in the JS) mirror
+  studio/lib/services/license-config.ts SIZE_BANDS - the source of truth.
+
+  Cart drawer: the Santa v2 theme's cart-drawer.js listens for `cart:reload`
+  (re-fetches + opens the drawer). We also fire `cart:open` (harmless no-op on
+  this theme) per the plan, in case a future drawer wires it separately.
+{%- endcomment -%}
+
+{%- comment -%} ── SSR the live price/variant blob from the licence products ──
+  Key grants by an EXPLICIT handle→grant map (NOT product.metafields.custom.license_type):
+  the org-membership product ALSO has license_type=all_in_one, which would collide
+  with the real All-in-One licence. The map gives each product a distinct grant key.
+{%- endcomment -%}
+{%- assign lic_map = "copyright-licence:copyright,streaming-licence:streaming,all-in-one-licence:all_in_one,organisation-membership:membership" | split: "," -%}
+{%- capture licence_data -%}{"grants":{
+{%- assign emitted = 0 -%}
+{%- for pair in lic_map -%}
+  {%- assign kv = pair | split: ":" -%}{%- assign p = all_products[kv[0]] -%}{%- assign key = kv[1] -%}
+  {%- if p != blank -%}
+    {%- if emitted > 0 -%},{%- endif -%}
+    "{{ key }}":{"from":{{ p.price_min | money_without_currency | remove: ',' }},"variants":{ {%- for v in p.variants -%}"{{ v.option1 | remove: 'Band ' }}":{"id":{{ v.id }},"price":{{ v.price | money_without_currency | remove: ',' }}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%} }}
+    {%- assign emitted = emitted | plus: 1 -%}
+  {%- endif -%}
+{%- endfor -%}
+}}{%- endcapture -%}
+<script id="lts-licence-data" type="application/json">{{ licence_data }}</script>
+
+<section class="lts-lb-blk" id="lts-licence-builder-{{ section.id }}">
+  <div class="lts-lb-wrap">
+    <div class="lts-lb-head-c">
+      {%- if section.settings.heading != blank -%}
+        <span class="lts-lb-eyebrow">Build your licence</span>
+        <h2>{{ section.settings.heading }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="lts-lb-sub">{{ section.settings.subheading }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="lts-lb-builder lts-lb-rise">
+      <div class="lts-lb-panel">
+        <div class="lts-lb-step">
+          <div class="lts-lb-n">1 &middot; Licence</div>
+          <div class="lts-lb-seg-row" id="lts-lb-grant" role="group" aria-label="Licence type">
+            <button type="button" class="lts-lb-seg" data-grant="copyright" aria-pressed="false">Copyright<small>In the room</small></button>
+            <button type="button" class="lts-lb-seg" data-grant="all_in_one" aria-pressed="true">All-in-One<small>Room + online</small></button>
+            <button type="button" class="lts-lb-seg" data-grant="streaming" aria-pressed="false">Streaming<small>Online only</small></button>
+            <button type="button" class="lts-lb-seg" data-grant="membership" aria-pressed="false">Membership<small>Whole catalogue</small></button>
+          </div>
+        </div>
+
+        <div class="lts-lb-step">
+          <div class="lts-lb-n">2 &middot; Who is it for</div>
+          <div class="lts-lb-seg-row" id="lts-lb-org" role="group" aria-label="Who is it for">
+            <button type="button" class="lts-lb-seg" data-org="church" aria-pressed="true">Church</button>
+            <button type="button" class="lts-lb-seg" data-org="school" aria-pressed="false">School</button>
+            <button type="button" class="lts-lb-seg" data-org="community" aria-pressed="false">Community</button>
+          </div>
+        </div>
+
+        <div class="lts-lb-step">
+          <div class="lts-lb-n">3 &middot; Your size</div>
+          <label class="lts-lb-qlab" id="lts-lb-sizeLabel" for="lts-lb-sizeNum">Average weekly attendance</label>
+          <input class="lts-lb-num" id="lts-lb-sizeNum" type="number" min="1" inputmode="numeric" placeholder="e.g. 180" />
+          <div class="lts-lb-bandnote" id="lts-lb-bandNote">Enter a number to see your price.</div>
+        </div>
+
+        <div class="lts-lb-step">
+          <div class="lts-lb-n">4 &middot; Organisation name</div>
+          <input class="lts-lb-txt" id="lts-lb-orgName" aria-label="Organisation name" placeholder="e.g. St Mary's Anglican Church" />
+          <div class="lts-lb-hint">Printed on your licence certificate.</div>
+        </div>
+      </div>
+
+      <aside class="lts-lb-sumcard">
+        <div class="lts-lb-nm" id="lts-lb-sumName">All-in-One Licence</div>
+        <div class="lts-lb-pr" id="lts-lb-sumPrice">from $29</div>
+        <div class="lts-lb-per" id="lts-lb-sumPer">a year, enter your size</div>
+        <ul id="lts-lb-sumFeatures"></ul>
+        <button type="button" class="lts-lb-addcart" id="lts-lb-addBtn" disabled>Add to cart</button>
+        <div class="lts-lb-fine">By adding to cart you agree to our <a href="{{ shop.privacy_policy.url }}" target="_blank" rel="noopener">Privacy Policy</a>, <a href="{{ shop.terms_of_service.url }}" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="/pages/licence-terms" target="_blank" rel="noopener">Licence Terms</a>.</div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lts-lb-blk{
+    --red:#c8102e; --red-strong:#b0102a; --red-deep:#8f0f24; --red-ink:#5e0a18;
+    --red-50:#fdeef0; --red-100:#fbdbe0;
+    --ink:#241a17; --body:#4a423e; --muted:#736a65; --line:#efe7e3; --hair:#f4eeeb;
+    --bg:#fffefe; --surface:#fff;
+    --r-sm:10px; --r:14px; --r-lg:18px;
+    --shadow-sm:0 1px 2px rgba(60,20,25,.06);
+    --shadow:0 10px 24px -14px rgba(90,20,30,.30);
+    --ok:0 8px 30px -12px rgba(200,16,46,.35);
+    --e:cubic-bezier(.2,.7,.2,1);
+    font-family:'Nunito',system-ui,Segoe UI,Roboto,sans-serif;
+    color:var(--body);line-height:1.55;-webkit-font-smoothing:antialiased;
+    padding:clamp(130px,14vw,180px) 0 clamp(44px,7vw,72px);background:var(--bg);
+  }
+  .lts-lb-blk *{box-sizing:border-box}
+  .lts-lb-wrap{max-width:1000px;margin:0 auto;padding:0 22px}
+  .lts-lb-blk h2{color:var(--ink);text-wrap:balance;margin:0;font-size:clamp(22px,3.6vw,30px);font-weight:900;letter-spacing:-.02em}
+  .lts-lb-sub{font-size:clamp(15px,2.2vw,18px);color:var(--muted);max-width:60ch;text-wrap:pretty;margin:8px auto 0}
+  .lts-lb-eyebrow{display:inline-block;font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:10px}
+  .lts-lb-head-c{text-align:center;max-width:62ch;margin:0 auto 6px}
+
+  /* reveal */
+  .lts-lb-rise{opacity:0;transform:translateY(14px);animation:lts-lb-rise .7s var(--e) forwards}
+  @keyframes lts-lb-rise{to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){.lts-lb-rise{animation:none;opacity:1;transform:none}}
+
+  /* builder */
+  .lts-lb-builder{margin-top:28px;display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+  .lts-lb-panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:6px 26px;box-shadow:var(--shadow-sm)}
+  .lts-lb-step{padding:22px 0;border-bottom:1px solid var(--hair)}
+  .lts-lb-step:last-child{border-bottom:0}
+  .lts-lb-n{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  .lts-lb-seg-row{display:flex;gap:10px}
+  .lts-lb-seg{flex:1;border:1.5px solid var(--line);border-radius:var(--r);padding:13px 8px;text-align:center;cursor:pointer;background:#fff;font:inherit;font-weight:800;font-size:14px;color:var(--ink);transition:.18s var(--e);line-height:1.25}
+  .lts-lb-seg small{display:block;font-weight:700;color:var(--muted);font-size:11.5px;margin-top:3px;white-space:nowrap}
+  .lts-lb-seg[aria-pressed="true"]{border-color:var(--red);background:var(--red-50);color:var(--red-ink);box-shadow:0 0 0 3px rgba(200,16,46,.10)}
+  .lts-lb-seg small{transition:color .18s var(--e)}
+  .lts-lb-seg[aria-pressed="true"] small{color:var(--red-ink)}
+  .lts-lb-qlab{font-weight:800;color:var(--ink);display:block;margin-bottom:10px}
+  .lts-lb-num{width:160px;font:inherit;font-size:18px;font-weight:800;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--r);color:var(--ink)}
+  .lts-lb-num:focus,.lts-lb-txt:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(200,16,46,.12)}
+  .lts-lb-txt{width:100%;font:inherit;font-size:16px;padding:13px 14px;border:1.5px solid var(--line);border-radius:var(--r);color:var(--ink)}
+  .lts-lb-bandnote{margin-top:14px;font-size:14.5px;color:var(--muted);font-weight:700}
+  .lts-lb-bandnote b{color:var(--ink)}
+  .lts-lb-hint{font-size:12.5px;color:var(--muted);margin-top:7px}
+  .lts-lb-sumcard{position:sticky;top:20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;text-align:center;box-shadow:var(--shadow)}
+  .lts-lb-sumcard .lts-lb-nm{font-size:19px;font-weight:900;color:var(--ink)}
+  .lts-lb-sumcard .lts-lb-pr{font-size:44px;font-weight:900;color:var(--ink);margin:8px 0 0;line-height:1}
+  .lts-lb-sumcard .lts-lb-per{color:var(--muted);font-weight:700;font-size:13.5px;margin-top:4px}
+  .lts-lb-sumcard ul{list-style:none;padding:0;margin:18px 0;text-align:left;font-size:14px}
+  .lts-lb-sumcard li{padding:6px 0;position:relative;padding-left:26px;color:var(--body)}
+  .lts-lb-sumcard li::before{content:"\2713";position:absolute;left:0;color:var(--red);font-weight:900}
+  .lts-lb-addcart{width:100%;padding:15px;border:0;border-radius:var(--r);background:var(--red);color:#fff;font:inherit;font-weight:900;font-size:16px;cursor:pointer;box-shadow:var(--ok);transition:.2s var(--e)}
+  .lts-lb-addcart:hover:not(:disabled){transform:translateY(-2px);background:var(--red-strong)}
+  .lts-lb-addcart:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+  .lts-lb-fine{font-size:12px;color:var(--muted);margin-top:13px;line-height:1.5}
+  .lts-lb-fine a{color:var(--red);font-weight:800;text-decoration:underline;text-underline-offset:2px}
+  .lts-lb-fine a:hover{color:var(--red-strong)}
+
+  @media(max-width:860px){
+    .lts-lb-builder{grid-template-columns:1fr}
+    .lts-lb-sumcard{position:static}
+  }
+  @media(max-width:520px){
+    .lts-lb-seg-row{flex-direction:column}
+  }
+{% endstylesheet %}
+
+<script>
+(function(){
+  var root = document.getElementById('lts-licence-builder-{{ section.id }}');
+  if(!root) return;
+
+  // Live prices + variant IDs SSR'd from the products (never hardcoded).
+  var DATA = {};
+  try { DATA = JSON.parse(document.getElementById('lts-licence-data').textContent) || {}; } catch(e) { DATA = {}; }
+  var GRANTS = DATA.grants || {};
+
+  // Static copy - grant display names + summary feature bullets.
+  var NAMES = {
+    copyright:"Copyright Licence",
+    streaming:"Streaming Licence",
+    all_in_one:"All-in-One Licence",
+    membership:"Organisation Membership"
+  };
+  var FEATURES = {
+    copyright:["Print, project & record in the room","Covers all your purchases","1 year, worldwide"],
+    all_in_one:["Everything in the room + online","Best value","1 year, worldwide"],
+    streaming:["Livestream & upload online","Online-only use","1 year, worldwide"],
+    membership:["Everything in All-in-One (in the room and online)","Stream our whole catalogue","Download our whole catalogue","One annual signup for your organisation"]
+  };
+
+  // Number->band thresholds - mirror studio/lib/services/license-config.ts SIZE_BANDS.
+  // church/community share church thresholds; band 9 is open-ended (Infinity).
+  var BANDS = {
+    church:   [24,49,99,149,199,499,999,1499,Infinity],
+    school:   [30,75,150,250,400,750,1200,1800,Infinity],
+    community:[24,49,99,149,199,499,999,1499,Infinity]
+  };
+  var RANGES = {
+    church:   ["1-24","25-49","50-99","100-149","150-199","200-499","500-999","1,000-1,499","1,500+"],
+    school:   ["1-30","31-75","76-150","151-250","251-400","401-750","751-1,200","1,201-1,800","1,800+"],
+    community:["1-24","25-49","50-99","100-149","150-199","200-499","500-999","1,000-1,499","1,500+"]
+  };
+  var SIZE_WORD = {
+    church:"Average weekly attendance",
+    school:"Number of students",
+    community:"Number of regular attendees"
+  };
+  // Short noun for the visible "Size" line-item property (surfaces at checkout).
+  var SIZE_NOUN = {
+    church:"weekly attendance",
+    school:"students",
+    community:"attendees"
+  };
+
+  // Pre-fill from URL params: ?licence= (grant), ?org= (org type), ?size= (number).
+  // Defaults: grant all_in_one, org church, empty size. Params are normalized +
+  // validated; unknown values fall back to defaults / are ignored.
+  var grant = "all_in_one", org = "church", prefillSize = "";
+  try {
+    var params = new URLSearchParams(location.search);
+    // grant: accept - or _ (e.g. all-in-one → all_in_one, membership).
+    var q = (params.get('licence') || '').replace(/-/g,'_');
+    if (q === 'copyright' || q === 'streaming' || q === 'all_in_one' || q === 'membership') grant = q;
+    // org: church | school | community (unknown → default church).
+    var o = (params.get('org') || '').toLowerCase();
+    if (o === 'church' || o === 'school' || o === 'community') org = o;
+    // size: positive integer only (non-numeric → ignored, empty stays empty).
+    var s = params.get('size');
+    if (s != null){
+      var sn = parseInt(s, 10);
+      if (sn > 0) prefillSize = String(sn);
+    }
+  } catch(e){}
+
+  function $(id){ return document.getElementById(id); }
+
+  function bandFor(n){
+    var b = BANDS[org];
+    for (var i=0;i<b.length;i++){ if(n<=b[i]) return i+1; }
+    return 9;
+  }
+
+  // "from $X" for a grant - from the SSR blob's price_min, fallback band 1.
+  function fromPrice(g){
+    var gd = GRANTS[g];
+    if (!gd) return null;
+    if (typeof gd.from === 'number') return gd.from;
+    if (gd.variants && gd.variants["1"]) return gd.variants["1"].price;
+    return null;
+  }
+
+  // Resolve the variant object for a grant+band, or null if missing.
+  function variantFor(g, band){
+    var gd = GRANTS[g];
+    if (!gd || !gd.variants) return null;
+    return gd.variants[String(band)] || null;
+  }
+
+  function money(n){
+    // Whole-dollar prices; show cents only if present.
+    return '$' + (n % 1 === 0 ? String(n) : n.toFixed(2));
+  }
+
+  function render(){
+    // reflect toggles
+    var segs = root.querySelectorAll('#lts-lb-grant .lts-lb-seg');
+    for (var i=0;i<segs.length;i++){ segs[i].setAttribute('aria-pressed', segs[i].getAttribute('data-grant')===grant); }
+    var osegs = root.querySelectorAll('#lts-lb-org .lts-lb-seg');
+    for (var j=0;j<osegs.length;j++){ osegs[j].setAttribute('aria-pressed', osegs[j].getAttribute('data-org')===org); }
+
+    $('lts-lb-sizeLabel').textContent = SIZE_WORD[org];
+    $('lts-lb-sumName').textContent = NAMES[grant];
+    $('lts-lb-sumFeatures').innerHTML = (FEATURES[grant]||[]).map(function(f){ return '<li>'+f+'</li>'; }).join('');
+
+    var num = parseInt($('lts-lb-sizeNum').value, 10);
+    var nameOk = $('lts-lb-orgName').value.trim().length > 0;
+    var addBtn = $('lts-lb-addBtn');
+
+    if (num > 0){
+      var band = bandFor(num);
+      var variant = variantFor(grant, band);
+      if (!variant){
+        // Graceful guard: band out of range / product missing that variant.
+        $('lts-lb-bandNote').innerHTML = 'Band '+band+' ('+RANGES[org][band-1]+'), price unavailable. Please <a href="/pages/contact" style="color:var(--red);font-weight:900">contact us</a>.';
+        $('lts-lb-sumPrice').textContent = '…';
+        $('lts-lb-sumPer').textContent = 'a year';
+        addBtn.disabled = true;
+        addBtn.textContent = 'Price unavailable';
+        return;
+      }
+      var price = variant.price;
+      $('lts-lb-bandNote').innerHTML = 'Band '+band+' ('+RANGES[org][band-1]+'), <b>'+money(price)+' a year</b>';
+      $('lts-lb-sumPrice').textContent = money(price);
+      $('lts-lb-sumPer').textContent = 'a year';
+      addBtn.disabled = !nameOk;
+      addBtn.textContent = nameOk ? ('Add to cart, '+money(price)) : 'Add your organisation name';
+    } else {
+      var fp = fromPrice(grant);
+      $('lts-lb-bandNote').textContent = 'Enter a number to see your price.';
+      $('lts-lb-sumPrice').textContent = fp != null ? ('from '+money(fp)) : 'from …';
+      $('lts-lb-sumPer').textContent = 'a year, enter your size';
+      addBtn.disabled = true;
+      addBtn.textContent = 'Add to cart';
+    }
+  }
+
+  // Add-to-cart: post the resolved variant + the four line-item properties,
+  // then reload/open the theme cart drawer.
+  function addToCart(){
+    var num = parseInt($('lts-lb-sizeNum').value, 10);
+    var orgName = $('lts-lb-orgName').value.trim();
+    if (!(num > 0) || !orgName) return;
+
+    var band = bandFor(num);
+    var variant = variantFor(grant, band);
+    if (!variant || !variant.id){
+      render();
+      return;
+    }
+    var variantId = variant.id;
+    var addBtn = $('lts-lb-addBtn');
+    addBtn.disabled = true;
+    addBtn.textContent = 'Adding…';
+
+    fetch('/cart/add.js', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        items:[{
+          id: variantId,
+          quantity: 1,
+          properties:{
+            _lts_org_name: orgName,
+            _lts_org_type: org,
+            _lts_size_band: String(band),
+            _lts_declared_size: String(num),
+            'Size': RANGES[org][band-1] + ' ' + SIZE_NOUN[org]
+          }
+        }]
+      })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){
+      // Santa v2 cart-drawer.js: `cart:reload` re-fetches + opens the drawer.
+      // `cart:open` is a harmless no-op on this theme (dispatched per plan).
+      document.dispatchEvent(new CustomEvent('cart:reload'));
+      document.dispatchEvent(new CustomEvent('cart:open'));
+      render();
+    })
+    .catch(function(){
+      addBtn.disabled = false;
+      addBtn.textContent = 'Add to cart';
+      render();
+    });
+  }
+
+  // wire up
+  var gsegs = root.querySelectorAll('#lts-lb-grant .lts-lb-seg');
+  for (var a=0;a<gsegs.length;a++){ gsegs[a].addEventListener('click', function(){ grant = this.getAttribute('data-grant'); render(); }); }
+  var osegs2 = root.querySelectorAll('#lts-lb-org .lts-lb-seg');
+  for (var b2=0;b2<osegs2.length;b2++){ osegs2[b2].addEventListener('click', function(){ org = this.getAttribute('data-org'); render(); }); }
+  $('lts-lb-sizeNum').addEventListener('input', render);
+  $('lts-lb-orgName').addEventListener('input', render);
+  $('lts-lb-addBtn').addEventListener('click', addToCart);
+
+  // Apply the ?size= prefill (if any) before the first render so the band/price
+  // resolve immediately for a fully pre-filled deep link.
+  if (prefillSize){ $('lts-lb-sizeNum').value = prefillSize; }
+
+  render();
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Licence builder",
+  "tag": "section",
+  "class": "lts-licence-builder-section",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Three quick choices and you are done"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Tell us who it is for and how big you are, and we will show your exact price."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Licence builder"
+    }
+  ]
+}
+{% endschema %}

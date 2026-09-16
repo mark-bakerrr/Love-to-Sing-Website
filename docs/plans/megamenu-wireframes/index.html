@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Love to Sing — Megamenu Wireframes (theme tokens)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+/* ============================================================
+   Tokens copied 1:1 from the live theme (assets/base.css)
+   ============================================================ */
+:root{
+  --c-neutral-50:#fff; --c-neutral-100:#F4F4F4; --c-neutral-200:#E8E8E8; --c-neutral-300:#B0B0B0;
+  --c-neutral-400:#888; --c-neutral-500:#6D6D6D; --c-neutral-600:#5D5D5D; --c-neutral-900:#3D3D3D; --c-neutral-950:#000;
+  --c-red-50:#FDEFEF; --c-red-100:#FCDCDB; --c-red-200:#FABFBE; --c-red-300:#F5928F; --c-red-400:#EC5450;
+  --c-red-500:#B91F1C; --c-red-600:#912422; --c-red-700:#781D1B; --c-red-800:#641A19; --c-red-900:#521B1A; --c-red-950:#2D0B0A;
+  --c-yellow-300:#FACC55; --c-yellow-400:#F0D549;
+  --c-green-300:#A5D0A9; --c-green-500:#519659;
+  --c-blue-300:#76AAEA; --c-blue-500:#205FA9;
+  --c-main-500:var(--c-red-500); --c-main-600:var(--c-red-600); --c-main-700:var(--c-red-700);
+  --c-orange-400:#F0813A; --c-orange-600:#B4470F;   /* Halloween placeholder — map to a real scheme */
+
+  --color-foreground:#141414; --color-subdued:#797979; --color-border:#e3e3e3;
+  --color-background:#fff; --color-background-secondary:#fff; --color-media-background:var(--c-red-100);
+  --color-megamenu-left-background:var(--c-neutral-100); --color-megamenu-left-text:var(--c-neutral-950);
+  --header-bg:#7d1512; --header-text:#ffffff;
+
+  --space-50:.4rem; --space-100:.8rem; --space-150:1.2rem; --space-200:1.6rem; --space-250:2rem;
+  --space-300:2.4rem; --space-400:3.2rem; --space-500:4rem;
+  --radius-xs:.4rem; --radius-s:.8rem; --radius-m:1.6rem; --radius-l:2.4rem;
+  --fz-t:1.2rem; --fz-s:1.4rem; --fz-r:1.6rem; --fz-m:1.8rem; --fz-l:2rem;
+
+  --ease-smooth:cubic-bezier(0.22,1,0.36,1);
+  --ease-spring:cubic-bezier(0.35,1.55,0.65,1);
+  --duration-fast:150ms; --duration-normal:200ms; --duration-slow:280ms;
+  --shadow-elevated:
+    0 4px 8px rgba(0,0,0,.02), 0 8px 12px rgba(0,0,0,.02),
+    0 2px 4px rgba(0,0,0,.02), 0 1px 2px rgba(0,0,0,.04), 0 0 0 .5px #e0e0e0;
+  --shadow-card:0 1px 2px rgba(0,0,0,.05),0 2px 4px rgba(0,0,0,.02),0 0 0 .5px rgba(0,0,0,.08);
+}
+html{font-size:62.5%;scrollbar-gutter:stable}   /* reserve gutter → no page shift when overlays lock scroll */
+*{box-sizing:border-box}
+body{margin:0;font-family:"Nunito",system-ui,sans-serif;color:var(--color-foreground);
+     background:#fafafa;font-size:var(--fz-r);line-height:1.5}
+html.no-scroll,body.no-scroll{overflow:hidden}
+a{color:inherit}
+
+.tint-red{--tint-bg:var(--c-red-100);--tint-fg:var(--c-red-500)}
+.tint-blue{--tint-bg:var(--c-blue-300);--tint-fg:var(--c-blue-500)}
+.tint-green{--tint-bg:var(--c-green-300);--tint-fg:var(--c-green-500)}
+.tint-yellow{--tint-bg:var(--c-yellow-300);--tint-fg:#8A6F1E}
+
+/* ============================================================
+   HEADER — transparent over hero, fills on scroll · floating pill
+   ============================================================ */
+.site-header{position:fixed;top:0;left:0;right:0;z-index:40;color:var(--header-text);
+  background:linear-gradient(180deg,rgba(0,0,0,.30),rgba(0,0,0,0));
+  transition:background var(--duration-slow) var(--ease-smooth),box-shadow var(--duration-slow) var(--ease-smooth),
+             top var(--duration-slow) var(--ease-smooth),width var(--duration-slow) var(--ease-smooth),
+             border-radius var(--duration-slow) var(--ease-smooth)}
+.site-header.solid{background:var(--header-bg);box-shadow:0 2px 16px rgba(0,0,0,.18)}
+.bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;column-gap:var(--space-300);
+  height:8.8rem;max-width:132rem;margin:0 auto;padding:0 var(--space-300)}
+.bar-left{display:flex;align-items:center;gap:var(--space-100);min-width:0}
+.bar-right{display:flex;align-items:center;justify-content:flex-end;gap:var(--space-100)}
+.burger{display:none;width:4.4rem;height:4.4rem;border:0;background:none;color:inherit;cursor:pointer;align-items:center;justify-content:center}
+.logo{justify-self:center;display:grid;place-items:center;width:6.4rem;height:6.4rem;border-radius:50%;
+  background:#fff;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.18);line-height:1;text-align:center}
+.logo .heart{color:var(--c-red-500);font-size:2.8rem;line-height:1}
+nav.main{display:flex;align-items:stretch;height:100%}
+.nav-item{position:static;display:flex;align-items:center}
+.nav-link{display:inline-flex;align-items:center;gap:.6rem;height:100%;padding:0 var(--space-150);
+  font-weight:800;font-size:var(--fz-r);color:var(--header-text);text-decoration:none;border:0;background:none;
+  cursor:pointer;position:relative;font-family:inherit;transition:opacity var(--duration-fast) var(--ease-smooth)}
+.nav-link:hover{opacity:.82}
+.nav-link .chev{transition:transform var(--duration-normal) var(--ease-smooth)}
+.nav-item[data-open="true"] .nav-link .chev{transform:rotate(180deg)}
+.icon-btn{position:relative;width:4.2rem;height:4.2rem;border-radius:50%;border:0;background:transparent;color:inherit;
+  display:grid;place-items:center;cursor:pointer;transition:transform var(--duration-fast) var(--ease-smooth),background var(--duration-fast) var(--ease-smooth)}
+.icon-btn:hover{background:rgba(255,255,255,.16)}
+.icon-btn:active{transform:scale(.94)}
+.icon-btn .count{position:absolute;top:.4rem;right:.4rem;min-width:1.7rem;height:1.7rem;padding:0 .4rem;border-radius:999px;
+  background:#fff;color:var(--c-red-600);font-size:1rem;font-weight:900;display:grid;place-items:center}
+
+/* FLOATING VARIANT — lower radius, transparent at top, colour on scroll, floats on mobile */
+body.floating .site-header{top:1.2rem;left:50%;right:auto;transform:translateX(-50%);
+  width:min(132rem,calc(100% - 2.4rem));border-radius:var(--radius-m);background:transparent}
+body.floating .site-header.solid{background:var(--header-bg);box-shadow:0 10px 30px rgba(0,0,0,.22)}
+body.floating .site-header .bar{height:6.8rem}
+body.floating .mega{left:0;right:0;top:calc(100% + .8rem);border-radius:var(--radius-l);overflow:hidden;box-shadow:0 18px 44px rgba(0,0,0,.20)}
+
+/* ---------- buttons ---------- */
+.button{display:inline-flex;align-items:center;justify-content:center;gap:.8rem;font-family:inherit;font-weight:800;
+  font-size:var(--fz-s);line-height:1;padding:1.2rem 2rem;border-radius:999px;border:0;cursor:pointer;text-decoration:none;
+  background:var(--c-red-500);color:#fff;transition:background var(--duration-normal) var(--ease-smooth),transform var(--duration-fast) var(--ease-smooth)}
+.button:hover{background:var(--c-red-600)}
+.button:active{transform:scale(.98)}
+.button--outlined{background:#fff;color:var(--c-red-500);box-shadow:inset 0 0 0 1.5px var(--c-red-500)}
+.button--outlined:hover{background:var(--c-red-500);color:#fff}
+.button--sm{padding:.9rem 1.5rem;font-size:var(--fz-t)}
+.button--ghost{background:transparent;color:var(--c-red-600);padding:.9rem 0}
+.button--ghost:hover{background:transparent;color:var(--c-red-800)}
+
+/* ============================================================
+   Desktop megamenu — no divider, blur-in entrance
+   ============================================================ */
+.mega{position:absolute;left:0;right:0;top:100%;background:var(--color-background-secondary);
+  box-shadow:var(--shadow-elevated);
+  opacity:0;visibility:hidden;transform:translateY(8px);filter:blur(2px);
+  transition:opacity var(--duration-slow) var(--ease-smooth),transform var(--duration-slow) var(--ease-smooth),
+             filter var(--duration-slow) var(--ease-smooth),visibility var(--duration-slow);z-index:30}
+.nav-item[data-open="true"] .mega{opacity:1;visibility:visible;transform:translateY(0);filter:blur(0)}
+.eyebrow{margin:0 0 var(--space-150);font-size:var(--fz-t);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--color-subdued);font-weight:800}
+.mega-inner{max-width:126rem;margin:0 auto;padding:var(--space-400) var(--space-300)}
+
+/* TYPE 1 · SONGS */
+.songs{display:flex;min-height:38rem;max-height:80vh}
+.song-rail{width:26rem;flex:none;background:var(--color-megamenu-left-background);padding:var(--space-300) 0 var(--space-400) var(--space-300);display:flex;flex-direction:column}
+.song-logo{margin:0 var(--space-200) var(--space-250) 0;height:8rem;border-radius:var(--radius-m);display:flex;align-items:center;gap:var(--space-150);padding:0 var(--space-200);color:#fff;box-shadow:var(--shadow-card);transition:background var(--duration-normal) var(--ease-smooth)}
+.song-logo .mark{width:4.4rem;height:4.4rem;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;flex:none}
+.song-logo .mark svg{width:2.4rem;height:2.4rem;color:#fff}
+.song-logo b{font-size:var(--fz-r);font-weight:900;line-height:1.1}
+.song-logo small{display:block;font-size:var(--fz-t);font-weight:700;opacity:.85}
+.song-rail .eyebrow{padding:0 var(--space-200)}
+.song-cat{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:1.2rem 1.6rem;text-decoration:none;color:var(--color-megamenu-left-text);font-weight:700;font-size:var(--fz-r);border-radius:var(--radius-s) 0 0 var(--radius-s);transition:background var(--duration-fast) var(--ease-smooth),color var(--duration-fast) var(--ease-smooth)}
+.song-cat i{opacity:0;line-height:0;transition:opacity var(--duration-fast) var(--ease-smooth)}
+.song-cat small{font-weight:700;color:var(--color-subdued)}
+.song-cat.is-active{background:var(--c-neutral-50);color:var(--c-neutral-950)}
+.song-cat.is-active i{opacity:1}
+.song-products{flex:1;min-width:0;padding:var(--space-400);display:flex;flex-direction:column;overflow-y:auto}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-100) var(--space-200)}
+.song{display:flex;flex-direction:row;align-items:center;gap:var(--space-150);padding:1rem 1.2rem;border-radius:var(--radius-m);text-decoration:none;color:var(--color-foreground);transition:transform var(--duration-normal) var(--ease-smooth),background var(--duration-normal) var(--ease-smooth)}
+.song:hover{background:var(--c-red-50);transform:translateX(2px)}
+.song .disc{width:4.8rem;height:4.8rem;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--tint-bg,var(--c-red-100));color:var(--tint-fg,var(--c-red-500));box-shadow:inset 0 0 0 5px rgba(255,255,255,.55)}
+.song .disc svg{width:2.2rem;height:2.2rem}
+.song .t{font-weight:800;font-size:var(--fz-s);text-align:left;line-height:1.2}
+.song-actions{display:flex;gap:var(--space-200);align-items:stretch;margin-top:var(--space-400)}
+.song-actions .button{height:4.8rem;padding-top:0;padding-bottom:0}   /* match search height */
+.search{flex:1;display:flex;align-items:center;gap:1rem;height:4.8rem;background:var(--c-neutral-100);border:1px solid var(--color-border);border-radius:999px;padding:0 1.6rem}
+.search input{border:0;background:none;outline:none;font-family:inherit;font-size:var(--fz-s);width:100%;color:inherit}
+
+/* TYPE 2 · SHOP */
+.shop-grid{display:grid;grid-template-columns:1fr 1fr 1fr 32rem;gap:var(--space-400)}
+.shop-col{display:flex;flex-direction:column;gap:2px}
+.shop-link{display:block;padding:1rem 1.2rem;border-radius:var(--radius-s);text-decoration:none;color:var(--color-foreground);transition:background var(--duration-fast) var(--ease-smooth)}
+.shop-link:hover{background:var(--c-red-100)}
+.shop-link .l{font-weight:800;font-size:var(--fz-s);display:flex;align-items:center;gap:.8rem}
+.shop-link .d{font-weight:600;font-size:var(--fz-t);color:var(--color-subdued);margin-top:2px;line-height:1.35}
+.shop-link:hover .l{color:var(--c-red-700)}
+.badge{font-size:1rem;font-weight:800;letter-spacing:.04em;color:var(--c-red-500);background:var(--c-red-100);padding:2px 7px;border-radius:999px}
+.album{background:var(--c-red-50);border:1px solid var(--c-red-100);border-radius:var(--radius-m);padding:var(--space-200);display:flex;flex-direction:column;gap:var(--space-150)}
+.album .cover{aspect-ratio:1/1;border-radius:var(--radius-s);overflow:hidden;position:relative;background:linear-gradient(150deg,#EC5450,#912422);display:grid;place-items:center;box-shadow:var(--shadow-card)}
+.album .cover svg{width:5.6rem;height:5.6rem;color:#fff;opacity:.95}
+.album .cover .ribbon{position:absolute;top:1rem;left:1rem;background:#fff;color:var(--c-red-600);font-size:1rem;font-weight:800;padding:.4rem .8rem;border-radius:999px;letter-spacing:.04em}
+.album h5{margin:0;font-size:var(--fz-m);font-weight:900;color:var(--c-red-700);line-height:1.15}
+.album .meta{font-size:var(--fz-t);font-weight:700;color:var(--color-subdued)}
+.album .price{font-size:var(--fz-l);font-weight:900}
+.album .price s{font-size:var(--fz-s);font-weight:700;color:var(--color-subdued);margin-left:.6rem}
+
+/* TYPE 3 · DISCOVER */
+.discover-grid{display:grid;grid-template-columns:1fr 1fr 34rem;gap:var(--space-400)}
+.list-col{display:flex;flex-direction:column}
+.list-link{display:flex;align-items:center;gap:var(--space-150);padding:1rem 1.2rem;border-radius:var(--radius-s);text-decoration:none;color:var(--color-foreground);transition:background var(--duration-fast) var(--ease-smooth)}
+.list-link:hover{background:var(--c-red-50)}
+.list-link .ic{width:3.8rem;height:3.8rem;border-radius:var(--radius-s);flex:none;display:grid;place-items:center;color:#fff;background:var(--c-red-500)}
+.list-link .ic svg{width:2rem;height:2rem}
+.list-link b{font-size:var(--fz-s);font-weight:800;display:block;line-height:1.2}
+.list-link span{font-size:var(--fz-t);color:var(--color-subdued);font-weight:600}
+.news{display:flex;flex-direction:column;gap:var(--space-100)}
+.news-item{display:flex;gap:var(--space-150);padding:.8rem;border-radius:var(--radius-m);text-decoration:none;color:inherit;transition:background var(--duration-fast) var(--ease-smooth)}
+.news-item:hover{background:var(--c-red-50)}
+.news-thumb{width:6.4rem;height:6.4rem;border-radius:var(--radius-s);flex:none;display:grid;place-items:center;color:#fff;font-weight:900;font-size:var(--fz-t);text-align:center;line-height:1.05}
+.news-body{min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.news-body .tag2{font-size:1rem;font-weight:800;color:var(--c-red-600);text-transform:uppercase;letter-spacing:.06em}
+.news-body b{font-size:var(--fz-s);font-weight:800;line-height:1.2}
+.news-body time{font-size:var(--fz-t);color:var(--color-subdued);font-weight:700}
+.feature{position:relative;border-radius:var(--radius-l);overflow:hidden;min-height:33rem;display:flex;flex-direction:column;justify-content:flex-end;padding:var(--space-300);color:#fff;background:linear-gradient(160deg,#EC5450 0%,#912422 60%,#521B1A 100%);transition:transform var(--duration-normal) var(--ease-smooth)}
+.feature:hover{transform:translateY(-2px)}
+.feature .heart-wm{position:absolute;top:-2.5rem;right:-1.5rem;font-size:16rem;line-height:1;opacity:.14}
+.feature .eyebrow{color:rgba(255,255,255,.82);position:relative}
+.feature h3{margin:.4rem 0 .8rem;font-size:2.6rem;line-height:1.08;font-weight:900;position:relative}
+.feature p{margin:0 0 var(--space-250);font-size:var(--fz-s);font-weight:600;line-height:1.45;color:rgba(255,255,255,.92);max-width:32ch;position:relative}
+.feature .button{align-self:flex-start;position:relative;background:#fff;color:var(--c-red-600)}
+.feature .button:hover{background:var(--c-red-50)}
+
+/* TYPE 4 · COUNTDOWN */
+.count-grid{display:grid;grid-template-columns:1fr 30rem;gap:var(--space-400)}
+.cd-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-200)}
+.cd-card{position:relative;border-radius:var(--radius-l);overflow:hidden;padding:var(--space-250);color:#fff;display:flex;flex-direction:column;justify-content:flex-end;min-height:15rem;transition:transform var(--duration-normal) var(--ease-smooth);text-decoration:none}
+.cd-card:hover{transform:translateY(-2px)}
+.cd-card .snow{position:absolute;inset:0;opacity:.22;background-image:radial-gradient(2px 2px at 20% 30%,#fff,transparent),radial-gradient(2px 2px at 70% 22%,#fff,transparent),radial-gradient(2px 2px at 42% 68%,#fff,transparent),radial-gradient(2px 2px at 85% 55%,#fff,transparent)}
+.cd-card .live{position:absolute;top:1.2rem;right:1.2rem;display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.2);padding:.3rem .8rem;border-radius:999px;font-size:1rem;font-weight:800;letter-spacing:.04em}
+.cd-card .live::before{content:"";width:.7rem;height:.7rem;border-radius:50%;background:#fff}
+.cd-card .num{font-size:5rem;font-weight:900;line-height:.85;position:relative}
+.cd-card .num small{font-size:var(--fz-s);font-weight:800;opacity:.85;margin-left:.6rem}
+.cd-card .cd-name{font-size:var(--fz-m);font-weight:900;position:relative;margin-top:.4rem}
+.cd-card .cd-sub{font-size:var(--fz-t);font-weight:700;opacity:.85;position:relative}
+.cd-red{background:linear-gradient(160deg,#EC5450,#521B1A)}
+.cd-orange{background:linear-gradient(160deg,var(--c-orange-400),#3A1A0A)}
+.cd-blue{background:linear-gradient(160deg,#76AAEA,#123A6B)}
+.cd-green{background:linear-gradient(160deg,#A5D0A9,#2C5E32)}
+.week{display:flex;flex-direction:column;gap:var(--space-100)}
+.week-item{display:flex;gap:var(--space-150);align-items:center;padding:1rem 1.2rem;border-radius:var(--radius-m);text-decoration:none;color:inherit;background:var(--c-neutral-100);transition:background var(--duration-fast) var(--ease-smooth)}
+.week-item:hover{background:var(--c-red-50)}
+.week-item .dot{width:4rem;height:4rem;border-radius:var(--radius-s);flex:none;display:grid;place-items:center;font-weight:900;color:#fff;font-size:1rem;background:var(--c-red-500);text-align:center;line-height:1}
+.week-item b{font-size:var(--fz-s);font-weight:800;display:block;line-height:1.2}
+.week-item span{font-size:var(--fz-t);color:var(--color-subdued);font-weight:600}
+
+/* ============================================================
+   FULL-SCREEN SEARCH OVERLAY (desktop + mobile)
+   logo up top · big input · predictive results · GSAP entrance
+   ============================================================ */
+.overlay{position:fixed;inset:0;z-index:80;opacity:0;visibility:hidden;
+  transition:opacity var(--duration-slow) var(--ease-smooth),visibility var(--duration-slow)}
+.overlay.is-open{opacity:1;visibility:visible}
+/* CSS fallback stagger when GSAP absent */
+body:not(.gsap) .overlay .stag{opacity:0;transform:translateY(22px);
+  transition:opacity .5s var(--ease-smooth),transform .5s var(--ease-smooth);transition-delay:calc(var(--i,0)*45ms)}
+body:not(.gsap) .overlay.is-open .stag{opacity:1;transform:none}
+
+.search-overlay{background:rgba(255,255,255,.86);backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1);display:flex;flex-direction:column}
+.so-top{display:flex;align-items:center;justify-content:space-between;padding:var(--space-300) var(--space-400);max-width:96rem;width:100%;margin:0 auto}
+.so-logo{display:flex;align-items:center;gap:1rem;text-decoration:none}
+.so-logo .badge-logo{width:5.2rem;height:5.2rem;border-radius:50%;background:var(--c-red-500);display:grid;place-items:center;box-shadow:0 4px 14px rgba(185,31,28,.35)}
+.so-logo .badge-logo span{color:#fff;font-size:2.4rem}
+.so-logo b{font-size:var(--fz-l);font-weight:900;color:var(--c-red-600);line-height:1}
+.so-logo b span{color:var(--color-foreground)}
+.so-close{width:5rem;height:5rem;border-radius:50%;border:0;background:var(--c-neutral-100);color:var(--color-foreground);display:grid;place-items:center;cursor:pointer;transition:transform var(--duration-fast) var(--ease-spring),background var(--duration-fast)}
+.so-close:hover{background:var(--c-red-100);transform:rotate(90deg)}
+.so-body{flex:1;overflow-y:auto;max-width:96rem;width:100%;margin:0 auto;padding:2rem var(--space-400) var(--space-500);scrollbar-width:none}
+.so-body::-webkit-scrollbar{display:none}
+.so-field{display:flex;align-items:center;gap:1.6rem;border-bottom:3px solid var(--c-red-500);padding:1.2rem .4rem}
+.so-field svg{width:3rem;height:3rem;color:var(--c-red-500);flex:none}
+.so-field input{flex:1;border:0;outline:0;background:none;font-family:inherit;font-weight:800;font-size:clamp(2.4rem,4vw,3.6rem);color:var(--color-foreground);min-width:0}
+.so-field input::placeholder{color:var(--c-neutral-300)}
+.so-chips{display:flex;gap:.8rem;flex-wrap:wrap;margin:var(--space-300) 0 var(--space-250)}
+.so-chip{border:0;font-family:inherit;font-weight:800;font-size:var(--fz-s);padding:.8rem 1.6rem;border-radius:999px;background:var(--c-neutral-100);color:var(--color-foreground);cursor:pointer;transition:background var(--duration-fast),color var(--duration-fast)}
+.so-chip.is-active{background:var(--c-red-500);color:#fff}
+.so-sec{margin-top:var(--space-300)}
+.so-pills{display:flex;flex-wrap:wrap;gap:.8rem}
+.so-pill{display:inline-flex;align-items:center;gap:.6rem;padding:.7rem 1.4rem;border-radius:999px;background:#fff;box-shadow:var(--shadow-card);text-decoration:none;font-weight:700;font-size:var(--fz-s);transition:transform var(--duration-fast) var(--ease-spring)}
+.so-pill:hover{transform:translateY(-2px)}
+.so-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(20rem,1fr));gap:var(--space-150);margin-top:var(--space-150)}
+.so-res{display:flex;align-items:center;gap:var(--space-150);padding:1rem;border-radius:var(--radius-m);text-decoration:none;color:inherit;background:#fff;box-shadow:var(--shadow-card);transition:transform var(--duration-fast) var(--ease-smooth)}
+.so-res:hover{transform:translateY(-2px)}
+.so-res .disc{width:4.4rem;height:4.4rem;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--tint-bg,var(--c-red-100));color:var(--tint-fg,var(--c-red-500));box-shadow:inset 0 0 0 5px rgba(255,255,255,.55)}
+.so-res .disc svg{width:2rem;height:2rem}
+.so-res b{font-size:var(--fz-s);font-weight:800;display:block;line-height:1.2}
+.so-res span{font-size:var(--fz-t);color:var(--color-subdued);font-weight:700}
+
+/* ============================================================
+   FULL-PAGE MENU OVERLAY (mobile) — big nav, staggered in
+   ============================================================ */
+.menu-overlay{background:radial-gradient(120% 90% at 50% 0%,#B91F1C 0%,#7d1512 45%,#2D0B0A 100%);color:#fff;display:flex;flex-direction:column}
+.mo-top{display:flex;align-items:center;justify-content:space-between;padding:var(--space-250) var(--space-300)}
+.mo-top .logo{background:#fff}
+.mo-close{width:5rem;height:5rem;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;display:grid;place-items:center;cursor:pointer;transition:transform var(--duration-fast) var(--ease-spring),background var(--duration-fast)}
+.mo-close:hover{background:rgba(255,255,255,.24);transform:rotate(90deg)}
+.mo-search{margin:0 var(--space-300);display:flex;align-items:center;gap:1rem;background:rgba(255,255,255,.14);border-radius:999px;padding:1.3rem 1.8rem;color:#fff;cursor:pointer;font-weight:700}
+.mo-search svg{width:2.2rem;height:2.2rem}
+.mo-nav{flex:1;overflow-y:auto;padding:var(--space-300);scrollbar-width:none}
+.mo-nav::-webkit-scrollbar{display:none}
+.mo-item{border-bottom:1px solid rgba(255,255,255,.16)}
+.mo-item>details>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:1.8rem .4rem;font-size:2.8rem;font-weight:900;cursor:pointer}
+.mo-item summary::-webkit-details-marker{display:none}
+.mo-item summary .chev{width:2.4rem;height:2.4rem;transition:transform var(--duration-normal) var(--ease-smooth);opacity:.8}
+.mo-item details[open] summary .chev{transform:rotate(90deg)}
+.mo-flat{display:block;padding:1.8rem .4rem;font-size:2.8rem;font-weight:900;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.16)}
+.mo-sub{padding:.4rem 0 1.8rem}
+.mo-sublink{display:flex;align-items:center;justify-content:space-between;padding:1rem .4rem;text-decoration:none;font-size:var(--fz-l);font-weight:700;color:rgba(255,255,255,.9)}
+.mo-sublink small{opacity:.6;font-weight:700}
+.mo-foot{display:flex;gap:1rem;padding:var(--space-300)}
+.mo-foot a{flex:1;display:flex;align-items:center;justify-content:center;gap:.8rem;padding:1.4rem;border-radius:var(--radius-m);background:rgba(255,255,255,.12);color:#fff;text-decoration:none;font-weight:800;font-size:var(--fz-s)}
+
+/* demo scaffolding */
+.hero{min-height:66vh;display:grid;place-items:center;text-align:center;color:#fff;padding:12rem 2rem 4rem;background:radial-gradient(120% 90% at 50% 0%,#EC5450 0%,#912422 45%,#2D0B0A 100%)}
+.hero h1{font-size:clamp(3.2rem,6vw,6rem);font-weight:900;margin:0 0 1rem;line-height:1.02}
+.hero p{font-size:var(--fz-l);font-weight:700;opacity:.9;margin:0}
+.filler{max-width:80rem;margin:0 auto;padding:8rem 2rem;color:var(--color-subdued);font-weight:700}
+.hint{max-width:80rem;margin:0 auto 4rem;padding:0 2rem;color:var(--color-subdued);font-size:var(--fz-s);font-weight:700;line-height:1.7}
+.tag{display:inline-block;background:#111;color:#fff;font-size:1.1rem;font-weight:800;padding:3px 9px;border-radius:6px;letter-spacing:.06em;margin-left:8px}
+.wf-controls{position:fixed;right:1.6rem;bottom:1.6rem;z-index:70;background:#111;color:#fff;border-radius:var(--radius-m);padding:1.2rem 1.4rem;box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:var(--fz-t);font-weight:700;display:flex;flex-direction:column;gap:.6rem;max-width:24rem}
+.wf-controls label{display:flex;align-items:center;gap:.8rem;cursor:pointer}
+.wf-controls input{width:1.8rem;height:1.8rem;accent-color:var(--c-red-400)}
+.wf-controls small{opacity:.7;font-weight:600;line-height:1.4}
+
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important}}
+
+@media (max-width:990px){
+  .burger{display:inline-flex}
+  nav.main{display:none}
+  .bar{column-gap:var(--space-200);height:6.4rem}
+  .logo{width:5.2rem;height:5.2rem}
+  body.floating .site-header{top:.8rem;width:calc(100% - 1.6rem);border-radius:var(--radius-m)}
+  body.floating .site-header .bar{height:5.8rem}
+  .so-top,.so-body{padding-left:var(--space-250);padding-right:var(--space-250)}
+}
+@media (max-width:1180px) and (min-width:991px){
+  .shop-grid{grid-template-columns:1fr 1fr 28rem}.shop-col:nth-child(3){display:none}
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .discover-grid{grid-template-columns:1fr 1fr 28rem}
+  .count-grid{grid-template-columns:1fr 26rem}
+}
+</style>
+</head>
+<body class="floating">
+
+  <header class="site-header" id="siteHeader">
+    <div class="bar">
+      <div class="bar-left">
+      <button class="burger" id="burger" aria-label="Open menu"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+      <nav class="main" id="mainNav">
+
+        <!-- TYPE 1 · SONGS -->
+        <div class="nav-item has-mega">
+          <button class="nav-link" aria-haspopup="true">Songs
+            <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="mega">
+            <div class="songs">
+              <aside class="song-rail">
+                <div class="song-logo" id="songLogo" style="background:linear-gradient(150deg,#EC5450,#912422)">
+                  <span class="mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 13.5351V3H20V6H14V17C14 19.2091 12.2091 21 10 21C7.79086 21 6 19.2091 6 17C6 14.7909 7.79086 13 10 13C10.7286 13 11.4117 13.1948 12 13.5351Z"/></svg></span>
+                  <span><b id="songLogoTitle">Christmas Songs</b><small id="songLogoSub">116 songs &amp; carols</small></span>
+                </div>
+                <p class="eyebrow">Categories</p>
+                <a class="song-cat is-active" href="#" data-title="Christmas Songs" data-sub="116 songs &amp; carols" data-grad="linear-gradient(150deg,#EC5450,#912422)">Christmas <span style="display:flex;align-items:center;gap:.8rem"><small>116</small><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span></a>
+                <a class="song-cat" href="#" data-title="Kids Songs" data-sub="Sing-along favourites" data-grad="linear-gradient(150deg,#76AAEA,#205FA9)">Kids Songs <small>300+</small></a>
+                <a class="song-cat" href="#" data-title="Halloween Songs" data-sub="Spooky sing-alongs" data-grad="linear-gradient(150deg,#F0813A,#B4470F)">Halloween <small>40</small></a>
+                <a class="song-cat" href="#" data-title="Celebration Songs" data-sub="Birthdays &amp; special days" data-grad="linear-gradient(150deg,#A5D0A9,#519659)">Celebration <small>55</small></a>
+              </aside>
+              <section class="song-products">
+                <div class="cards" id="songCards"></div>
+                <div class="song-actions">
+                  <a class="button button--outlined button--sm" href="#">View all 116 songs →</a>
+                  <label class="search">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <input placeholder="Search Christmas songs…">
+                  </label>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- TYPE 2 · SHOP -->
+        <div class="nav-item has-mega">
+          <button class="nav-link" aria-haspopup="true">Shop
+            <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="mega">
+            <div class="mega-inner">
+              <div class="shop-grid">
+                <div class="shop-col">
+                  <p class="eyebrow">Shop by product</p>
+                  <a class="shop-link" href="#"><span class="l">Albums &amp; MP3s</span><span class="d">Full song collections, instant download</span></a>
+                  <a class="shop-link" href="#"><span class="l">Single Songs</span><span class="d">Buy any track on its own</span></a>
+                  <a class="shop-link" href="#"><span class="l">Backing Tracks</span><span class="d">Instrumental versions for performances</span></a>
+                  <a class="shop-link" href="#"><span class="l">Sheet Music &amp; Lyrics</span><span class="d">Printable scores and lyric sheets</span></a>
+                  <a class="shop-link" href="#"><span class="l">eBooks</span><span class="d">Activity &amp; song books for kids</span></a>
+                </div>
+                <div class="shop-col">
+                  <p class="eyebrow">Licences</p>
+                  <a class="shop-link" href="#"><span class="l">Copyright Licence</span><span class="d">Print, project &amp; record in your services</span></a>
+                  <a class="shop-link" href="#"><span class="l">Streaming Licence <span class="badge">NEW</span></span><span class="d">Livestream &amp; upload to YouTube</span></a>
+                  <a class="shop-link" href="#"><span class="l">All-in-One Licence</span><span class="d">Copyright + Streaming, one price</span></a>
+                  <a class="shop-link" href="#"><span class="l">Which licence do I need?</span><span class="d">2-minute guide for churches &amp; schools</span></a>
+                </div>
+                <div class="shop-col">
+                  <p class="eyebrow">Bundles &amp; more</p>
+                  <a class="shop-link" href="#"><span class="l">Value Bundles</span><span class="d">Save when you buy collections together</span></a>
+                  <a class="shop-link" href="#"><span class="l">Christmas Shop</span><span class="d">Everything for the nativity season</span></a>
+                  <a class="shop-link" href="#"><span class="l">Gift Cards</span><span class="d">Let them choose their own songs</span></a>
+                  <a class="shop-link" href="#"><span class="l">Free Samples</span><span class="d">Try before you buy</span></a>
+                </div>
+                <aside class="album">
+                  <div class="cover"><span class="ribbon">FEATURED ALBUM</span>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 13.5351V3H20V6H14V17C14 19.2091 12.2091 21 10 21C7.79086 21 6 19.2091 6 17C6 14.7909 7.79086 13 10 13C10.7286 13 11.4117 13.1948 12 13.5351Z"/></svg>
+                  </div>
+                  <h5>Christmas Songs &amp; Carols</h5>
+                  <span class="meta">25 songs · MP3 + backing tracks + lyrics</span>
+                  <span class="price">$14.99 <s>$24.99</s></span>
+                  <a class="button" href="#">Shop this album →</a>
+                </aside>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TYPE 3 · DISCOVER -->
+        <div class="nav-item has-mega">
+          <button class="nav-link" aria-haspopup="true">Discover
+            <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="mega">
+            <div class="mega-inner">
+              <div class="discover-grid">
+                <div class="list-col">
+                  <p class="eyebrow">Explore</p>
+                  <a class="list-link" href="#"><span class="ic" style="background:linear-gradient(150deg,#F5928F,#B91F1C)"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v14H4z" stroke="#fff" stroke-width="2"/><path d="M4 15l5-4 4 3 3-2 4 3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>The Photo Wall</b><span>Your singalong photos</span></span></a>
+                  <a class="list-link" href="#"><span class="ic" style="background:linear-gradient(150deg,#76AAEA,#205FA9)"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5z" stroke="#fff" stroke-width="2"/><path d="M8 9h8M8 13h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></span><span><b>From the Blog</b><span>Tips, news &amp; ideas</span></span></a>
+                  <a class="list-link" href="#"><span class="ic" style="background:linear-gradient(150deg,#A5D0A9,#519659)"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8l8 5 8-5M4 8v9h16V8L12 3 4 8z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg></span><span><b>Send it in</b><span>Share your videos</span></span></a>
+                  <a class="list-link" href="#"><span class="ic" style="background:linear-gradient(150deg,#FACC55,#B98A1E)"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 21l-4.9 2.6.9-5.5-4-3.9 5.5-.8L12 3z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg></span><span><b>Free Resources</b><span>Printables &amp; activities</span></span></a>
+                </div>
+                <div class="list-col">
+                  <p class="eyebrow">New this week</p>
+                  <div class="news">
+                    <a class="news-item" href="#"><span class="news-thumb" style="background:linear-gradient(150deg,#EC5450,#912422)">PHOTO<br>WALL</span><span class="news-body"><span class="tag2">Gallery</span><b>18 new nativity photos added</b><time>2 days ago</time></span></a>
+                    <a class="news-item" href="#"><span class="news-thumb" style="background:linear-gradient(150deg,#76AAEA,#205FA9)">BLOG</span><span class="news-body"><span class="tag2">Article</span><b>10 easy carols for toddlers</b><time>4 days ago</time></span></a>
+                    <a class="news-item" href="#"><span class="news-thumb" style="background:linear-gradient(150deg,#A5D0A9,#519659)">VIDEO</span><span class="news-body"><span class="tag2">Send it in</span><b>Ella’s class sings Jingle Bells</b><time>this week</time></span></a>
+                  </div>
+                  <a class="button button--ghost button--sm" href="#" style="margin-top:auto">See what’s new →</a>
+                </div>
+                <a class="feature" href="#">
+                  <span class="heart-wm">♥</span>
+                  <p class="eyebrow">Our story</p>
+                  <h3>The Heart of Love&nbsp;to&nbsp;Sing</h3>
+                  <p>Why a little family in New Zealand has helped millions of children find their voice.</p>
+                  <span class="button button--sm">Read our story →</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TYPE 4 · COUNTDOWN -->
+        <div class="nav-item has-mega">
+          <button class="nav-link" aria-haspopup="true">Countdown
+            <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="mega">
+            <div class="mega-inner">
+              <div class="count-grid">
+                <div>
+                  <p class="eyebrow">Live countdowns</p>
+                  <div class="cd-cards">
+                    <a class="cd-card cd-red" href="#"><span class="snow"></span><span class="live">LIVE</span><span class="num">127<small>sleeps</small></span><span class="cd-name">Christmas</span><span class="cd-sub">25 December · widget + daily ideas</span></a>
+                    <a class="cd-card cd-orange" href="#"><span class="live">LIVE</span><span class="num">71<small>days</small></span><span class="cd-name">Halloween</span><span class="cd-sub">31 October · spooky songs</span></a>
+                    <a class="cd-card cd-blue" href="#"><span class="live">LIVE</span><span class="num">133<small>days</small></span><span class="cd-name">New Year</span><span class="cd-sub">1 January · party playlist</span></a>
+                    <a class="cd-card cd-green" href="#"><span class="live">LIVE</span><span class="num">240<small>days</small></span><span class="cd-name">Easter</span><span class="cd-sub">Spring songs &amp; crafts</span></a>
+                  </div>
+                </div>
+                <div class="list-col">
+                  <p class="eyebrow">New this week</p>
+                  <div class="week">
+                    <a class="week-item" href="#"><span class="dot">NEW</span><span><b>Christmas Eve tracker</b><span>Hour-by-hour widget · just launched</span></span></a>
+                    <a class="week-item" href="#"><span class="dot" style="background:var(--c-orange-400)">SOON</span><span><b>12 Days of Christmas</b><span>Widget in build</span></span></a>
+                    <a class="week-item" href="#"><span class="dot" style="background:var(--c-green-500)">SING</span><span><b>Carol of the day</b><span>Daily song picker</span></span></a>
+                    <a class="button button--ghost button--sm" href="#">All countdowns &amp; widgets →</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item"><a class="nav-link" href="#">About</a></div>
+      </nav>
+      </div><!-- /.bar-left -->
+
+      <a class="logo" href="#" aria-label="Love to Sing home"><span class="heart">♥</span></a>
+
+      <div class="bar-right">
+        <button class="icon-btn search-btn" id="searchBtn" aria-label="Search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button class="icon-btn" aria-label="Cart, 2 items"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6h15l-1.5 9h-12L6 6zM6 6L5 3H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="20" r="1.6" fill="currentColor"/><circle cx="18" cy="20" r="1.6" fill="currentColor"/></svg><span class="count">2</span></button>
+        <button class="icon-btn" aria-label="Account"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-3.5 3.6-6 8-6s8 2.5 8 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1>Love to Sing</h1>
+      <p>Scroll to see the header fill · click the search icon · on mobile tap ☰ for the full-page menu.</p>
+    </div>
+  </section>
+
+  <p class="hint" style="margin-top:4rem">
+    Menu types: <b>Songs</b> · <b>Shop</b> · <b>Discover</b> · <b>Countdown</b>. Header floats by default (toggle bottom-right), transparent at top → solid on scroll.
+    <b>Search icon</b> opens a full-screen overlay. Below 990px the <b>☰</b> opens a full-page menu.
+    <span class="tag">WIREFRAME · theme tokens · GSAP</span>
+  </p>
+  <div class="filler">Page content — scroll up to see the transparent header over the hero.</div>
+
+<div class="wf-controls">
+  <label><input type="checkbox" id="floatToggle" checked> Floating header</label>
+  <small>Lower-radius pill, floats on mobile too. Scroll to watch transparent → solid.</small>
+</div>
+
+<!-- ===== FULL-SCREEN SEARCH OVERLAY ===== -->
+<div class="overlay search-overlay" id="searchOverlay" aria-label="Search" role="dialog" aria-modal="true">
+  <div class="so-top">
+    <a class="so-logo stag" href="#" style="--i:0"><span class="badge-logo"><span>♥</span></span><b>Love to<span> Sing</span></b></a>
+    <button class="so-close stag" id="searchClose" aria-label="Close search" style="--i:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="so-body">
+    <label class="so-field stag" style="--i:1">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="searchInput" placeholder="Search songs, albums, pages…" autocomplete="off">
+    </label>
+    <div class="so-chips stag" style="--i:2">
+      <button class="so-chip is-active">All</button>
+      <button class="so-chip">Songs</button>
+      <button class="so-chip">Shop</button>
+      <button class="so-chip">Blog &amp; pages</button>
+    </div>
+
+    <div class="so-sec">
+      <p class="eyebrow stag" style="--i:3">Popular searches</p>
+      <div class="so-pills">
+        <a class="so-pill stag" href="#" style="--i:3">🎄 Jingle Bells</a>
+        <a class="so-pill stag" href="#" style="--i:4">Nativity songs</a>
+        <a class="so-pill stag" href="#" style="--i:4">Backing tracks</a>
+        <a class="so-pill stag" href="#" style="--i:5">Streaming licence</a>
+        <a class="so-pill stag" href="#" style="--i:5">Twinkle Twinkle</a>
+      </div>
+    </div>
+
+    <div class="so-sec">
+      <p class="eyebrow stag" style="--i:5">Top songs</p>
+      <div class="so-grid" id="searchResults"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FULL-PAGE MENU OVERLAY (mobile) ===== -->
+<div class="overlay menu-overlay" id="menuOverlay" aria-label="Menu" role="dialog" aria-modal="true">
+  <div class="mo-top">
+    <a class="logo" href="#"><span class="heart">♥</span></a>
+    <button class="mo-close" id="menuClose" aria-label="Close menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="mo-search stag" id="menuSearch" style="--i:0"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Search songs, albums, pages…</div>
+  <nav class="mo-nav">
+    <div class="mo-item stag" style="--i:1"><details open><summary>Songs <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="mo-sub">
+        <a class="mo-sublink" href="#">Christmas <small>116</small></a>
+        <a class="mo-sublink" href="#">Kids Songs <small>300+</small></a>
+        <a class="mo-sublink" href="#">Halloween <small>40</small></a>
+        <a class="mo-sublink" href="#">Celebration <small>55</small></a>
+      </div></details></div>
+    <div class="mo-item stag" style="--i:2"><details><summary>Shop <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="mo-sub">
+        <a class="mo-sublink" href="#">Albums &amp; MP3s</a>
+        <a class="mo-sublink" href="#">Single Songs</a>
+        <a class="mo-sublink" href="#">Backing Tracks</a>
+        <a class="mo-sublink" href="#">Licences</a>
+      </div></details></div>
+    <div class="mo-item stag" style="--i:3"><details><summary>Discover <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="mo-sub">
+        <a class="mo-sublink" href="#">The Heart of Love to Sing</a>
+        <a class="mo-sublink" href="#">The Photo Wall</a>
+        <a class="mo-sublink" href="#">From the Blog</a>
+        <a class="mo-sublink" href="#">Send it in</a>
+      </div></details></div>
+    <div class="mo-item stag" style="--i:4"><details><summary>Countdown <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="mo-sub">
+        <a class="mo-sublink" href="#">Christmas <small>127 sleeps</small></a>
+        <a class="mo-sublink" href="#">Halloween <small>71 days</small></a>
+        <a class="mo-sublink" href="#">New Year <small>133 days</small></a>
+      </div></details></div>
+    <a class="mo-flat stag" href="#" style="--i:5">About</a>
+  </nav>
+  <div class="mo-foot stag" style="--i:6">
+    <a href="#">🛒 Cart (2)</a>
+    <a href="#">👤 Account</a>
+  </div>
+</div>
+
+<script>
+  var G=window.gsap; if(G) document.body.classList.add('gsap');
+
+  // song grid mock — music icon LEFT of the name
+  var note='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 13.5351V3H20V6H14V17C14 19.2091 12.2091 21 10 21C7.79086 21 6 19.2091 6 17C6 14.7909 7.79086 13 10 13C10.7286 13 11.4117 13.1948 12 13.5351Z"/></svg>';
+  var tints=['tint-red','tint-blue','tint-green','tint-yellow'];
+  var titles=["Jingle Bells","Away in a Manger","We Wish You","Silent Night","Little Donkey","Deck the Halls",
+    "Joy to the World","O Christmas Tree","Frosty the Snowman","The First Noel","Rudolph","Ding Dong Merrily",
+    "Good King Wenceslas","Once in Royal","Mary's Boy Child","Calypso Carol","See Him Lying","Go Tell It"];
+  document.getElementById('songCards').innerHTML=titles.map(function(t,i){
+    return '<a class="song '+tints[i%tints.length]+'" href="#"><span class="disc">'+note+'</span><span class="t">'+t+'</span></a>';}).join('');
+
+  // search overlay results (predictive-style)
+  var sres=["Jingle Bells","Away in a Manger","Silent Night","We Wish You a Merry Christmas","Twinkle Twinkle","Wheels on the Bus"];
+  document.getElementById('searchResults').innerHTML=sres.map(function(t,i){
+    return '<a class="so-res stag '+tints[i%tints.length]+'" href="#" style="--i:'+(6+Math.floor(i/2))+'"><span class="disc">'+note+'</span><span><b>'+t+'</b><span>Song · MP3 + backing track</span></span></a>';}).join('');
+
+  // Songs category logo swap
+  var cats=[].slice.call(document.querySelectorAll('.song-cat'));
+  var sLogo=document.getElementById('songLogo'),sT=document.getElementById('songLogoTitle'),sS=document.getElementById('songLogoSub');
+  function activateCat(c){cats.forEach(function(x){x.classList.toggle('is-active',x===c);});
+    sLogo.style.background=c.dataset.grad;sT.innerHTML=c.dataset.title;sS.innerHTML=c.dataset.sub;}
+  cats.forEach(function(c){c.addEventListener('mouseenter',function(){activateCat(c);});
+    c.addEventListener('click',function(e){e.preventDefault();activateCat(c);});});
+
+  // ===== desktop mega controller (hover-capable → hover; everywhere → click) =====
+  var nav=document.getElementById('mainNav');
+  var header=document.getElementById('siteHeader');
+  var items=[].slice.call(nav.querySelectorAll('.nav-item')),closeTimer;
+  var canHover=window.matchMedia('(hover:hover)').matches;
+  // header fills with colour ONLY on scroll — stays transparent at the top even with a mega menu open
+  function syncHeader(){header.classList.toggle('solid',window.scrollY>10);}
+  function openOnly(item){clearTimeout(closeTimer);
+    items.forEach(function(n){n.dataset.open=(n===item&&item&&item.classList.contains('has-mega'))?'true':'false';});syncHeader();}
+  function closeAll(){items.forEach(function(n){n.dataset.open='false';});syncHeader();}
+  items.forEach(function(item){
+    if(canHover){item.addEventListener('mouseenter',function(){openOnly(item);});}
+    item.addEventListener('focusin',function(){openOnly(item);});
+    item.querySelector('.nav-link').addEventListener('click',function(e){
+      if(!item.classList.contains('has-mega'))return;e.preventDefault();
+      openOnly(item.dataset.open==='true'?null:item);});
+  });
+  if(canHover){nav.addEventListener('mouseleave',function(){closeTimer=setTimeout(closeAll,140);});
+    nav.addEventListener('mouseenter',function(){clearTimeout(closeTimer);});}
+  document.addEventListener('click',function(e){if(!nav.contains(e.target))closeAll();});
+  window.addEventListener('scroll',syncHeader,{passive:true});syncHeader();
+
+  // ===== overlay open/close with GSAP (fallback to CSS class) =====
+  // Scroll stays locked across a menu→search hand-off so the page never shifts.
+  function showOverlay(el){
+    el.classList.add('is-open');document.documentElement.classList.add('no-scroll');document.body.classList.add('no-scroll');
+    if(G){var stg=el.querySelectorAll('.stag');G.killTweensOf([el].concat([].slice.call(stg)));
+      G.fromTo(el,{autoAlpha:0},{autoAlpha:1,duration:.3,ease:'power2.out'});
+      G.fromTo(stg,{y:26,autoAlpha:0},{y:0,autoAlpha:1,duration:.5,stagger:.05,ease:'power3.out',delay:.06});}
+  }
+  function hideOverlay(el,opts){opts=opts||{};
+    function done(){el.classList.remove('is-open');el.style.removeProperty('visibility');el.style.removeProperty('opacity');
+      if(!opts.keepLock){document.documentElement.classList.remove('no-scroll');document.body.classList.remove('no-scroll');}if(opts.then)opts.then();}
+    if(G){G.to(el,{autoAlpha:0,duration:.22,ease:'power1.in',onComplete:done});}else{done();}
+  }
+  var searchOverlay=document.getElementById('searchOverlay');
+  var menuOverlay=document.getElementById('menuOverlay');
+  function focusSearch(){setTimeout(function(){document.getElementById('searchInput').focus();},260);}
+  function openSearch(){closeAll();showOverlay(searchOverlay);focusSearch();}
+  document.getElementById('searchBtn').addEventListener('click',openSearch);
+  document.getElementById('searchClose').addEventListener('click',function(){hideOverlay(searchOverlay);});
+  document.getElementById('burger').addEventListener('click',function(){showOverlay(menuOverlay);});
+  document.getElementById('menuClose').addEventListener('click',function(){hideOverlay(menuOverlay);});
+  // menu → search: fade the menu out while keeping scroll locked, then open search
+  document.getElementById('menuSearch').addEventListener('click',function(){
+    hideOverlay(menuOverlay,{keepLock:true,then:function(){showOverlay(searchOverlay);focusSearch();}});});
+  // search chips
+  [].slice.call(document.querySelectorAll('.so-chip')).forEach(function(c){
+    c.addEventListener('click',function(){document.querySelectorAll('.so-chip').forEach(function(x){x.classList.remove('is-active');});c.classList.add('is-active');});});
+
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeAll();
+    if(searchOverlay.classList.contains('is-open'))hideOverlay(searchOverlay);
+    if(menuOverlay.classList.contains('is-open'))hideOverlay(menuOverlay);}});
+
+  // floating toggle (on by default)
+  document.getElementById('floatToggle').addEventListener('change',function(e){
+    document.body.classList.toggle('floating',e.target.checked);});
+</script>
+</body>
+</html>

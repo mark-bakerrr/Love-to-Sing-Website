@@ -1,0 +1,952 @@
+{%- assign background_image = section.settings.background_image -%}
+{%- assign album_variant = product.selected_or_first_available_variant -%}
+{%- assign album_tracks = product.metafields.lts.album_tracklist.value -%}
+{%- assign album_meta = product.metafields.lts.album_meta.value -%}
+{%- assign track_count = album_meta.trackCount | default: album_tracks.size -%}
+
+<section
+  id="lts-album-{{ section.id }}"
+  class="lts-album main-color-red"
+  itemscope
+  itemtype="http://schema.org/Product"
+>
+  <div class="lts-album__head relative">
+    {%- if background_image != blank -%}
+      <div class="main-song__background" style="--opacity: {{ section.settings.background_opacity | divided_by: 100.0 }};">
+        {{- background_image | image_url: width: 1920 | image_tag -}}
+      </div><!-- /.main-song__background -->
+    {%- endif -%}
+
+    <div class="container">
+      <meta itemprop="url" content="{{ shop.url }}{{ product.url }}">
+      {%- if product.featured_image != blank -%}
+        <meta itemprop="image" content="{{ product.featured_image | image_url: width: 1200 }}">
+      {%- endif -%}
+      <meta itemprop="priceCurrency" content="{{ shop.currency }}">
+
+      <div class="lts-album__hero">
+        <div class="lts-album__art">
+          {%- if product.featured_image != blank -%}
+            <img
+              src="{{ product.featured_image | image_url: width: 900 }}"
+              srcset="{{ product.featured_image | image_url: width: 450 }} 450w, {{ product.featured_image | image_url: width: 700 }} 700w, {{ product.featured_image | image_url: width: 900 }} 900w"
+              sizes="(min-width: 990px) 34vw, (min-width: 750px) 42vw, 88vw"
+              width="{{ product.featured_image.width }}"
+              height="{{ product.featured_image.height }}"
+              alt="{{ product.featured_image.alt | default: product.title | escape }}"
+              loading="eager"
+            >
+          {%- else -%}
+            <div class="lts-album__art-placeholder" aria-hidden="true">&#9835;</div>
+          {%- endif -%}
+        </div><!-- /.lts-album__art -->
+
+        <div class="lts-album__details">
+          <p class="lts-album__eyebrow">{{ album_meta.genre | default: 'Album' }}</p>
+          <h1 class="lts-album__title h1" itemprop="name">{{ product.title | escape }}</h1>
+
+          <div class="lts-album__meta">
+            {%- if track_count and track_count > 0 -%}
+              <span>{{ track_count }} {% if track_count == 1 %}track{% else %}tracks{% endif %}</span>
+            {%- endif -%}
+            {%- if album_meta.runtime != blank -%}<span>{{ album_meta.runtime }}</span>{%- endif -%}
+            <span>MP3</span>
+            {%- if album_meta.releaseDate != blank -%}<span>{{ album_meta.releaseDate | date: '%-d %b %Y' }}</span>{%- endif -%}
+          </div><!-- /.lts-album__meta -->
+          <p class="lts-album__formats">WAV &amp; FLAC coming soon</p>
+
+          <p class="lts-album__price">
+            <span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+              <meta itemprop="price" content="{{ product.price | divided_by: 100.0 }}">
+              <link itemprop="availability" href="http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}">
+              {{ product.price | money }}
+            </span>
+            {%- if product.compare_at_price > product.price -%}
+              <s class="lts-album__price-was">{{ product.compare_at_price | money }}</s>
+            {%- endif -%}
+          </p>
+
+          {%- if product.description != blank -%}
+            <div class="lts-album__description rte" itemprop="description">
+              {{ product.description }}
+            </div><!-- /.lts-album__description -->
+          {%- endif -%}
+
+          <div class="lts-album__actions">
+            <button
+              id="lts-album-add"
+              type="button"
+              class="button lts-album__add"
+              data-lts-album-add
+              {% unless album_variant.available %}disabled{% endunless %}
+            >
+              <span>{% render 'icon-cart' %} Add album &mdash; {{ product.price | money }}</span>
+            </button>
+            <p id="lts-album-add-status" class="lts-album__add-status" role="status" aria-live="polite"></p>
+          </div><!-- /.lts-album__actions -->
+        </div><!-- /.lts-album__details -->
+      </div><!-- /.lts-album__hero -->
+    </div><!-- /.container -->
+  </div><!-- /.lts-album__head -->
+
+  <div class="container">
+    <div class="lts-album__tracks" aria-labelledby="lts-album-tracklist-heading">
+      <div class="lts-album__tracks-head">
+        <div>
+          <h2 id="lts-album-tracklist-heading" class="lts-album__tracks-title h3">Tracklist</h2>
+        </div>
+
+        {%- comment -%} Tracklist is server-rendered from the lts.album_tracklist
+            metafield (written on sync) so it appears instantly; album-player.js
+            then enhances these rows (previews, add-to-cart). If the metafield is
+            absent it falls back to fetching the payload client-side. {%- endcomment -%}
+        <p id="lts-album-tracklist-status" class="lts-album__tracks-status" role="status" aria-live="polite">
+          {%- if album_tracks and album_tracks.size > 0 -%}
+            {{ album_tracks.size }} {% if album_tracks.size == 1 %}track{% else %}tracks{% endif %}
+          {%- else -%}Loading tracklist...{%- endif -%}
+        </p>
+      </div><!-- /.lts-album__tracks-head -->
+
+      <ol
+        id="lts-album-tracklist"
+        class="lts-album-tracklist"
+        data-lts-album-tracklist
+      >
+        {%- if album_tracks and album_tracks.size > 0 -%}
+          {%- for track in album_tracks -%}
+            {%- assign t_available = true -%}
+            {%- if track.available == false -%}{%- assign t_available = false -%}{%- endif -%}
+            {%- assign t_has_preview = false -%}
+            {%- if track.trackId != blank -%}{%- assign t_has_preview = true -%}{%- endif -%}
+            <li class="lts-album-track{% unless t_available %} is-unavailable{% endunless %}" data-track-row style="--track-progress: 0%;">
+              <span class="lts-album-track__number">{{ forloop.index }}</span>
+              <button
+                type="button"
+                class="lts-album-track__play"
+                data-track-preview
+                data-track-id="{{ track.trackId | escape }}"
+                data-play-label="Play preview for {{ track.title | escape }}"
+                data-pause-label="Pause preview for {{ track.title | escape }}"
+                aria-label="{% if t_has_preview %}Play preview for {{ track.title | escape }}{% else %}Preview unavailable for {{ track.title | escape }}{% endif %}"
+                {% unless t_has_preview and t_available %}disabled{% endunless %}
+              >&#9654;</button>
+              <span class="lts-album-track__title">
+                {{ track.title | escape }}
+                <span class="lts-album-track__meta">{% if t_has_preview %}30s preview{% else %}Preview coming soon{% endif %}</span>
+                <span class="lts-album-track__progress" aria-hidden="true">
+                  <span class="lts-album-track__progress-fill"></span>
+                  <span class="lts-album-track__progress-dot"></span>
+                </span>
+              </span>
+              <span class="lts-album-track__price">{{ track.priceCents | money }}</span>
+              <button
+                type="button"
+                class="lts-album-track__add"
+                data-track-add
+                data-variant-id="{{ track.variantId | escape }}"
+                data-original-label="Add {{ track.title | escape }} to cart"
+                aria-label="{% if t_available %}Add {{ track.title | escape }} to cart{% else %}{{ track.title | escape }} unavailable{% endif %}"
+                {% unless t_available and track.variantId != blank %}disabled{% endunless %}
+              >
+                <span class="lts-album-track__add-icon lts-album-track__add-icon--cart" aria-hidden="true">{% render 'icon-cart' %}</span>
+                <span class="lts-album-track__add-icon lts-album-track__add-icon--check" aria-hidden="true">&#10003;</span>
+              </button>
+            </li>
+          {%- endfor -%}
+        {%- endif -%}
+      </ol><!-- /.lts-album-tracklist -->
+    </div><!-- /.lts-album__tracks -->
+  </div><!-- /.container -->
+</section>
+
+{%- comment -%} Sticky add-album bar lives OUTSIDE the section: the .lts-album
+  wrapper uses overflow:hidden + isolation, which can clip a position:fixed child.
+{%- endcomment -%}
+<div class="lts-album__sticky" data-lts-album-sticky aria-hidden="true">
+  <div class="lts-album__sticky-inner">
+    {%- if product.featured_image != blank -%}
+      <img class="lts-album__sticky-art" src="{{ product.featured_image | image_url: width: 120 }}" width="50" height="50" alt="" loading="lazy">
+    {%- endif -%}
+    <div class="lts-album__sticky-text">
+      <span class="lts-album__sticky-title">{{ product.title | escape }}</span>
+      <span class="lts-album__sticky-price">{{ product.price | money }}</span>
+    </div>
+    <button
+      type="button"
+      class="lts-album__sticky-add"
+      data-lts-album-sticky-add
+      {% unless album_variant.available %}disabled{% endunless %}
+    >
+      <span class="lts-album__sticky-add-label">Add album to cart</span>
+      {% render 'icon-cart' %}
+    </button>
+  </div>
+</div><!-- /.lts-album__sticky -->
+
+<script id="lts-album-ctx" type="application/json">
+  {
+    "apiBase": "/apps/lts-studio",
+    "handle": {{ product.handle | json }},
+    "albumTitle": {{ product.title | json }},
+    "albumVariantId": {{ album_variant.id | json }},
+    "albumPrice": {{ product.price | json }},
+    "currency": {{ cart.currency.symbol | default: cart.currency.iso_code | json }},
+    "sectionId": {{ section.id | json }}
+  }
+</script>
+<script src="{{ 'album-player.js' | asset_url }}" defer></script>
+
+<script>
+  (function () {
+    var bar = document.querySelector('[data-lts-album-sticky]');
+    var cta = document.getElementById('lts-album-add');
+    if (!bar || !cta) return;
+
+    // The sticky button just forwards to the real CTA so all add-to-cart logic
+    // (cart refresh, "Added" feedback) lives in one place (album-player.js).
+    var stickyAdd = bar.querySelector('[data-lts-album-sticky-add]');
+    if (stickyAdd) {
+      stickyAdd.addEventListener('click', function () { cta.click(); });
+    }
+
+    if (!('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(
+      function (entries) {
+        var e = entries[0];
+        // Reveal only after the hero CTA has scrolled UP out of view.
+        var show = !e.isIntersecting && e.boundingClientRect.top < 0;
+        bar.classList.toggle('is-visible', show);
+        bar.setAttribute('aria-hidden', show ? 'false' : 'true');
+      },
+      { threshold: 0 },
+    );
+    io.observe(cta);
+  })();
+</script>
+
+{%- style -%}
+  .lts-album {
+    --lts-album-accent: var(--c-main-500);
+    --lts-album-accent-hover: var(--c-main-600);
+    --lts-album-accent-contrast: #ffffff;
+    --lts-album-hero-text: var(--color-background-body);
+    --lts-album-surface: #ffffff;
+    --lts-album-surface-warm: var(--c-main-50);
+    --lts-album-border: rgba(52, 35, 24, 0.12);
+    --lts-album-muted: color-mix(in srgb, var(--color-paragraphs), transparent 32%);
+    --lts-album-shadow: 0 1rem 2.8rem rgba(45, 11, 10, 0.08);
+    position: relative;
+    overflow: hidden;
+    /* No top padding on the section — the red+hearts head owns all top spacing
+       so the background runs to the very top of the page (behind the header)
+       with no white gap. The head clears the header via its own padding-top. */
+    padding-block: 0 6.4rem;
+    color: var(--color-paragraphs);
+    background: var(--lts-album-surface);
+    isolation: isolate;
+  }
+
+  .lts-album__head {
+    position: relative;
+    color: var(--lts-album-hero-text);
+    padding-block: calc(8rem + var(--header-top-position, 7.4rem)) 9rem;
+    background: linear-gradient(180deg, var(--c-main-500) 0%, var(--c-main-600) 100%);
+    isolation: isolate;
+  }
+
+  .lts-album__head > .container {
+    position: relative;
+    z-index: 2;
+  }
+
+  .lts-album__head .main-song__background {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(180deg, var(--c-main-500) 0%, var(--c-main-600) 100%);
+  }
+
+  .lts-album__head .main-song__background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.22), transparent 18rem),
+      linear-gradient(180deg, rgba(121, 2, 0, 0.1), rgba(121, 2, 0, 0.36));
+  }
+
+  .lts-album__head .main-song__background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: var(--opacity);
+  }
+
+  .lts-album__hero {
+    display: grid;
+    grid-template-columns: minmax(22rem, 42rem) minmax(0, 1fr);
+    gap: clamp(3.2rem, 6vw, 7.2rem);
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .lts-album__art {
+    position: relative;
+    max-width: 42rem;
+    isolation: isolate;
+  }
+
+  .lts-album__art::before {
+    content: '';
+    position: absolute;
+    inset: 7% -13% 7% 30%;
+    z-index: -1;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, #ffffff 0 7%, var(--c-main-500) 7% 15%, rgba(43, 28, 22, 0.88) 15% 16%, rgba(28, 22, 20, 0.82) 16% 100%);
+    box-shadow: 0 2rem 5rem rgba(45, 11, 10, 0.32);
+    opacity: 0.72;
+  }
+
+  .lts-album__art img,
+  .lts-album__art-placeholder {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: var(--radius-m);
+    background: var(--lts-album-surface-warm);
+    box-shadow: 0 2rem 5rem rgba(37, 24, 16, 0.28);
+    transform: rotate(-1.5deg);
+  }
+
+  .lts-album__art-placeholder {
+    display: grid;
+    place-items: center;
+    font-size: 7rem;
+    color: var(--lts-album-accent);
+  }
+
+  .lts-album__details {
+    min-width: 0;
+  }
+
+  .lts-album__eyebrow {
+    margin: 0 0 1.2rem;
+    font-size: var(--fz-s);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    color: inherit;
+    text-transform: uppercase;
+  }
+
+  .lts-album__title {
+    width: 100%;
+    margin: 0;
+    color: inherit;
+    overflow-wrap: break-word;
+  }
+
+  .lts-album__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 1.6rem 0 0;
+    font-size: var(--fz-m);
+    font-weight: 600;
+    line-height: 1.25;
+    color: inherit;
+  }
+
+  .lts-album__meta span:not(:first-child)::before {
+    content: "·";
+    padding: 0 1rem;
+    font-weight: 400;
+    opacity: 0.45;
+  }
+
+  .lts-album__formats {
+    margin: 0.8rem 0 0;
+    font-size: var(--fz-s);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: inherit;
+    opacity: 0.72;
+  }
+
+  /* Sticky "Add album" bar — a centered, brand-red floating pill (matches the
+     song page's floating CTA), revealed once the hero CTA scrolls out of view. */
+  .lts-album__sticky {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    padding: 0 1.6rem 1.6rem;
+    padding-bottom: max(1.6rem, env(safe-area-inset-bottom));
+    pointer-events: none;
+    transform: translateY(150%);
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .lts-album__sticky.is-visible {
+    transform: translateY(0);
+  }
+
+  .lts-album__sticky-inner {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: 0.8rem 0.8rem 0.8rem 0.9rem;
+    border-radius: 1.6rem;
+    background: var(--c-main-500, #b91f1c);
+    color: #fff;
+    box-shadow: 0 1.4rem 3.6rem rgba(45, 11, 10, 0.34);
+  }
+
+  .lts-album__sticky-art {
+    width: 5rem;
+    height: 5rem;
+    flex-shrink: 0;
+    border-radius: 1rem;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+  }
+
+  .lts-album__sticky-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+    margin-right: auto;
+  }
+
+  .lts-album__sticky-title {
+    font-weight: 800;
+    font-size: var(--fz-r);
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lts-album__sticky-price {
+    font-size: var(--fz-s);
+    opacity: 0.82;
+  }
+
+  .lts-album__sticky-add {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: none;
+    cursor: pointer;
+    background: #fff;
+    color: var(--c-main-600, #8b1d18);
+    font-family: inherit;
+    font-weight: 800;
+    font-size: var(--fz-s);
+    line-height: 1;
+    padding: 1.1rem 1.4rem;
+    border-radius: 1.1rem;
+    transition: transform 120ms ease, box-shadow 150ms ease;
+  }
+
+  .lts-album__sticky-add:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.18);
+  }
+
+  .lts-album__sticky-add svg {
+    width: 1.6rem;
+    height: 1.6rem;
+    flex-shrink: 0;
+  }
+
+  .lts-album__sticky-add[disabled] {
+    opacity: 0.55;
+    cursor: default;
+  }
+
+  @media screen and (max-width: 750px) {
+    .lts-album__sticky-inner {
+      gap: 0.9rem;
+      padding: 0.7rem;
+    }
+    .lts-album__sticky-art {
+      width: 4.4rem;
+      height: 4.4rem;
+    }
+    .lts-album__sticky-title {
+      max-width: 38vw;
+    }
+    .lts-album__sticky-add .lts-album__sticky-add-label {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lts-album__sticky {
+      transition: none;
+    }
+  }
+
+  .lts-album__price {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    align-items: baseline;
+    margin: 1.6rem 0 0;
+    font-size: var(--fz-h6);
+    font-weight: 800;
+    color: inherit;
+  }
+
+  .lts-album__price-was {
+    font-size: var(--fz-t);
+    font-weight: 400;
+    opacity: 0.62;
+  }
+
+  .lts-album__description {
+    max-width: 64rem;
+    margin-top: 2rem;
+    font-size: var(--fz-s);
+    line-height: 1.65;
+  }
+
+  .lts-album__description,
+  .lts-album__description :where(p, li, strong, em, a, h1, h2, h3, h4, h5, h6) {
+    color: inherit;
+  }
+
+  .lts-album__description :first-child {
+    margin-top: 0;
+  }
+
+  .lts-album__description :last-child {
+    margin-bottom: 0;
+  }
+
+  .lts-album__description a {
+    text-decoration-color: currentColor;
+  }
+
+  .lts-album__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    align-items: center;
+    margin-top: 3.2rem;
+  }
+
+  .lts-album__add {
+    min-width: min(100%, 28rem);
+    color: var(--lts-album-accent);
+    background: var(--lts-album-accent-contrast);
+  }
+
+  .lts-album__add::after {
+    background: var(--lts-album-surface-warm);
+  }
+
+  .lts-album__add span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.2rem;
+  }
+
+  .lts-album__add svg {
+    fill: currentColor;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .lts-album__add:hover {
+      color: var(--lts-album-accent-hover);
+    }
+  }
+
+  .lts-album__add-status {
+    min-height: 1.6rem;
+    margin: 0;
+    font-size: var(--fz-xs);
+    color: inherit;
+  }
+
+  .lts-album__tracks {
+    position: relative;
+    z-index: 2;
+    margin-top: -3rem;
+    border: 0.1rem solid var(--lts-album-border);
+    border-radius: var(--radius-m);
+    color: var(--color-paragraphs);
+    background: var(--lts-album-surface);
+    box-shadow: var(--lts-album-shadow);
+    overflow: hidden;
+  }
+
+  .lts-album__tracks-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem 1.6rem;
+    align-items: end;
+    justify-content: space-between;
+    padding: 2.4rem 2.8rem 1.8rem;
+    border-bottom: 0.1rem solid var(--lts-album-border);
+  }
+
+  .lts-album__tracks-kicker {
+    margin: 0 0 0.2rem;
+    font-size: var(--fz-xs);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--lts-album-accent);
+    text-transform: uppercase;
+  }
+
+  .lts-album__tracks-title {
+    margin: 0;
+    color: var(--color-headings);
+  }
+
+  .lts-album__tracks-status {
+    margin: 0;
+    font-size: var(--fz-xs);
+    color: var(--lts-album-muted);
+  }
+
+  .lts-album-tracklist {
+    margin: 0;
+    padding: 0.6rem 0;
+    list-style: none;
+    overflow: visible;
+  }
+
+  .lts-album-track {
+    --track-progress: 0%;
+    display: grid;
+    grid-template-columns: 3.2rem 4rem minmax(0, 1fr) minmax(5.6rem, auto) 4rem;
+    gap: 1.2rem;
+    align-items: center;
+    min-height: 5.8rem;
+    padding: 0.9rem 2.8rem;
+    border-bottom: 0.1rem solid rgba(52, 35, 24, 0.08);
+    transition: background-color var(--duration-default) linear;
+  }
+
+  .lts-album-track:last-child {
+    border-bottom: 0;
+  }
+
+  .lts-album-track:hover,
+  .lts-album-track.is-playing {
+    background: color-mix(in srgb, var(--lts-album-accent), transparent 94%);
+  }
+
+  .lts-album-track.is-unavailable {
+    opacity: 0.56;
+  }
+
+  .lts-album-track__number {
+    font-size: var(--fz-xs);
+    font-weight: 800;
+    color: var(--lts-album-muted);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+
+  .lts-album-track__play {
+    display: grid;
+    place-items: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    padding: 0 0 0 0.2rem;
+    border: 0.1rem solid color-mix(in srgb, var(--lts-album-accent), transparent 56%);
+    border-radius: 999rem;
+    font: inherit;
+    font-size: 1.2rem;
+    line-height: 1;
+    color: var(--lts-album-accent);
+    background: #ffffff;
+    cursor: pointer;
+    transition: color var(--duration-default) ease, border-color var(--duration-default) ease, background-color var(--duration-default) ease;
+  }
+
+  .lts-album-track.is-playing .lts-album-track__play {
+    padding-left: 0;
+    color: var(--lts-album-accent-contrast);
+    border-color: var(--lts-album-accent);
+    background: var(--lts-album-accent);
+  }
+
+  .lts-album-track__play[disabled],
+  .lts-album-track__add[disabled] {
+    cursor: not-allowed;
+    opacity: 0.48;
+  }
+
+  .lts-album-track__title {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 0;
+    font-size: var(--fz-s);
+    font-weight: 800;
+    line-height: 1.28;
+    color: var(--color-headings);
+    overflow-wrap: break-word;
+  }
+
+  .lts-album-track__meta {
+    font-size: var(--fz-xs);
+    font-weight: 400;
+    color: var(--lts-album-muted);
+  }
+
+  .lts-album-track__progress {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 0.3rem;
+    margin-top: 0.3rem;
+    border-radius: 999rem;
+    background: rgba(52, 35, 24, 0.1);
+    overflow: visible;
+  }
+
+  .lts-album-track__progress-fill {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: var(--track-progress);
+    border-radius: inherit;
+    background: var(--lts-album-accent);
+    opacity: 0;
+  }
+
+  .lts-album-track__progress-dot {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: var(--track-progress);
+    width: 0.9rem;
+    height: 0.9rem;
+    border: 0.2rem solid #ffffff;
+    border-radius: 50%;
+    background: var(--lts-album-accent);
+    box-shadow: 0 0.2rem 0.6rem rgba(45, 11, 10, 0.2);
+    opacity: 0;
+    transform: translate(-50%, -50%);
+  }
+
+  .lts-album-track.is-playing .lts-album-track__progress-fill,
+  .lts-album-track.is-playing .lts-album-track__progress-dot {
+    opacity: 1;
+  }
+
+  .lts-album-track__price {
+    font-size: var(--fz-xs);
+    font-weight: 800;
+    color: var(--color-headings);
+    white-space: nowrap;
+  }
+
+  .lts-album-track__add {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 3.6rem;
+    height: 3.6rem;
+    padding: 0;
+    border: 0;
+    border-radius: 999rem;
+    font: inherit;
+    color: var(--lts-album-accent);
+    background: transparent;
+    cursor: pointer;
+    transition: color var(--duration-default) ease, background-color var(--duration-default) ease, transform var(--duration-default) ease;
+  }
+
+  .lts-album-track__add svg {
+    display: block;
+    width: 1.8rem;
+    height: 1.8rem;
+    fill: currentColor;
+  }
+
+  .lts-album-track__add-icon {
+    grid-area: 1 / 1;
+    display: grid;
+    place-items: center;
+    transition: opacity var(--duration-default) ease, transform var(--duration-default) ease;
+  }
+
+  .lts-album-track__add-icon--check {
+    font-size: 1.8rem;
+    font-weight: 800;
+    opacity: 0;
+    transform: scale(0.72);
+  }
+
+  .lts-album-track__add.is-added {
+    color: var(--lts-album-accent-contrast);
+    background: var(--lts-album-accent);
+  }
+
+  .lts-album-track__add.is-added .lts-album-track__add-icon--cart,
+  .lts-album-track__add.is-loading .lts-album-track__add-icon--cart {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+
+  .lts-album-track__add.is-added .lts-album-track__add-icon--check {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .lts-album-track__add.is-loading::after {
+    content: '';
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 0.2rem solid currentColor;
+    border-block-start-color: transparent;
+    border-radius: 50%;
+    animation: lts-album-spin 0.75s linear infinite;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .lts-album-track__add:hover {
+      color: var(--lts-album-accent-contrast);
+      background: var(--lts-album-accent);
+      transform: translateY(-0.1rem);
+    }
+
+    .lts-album-track__play:hover {
+      border-color: var(--lts-album-accent);
+      background: color-mix(in srgb, var(--lts-album-accent), transparent 92%);
+    }
+  }
+
+  .lts-album-tracklist__empty {
+    margin: 0;
+    padding: 3.2rem 2.8rem;
+    font-size: var(--fz-s);
+    color: var(--color-paragraphs);
+  }
+
+  @keyframes lts-album-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .lts-album {
+      /* No top padding — the head owns the header offset so the hearts run to
+         the very top here too (matches the base rule). */
+      padding-block: 0 4rem;
+    }
+
+    .lts-album__head {
+      padding-block: 6.4rem 14rem;
+    }
+
+    .template:not(:has(.shopify-section-group-header-group .header--solid)) {
+      .lts-album__head {
+        padding-top: calc(6.4rem + var(--header-top-position, 5.6rem));
+      }
+    }
+
+    .lts-album__hero {
+      grid-template-columns: 1fr;
+      gap: 3.2rem;
+      align-items: start;
+    }
+
+    .lts-album__art {
+      width: min(100%, 34rem);
+      margin-inline: auto;
+    }
+
+    .lts-album__art::before {
+      inset: 9% -8% 9% 36%;
+    }
+
+    .lts-album__title {
+      max-width: 100%;
+    }
+
+    .lts-album__actions {
+      align-items: stretch;
+    }
+
+    .lts-album__add {
+      width: 100%;
+    }
+
+    .lts-album__tracks {
+      margin-top: -7rem;
+    }
+
+    .lts-album__tracks-head {
+      padding: 2rem 1.6rem 1.4rem;
+    }
+
+    .lts-album-track {
+      grid-template-columns: 2.4rem 3.6rem minmax(0, 1fr) 3.6rem;
+      gap: 0.8rem;
+      padding: 0.9rem 1.2rem;
+    }
+
+    .lts-album-track__price {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lts-album-track,
+    .lts-album-track__play,
+    .lts-album-track__add,
+    .lts-album-track__add-icon {
+      transition-duration: 0.01ms;
+    }
+
+    .lts-album-track__add.is-loading::after {
+      animation-duration: 1.5s;
+    }
+  }
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Album (Love to Sing)",
+  "tag": "section",
+  "class": "section section--main-album",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "range",
+      "id": "background_opacity",
+      "label": "Background opacity",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 5
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    { "name": "Album (Love to Sing)" }
+  ]
+}
+{% endschema %}

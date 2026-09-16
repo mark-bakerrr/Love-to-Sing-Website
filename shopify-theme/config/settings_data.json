@@ -18,7 +18,166 @@
     "social_youtube_link": "#",
     "social_linkedin_link": "#",
     "favicon": "shopify://shop_images/Love_to_Sing_Base_Logo.png",
+    "countdown_widget_mode": "auto",
+    "countdown_widget_transparent": true,
+    "cd_hall_design": "hall-jack",
+    "cd_hall_link": "shopify://pages/halloween-countdown",
+    "cd_hall_cta_label": "Halloween countdown",
+    "cd_xmas_design": "xmas-advent",
+    "cd_xmas_link": "shopify://pages/christmas-countdown",
+    "cd_xmas_cta_label": "Christmas countdown",
     "social_tiktok_link": "#",
+    "sections": {
+      "christmas-countdown": {
+        "type": "christmas-countdown",
+        "blocks": {
+          "track_NnVkFY": {
+            "type": "track",
+            "settings": {
+              "title": "Jingle Bells Lofi",
+              "artist": "Love to Sing",
+              "artwork": "shopify://shop_images/Christmas_62679af8-d364-49ea-a182-311b2fac9fd8.jpg",
+              "audio_url": "https://cdn.shopify.com/s/files/1/0053/3505/6418/files/1._Jingle_Bells_Lofi_Love_to_Sing.mp3?v=1786955841"
+            }
+          },
+          "track_JFaJAe": {
+            "type": "track",
+            "settings": {
+              "title": "Silent Night Lofi",
+              "artist": "Love to Sing",
+              "artwork": "shopify://shop_images/Christmas_62679af8-d364-49ea-a182-311b2fac9fd8.jpg",
+              "audio_url": "https://cdn.shopify.com/s/files/1/0053/3505/6418/files/5._Silent_Night_Lofi_Love_to_Sing.mp3?v=1786955839"
+            }
+          },
+          "track_METVLA": {
+            "type": "track",
+            "settings": {
+              "title": "O Come All Ye Faithful Lofi",
+              "artist": "Love to Sing",
+              "artwork": "shopify://shop_images/Christmas_62679af8-d364-49ea-a182-311b2fac9fd8.jpg",
+              "audio_url": "https://cdn.shopify.com/s/files/1/0053/3505/6418/files/10._O_Come_All_Ye_Faithful_Lofi_Love_to_Sing.mp3?v=1786955840"
+            }
+          },
+          "track_7pgLzr": {
+            "type": "track",
+            "settings": {
+              "title": "Hark! The Herald Angel Sings Lofi",
+              "artist": "Love to Sing",
+              "artwork": "shopify://shop_images/Christmas_62679af8-d364-49ea-a182-311b2fac9fd8.jpg",
+              "audio_url": "https://cdn.shopify.com/s/files/1/0053/3505/6418/files/7._Hark_the_Herald_Angels_Sing_Lofi_Love_to_Sing.mp3?v=1786955840"
+            }
+          },
+          "track_tRRfhm": {
+            "type": "track",
+            "settings": {
+              "title": "Deck the Halls Lofi",
+              "artist": "Love to Sing",
+              "artwork": "shopify://shop_images/Christmas_62679af8-d364-49ea-a182-311b2fac9fd8.jpg",
+              "audio_url": "https://cdn.shopify.com/s/files/1/0053/3505/6418/files/2._Deck_the_Halls_Lofi_Love_to_Sing.mp3?v=1786955841"
+            }
+          },
+          "track_MbWn6i": {
+            "type": "track",
+            "settings": {
+              "title": "O Christmas Tree Lofi",
+              "artist": "Love to Sing",
+              "artwork": "shopify://shop_images/Christmas_62679af8-d364-49ea-a182-311b2fac9fd8.jpg",
+              "audio_url": "https://cdn.shopify.com/s/files/1/0053/3505/6418/files/8._O_Christmas_Tree_Lofi_Love_to_Sing.mp3?v=1786955841"
+            }
+          },
+          "track_BwCXzf": {
+            "type": "track",
+            "settings": {
+              "title": "Angels We Have Heard on High",
+              "artist": "Love to Sing",
+              "artwork": "shopify://shop_images/Christmas_62679af8-d364-49ea-a182-311b2fac9fd8.jpg",
+              "audio_url": "https://cdn.shopify.com/s/files/1/0053/3505/6418/files/9._Angels_we_Have_Heard_on_High_Lofi_Love_to_Sing.mp3?v=1786955840"
+            }
+          },
+          "track_FrYMDp": {
+            "type": "track",
+            "settings": {
+              "title": "The First Noel Lofi",
+              "artist": "Love to Sing",
+              "artwork": "shopify://shop_images/Christmas_62679af8-d364-49ea-a182-311b2fac9fd8.jpg",
+              "audio_url": "https://cdn.shopify.com/s/files/1/0053/3505/6418/files/11._The_First_Noel_Lofi_Love_to_Sing.mp3?v=1786955840"
+            }
+          },
+          "track_JU3WCp": {
+            "type": "track",
+            "settings": {
+              "title": "12 Days of Christmas Lofi",
+              "artist": "Love to Sing",
+              "artwork": "shopify://shop_images/Christmas_62679af8-d364-49ea-a182-311b2fac9fd8.jpg",
+              "audio_url": "https://cdn.shopify.com/s/files/1/0053/3505/6418/files/4._12_Days_of_Christmas_Lofi_Love_to_Sing.mp3?v=1786955840"
+            }
+          },
+          "track_JHNhnV": {
+            "type": "track",
+            "settings": {
+              "title": "We Wish You a Merry Christmas Lofi",
+              "artist": "Love to Sing",
+              "artwork": "shopify://shop_images/Christmas_62679af8-d364-49ea-a182-311b2fac9fd8.jpg",
+              "audio_url": "https://cdn.shopify.com/s/files/1/0053/3505/6418/files/3._We_Wish_You_a_Merry_Christmas_Lofi_Love_to_Sing.mp3?v=1786955841"
+            }
+          },
+          "track_hWAkrF": {
+            "type": "track",
+            "settings": {
+              "title": "Joy to the World Lofi",
+              "artist": "Love to Sing",
+              "artwork": "shopify://shop_images/Christmas_62679af8-d364-49ea-a182-311b2fac9fd8.jpg",
+              "audio_url": "https://cdn.shopify.com/s/files/1/0053/3505/6418/files/6._Joy_to_the_World_Lofi_Love_to_Sing.mp3?v=1786955841"
+            }
+          }
+        },
+        "block_order": [
+          "track_NnVkFY",
+          "track_JFaJAe",
+          "track_METVLA",
+          "track_7pgLzr",
+          "track_tRRfhm",
+          "track_MbWn6i",
+          "track_BwCXzf",
+          "track_FrYMDp",
+          "track_JU3WCp",
+          "track_JHNhnV",
+          "track_hWAkrF"
+        ],
+        "settings": {
+          "logo": "shopify://shop_images/Love_to_Sing_Christmas_Logo.png",
+          "background_video": "shopify://files/videos/Website Christmas Countdown.mp4",
+          "reference_tz": "America/New_York",
+          "target_month": 12,
+          "target_day": 25,
+          "christmas_message": "🎄Merry Christmas! 🎄",
+          "show_music_player": true
+        }
+      },
+      "halloween-countdown": {
+        "type": "halloween-countdown",
+        "settings": {
+          "logo": "shopify://shop_images/LTS_Logo_Halloween_Final.png",
+          "background_video": "shopify://files/videos/Halloween Countdown_3ecdbf1c-9815-4f78-b7ba-4742f11e6002.mp4",
+          "reference_tz": "America/New_York",
+          "target_month": 10,
+          "target_day": 31,
+          "post_days": 1,
+          "show_fx": true,
+          "message": "🎃 Happy Halloween! 🎃",
+          "show_music_player": true
+        }
+      },
+      "photo-wall": {
+        "type": "photo-wall",
+        "settings": {
+          "logo": "shopify://shop_images/Love_to_Sing_Base_Logo.png",
+          "subtitle": "The Heart of Love to Sing",
+          "watermark": "LOVE TO SING",
+          "show_music_player": true
+        }
+      }
+    },
     "content_for_index": [],
     "blocks": {
       "15132424025755801183": {
@@ -28,6 +187,13 @@
       },
       "10767264615385502235": {
         "type": "shopify://apps/love-to-sing-studio/blocks/blog-blocks-embed/019d28e6-2806-70a0-bdbd-e95fa91f79ff",
+        "disabled": false,
+        "settings": {
+          "enabled": true
+        }
+      },
+      "82640071553099820001": {
+        "type": "shopify://apps/love-to-sing-studio/blocks/shop-drawer-embed/019d28e6-2806-70a0-bdbd-e95fa91f79ff",
         "disabled": false,
         "settings": {
           "enabled": true

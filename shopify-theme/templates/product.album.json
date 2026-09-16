@@ -1,0 +1,84 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-album",
+      "settings": {
+        "background_image": "shopify://shop_images/hearts-background.png",
+        "background_opacity": 5
+      }
+    },
+    "faq_downloads": {
+      "type": "faq",
+      "blocks": {
+        "grp": {
+          "type": "faq_group",
+          "settings": {
+            "faq_group": "faq-downloads",
+            "max_items": 0
+          }
+        }
+      },
+      "block_order": [
+        "grp"
+      ],
+      "name": "FAQ",
+      "settings": {
+        "border_top": false,
+        "border_bottom": false,
+        "open_first": false,
+        "title": "How to get your music",
+        "subtitle": "Downloading your songs is quick and easy — here's everything you need to know.",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+    "featured_products_NLJWfT": {
+      "type": "featured-products",
+      "blocks": {
+        "featured-products-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 20,
+            "spacing_bottom_mobile": 20
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.featured-products.name",
+      "settings": {
+        "show_placeholder_cards": true,
+        "alt_background": false,
+        "border_top": false,
+        "border_bottom": false,
+        "title": "Other Albums",
+        "subtitle": "",
+        "button_label": "",
+        "button_link": "",
+        "large_tiles": false,
+        "product_aspect_ratio": "1-1",
+        "collection": "",
+        "product_list": "{{ product.metafields[\"shopify--discovery--product_recommendation\"].related_products.value }}",
+        "products_count": 6,
+        "autoplay": false,
+        "autoplay_speed": 5
+      }
+    }
+  },
+  "order": [
+    "main",
+    "faq_downloads",
+    "featured_products_NLJWfT"
+  ]
+}

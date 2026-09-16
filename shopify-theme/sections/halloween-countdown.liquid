@@ -1,0 +1,246 @@
+{%- comment -%}
+  Halloween Countdown — full-viewport 16:9 countdown overlay for livestreaming
+  (upstream.so webpage embed) and lovetosing.com. Standalone sibling of the
+  Christmas countdown.
+
+  Use with the dedicated chrome-free layout: set the page's theme template to
+  "halloween-countdown" (templates/page.halloween-countdown.liquid).
+
+  QA: ?overlay=1 hides the music player; ?now=<ISO> fakes the clock.
+{%- endcomment -%}
+
+{%- liquid
+  assign bg = section.settings.background_image
+  if bg != blank
+    assign bg_url = bg | image_url: width: 1920
+  else
+    assign bg_url = 'halloween-countdown-bg.png' | asset_url
+  endif
+-%}
+
+<div class="hc-stage" id="hc-stage" style="background-image: url('{{ bg_url }}');">
+
+  {%- comment -%} Optional looping background video (overrides the static image + FX) {%- endcomment -%}
+  {%- assign bg_video = section.settings.background_video -%}
+  {%- if bg_video != blank -%}
+    <video class="hc-bg-video" autoplay muted loop playsinline preload="auto" poster="{{ bg_url }}" aria-hidden="true">
+      {%- for source in bg_video.sources -%}
+        <source src="{{ source.url }}" type="{{ source.mime_type }}">
+      {%- endfor -%}
+    </video>
+  {%- endif -%}
+
+  {%- comment -%} Motion FX: mist (screen-blend), crows + pumpkins (alpha WebM). Suppressed when a background video is set. {%- endcomment -%}
+  {%- if section.settings.show_fx and bg_video == blank -%}
+    <video class="hc-fx hc-fx-mist" src="{{ 'halloween-mist.mp4' | asset_url }}" autoplay muted loop playsinline aria-hidden="true"></video>
+    <video class="hc-fx hc-fx-crows" src="{{ 'halloween-crows.webm' | asset_url }}" autoplay muted loop playsinline aria-hidden="true"></video>
+    <video class="hc-fx hc-fx-pumpkins" src="{{ 'halloween-pumpkins.webm' | asset_url }}" autoplay muted loop playsinline aria-hidden="true"></video>
+  {%- endif -%}
+
+  {%- if section.settings.logo != blank -%}
+    <a class="hc-brand" href="https://lovetosing.com" target="_blank" rel="noopener" aria-label="{{ shop.name | escape }}">
+      <img src="{{ section.settings.logo | image_url: width: 720 }}" alt="{{ shop.name | escape }}" width="360" height="120">
+    </a>
+  {%- endif -%}
+
+  {%- comment -%} Countdown (pre-target) {%- endcomment -%}
+  <div class="hc-countdown" id="hc-countdown">
+    <div class="hc-unit"><span class="hc-value" data-unit="days">--</span><span class="hc-label">Days</span></div>
+    <span class="hc-sep">:</span>
+    <div class="hc-unit"><span class="hc-value" data-unit="hours">--</span><span class="hc-label">Hours</span></div>
+    <span class="hc-sep">:</span>
+    <div class="hc-unit"><span class="hc-value" data-unit="minutes">--</span><span class="hc-label">Minutes</span></div>
+    <span class="hc-sep">:</span>
+    <div class="hc-unit"><span class="hc-value" data-unit="seconds">--</span><span class="hc-label">Seconds</span></div>
+  </div>
+
+  {%- comment -%} Message (shown for the post window after the target) {%- endcomment -%}
+  <div class="hc-message" id="hc-message">{{ section.settings.message }}</div>
+
+  {%- comment -%} Music widget (website only; hidden in ?overlay=1) {%- endcomment -%}
+  {%- if section.settings.show_music_player and section.blocks.size > 0 -%}
+    <div class="hc-player" id="hc-player">
+      <img class="hc-art" alt="" src="" width="80" height="80">
+      <div class="hc-meta">
+        <span class="hc-title">—</span>
+        <span class="hc-artist">—</span>
+      </div>
+      <div class="hc-controls">
+        <button class="hc-btn-side hc-prev" aria-label="Previous">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+        </button>
+        <button class="hc-btn-play" aria-label="Play">
+          <svg class="hc-icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="hc-icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+        </button>
+        <button class="hc-btn-side hc-next" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+        </button>
+      </div>
+    </div>
+  {%- endif -%}
+</div>
+
+<script type="application/json" id="hc-config">
+{
+  "referenceTz": {{ section.settings.reference_tz | json }},
+  "targetMonth": {{ section.settings.target_month | default: 10 | json }},
+  "targetDay": {{ section.settings.target_day | default: 31 | json }},
+  "postDays": {{ section.settings.post_days | default: 1 | json }},
+  "playlist": [
+    {%- assign first = true -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'track' and block.settings.audio_url != blank -%}
+        {%- unless first -%},{%- endunless -%}{%- assign first = false -%}
+        {
+          "title": {{ block.settings.title | default: block.settings.artwork.alt | json }},
+          "artist": {{ block.settings.artist | json }},
+          "art": {% if block.settings.artwork != blank %}{{ block.settings.artwork | image_url: width: 240 | json }}{% else %}""{% endif %},
+          "src": {{ block.settings.audio_url | json }}
+        }
+      {%- endif -%}
+    {%- endfor -%}
+  ]
+}
+</script>
+
+<script src="{{ 'halloween-countdown.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Halloween Countdown",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Brand logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo (top-left)",
+      "info": "Links permanently to lovetosing.com."
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image",
+      "info": "16:9 recommended. Falls back to the bundled Halloween background if empty. Used as the poster if a background video is set."
+    },
+    {
+      "type": "video",
+      "id": "background_video",
+      "label": "Background video (optional)",
+      "info": "Upload a seamless 16:9 loop (e.g. 60s). When set, it plays as the background and the animated mist/crows/pumpkins overlays are turned off."
+    },
+    {
+      "type": "header",
+      "content": "Countdown target"
+    },
+    {
+      "type": "select",
+      "id": "reference_tz",
+      "label": "Reference timezone",
+      "info": "The countdown hits zero at midnight in this timezone. A fixed reference keeps every livestream viewer's numbers consistent.",
+      "default": "America/New_York",
+      "options": [
+        { "value": "America/New_York", "label": "New York (Eastern)" },
+        { "value": "America/Chicago", "label": "Chicago (Central)" },
+        { "value": "America/Denver", "label": "Denver (Mountain)" },
+        { "value": "America/Los_Angeles", "label": "Los Angeles (Pacific)" },
+        { "value": "UTC", "label": "UTC / London (GMT)" },
+        { "value": "Europe/London", "label": "London (UK)" },
+        { "value": "Pacific/Auckland", "label": "Auckland (New Zealand)" },
+        { "value": "Australia/Sydney", "label": "Sydney (Australia)" }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "target_month",
+      "label": "Target month (1–12)",
+      "default": 10
+    },
+    {
+      "type": "number",
+      "id": "target_day",
+      "label": "Target day",
+      "default": 31
+    },
+    {
+      "type": "number",
+      "id": "post_days",
+      "label": "Show message for (days after target)",
+      "info": "How many days the message shows before rolling to next year. 1 = just the day itself.",
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Motion effects"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_fx",
+      "label": "Show animated overlays (mist, crows, pumpkins)",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Message"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "message",
+      "label": "Message shown after the countdown",
+      "default": "Happy Halloween! 🎃"
+    },
+    {
+      "type": "header",
+      "content": "Music player"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_music_player",
+      "label": "Show music player (website only)",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "track",
+      "name": "Track",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Song title"
+        },
+        {
+          "type": "text",
+          "id": "artist",
+          "label": "Artist",
+          "default": "Love to Sing"
+        },
+        {
+          "type": "image_picker",
+          "id": "artwork",
+          "label": "Artwork"
+        },
+        {
+          "type": "url",
+          "id": "audio_url",
+          "label": "Audio URL (full track)",
+          "info": "Full-length audio. Public URLs are readable by anyone — use lo-fi versions or a gated source for paid songs."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Halloween Countdown"
+    }
+  ]
+}
+{% endschema %}

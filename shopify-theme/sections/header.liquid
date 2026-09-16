@@ -13,6 +13,7 @@
   assign _blocks = section.blocks
   assign current_template = template.name | append: '.' | append: template.suffix
   assign menu_blocks = _blocks | where: "type", "mega_menu"
+  assign menu_item_blocks = _blocks | where: "type", "menu_item"
   assign solid_color_blocks = _blocks | where: "type", "solid_header"
 
   comment
@@ -125,15 +126,15 @@
 {%- endstyle -%}
 
 <header
-  class="header color-{{ color_scheme }}{% if is_solid %} header--solid {{ class }}{% endif %}"
+  class="header color-{{ color_scheme }}{% if is_solid %} header--solid {{ class }}{% endif %}{% if section.settings.floating_header %} header--floating{% endif %}"
   style="--logo-width: {{ section.settings.logo_width | default: 108 }}px;--logo-width-mobile: {{ section.settings.logo_width_mobile | default: 76 }}px;"
 >
   <div class="container container--fullwidth">
     <div class="header__inner">
       {%- if linklists[section.settings.menu].links.size > 0 -%}
-        {%- render 'navigation-mobile', menu: linklists[section.settings.menu_mobile] -%}
+        {%- render 'navigation-mobile', menu: linklists[section.settings.menu_mobile], menu_item_blocks: menu_item_blocks -%}
 
-        {%- render 'navigation-desktop', menu: linklists[section.settings.menu], megamenu_blocks: menu_blocks -%}
+        {%- render 'navigation-desktop', menu: linklists[section.settings.menu], megamenu_blocks: menu_blocks, menu_item_blocks: menu_item_blocks -%}
       {%- endif -%}
 
       <div class="header__logo-placeholder"> </div><!-- /.header__logo-placeholder -->
@@ -186,58 +187,32 @@
       <nav class="header__utils">
         <ul class="header__utils-items list-unstyled">
           <li class="header__utils-item">
-            {%- capture search_link_html -%}
+            {%- comment -%}
+              Search icon opens the full-screen search overlay (rendered near the
+              end of this section). The overlay wraps the SAME <predictive-search>
+              engine, so live results still work. noscript falls back to /search.
+            {%- endcomment -%}
+            <noscript>
               <a
                 href="{{- routes.search_url -}}"
                 class="header__utils-link full-unstyled-link focus-inset"
                 title="{{- 'accessibility.search' | t -}}"
-                data-header="mobile-search-open"
               >
                 {%- render 'icon', icon: 'search' -%}
               </a>
-            {%- endcapture -%}
+            </noscript>
 
-            {%- if settings.enable_predictive_search -%}
-              <noscript>
-                {{- search_link_html -}}
-              </noscript>
-
-              <span class="large-up-hide">
-                {{- search_link_html }}
-              </span>
-
-              <predictive-search class="no-js-hidden medium-hide small-hide">
-                <details class="disclosure-has-popup header__search-wrapper motion-reduce">
-                  <summary class="header__utils-link">
-                    {%- render 'icon', icon: 'search' -%}
-                  </summary>
-
-                  <div class="header__search motion-reduce">
-                    {%-
-                      liquid
-                      capture search_input_attr
-                        echo 'role="combobox" '
-                        echo 'aria-expanded="false" '
-                        echo 'aria-owns="predictive-search-results-list" '
-                        echo 'aria-controls="predictive-search-results-list" '
-                        echo 'aria-haspopup="listbox" '
-                        echo 'aria-autocomplete="list" '
-                        echo 'autocorrect="off" '
-                        echo 'autocomplete="off" '
-                        echo 'autocapitalize="off" '
-                        echo 'spellcheck="false"'
-                      endcapture
-
-                      render 'form-search', namespace: 'Header', input_attr: search_input_attr, class: 'header__search-form'
-                    -%}
-
-                    <predictive-search-results class="header__search-results"></predictive-search-results>
-                  </div>
-                </details>
-              </predictive-search>
-            {%- else -%}
-              {{- search_link_html -}}
-            {%- endif -%}
+            <button
+              type="button"
+              class="button-reset header__utils-link no-js-hidden"
+              data-search-open
+              aria-haspopup="dialog"
+              aria-controls="SearchOverlay"
+              title="{{- 'accessibility.search' | t -}}"
+            >
+              <span class="visually-hidden">{{- 'accessibility.search' | t -}}</span>
+              {%- render 'icon', icon: 'search' -%}
+            </button>
           </li><!-- /.header__utils-item -->
 
           <li class="header__utils-item header__utils-item--cart">
@@ -258,6 +233,10 @@
     </div><!-- /.header__inner -->
   </div><!-- /.container -->
 </header><!-- /.header -->
+
+{%- comment -%} Full-screen search overlay (opens from the header search icon). {%- endcomment -%}
+{%- render 'search-overlay' -%}
+<script src="{{ 'search-overlay.js' | asset_url }}" defer="defer"></script>
 
 <script type="application/ld+json">
   {
@@ -296,120 +275,521 @@
 {%- endif -%}
 
 {% schema %}
-  {
-    "name": "t:sections.header.name",
-    "settings": [
-      {
-        "type": "image_picker",
-        "id": "logo",
-        "label": "t:sections.header.settings.logo.label"
-      },
-      {
-        "type": "html",
-        "id": "logo_svg_code",
-        "label": "t:sections.header.settings.logo_svg_code.label",
-        "info": "t:sections.header.settings.logo_svg_code.info"
-      },
-      {
-        "type": "number",
-        "id": "logo_width",
-        "label": "Logo width (px)",
-        "default": 108
-      },
-      {
-        "type": "number",
-        "id": "logo_width_mobile",
-        "label": "Logo width Mobile (px)",
-        "default": 76
-      },
-      {
-        "type": "link_list",
-        "id": "menu_mobile",
-        "default": "main-menu",
-        "label": "Mobile menu"
-      },
-      {
-        "type": "link_list",
-        "id": "menu",
-        "default": "main-menu",
-        "label": "Desktop menu"
-      },
-      {
-        "type": "color_scheme",
-        "id": "main_colors",
-        "default": "scheme_1",
-        "label": "Main colors"
-      }
-    ],
-    "blocks": [
-      {
-        "name": "Custom template Logo",
-        "type": "custom_template_logo",
-        "settings": [
-          {
-            "type": "textarea",
-            "id": "title",
-            "label": "Template name",
-            "info": "Enter a list of templates(each on a new line) with type and name in the following format: '[type].[name]', eg. 'product.christmas', 'collection.special-offers'. Default templates have no name, so use just the type, for example 'product' or 'collection'.",
-          },
-          {
-            "type": "image_picker",
-            "id": "logo",
-            "label": "Logo"
-          },
-        ]
-      },
-      {
-        "name": "Custom color scheme",
-        "type": "custom_color_scheme",
-        "settings": [
-          {
-            "type": "textarea",
-            "id": "title",
-            "label": "Template name",
-            "info": "Enter a list of templates(each on a new line) with type and name in the following format: '[type].[name]', eg. 'product.christmas', 'collection.special-offers'. Default templates have no name, so use just the type, for example 'product' or 'collection'.",
-          },
-          {
-            "type": "color_scheme",
-            "id": "color_scheme",
-            "default": "scheme_1",
-            "label": "Color scheme"
-          }
-        ]
-      },
-      {
-        "name": "Mega menu",
-        "type": "mega_menu",
-        "settings": [
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Main menu name"
-          },
-          {
-            "type": "metaobject",
-            "id": "mega_menu",
-            "label": "Mega menu",
-            "metaobject_type": "mega_menu_item"
-          }
-        ]
-      },
-      {
-        "name": "Solid header",
-        "type": "solid_header",
-        "settings": [
-          {
-            "type": "paragraph",
-            "content": "Templates, that will have solid color headers by default"
-          },
-          {
-            "type": "textarea",
-            "id": "title",
-            "label": "Template name",
-            "info": "Enter a list of templates(each on a new line) with type and name in the following format: '[type].[name]', eg. 'product.christmas', 'collection.special-offers'. Default templates have no name, so use just the type, for example 'product' or 'collection'.",
-          }
-        ]
-      },
-    ],
-  }
+{
+  "name": "t:sections.header.name",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "t:sections.header.settings.logo.label"
+    },
+    {
+      "type": "html",
+      "id": "logo_svg_code",
+      "label": "t:sections.header.settings.logo_svg_code.label",
+      "info": "t:sections.header.settings.logo_svg_code.info"
+    },
+    {
+      "type": "number",
+      "id": "logo_width",
+      "label": "Logo width (px)",
+      "default": 108
+    },
+    {
+      "type": "number",
+      "id": "logo_width_mobile",
+      "label": "Logo width Mobile (px)",
+      "default": 76
+    },
+    {
+      "type": "link_list",
+      "id": "menu_mobile",
+      "default": "main-menu",
+      "label": "Mobile menu"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "default": "main-menu",
+      "label": "Desktop menu"
+    },
+    {
+      "type": "color_scheme",
+      "id": "main_colors",
+      "default": "scheme_1",
+      "label": "Main colors"
+    },
+    {
+      "type": "checkbox",
+      "id": "floating_header",
+      "label": "Floating header",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Custom template Logo",
+      "type": "custom_template_logo",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Template name",
+          "info": "Enter a list of templates(each on a new line) with type and name in the following format: '[type].[name]', eg. 'product.christmas', 'collection.special-offers'. Default templates have no name, so use just the type, for example 'product' or 'collection'."
+        },
+        {
+          "type": "image_picker",
+          "id": "logo",
+          "label": "Logo"
+        }
+      ]
+    },
+    {
+      "name": "Custom color scheme",
+      "type": "custom_color_scheme",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Template name",
+          "info": "Enter a list of templates(each on a new line) with type and name in the following format: '[type].[name]', eg. 'product.christmas', 'collection.special-offers'. Default templates have no name, so use just the type, for example 'product' or 'collection'."
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "default": "scheme_1",
+          "label": "Color scheme"
+        }
+      ]
+    },
+    {
+      "name": "Mega menu",
+      "type": "mega_menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Main menu name"
+        },
+        {
+          "type": "metaobject",
+          "id": "mega_menu",
+          "label": "Mega menu",
+          "metaobject_type": "mega_menu_item"
+        }
+      ]
+    },
+    {
+      "name": "Menu item",
+      "type": "menu_item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Menu link text (must match a Navigation item)"
+        },
+        {
+          "type": "select",
+          "id": "menu_type",
+          "label": "Menu type",
+          "default": "simple",
+          "options": [
+            {
+              "value": "simple",
+              "label": "Simple dropdown"
+            },
+            {
+              "value": "songs",
+              "label": "Songs (music finder)"
+            },
+            {
+              "value": "shop",
+              "label": "Shop (ecommerce)"
+            },
+            {
+              "value": "discover",
+              "label": "Discover (page listing)"
+            },
+            {
+              "value": "countdown",
+              "label": "Countdown (multiple countdowns)"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Songs"
+        },
+        {
+          "type": "paragraph",
+          "content": "Fill categories in order. Each shows its own label, logo and colour when active."
+        },
+        {
+          "type": "collection",
+          "id": "songs_cat1_collection",
+          "label": "Category 1 — collection"
+        },
+        {
+          "type": "text",
+          "id": "songs_cat1_label",
+          "label": "Category 1 — label (optional, defaults to collection name)"
+        },
+        {
+          "type": "image_picker",
+          "id": "songs_cat1_logo",
+          "label": "Category 1 — logo"
+        },
+        {
+          "type": "color_scheme",
+          "id": "songs_cat1_scheme",
+          "label": "Category 1 — colour scheme"
+        },
+        {
+          "type": "collection",
+          "id": "songs_cat2_collection",
+          "label": "Category 2 — collection"
+        },
+        {
+          "type": "text",
+          "id": "songs_cat2_label",
+          "label": "Category 2 — label (optional, defaults to collection name)"
+        },
+        {
+          "type": "image_picker",
+          "id": "songs_cat2_logo",
+          "label": "Category 2 — logo"
+        },
+        {
+          "type": "color_scheme",
+          "id": "songs_cat2_scheme",
+          "label": "Category 2 — colour scheme"
+        },
+        {
+          "type": "collection",
+          "id": "songs_cat3_collection",
+          "label": "Category 3 — collection"
+        },
+        {
+          "type": "text",
+          "id": "songs_cat3_label",
+          "label": "Category 3 — label (optional, defaults to collection name)"
+        },
+        {
+          "type": "image_picker",
+          "id": "songs_cat3_logo",
+          "label": "Category 3 — logo"
+        },
+        {
+          "type": "color_scheme",
+          "id": "songs_cat3_scheme",
+          "label": "Category 3 — colour scheme"
+        },
+        {
+          "type": "collection",
+          "id": "songs_cat4_collection",
+          "label": "Category 4 — collection"
+        },
+        {
+          "type": "text",
+          "id": "songs_cat4_label",
+          "label": "Category 4 — label (optional, defaults to collection name)"
+        },
+        {
+          "type": "image_picker",
+          "id": "songs_cat4_logo",
+          "label": "Category 4 — logo"
+        },
+        {
+          "type": "color_scheme",
+          "id": "songs_cat4_scheme",
+          "label": "Category 4 — colour scheme"
+        },
+        {
+          "type": "collection",
+          "id": "songs_cat5_collection",
+          "label": "Category 5 — collection"
+        },
+        {
+          "type": "text",
+          "id": "songs_cat5_label",
+          "label": "Category 5 — label (optional, defaults to collection name)"
+        },
+        {
+          "type": "image_picker",
+          "id": "songs_cat5_logo",
+          "label": "Category 5 — logo"
+        },
+        {
+          "type": "color_scheme",
+          "id": "songs_cat5_scheme",
+          "label": "Category 5 — colour scheme"
+        },
+        {
+          "type": "collection",
+          "id": "songs_cat6_collection",
+          "label": "Category 6 — collection"
+        },
+        {
+          "type": "text",
+          "id": "songs_cat6_label",
+          "label": "Category 6 — label (optional, defaults to collection name)"
+        },
+        {
+          "type": "image_picker",
+          "id": "songs_cat6_logo",
+          "label": "Category 6 — logo"
+        },
+        {
+          "type": "color_scheme",
+          "id": "songs_cat6_scheme",
+          "label": "Category 6 — colour scheme"
+        },
+        {
+          "type": "header",
+          "content": "Shop"
+        },
+        {
+          "type": "link_list",
+          "id": "shop_menu",
+          "label": "Shop menu (columns from nested links)"
+        },
+        {
+          "type": "product",
+          "id": "shop_feature_product",
+          "label": "Featured album/product"
+        },
+        {
+          "type": "checkbox",
+          "id": "shop_show_products",
+          "label": "Show featured products grid",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "shop_products_heading",
+          "label": "Featured products — heading",
+          "default": "Featured products"
+        },
+        {
+          "type": "collection",
+          "id": "shop_products_collection",
+          "label": "Featured products — collection"
+        },
+        {
+          "type": "range",
+          "id": "shop_products_limit",
+          "min": 3,
+          "max": 12,
+          "step": 1,
+          "default": 6,
+          "label": "Products to show"
+        },
+        {
+          "type": "checkbox",
+          "id": "shop_show_collections",
+          "label": "Show collections carousel",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "shop_collections_heading",
+          "label": "Collections — heading",
+          "default": "Browse collections"
+        },
+        {
+          "type": "collection_list",
+          "id": "shop_collections",
+          "label": "Collections",
+          "limit": 10
+        },
+        {
+          "type": "checkbox",
+          "id": "shop_show_albums",
+          "label": "Show featured albums row",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "shop_albums_heading",
+          "label": "Featured albums — heading",
+          "default": "Featured albums"
+        },
+        {
+          "type": "product_list",
+          "id": "shop_albums",
+          "label": "Featured albums",
+          "limit": 8
+        },
+        {
+          "type": "checkbox",
+          "id": "shop_show_feature",
+          "label": "Show featured card (right)",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Discover"
+        },
+        {
+          "type": "text",
+          "id": "discover_explore_heading",
+          "label": "Explore — heading",
+          "default": "Explore"
+        },
+        {
+          "type": "text",
+          "id": "discover_new_heading",
+          "label": "New this week — heading",
+          "default": "New this week"
+        },
+        {
+          "type": "text",
+          "id": "discover_new_cta_text",
+          "label": "New this week — link text",
+          "default": "Read the latest"
+        },
+        {
+          "type": "link_list",
+          "id": "discover_links",
+          "label": "Explore links"
+        },
+        {
+          "type": "blog",
+          "id": "discover_blog",
+          "label": "New this week (blog)"
+        },
+        {
+          "type": "page",
+          "id": "discover_feature_page",
+          "label": "Feature page (Heart of Love to Sing)"
+        },
+        {
+          "type": "image_picker",
+          "id": "discover_feature_image",
+          "label": "Feature image"
+        },
+        {
+          "type": "header",
+          "content": "Countdown"
+        },
+        {
+          "type": "text",
+          "id": "cd1_title",
+          "label": "Countdown 1 — title"
+        },
+        {
+          "type": "text",
+          "id": "cd1_date",
+          "label": "Countdown 1 — date (YYYY-MM-DD)"
+        },
+        {
+          "type": "url",
+          "id": "cd1_link",
+          "label": "Countdown 1 — link"
+        },
+        {
+          "type": "color_scheme",
+          "id": "cd1_scheme",
+          "label": "Countdown 1 — colour scheme"
+        },
+        {
+          "type": "image_picker",
+          "id": "cd1_image",
+          "label": "Countdown 1 — background image"
+        },
+        {
+          "type": "text",
+          "id": "cd2_title",
+          "label": "Countdown 2 — title"
+        },
+        {
+          "type": "text",
+          "id": "cd2_date",
+          "label": "Countdown 2 — date (YYYY-MM-DD)"
+        },
+        {
+          "type": "url",
+          "id": "cd2_link",
+          "label": "Countdown 2 — link"
+        },
+        {
+          "type": "color_scheme",
+          "id": "cd2_scheme",
+          "label": "Countdown 2 — colour scheme"
+        },
+        {
+          "type": "image_picker",
+          "id": "cd2_image",
+          "label": "Countdown 2 — background image"
+        },
+        {
+          "type": "text",
+          "id": "cd3_title",
+          "label": "Countdown 3 — title"
+        },
+        {
+          "type": "text",
+          "id": "cd3_date",
+          "label": "Countdown 3 — date (YYYY-MM-DD)"
+        },
+        {
+          "type": "url",
+          "id": "cd3_link",
+          "label": "Countdown 3 — link"
+        },
+        {
+          "type": "color_scheme",
+          "id": "cd3_scheme",
+          "label": "Countdown 3 — colour scheme"
+        },
+        {
+          "type": "image_picker",
+          "id": "cd3_image",
+          "label": "Countdown 3 — background image"
+        },
+        {
+          "type": "text",
+          "id": "cd4_title",
+          "label": "Countdown 4 — title"
+        },
+        {
+          "type": "text",
+          "id": "cd4_date",
+          "label": "Countdown 4 — date (YYYY-MM-DD)"
+        },
+        {
+          "type": "url",
+          "id": "cd4_link",
+          "label": "Countdown 4 — link"
+        },
+        {
+          "type": "color_scheme",
+          "id": "cd4_scheme",
+          "label": "Countdown 4 — colour scheme"
+        },
+        {
+          "type": "image_picker",
+          "id": "cd4_image",
+          "label": "Countdown 4 — background image"
+        }
+      ]
+    },
+    {
+      "name": "Solid header",
+      "type": "solid_header",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Templates, that will have solid color headers by default"
+        },
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Template name",
+          "info": "Enter a list of templates(each on a new line) with type and name in the following format: '[type].[name]', eg. 'product.christmas', 'collection.special-offers'. Default templates have no name, so use just the type, for example 'product' or 'collection'."
+        }
+      ]
+    }
+  ]
+}
 {% endschema %}

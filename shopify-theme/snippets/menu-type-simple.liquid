@@ -1,0 +1,47 @@
+{%- comment -%}
+  Simple dropdown menu type.
+  A plain column of links built from the native child links (link.links),
+  reusing the existing header dropdown classes for consistent styling.
+  Accepts:
+  - link: the parent nav link object (uses link.links / grandchildren)
+  - block_settings: the matched menu_item block settings (unused for now)
+{%- endcomment -%}
+
+{%- if link.links.size > 0 -%}
+  <div class="header__nav-dropdown" tabindex="-1">
+    <ul class="header__nav-links list-unstyled">
+      {%- for child_link in link.links -%}
+        <li class="header__nav-links-item">
+          <a
+            href="{{- child_link.url -}}"
+            class="header__nav-dropdown-link full-unstyled-link focus-inset{% if child_link.current %} is-current{% endif %}"
+            aria-label="{{- child_link.title | escape -}}"
+            {% if child_link.current %}aria-current="page"{% endif %}
+          >
+            <span>{{- child_link.title | escape -}}</span>
+
+            {%- if child_link.links.size > 0 -%}
+              <i>
+                {%- render 'icon', icon: 'chevron-right' -%}
+              </i>
+            {%- endif -%}
+          </a>
+
+          {%- if child_link.links.size > 0 -%}
+            <ul class="header__nav-sublinks list-unstyled">
+              {%- for grand_child_link in child_link.links -%}
+                <li class="header__nav-sublinks-item">
+                  <a
+                    href="{{- grand_child_link.url -}}"
+                    class="header__nav-dropdown-link full-unstyled-link focus-inset{% if grand_child_link.current %} is-current{% endif %}"
+                    {% if grand_child_link.current %}aria-current="page"{% endif %}
+                  >{{- grand_child_link.title | escape -}}</a>
+                </li><!-- /.header__nav-sublinks-item -->
+              {%- endfor -%}
+            </ul><!-- /.header__nav-sublinks list-unstyled -->
+          {%- endif -%}
+        </li><!-- /.header__nav-links-item -->
+      {%- endfor -%}
+    </ul><!-- /.header__nav-links list-unstyled -->
+  </div><!-- /.header__nav-dropdown -->
+{%- endif -%}

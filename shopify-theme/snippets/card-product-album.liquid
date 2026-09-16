@@ -1,0 +1,104 @@
+{%- comment -%}
+  Renders an album product card for the Digital Albums collection grid.
+
+  Accepts:
+  - product_ref {Product}  the album product
+  - class {String}         extra classes (e.g. grid__item)
+
+  Reads lts.album_meta { genre, trackCount, runtime, releaseDate } — the same
+  metafield the album product page uses — so the card and the product page show
+  identical data. Quick-add reuses the document-delegated handler in
+  cart-upsells.js ([data-cart-upsell-add] + [data-variant-id]).
+{%- endcomment -%}
+
+{%- liquid
+  assign p = product_ref | default: false
+  assign meta = p.metafields.lts.album_meta.value
+  assign tracks = meta.trackCount | default: 0
+  assign variant = p.selected_or_first_available_variant
+
+  # Genre eyebrow: prefer the album_meta genre, else infer from the album's
+  # themed-collection membership so legacy albums (no metafield) still get one.
+  assign genre = meta.genre
+  if genre == 'Kids music'
+    assign genre = 'Kids Songs'
+  endif
+  if genre == blank
+    for coll in p.collections
+      assign h = coll.handle
+      if h contains 'kids'
+        assign genre = 'Kids Songs'
+      elsif h contains 'halloween'
+        assign genre = 'Halloween'
+      elsif h contains 'celebration'
+        assign genre = 'Celebration'
+      elsif h contains 'christmas'
+        assign genre = 'Christmas'
+      endif
+    endfor
+  endif
+-%}
+
+{%- if p -%}
+  <article class="album-card {{ class }}">
+    <a href="{{ p.url }}" class="album-card__link">
+      <span class="visually-hidden">{{ p.title | escape }}</span>
+
+      <span class="album-card__art">
+        {%- comment -%} Vinyl disc that peeks out from behind the sleeve on hover. {%- endcomment -%}
+        <span class="album-card__disc" aria-hidden="true"></span>
+        <span class="album-card__sleeve">
+          {%- if p.featured_image != blank -%}
+            <img
+              class="album-card__cover"
+              src="{{ p.featured_image | image_url: width: 600 }}"
+              srcset="{{ p.featured_image | image_url: width: 300 }} 300w, {{ p.featured_image | image_url: width: 600 }} 600w, {{ p.featured_image | image_url: width: 900 }} 900w"
+              sizes="(min-width: 990px) 24rem, 45vw"
+              width="600"
+              height="600"
+              alt="{{ p.featured_image.alt | default: p.title | escape }}"
+              loading="lazy"
+            >
+          {%- else -%}
+            <span class="album-card__cover album-card__cover--empty" aria-hidden="true">&#9835;</span>
+          {%- endif -%}
+        </span>
+      </span><!-- /.album-card__art -->
+
+      <span class="album-card__body">
+        {%- if genre != blank -%}<span class="album-card__eyebrow">{{ genre }}</span>{%- endif -%}
+        <span class="album-card__title">{{ p.title | escape }}</span>
+        <span class="album-card__meta">
+          {%- if tracks and tracks > 0 -%}
+            <span>{{ tracks }} {% if tracks == 1 %}track{% else %}tracks{% endif %}</span>
+          {%- endif -%}
+          {%- if meta.runtime != blank -%}<span>{{ meta.runtime }}</span>{%- endif -%}
+          <span>MP3</span>
+        </span>
+      </span><!-- /.album-card__body -->
+    </a>
+
+    <div class="album-card__foot">
+      <span class="album-card__price">
+        {{ p.price | money }}
+        {%- if p.compare_at_price > p.price -%}
+          <s class="album-card__price-was">{{ p.compare_at_price | money }}</s>
+        {%- endif -%}
+      </span>
+
+      {%- if variant -%}
+        <button
+          type="button"
+          class="album-card__add"
+          data-cart-upsell-add
+          data-variant-id="{{ variant.id }}"
+          {% unless variant.available %}disabled{% endunless %}
+          aria-label="Add {{ p.title | escape }} to cart"
+        >
+          {%- render 'icon-cart' -%}
+          <span class="album-card__add-check" aria-hidden="true">&#10003;</span>
+        </button>
+      {%- endif -%}
+    </div><!-- /.album-card__foot -->
+  </article><!-- /.album-card -->
+{%- endif -%}

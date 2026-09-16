@@ -20,14 +20,20 @@ class CartDrawer extends HTMLElement {
     );
     this.setCartLinks();
     this.handleReload = this.reloadCartDrawer.bind(this);
+    // cart:refresh updates contents WITHOUT opening the drawer — used when an
+    // external surface (e.g. the "Get the music" Shop Drawer app) mutates the
+    // cart, so our standard cart + header count stay in sync. See cart-sync.js.
+    this.handleRefresh = this.refreshCartDrawer.bind(this);
   }
 
   disconnectedCallback() {
     document.removeEventListener('cart:reload', this.handleReload);
+    document.removeEventListener('cart:refresh', this.handleRefresh);
   }
 
   connectedCallback() {
     document.addEventListener('cart:reload', this.handleReload);
+    document.addEventListener('cart:refresh', this.handleRefresh);
   }
 
   setCartLinks() {
@@ -38,12 +44,12 @@ class CartDrawer extends HTMLElement {
       cartLink.setAttribute('aria-haspopup', 'dialog');
       cartLink.addEventListener('click', (event) => {
         event.preventDefault();
-        this.open(cartLink);
+        this.openFresh(cartLink);
       });
       cartLink.addEventListener('keydown', (event) => {
         if (event.code.toUpperCase() !== 'SPACE') return;
         event.preventDefault();
-        this.open(cartLink);
+        this.openFresh(cartLink);
       });
     });
   }
@@ -77,15 +83,43 @@ class CartDrawer extends HTMLElement {
     trapFocus(containerToTrapFocusOn, focusElement);
   }
 
-  renderContents(response) {
+  renderContents(response, shouldOpen = true) {
     this.getSectionsToRender().forEach((section) => {
       const sectionElement = document.querySelector(section.id);
+      // Live-region selectors may not exist on every page — guard against null.
+      if (!sectionElement || !response.sections[section.section]) return;
       sectionElement.innerHTML = this.getSectionInnerHTML(
         response.sections[section.section],
         section.selector,
       );
     });
-    this.open();
+    if (shouldOpen) this.open();
+  }
+
+  /**
+   * Open the drawer immediately (no wait) and refresh its contents in place.
+   * The fetch is what makes the cart correct even when items were added by an
+   * external surface that didn't fire cart:reload (e.g. the Shop Drawer app).
+   */
+  openFresh(opener) {
+    this.open(opener);
+    this.refreshCartDrawer();
+  }
+
+  /** Re-fetch + re-render cart sections WITHOUT opening or focus-trapping. */
+  refreshCartDrawer() {
+    const sectionsToFetch = this.getSectionsToRender().map((section) => section.section);
+    const url = `${window.Shopify.routes.root}?sections=${sectionsToFetch.join(',')}`;
+
+    return fetch(url)
+      .then((response) => response.json())
+      .then((response) => {
+        this.renderContents({ sections: response }, false);
+        return response;
+      })
+      .catch((error) => {
+        console.error('Failed to refresh cart:', error);
+      });
   }
 
   getSectionsToRender() {

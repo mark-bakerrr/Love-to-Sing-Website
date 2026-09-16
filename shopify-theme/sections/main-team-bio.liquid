@@ -1,0 +1,365 @@
+{%- comment -%}
+  Team member bio page (rendered for a `team` metaobject web page).
+  Editorial layout on the Love to Sing design system. Per-member hero colour,
+  rich `content`, a `quote` sticky note, and the Photo Wall photos the person is
+  tagged in woven down the page (full images, alternating sides).
+{%- endcomment -%}
+
+{%- liquid
+  assign m = metaobject
+  assign heart = 'hearts-background.png' | asset_url
+
+  # Reuse the theme's named colour schemes (main-color-{red|blue|green|black|yellow}),
+  # so the hero, header and footer all read the same --c-main-* ramp as the rest of the site.
+  assign main_color = m.main_color.value | default: 'red' | downcase
+  assign light_scheme = false
+  if main_color == 'yellow'
+    assign light_scheme = true
+  endif
+  if light_scheme
+    assign hero_text = '#241a00'
+    assign hero_intro = 'rgba(36,26,0,.78)'
+    assign heart_ink = '#241a00'
+  else
+    assign hero_text = '#ffffff'
+    assign hero_intro = 'rgba(255,255,255,.82)'
+    assign heart_ink = '#ffffff'
+  endif
+  assign heart_op = section.settings.hero_heart_opacity | default: 7 | divided_by: 100.0
+-%}
+
+{%- comment -%} Put the scheme class on <html> so the shared header & footer inherit --c-main-*. {%- endcomment -%}
+<script>document.documentElement.classList.add('main-color-{{ main_color | escape }}');</script>
+
+<style>
+  /* Site header adopts this member's scheme colour on scroll. Set the background VARIABLE
+     always (theme fades .header::before via opacity) so the fade-out is the scheme colour,
+     never the theme's default red. */
+  .shopify-section-group-header-group .header{--color-header-background:linear-gradient(180deg, var(--c-main-500), var(--c-main-600))}
+  .shopify-section-group-header-group.is-stuck .header{--color-header-text:{{ hero_text }};color:{{ hero_text }}!important}
+  .shopify-section-group-header-group.is-stuck .header a,
+  .shopify-section-group-header-group.is-stuck .header summary,
+  .shopify-section-group-header-group.is-stuck .header .header__heading-link,
+  .shopify-section-group-header-group.is-stuck .header .header__icon,
+  .shopify-section-group-header-group.is-stuck .header svg{color:{{ hero_text }}!important}
+  /* Footer follows this member's scheme (deep tone keeps white-text contrast) */
+  .footer{background:var(--c-main-900)!important}
+</style>
+
+<div class="tb main-color-{{ main_color | escape }}" style="
+  --heart:url('{{ heart }}');
+  --hero-bg:linear-gradient(180deg, var(--c-main-500), var(--c-main-600));
+  --hero-text:{{ hero_text }};
+  --hero-intro:{{ hero_intro }};
+  --heart-tint:{{ heart_ink }};
+  --heart-op:{{ heart_op }};">
+
+  <header class="tb-hero">
+    <div class="tb-hero__in">
+      <div class="tb-hero__text">
+        <h1>{{ m.name.value | escape }}</h1>
+        {%- if m.role.value != blank -%}<span class="tb-role">{{ m.role.value | escape }}</span>{%- endif -%}
+        {%- if m.bio.value != blank -%}<p class="tb-intro">{{ m.bio.value | escape }}</p>{%- endif -%}
+      </div>
+      {%- if m.photo.value != blank -%}
+        <div class="tb-portrait"><img src="{{ m.photo.value | image_url: width: 760 }}" alt="{{ m.name.value | escape }}" width="420" height="525" loading="eager"></div>
+      {%- endif -%}
+    </div>
+  </header>
+
+  <div class="tb-body">
+    {%- if section.blocks.size > 0 -%}
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+
+          {%- when 'text' -%}
+            <div class="tb-seg" {{ block.shopify_attributes }}>
+              {%- if block.settings.heading != blank -%}<h2 class="tb-seg__h">{{ block.settings.heading | escape }}</h2>{%- endif -%}
+              {%- if block.settings.body != blank -%}<div class="rte">{{ block.settings.body }}</div>{%- endif -%}
+            </div>
+
+          {%- when 'quote' -%}
+            {%- if block.settings.quote != blank -%}
+            <div class="tb-note" {{ block.shopify_attributes }}>
+              <div class="tb-note__card" style="--q-scale:{{ block.settings.quote_size | default: 100 | divided_by: 100.0 }}"><span class="tb-pin"></span>
+                <div class="tb-note__q">&ldquo;{{ block.settings.quote | escape }}&rdquo;</div>
+                {%- if block.settings.cite != blank -%}<span class="tb-note__c">&mdash; {{ block.settings.cite | escape }}</span>{%- endif -%}
+              </div>
+            </div>
+            {%- endif -%}
+
+          {%- when 'photo' -%}
+            {%- comment -%} Direct handle lookup — iterating metaobjects.photo_wall.values is capped at 50 entries. {%- endcomment -%}
+            {%- assign pw = blank -%}
+            {%- if block.settings.pw_handle != blank -%}
+              {%- assign pw_key = block.settings.pw_handle | strip -%}
+              {%- assign pw = metaobjects.photo_wall[pw_key] -%}
+            {%- endif -%}
+            {%- liquid
+              assign ph_img = pw.photo.value
+              assign ph_year = pw.year.value
+              assign ph_title = block.settings.title | default: pw.title.value
+              assign ph_desc = block.settings.description | default: pw.description.value
+            -%}
+            <figure class="photo" {{ block.shopify_attributes }}>
+              <div class="ph">
+                {%- if ph_img != blank -%}
+                  <img src="{{ ph_img | image_url: width: 1200 }}" alt="{{ ph_title | escape }}" loading="lazy">
+                {%- else -%}
+                  {{ 'image' | placeholder_svg_tag: 'tb-ph-placeholder' }}
+                {%- endif -%}
+              </div>
+              <figcaption>
+                {%- if ph_year != blank -%}<span class="yr">{{ ph_year | escape }}</span>{%- endif -%}
+                {%- if ph_title != blank -%}<div class="cap">{{ ph_title | escape }}</div>{%- endif -%}
+                {%- if ph_desc != blank -%}<p class="cap-desc">{{ ph_desc | escape }}</p>{%- endif -%}
+              </figcaption>
+            </figure>
+
+        {%- endcase -%}
+      {%- endfor -%}
+    {%- else -%}
+      {%- comment -%} Fallback: render the metaobject `content` + auto-woven Photo Wall photos (legacy). {%- endcomment -%}
+      <div id="tb-content" class="rte"></div>
+    {%- endif -%}
+  </div>
+</div>
+
+{%- if section.blocks.size == 0 -%}
+  {%- if m.content != blank -%}
+    <script type="application/json" id="tb-content-data">{{ m.content }}</script>
+  {%- endif -%}
+  {%- if m.quote.value != blank -%}
+    <script type="application/json" id="tb-quote">{"text": {{ m.quote.value | json }}, "cite": {{ m.name.value | json }}}</script>
+  {%- endif -%}
+  <script type="application/json" id="tb-photos">
+  [
+    {%- assign first = true -%}
+    {%- for e in metaobjects.photo_wall.values -%}
+      {%- for person in e.people.value -%}
+        {%- if person.system.handle == m.system.handle -%}
+          {%- unless first -%},{%- endunless -%}{%- assign first = false -%}
+          {"img": {{ e.photo.value | image_url: width: 1100 | json }}, "year": {{ e.year.value | json }}, "title": {{ e.title.value | json }}}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endfor -%}
+  ]
+  </script>
+{%- endif -%}
+
+{% stylesheet %}
+  /* NOTE: theme root font-size is 62.5% (10px). All rem values below are ×1.6
+     vs the 16px-based wireframe so the design renders at the intended scale. */
+  .tb{--ink:#1a1a1a;--body:#333;--muted:#797979;--red:#C42637;--pink:#fcdcdb;
+    --measure:83.2rem;--wrap:clamp(1.6rem,4vw,5.6rem);
+    font-family:'Nunito',system-ui,sans-serif;color:var(--body);line-height:1.7}
+  .tb *{box-sizing:border-box}
+
+  .tb-hero{position:relative;overflow:hidden;background:var(--hero-bg);color:var(--hero-text)}
+  .tb-hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:var(--heart-tint);opacity:var(--heart-op);
+    -webkit-mask:var(--heart) center/cover;mask:var(--heart) center/cover}
+  .tb-hero__in{position:relative;max-width:118.4rem;margin:0 auto;padding:clamp(7.2rem,10vw,12.8rem) var(--wrap) clamp(4.8rem,7vw,9.6rem);
+    display:grid;grid-template-columns:minmax(0,1fr) 33.6rem;gap:clamp(2.4rem,5vw,5.6rem);align-items:center}
+  .tb-hero h1{color:var(--hero-text);font-weight:900;font-size:clamp(4.16rem,7.5vw,8.64rem);line-height:.95;letter-spacing:-.02em;margin:0;text-wrap:balance}
+  .tb-role{display:inline-flex;align-items:center;gap:.4em;
+    background:color-mix(in srgb, var(--hero-text) 12%, transparent);color:var(--hero-text);
+    font-weight:800;font-size:1.52rem;padding:6px 15px;border-radius:999px;margin:1.76rem 0 .32rem}
+  .tb-role::before{content:"\2665";font-size:.85em;opacity:.85}
+  .tb-intro{font-size:clamp(1.68rem,2vw,2rem);max-width:57.6rem;margin:1.6rem 0 0;color:var(--hero-intro)}
+  .tb-portrait{aspect-ratio:4/5;border-radius:16px;overflow:hidden;box-shadow:0 26px 54px rgba(0,0,0,.3)}
+  .tb-portrait img{width:100%;height:100%;object-fit:cover;display:block}
+
+  .tb-body{margin:clamp(5.6rem,9vw,10rem) auto;padding:0 var(--wrap)}
+  /* text segment — reading column */
+  .tb-seg{max-width:var(--measure);margin:0 auto}
+  .tb-seg__h{font-weight:900;color:var(--ink);font-size:clamp(2.72rem,4vw,3.84rem);line-height:1.08;letter-spacing:-.01em;margin:clamp(4.8rem,7vw,7.2rem) 0 1.28rem;text-wrap:balance}
+  .tb-body>.tb-seg:first-child .tb-seg__h{margin-top:0}
+  .tb .rte h2,.tb .rte h3{font-weight:900;color:var(--ink);line-height:1.08;letter-spacing:-.01em;margin:clamp(4.8rem,7vw,7.2rem) 0 1.28rem;text-wrap:balance}
+  .tb .rte h2{font-size:clamp(2.72rem,4vw,3.84rem)} .tb .rte h3{font-size:clamp(2.16rem,3vw,2.72rem)}
+  .tb .rte p{font-size:clamp(1.68rem,1.6vw,1.888rem);margin:0 0 1.84rem;color:var(--body);text-wrap:pretty}
+  .tb .rte p:last-child{margin-bottom:0}
+  .tb-body>.tb-seg:first-child .rte>p:first-child{font-size:clamp(1.92rem,2.2vw,2.24rem);font-weight:600;color:var(--ink)}
+  .tb .rte a{color:var(--red);font-weight:700} .tb .rte strong{font-weight:800} .tb .rte em{font-style:italic}
+  .tb .rte ul,.tb .rte ol{margin:0 0 1.84rem 1.92rem} .tb .rte li{margin:.48rem 0}
+
+  /* quote sticky note (JS-inserted) */
+  .tb-note{max-width:var(--measure);margin:clamp(4.8rem,7vw,7.2rem) auto}
+  .tb-note__card{position:relative;background:#f3f3f3;padding:2.72rem 3.04rem;border-radius:14px;rotate:-1.5deg;
+    box-shadow:0 18px 40px rgba(0,0,0,.14)}
+  .tb-note__card::before{content:"";position:absolute;inset:0;pointer-events:none;background:var(--red);opacity:.03;border-radius:14px;
+    -webkit-mask:var(--heart) center/cover;mask:var(--heart) center/cover}
+  .tb-note__q,.tb-note__c{position:relative}
+  .tb-note__q{font-family:'Caveat',cursive;font-size:calc(clamp(2.08rem,3vw,2.72rem) * var(--q-scale,1));line-height:1.14;color:#3a2f22}
+  .tb-note__c{display:block;margin-top:.88rem;font-weight:800;color:var(--red);font-size:1.472rem}
+  .tb-pin{position:absolute;top:-15px;left:50%;translate:-50% 0;width:24px;height:22px;filter:drop-shadow(0 4px 5px rgba(0,0,0,.35))}
+  .tb-pin::before,.tb-pin::after{content:"";position:absolute;top:0;width:12px;height:19px;background:var(--red);border-radius:12px 12px 0 0}
+  .tb-pin::before{left:12px;transform:rotate(-45deg);transform-origin:0 100%}
+  .tb-pin::after{left:0;transform:rotate(45deg);transform-origin:100% 100%}
+
+  /* photo — centred image with the caption centred below */
+  .tb figure.photo{margin:clamp(4.8rem,7vw,7.2rem) auto;max-width:min(66rem,92vw);text-align:center}
+  .tb figure.photo .ph{border-radius:14px;overflow:hidden;box-shadow:0 22px 44px rgba(0,0,0,.16)}
+  .tb figure.photo .ph img{width:100%;height:auto;display:block}
+  .tb figure.photo .ph svg{width:100%;height:auto;display:block;aspect-ratio:4/3;background:#ececec}
+  .tb figure.photo figcaption{margin-top:clamp(1.2rem,2.5vw,1.8rem)}
+  .tb figure.photo .yr{display:inline-block;font-weight:900;color:var(--red);font-size:1.28rem;letter-spacing:.1em;margin-bottom:.4rem}
+  .tb figure.photo .cap{font-weight:800;font-size:clamp(1.92rem,2.4vw,2.4rem);color:var(--ink);line-height:1.15}
+  .tb figure.photo .cap-desc{margin:.72rem auto 0;max-width:46rem;font-weight:500;font-size:clamp(1.6rem,1.7vw,1.76rem);line-height:1.5;color:var(--body)}
+
+  /* subtle motion — gentle image zoom on hover + scroll reveal */
+  .tb figure.photo .ph img{transition:transform .8s cubic-bezier(.22,1,.36,1)}
+  .tb figure.photo:hover .ph img{transform:scale(1.035)}
+  .tb-portrait img{transition:transform .8s cubic-bezier(.22,1,.36,1)}
+  .tb-hero:hover .tb-portrait img{transform:scale(1.03)}
+  @media (prefers-reduced-motion: no-preference){
+    /* hero entrance — CSS keyframes (starts pre-hidden, no flash) */
+    .tb-hero h1{animation:tb-in .8s cubic-bezier(.22,1,.36,1) both}
+    .tb-hero .tb-role{animation:tb-in .8s cubic-bezier(.22,1,.36,1) .10s both}
+    .tb-hero .tb-intro{animation:tb-in .8s cubic-bezier(.22,1,.36,1) .18s both}
+    .tb-portrait{animation:tb-in .9s cubic-bezier(.22,1,.36,1) .12s both}
+    @keyframes tb-in{from{opacity:0;transform:translateY(1.6rem);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+    /* body blocks — revealed on scroll via JS */
+    .tb-anim{opacity:0;transform:translateY(1.6rem);filter:blur(6px);
+      transition:opacity .75s cubic-bezier(.22,1,.36,1),transform .75s cubic-bezier(.22,1,.36,1),filter .75s cubic-bezier(.22,1,.36,1)}
+    .tb-anim.is-in{opacity:1;transform:none;filter:none}
+  }
+
+  @media(max-width:800px){
+    .tb-hero__in{grid-template-columns:1fr}
+    .tb-portrait{order:-1;max-width:24rem}
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  // subtle scroll-reveal for body blocks (hero animates via CSS keyframes)
+  (function(){
+    if(!('IntersectionObserver' in window)) return;
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var els=[].slice.call(document.querySelectorAll('.tb-body .tb-seg, .tb-body .tb-note, .tb-body figure.photo'));
+    if(!els.length) return;
+    els.forEach(function(el){ el.classList.add('tb-anim'); });
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('is-in'); io.unobserve(e.target); } });
+    },{ rootMargin:'0px 0px -8% 0px', threshold:0.08 });
+    els.forEach(function(el){ io.observe(el); });
+    // failsafe: never leave content hidden (crawlers, no-scroll renders, background tabs)
+    setTimeout(function(){ els.forEach(function(el){ el.classList.add('is-in'); }); }, 1400);
+  })();
+
+  (function(){
+    var content=document.getElementById('tb-content');
+    if(!content) return;
+    function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+    function readJSON(id){try{var el=document.getElementById(id);return el?JSON.parse(el.textContent):null;}catch(e){return null;}}
+
+    // render Shopify rich_text AST -> HTML (metaobject fields don't auto-render)
+    function rt(n){
+      if(!n) return '';
+      if(Array.isArray(n)) return n.map(rt).join('');
+      var kids=(n.children||[]).map(rt).join('');
+      switch(n.type){
+        case 'root': return kids;
+        case 'paragraph': return '<p>'+kids+'</p>';
+        case 'heading': var l=Math.min(Math.max(n.level||2,2),4); return '<h'+l+'>'+kids+'</h'+l+'>';
+        case 'list': var tag=(n.listType==='ordered')?'ol':'ul'; return '<'+tag+'>'+kids+'</'+tag+'>';
+        case 'list-item': return '<li>'+kids+'</li>';
+        case 'link':
+          var u=esc(n.url||'#'), ti=n.title?' title="'+esc(n.title)+'"':'', tg=n.target?' target="'+esc(n.target)+'" rel="noopener"':'';
+          return '<a href="'+u+'"'+ti+tg+'>'+kids+'</a>';
+        case 'text':
+          var s=esc(n.value||''); if(n.bold) s='<strong>'+s+'</strong>'; if(n.italic) s='<em>'+s+'</em>'; return s;
+        default: return kids;
+      }
+    }
+    var contentAst=readJSON('tb-content-data');
+    if(contentAst){ content.innerHTML=rt(contentAst); }
+
+    var blocks=Array.prototype.slice.call(content.children);
+    var after=0; // insert position pointer within blocks
+
+    // quote sticky note after the first block
+    var q=readJSON('tb-quote');
+    if(q&&q.text&&blocks.length){
+      var note=document.createElement('div');
+      note.className='tb-note';
+      note.innerHTML='<div class="tb-note__card"><span class="tb-pin"></span>'
+        +'<div class="tb-note__q">“'+esc(q.text)+'”</div>'
+        +(q.cite?'<span class="tb-note__c">— '+esc(q.cite)+'</span>':'')+'</div>';
+      blocks[0].insertAdjacentElement('afterend', note);
+      after=1;
+    }
+
+    // weave photos through the remaining blocks, alternating sides
+    var photos=(readJSON('tb-photos')||[]).filter(function(p){return p&&p.img;});
+    if(photos.length){
+      function fig(p,i){
+        var f=document.createElement('figure');
+        f.className='weave '+(i%2?'right':'left');
+        f.innerHTML='<div class="grid"><div class="ph"><img src="'+esc(p.img)+'" alt="" loading="lazy"></div>'
+          +'<figcaption>'+(p.year?'<span class="yr">'+esc(p.year)+'</span>':'')
+          +(p.title?'<div class="cap">'+esc(p.title)+'</div>':'')+'</figcaption></div>';
+        return f;
+      }
+      var remaining=blocks.slice(after+1);
+      if(!remaining.length){ photos.forEach(function(p,i){content.appendChild(fig(p,i));}); return; }
+      var step=Math.max(1, Math.floor(remaining.length/(photos.length+1)));
+      var pi=0;
+      for(var i=step-1;i<remaining.length && pi<photos.length;i+=step){
+        remaining[i].insertAdjacentElement('afterend', fig(photos[pi],pi)); pi++;
+      }
+      while(pi<photos.length){ content.appendChild(fig(photos[pi],pi)); pi++; }
+    }
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Team bio",
+  "settings": [
+    {
+      "type": "range",
+      "id": "hero_heart_opacity",
+      "label": "Heart background transparency",
+      "min": 0, "max": 100, "step": 1, "unit": "%",
+      "default": 7
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "info": "Optional. Leave blank for an intro/continuation paragraph." },
+        { "type": "richtext", "id": "body", "label": "Text" }
+      ]
+    },
+    {
+      "type": "quote",
+      "name": "Quote (sticky note)",
+      "settings": [
+        { "type": "textarea", "id": "quote", "label": "Quote" },
+        { "type": "text", "id": "cite", "label": "Attribution" },
+        { "type": "range", "id": "quote_size", "label": "Quote size", "min": 60, "max": 160, "step": 5, "unit": "%", "default": 100 }
+      ]
+    },
+    {
+      "type": "photo",
+      "name": "Photo",
+      "settings": [
+        { "type": "text", "id": "pw_handle", "label": "Photo Wall photo (handle)", "info": "The handle of the Photo Wall entry — its image, year, title and description are pulled in automatically. Find the handle on the Photo Wall entry in admin." },
+        { "type": "text", "id": "title", "label": "Title override (optional)" },
+        { "type": "text", "id": "description", "label": "Description override (optional)" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Team bio",
+      "blocks": [
+        { "type": "text" }
+      ]
+    }
+  ]
+}
+{% endschema %}

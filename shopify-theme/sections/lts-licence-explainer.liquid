@@ -1,0 +1,398 @@
+{%- comment -%}
+  lts-licence-explainer  —  TAB GROUP version
+  One TAB per licence block (Copyright / All-in-One / Streaming); the active tab
+  reveals that licence's explainer panel. Blocks + settings are unchanged from
+  the stacked version — only the layout is now a segmented tab group.
+
+  Progressive enhancement: with no JS the tab bar is hidden and every panel
+  renders stacked (original look, fully crawlable). JS adds `.lts-lce-js`, which
+  collapses to tab mode and enables the sliding indicator + keyboard nav.
+
+  Each block header shows icon + name + tagline + live "from $X" price read from
+  the published product via all_products[handle].price_min (never hardcoded).
+  Two body layouts per block: `can_need` (You can / You will need) or `full`.
+{%- endcomment -%}
+
+<div class="lts-lce" id="lts-lce-{{ section.id }}" data-lts-lce>
+  <section class="lts-lce-blk">
+    <div class="lts-lce-wrap">
+      {%- if section.settings.heading != blank -%}
+        <div class="lts-lce-headc lts-lce-rise"><h2>{{ section.settings.heading | escape }}</h2></div>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+      <div class="lts-lce-tabwrap lts-lce-rise">
+        <div class="lts-lce-tabs" role="tablist" aria-label="Choose a licence to compare">
+          {%- for block in section.blocks -%}
+            {%- assign p = all_products[block.settings.product] -%}
+            <button type="button"
+                    class="lts-lce-tab{% if forloop.first %} is-active{% endif %}"
+                    role="tab"
+                    id="lce-tab-{{ section.id }}-{{ forloop.index0 }}"
+                    aria-controls="lce-panel-{{ section.id }}-{{ forloop.index0 }}"
+                    aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                    tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+                    data-lce-tab="{{ forloop.index0 }}">
+              {%- if block.settings.icon != blank -%}<span class="lts-lce-tab-ic" aria-hidden="true">{{ block.settings.icon }}</span>{%- endif -%}
+              <span class="lts-lce-tab-nm">{{ block.settings.name | escape }}</span>
+              {%- if p != blank -%}<span class="lts-lce-tab-pr">{{ section.settings.price_prefix | escape }} {{ p.price_min | money | remove: '.00' }}</span>{%- endif -%}
+            </button>
+          {%- endfor -%}
+          <span class="lts-lce-tab-ind" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <div class="lts-lce-panels">
+        {%- for block in section.blocks -%}
+          {%- assign p = all_products[block.settings.product] -%}
+          <div class="lts-lce-panel{% if forloop.first %} is-active{% endif %}"
+               role="tabpanel"
+               id="lce-panel-{{ section.id }}-{{ forloop.index0 }}"
+               aria-labelledby="lce-tab-{{ section.id }}-{{ forloop.index0 }}"
+               data-lce-panel="{{ forloop.index0 }}"
+               tabindex="0"
+               {{ block.shopify_attributes }}>
+            <div class="lts-lce-block{% if block.settings.quiet %} lts-lce-quiet{% endif %}">
+              <div class="lts-lce-lichead">
+                {%- if block.settings.icon != blank -%}<span class="lts-lce-ic" aria-hidden="true">{{ block.settings.icon }}</span>{%- endif -%}
+                <span class="lts-lce-nm">{{ block.settings.name | escape }}</span>
+                {%- if block.settings.tagline != blank -%}<span class="lts-lce-ds">{{ block.settings.tagline | escape }}</span>{%- endif -%}
+                {%- if p != blank -%}<span class="lts-lce-from">{{ section.settings.price_prefix | escape }} {{ p.price_min | money | remove: '.00' }}</span>{%- endif -%}
+              </div>
+
+              {%- if block.settings.layout == 'full' -%}
+                <div class="lts-lce-licfull">
+                  {%- if block.settings.full_intro != blank -%}<p>{{ block.settings.full_intro | escape }}</p>{%- endif -%}
+                  <ul>
+                    {%- assign full_items = block.settings.full_list | newline_to_br | split: '<br />' -%}
+                    {%- for item in full_items -%}
+                      {%- assign trimmed = item | strip -%}
+                      {%- if trimmed != blank -%}<li>{{ trimmed | escape }}</li>{%- endif -%}
+                    {%- endfor -%}
+                  </ul>
+                </div>
+              {%- else -%}
+                <div class="lts-lce-licbody">
+                  <div class="lts-lce-liccol lts-lce-can">
+                    {%- if block.settings.can_heading != blank -%}<h4>{{ block.settings.can_heading | escape }}</h4>{%- endif -%}
+                    <ul>
+                      {%- assign can_items = block.settings.can_list | newline_to_br | split: '<br />' -%}
+                      {%- for item in can_items -%}
+                        {%- assign trimmed = item | strip -%}
+                        {%- if trimmed != blank -%}<li>{{ trimmed | escape }}</li>{%- endif -%}
+                      {%- endfor -%}
+                    </ul>
+                  </div>
+                  <div class="lts-lce-liccol lts-lce-cant">
+                    {%- if block.settings.need_heading != blank -%}<h4>{{ block.settings.need_heading | escape }}</h4>{%- endif -%}
+                    <ul>
+                      {%- assign need_items = block.settings.need_list | newline_to_br | split: '<br />' -%}
+                      {%- for item in need_items -%}
+                        {%- assign trimmed = item | strip -%}
+                        {%- if trimmed != blank -%}<li>{{ trimmed | escape }}</li>{%- endif -%}
+                      {%- endfor -%}
+                    </ul>
+                  </div>
+                </div>
+              {%- endif -%}
+
+              {%- if block.settings.button_label != blank -%}
+                <div class="lts-lce-licfoot">
+                  <a class="lts-lce-btn{% if block.settings.layout == 'full' %} lts-lce-solid{% endif %}" href="{{ block.settings.button_url }}">{{ block.settings.button_label | escape }}</a>
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+      {%- endif -%}
+    </div>
+  </section>
+</div>
+
+{% stylesheet %}
+.lts-lce{
+  --lc-red:#c8102e; --lc-red-strong:#b0102a; --lc-red-deep:#8f0f24; --lc-red-ink:#5e0a18;
+  --lc-red-50:#fdeef0; --lc-red-100:#fbdbe0;
+  --lc-ink:#241a17; --lc-body:#4a423e; --lc-muted:#736a65; --lc-line:#efe7e3; --lc-hair:#f4eeeb;
+  --lc-bg:#fffefe; --lc-surface:#fff;
+  --lc-r:14px; --lc-r-lg:18px;
+  --lc-shadow-sm:0 1px 2px rgba(60,20,25,.06);
+  --lc-shadow:0 10px 24px -14px rgba(90,20,30,.30);
+  --lc-ok:0 8px 30px -12px rgba(200,16,46,.35);
+  /* polish easing + timing */
+  --ease-smooth:cubic-bezier(.22,1,.36,1);
+  --ease-spring:cubic-bezier(.35,1.55,.65,1);
+  --dur-fast:150ms; --dur:200ms; --dur-slow:280ms;
+  --lc-e:cubic-bezier(.2,.7,.2,1);
+  font-family:'Nunito',system-ui,'Segoe UI',Roboto,sans-serif;color:var(--lc-body);line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.lts-lce *{box-sizing:border-box}
+.lts-lce .lts-lce-wrap{max-width:1000px;margin:0 auto;padding:0 22px}
+.lts-lce h2{color:var(--lc-ink);text-wrap:balance;margin:0;font-size:clamp(22px,3.6vw,30px);font-weight:900;letter-spacing:-.02em}
+.lts-lce a{color:inherit}
+
+/* reveal */
+.lts-lce .lts-lce-rise{opacity:0;transform:translateY(14px);animation:lts-lce-rise .7s var(--lc-e) forwards}
+@keyframes lts-lce-rise{to{opacity:1;transform:none}}
+
+.lts-lce .lts-lce-blk{padding:clamp(44px,7vw,72px) 0}
+.lts-lce .lts-lce-headc{text-align:center;max-width:62ch;margin:0 auto 22px}
+
+/* ===== tab bar (segmented control) ===== */
+.lts-lce .lts-lce-tabwrap{display:none;justify-content:center;margin:0 0 22px}          /* hidden until JS */
+.lts-lce.lts-lce-js .lts-lce-tabwrap{display:flex}
+.lts-lce .lts-lce-tabs{
+  position:relative;display:inline-flex;gap:4px;padding:5px;
+  background:#faf5f3;border:1px solid var(--lc-line);border-radius:999px;
+  max-width:100%;
+}
+.lts-lce .lts-lce-tab{
+  position:relative;z-index:1;display:inline-flex;align-items:center;gap:9px;
+  padding:11px 20px;border:0;background:transparent;border-radius:999px;cursor:pointer;
+  font:inherit;font-weight:800;font-size:15px;color:var(--lc-muted);white-space:nowrap;
+  transition:color var(--dur) var(--ease-smooth),transform var(--dur-fast) var(--ease-smooth);
+  -webkit-tap-highlight-color:transparent;
+}
+.lts-lce .lts-lce-tab:hover{color:var(--lc-ink)}
+.lts-lce .lts-lce-tab:active{transform:scale(.98)}                                       /* tactile press */
+.lts-lce .lts-lce-tab.is-active{color:var(--lc-red-ink)}
+.lts-lce .lts-lce-tab:focus-visible{outline:2px solid var(--lc-red);outline-offset:2px}
+.lts-lce .lts-lce-tab-ic{font-size:18px;line-height:1}
+.lts-lce .lts-lce-tab-pr{font-weight:800;font-size:13px;color:var(--lc-muted);transition:color var(--dur) var(--ease-smooth)}
+.lts-lce .lts-lce-tab.is-active .lts-lce-tab-pr{color:var(--lc-red)}
+/* sliding white pill behind the active tab */
+.lts-lce .lts-lce-tab-ind{
+  position:absolute;z-index:0;top:5px;left:0;height:calc(100% - 10px);width:0;
+  background:var(--lc-surface);border-radius:999px;
+  box-shadow:0 1px 2px rgba(60,20,25,.06),0 4px 10px -4px rgba(90,20,30,.18),0 0 0 .5px rgba(120,20,30,.06);
+  transition:transform var(--dur-slow) var(--ease-smooth),width var(--dur-slow) var(--ease-smooth);
+  will-change:transform,width;
+}
+
+/* ===== panels ===== */
+.lts-lce .lts-lce-panels{display:grid;gap:18px}                                          /* no-JS: stacked */
+.lts-lce.lts-lce-js .lts-lce-panels{display:block}
+.lts-lce.lts-lce-js .lts-lce-panel{display:none}
+.lts-lce.lts-lce-js .lts-lce-panel.is-active{display:block;animation:lts-lce-blurin var(--dur-slow) var(--ease-smooth) both}
+.lts-lce .lts-lce-panel:focus{outline:none}
+@keyframes lts-lce-blurin{from{opacity:0;transform:translateY(6px);filter:blur(2px)}to{opacity:1;transform:none;filter:none}}
+
+/* ===== explainer card (unchanged visual language) ===== */
+.lts-lce .lts-lce-block{background:var(--lc-surface);border:1px solid var(--lc-line);border-radius:var(--lc-r-lg);overflow:hidden}
+.lts-lce .lts-lce-lichead{display:flex;align-items:center;gap:14px;padding:18px 24px;border-bottom:1px solid var(--lc-hair)}
+.lts-lce .lts-lce-lichead .lts-lce-ic{width:40px;height:40px;border-radius:11px;background:var(--lc-red-50);color:var(--lc-red);display:grid;place-items:center;font-size:20px;flex:0 0 auto}
+.lts-lce .lts-lce-lichead .lts-lce-nm{font-size:19px;font-weight:900;color:var(--lc-ink)}
+.lts-lce .lts-lce-lichead .lts-lce-ds{color:var(--lc-muted);font-weight:700;font-size:14px}
+.lts-lce .lts-lce-lichead .lts-lce-from{margin-left:auto;font-weight:900;color:var(--lc-red)}
+.lts-lce .lts-lce-licbody{display:grid;grid-template-columns:1fr 1fr}
+.lts-lce .lts-lce-liccol{padding:20px 24px}
+.lts-lce .lts-lce-liccol + .lts-lce-liccol{border-left:1px solid var(--lc-hair)}
+.lts-lce .lts-lce-liccol h4{margin:0 0 12px;font-size:12px;font-weight:900;letter-spacing:.05em;text-transform:uppercase}
+.lts-lce .lts-lce-liccol.lts-lce-can h4{color:var(--lc-red)}
+.lts-lce .lts-lce-liccol.lts-lce-cant h4{color:var(--lc-muted)}
+.lts-lce .lts-lce-liccol ul{list-style:none;padding:0;margin:0;font-size:14.5px}
+.lts-lce .lts-lce-liccol li{position:relative;padding:7px 0 7px 26px;line-height:1.4;color:var(--lc-body)}
+.lts-lce .lts-lce-liccol.lts-lce-can li::before{content:"\2713";position:absolute;left:0;top:7px;color:var(--lc-red);font-weight:900}
+.lts-lce .lts-lce-liccol.lts-lce-cant li{color:var(--lc-muted)}
+.lts-lce .lts-lce-liccol.lts-lce-cant li::before{content:"\2715";position:absolute;left:0;top:7px;color:#d8c9c4;font-weight:900}
+.lts-lce .lts-lce-licfull{padding:20px 24px}
+.lts-lce .lts-lce-licfull p{margin:0 0 12px;font-weight:800;color:var(--lc-ink)}
+.lts-lce .lts-lce-licfull ul{columns:2;column-gap:28px;list-style:none;padding:0;margin:0;font-size:14.5px}
+.lts-lce .lts-lce-licfull li{position:relative;padding:7px 0 7px 26px;break-inside:avoid;color:var(--lc-body)}
+.lts-lce .lts-lce-licfull li::before{content:"\2713";position:absolute;left:0;top:7px;color:var(--lc-red);font-weight:900}
+.lts-lce .lts-lce-block.lts-lce-quiet .lts-lce-lichead{background:#faf6f4}
+.lts-lce .lts-lce-block.lts-lce-quiet{opacity:.96}
+.lts-lce .lts-lce-licfoot{display:flex;justify-content:flex-end;padding:16px 24px;border-top:1px solid var(--lc-hair)}
+
+.lts-lce .lts-lce-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:800;font-size:14px;padding:11px 20px;border-radius:999px;cursor:pointer;text-decoration:none;border:1.5px solid var(--lc-red);background:#fff;color:var(--lc-red);transition:transform var(--dur) var(--ease-smooth),box-shadow var(--dur) var(--ease-smooth),background var(--dur) var(--ease-smooth)}
+.lts-lce .lts-lce-btn:hover{transform:translateY(-2px)}
+.lts-lce .lts-lce-btn:active{transform:scale(.98)}
+.lts-lce .lts-lce-btn.lts-lce-solid{background:var(--lc-red);color:#fff;border-color:var(--lc-red);box-shadow:var(--lc-ok)}
+.lts-lce .lts-lce-btn.lts-lce-solid:hover{background:var(--lc-red-strong)}
+
+@media(max-width:640px){
+  .lts-lce .lts-lce-tabwrap{display:none}
+  .lts-lce.lts-lce-js .lts-lce-tabwrap{display:block}
+  .lts-lce .lts-lce-tabs{display:flex;width:100%}
+  .lts-lce .lts-lce-tab{flex:1 1 0;justify-content:center;padding:11px 10px;font-size:14px;gap:6px}
+  .lts-lce .lts-lce-tab-pr{display:none}
+  .lts-lce .lts-lce-licbody{grid-template-columns:1fr}
+  .lts-lce .lts-lce-liccol + .lts-lce-liccol{border-left:0;border-top:1px solid var(--lc-hair)}
+  .lts-lce .lts-lce-licfull ul{columns:1}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .lts-lce .lts-lce-rise{animation:none;opacity:1;transform:none}
+  .lts-lce .lts-lce-tab-ind{transition:none}
+  .lts-lce.lts-lce-js .lts-lce-panel.is-active{animation:none}
+  .lts-lce .lts-lce-tab,.lts-lce .lts-lce-tab:active,.lts-lce .lts-lce-btn{transition:none;transform:none}
+}
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  function initLce(root) {
+    if (!root || root.dataset.lceReady) return;
+    var tabs = [].slice.call(root.querySelectorAll('[data-lce-tab]'));
+    var panels = [].slice.call(root.querySelectorAll('[data-lce-panel]'));
+    var ind = root.querySelector('.lts-lce-tab-ind');
+    if (tabs.length < 2) return;            // 0/1 licences: leave stacked
+    root.dataset.lceReady = '1';
+    root.classList.add('lts-lce-js');       // switch on tab mode
+
+    function moveInd(tab) {
+      if (!ind || !tab) return;
+      ind.style.transform = 'translateX(' + tab.offsetLeft + 'px)';
+      ind.style.width = tab.offsetWidth + 'px';
+    }
+    function activate(i, focus) {
+      tabs.forEach(function (t, j) {
+        var on = j === i;
+        t.classList.toggle('is-active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        if (on && focus) t.focus();
+      });
+      panels.forEach(function (pn, j) {
+        var on = j === i;
+        pn.classList.toggle('is-active', on);
+        if (on) { pn.removeAttribute('hidden'); }
+        else { pn.setAttribute('hidden', ''); }
+      });
+      moveInd(tabs[i]);
+    }
+
+    tabs.forEach(function (tab, i) {
+      tab.addEventListener('click', function () { activate(i); });
+      tab.addEventListener('keydown', function (e) {
+        var n = null, last = tabs.length - 1;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = (i + 1) % tabs.length;
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = (i - 1 + tabs.length) % tabs.length;
+        else if (e.key === 'Home') n = 0;
+        else if (e.key === 'End') n = last;
+        if (n !== null) { e.preventDefault(); activate(n, true); }
+      });
+    });
+
+    // initial: hide non-active panels, place the indicator
+    panels.forEach(function (pn) { if (!pn.classList.contains('is-active')) pn.setAttribute('hidden', ''); });
+    function placeInit() { moveInd(root.querySelector('.lts-lce-tab.is-active') || tabs[0]); }
+    placeInit();
+    // re-measure once webfont (Nunito) settles, and on resize
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeInit);
+    var rt;
+    window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(placeInit, 120); });
+  }
+  function boot() { [].forEach.call(document.querySelectorAll('[data-lts-lce]'), initLce); }
+  if (document.readyState !== 'loading') boot();
+  else document.addEventListener('DOMContentLoaded', boot);
+  document.addEventListener('shopify:section:load', function (e) {
+    var r = (e.target || document).querySelector('[data-lts-lce]');
+    if (r) { delete r.dataset.lceReady; r.classList.remove('lts-lce-js'); initLce(r); }
+  });
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Licence explainer",
+  "tag": "section",
+  "class": "lts-lce-section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Exactly what each licence includes" },
+    { "type": "text", "id": "price_prefix", "label": "Price prefix", "default": "from" }
+  ],
+  "blocks": [
+    {
+      "type": "licence",
+      "name": "Licence",
+      "settings": [
+        { "type": "text", "id": "icon", "label": "Icon (emoji)" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Copyright" },
+        { "type": "text", "id": "tagline", "label": "Tagline", "default": "Just in the room" },
+        { "type": "text", "id": "product", "label": "Product handle (live price)", "default": "copyright-licence" },
+        {
+          "type": "select",
+          "id": "layout",
+          "label": "Layout",
+          "options": [
+            { "value": "can_need", "label": "Can / Need (two columns)" },
+            { "value": "full", "label": "Full (intro + single list)" }
+          ],
+          "default": "can_need"
+        },
+        { "type": "header", "content": "Can / Need layout" },
+        { "type": "text", "id": "can_heading", "label": "Can heading", "default": "You can" },
+        { "type": "textarea", "id": "can_list", "label": "Can list (one item per line)" },
+        { "type": "text", "id": "need_heading", "label": "Need heading", "default": "You will need All-in-One to" },
+        { "type": "textarea", "id": "need_list", "label": "Need list (one item per line)" },
+        { "type": "header", "content": "Full layout" },
+        { "type": "text", "id": "full_intro", "label": "Full intro paragraph" },
+        { "type": "textarea", "id": "full_list", "label": "Full list (one item per line)" },
+        { "type": "header", "content": "Style + CTA" },
+        { "type": "checkbox", "id": "quiet", "label": "Subdued header tint", "default": false },
+        { "type": "text", "id": "button_label", "label": "Button label", "default": "Choose" },
+        { "type": "text", "id": "button_url", "label": "Button URL" }
+      ]
+    }
+  ],
+  "enabled_on": { "templates": ["page"] },
+  "presets": [
+    {
+      "name": "Licence explainer",
+      "blocks": [
+        {
+          "type": "licence",
+          "settings": {
+            "icon": "🔊",
+            "name": "Copyright",
+            "tagline": "Just in the room",
+            "product": "copyright-licence",
+            "layout": "can_need",
+            "can_heading": "You can",
+            "can_list": "Play our tracks, sing and perform our songs live\nPrint lyrics in song sheets, slides, programmes and songbooks\nProject the words on screen\nShow our music videos on the screen in the room\nStore the files on your computers and presentation software\nRecord your own audio or video of your performance to keep and use within your church or school\nTranslate lyrics into another language (with our approval)",
+            "need_heading": "You will need All-in-One to",
+            "need_list": "Livestream your service or performance\nUpload your recording to YouTube, Facebook or social media\nPut any video containing our music on a website\nShare a recording publicly outside your church or school",
+            "quiet": false,
+            "button_label": "Choose Copyright",
+            "button_url": "/pages/licence-builder?licence=copyright"
+          }
+        },
+        {
+          "type": "licence",
+          "settings": {
+            "icon": "✨",
+            "name": "All-in-One",
+            "tagline": "In the room and online",
+            "product": "all-in-one-licence",
+            "layout": "full",
+            "full_intro": "Everything in the room, plus everything online, for less than buying the rights separately:",
+            "full_list": "Play, sing and perform live\nPrint, project and store lyrics\nShow our videos in the room\nRecord your own performances\nTranslate lyrics (with approval)\nLivestream your services and performances\nUpload to YouTube and social media\nShare recordings with your community",
+            "quiet": false,
+            "button_label": "Choose All-in-One",
+            "button_url": "/pages/licence-builder?licence=all_in_one"
+          }
+        },
+        {
+          "type": "licence",
+          "settings": {
+            "icon": "🎬",
+            "name": "Streaming only",
+            "tagline": "For online-only use",
+            "product": "streaming-licence",
+            "layout": "can_need",
+            "can_heading": "You can",
+            "can_list": "Livestream your performances online\nUpload to YouTube, Facebook and social media\nKeep recordings online for people to watch back\nShare recordings with your audience online",
+            "need_heading": "You will need Copyright (or All-in-One) to",
+            "need_list": "Print or project the lyrics in a room\nRecord and keep performances for in-room use",
+            "quiet": true,
+            "button_label": "Choose Streaming",
+            "button_url": "/pages/licence-builder?licence=streaming"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,132 @@
+{%- comment -%}
+  Full-screen search overlay (all breakpoints).
+
+  Reuses the theme's existing Shopify predictive-search engine verbatim:
+    - <predictive-search> custom element (assets/predictive-search.js) binds to the
+      inner form's input[role="combobox"] on construction. Typing fires the debounced
+      `input` handler -> fetch(routes.predictive_search_url?q=…&section_id=predictive-search)
+      -> renders the returned markup into <predictive-search-results>. The overlay does
+      NOT touch that pipeline; it only shows/hides the whole overlay container.
+    - The <details>/<summary> disclosure inside is required by the element (its base class
+      is MenuDrawer and open()/close() toggle it). We keep it present but visually flatten
+      it — the overlay itself is the disclosure surface, so the details stays permanently
+      "open" and the summary is hidden.
+
+  Open/close + scroll-lock is handled by assets/search-overlay.js (loaded from header.liquid).
+
+  Chips: purely visual filter affordances for now. "All" is active by default. They do NOT
+  re-scope the live predictive fetch (that always returns product/article/page); they exist
+  to steer the full /search submit — see search-overlay.js which rewrites the form's hidden
+  `type` field on chip click so pressing Enter lands on a filtered results page.
+
+  Falls back to a plain /search form when settings.enable_predictive_search is off.
+{%- endcomment -%}
+
+{%- assign placeholder = 'search.placeholder' | t -%}
+
+<div
+  class="search-overlay"
+  id="SearchOverlay"
+  role="dialog"
+  aria-modal="true"
+  aria-label="{{- 'accessibility.search' | t -}}"
+  aria-hidden="true"
+  hidden
+>
+  <div class="search-overlay__top">
+    <a href="{{- routes.root_url -}}" class="search-overlay__logo inline-unstyled-link focus-inset" style="--i:0">
+      {%- if section.settings.logo != blank -%}
+        <img
+          src="{{- section.settings.logo | image_url: width: 220 -}}"
+          loading="lazy"
+          width="{{- section.settings.logo.width -}}"
+          height="{{- section.settings.logo.height -}}"
+          alt="{{- section.settings.logo.alt | default: shop.name | escape -}}"
+        >
+      {%- else -%}
+        <span class="search-overlay__logo-text">{{- shop.name | escape -}}</span>
+      {%- endif -%}
+    </a>
+
+    <button
+      type="button"
+      class="button-reset search-overlay__close"
+      data-search-close
+      aria-label="{{- 'accessibility.close' | t -}}"
+      style="--i:0"
+    >
+      {%- render 'icon-close' -%}
+    </button>
+  </div><!-- /.search-overlay__top -->
+
+  <div class="search-overlay__body">
+    {%- if settings.enable_predictive_search -%}
+      <predictive-search class="no-js-hidden search-overlay__predictive" data-section-id="predictive-search">
+        <details class="search-overlay__disclosure" open>
+          <summary class="search-overlay__summary visually-hidden">
+            {{- 'accessibility.search' | t -}}
+          </summary>
+
+          <div class="search-overlay__field-wrap motion-reduce" style="--i:1">
+            {%-
+              liquid
+              capture search_input_attr
+                echo 'role="combobox" '
+                echo 'aria-expanded="false" '
+                echo 'aria-owns="predictive-search-results-list" '
+                echo 'aria-controls="predictive-search-results-list" '
+                echo 'aria-haspopup="listbox" '
+                echo 'aria-autocomplete="list" '
+                echo 'autocorrect="off" '
+                echo 'autocomplete="off" '
+                echo 'autocapitalize="off" '
+                echo 'spellcheck="false" '
+                echo 'data-search-overlay-input'
+              endcapture
+
+              render 'form-search', namespace: 'SearchOverlay', input_attr: search_input_attr, class: 'search-overlay__form', placeholder: placeholder, hide_button: true
+            -%}
+
+            <predictive-search-results class="search-overlay__results"></predictive-search-results>
+          </div><!-- /.search-overlay__field-wrap -->
+        </details>
+      </predictive-search>
+    {%- else -%}
+      {%- comment -%} No predictive search: plain /search form still fully works. {%- endcomment -%}
+      <div class="search-overlay__field-wrap" style="--i:1">
+        {%-
+          liquid
+          capture search_input_attr
+            echo 'autocorrect="off" '
+            echo 'autocomplete="off" '
+            echo 'autocapitalize="off" '
+            echo 'spellcheck="false" '
+            echo 'data-search-overlay-input'
+          endcapture
+
+          render 'form-search', namespace: 'SearchOverlay', input_attr: search_input_attr, class: 'search-overlay__form', placeholder: placeholder, hide_button: true
+        -%}
+      </div><!-- /.search-overlay__field-wrap -->
+    {%- endif -%}
+
+    {%- comment -%} Visual filter chips. "All" active by default. {%- endcomment -%}
+    <div class="search-overlay__chips" role="group" aria-label="{{- 'accessibility.search' | t -}}" style="--i:2">
+      <button type="button" class="search-overlay__chip is-active" data-search-chip data-search-type="">All</button>
+      <button type="button" class="search-overlay__chip" data-search-chip data-search-type="product">Songs</button>
+      <button type="button" class="search-overlay__chip" data-search-chip data-search-type="product">Shop</button>
+      <button type="button" class="search-overlay__chip" data-search-chip data-search-type="article,page">Blog &amp; pages</button>
+    </div><!-- /.search-overlay__chips -->
+
+    {%- comment -%} Popular searches — a few hardcoded jumping-off points. {%- endcomment -%}
+    <div class="search-overlay__sec" style="--i:3">
+      <p class="search-overlay__sec-title h6">Popular searches</p>
+      <div class="search-overlay__pills">
+        <a class="search-overlay__pill" href="{{ routes.search_url }}?q=Jingle+Bells">Jingle Bells</a>
+        <a class="search-overlay__pill" href="{{ routes.search_url }}?q=Nativity">Nativity songs</a>
+        <a class="search-overlay__pill" href="{{ routes.search_url }}?q=Backing+track">Backing tracks</a>
+        <a class="search-overlay__pill" href="{{ routes.search_url }}?q=Streaming+licence">Streaming licence</a>
+        <a class="search-overlay__pill" href="{{ routes.search_url }}?q=Twinkle+Twinkle">Twinkle Twinkle</a>
+      </div>
+    </div><!-- /.search-overlay__sec -->
+  </div><!-- /.search-overlay__body -->
+</div><!-- /.search-overlay -->

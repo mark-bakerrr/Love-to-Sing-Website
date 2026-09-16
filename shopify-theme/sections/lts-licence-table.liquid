@@ -1,0 +1,316 @@
+{%- comment -%}
+  lts-licence-table
+  Standalone, theme-editor-editable version of the 2-column comparison table
+  (extracted from the lts-licence-comparison monolith, blocks 3+4).
+
+  Copyright vs All-in-One. Column headers show LIVE "from" prices read from the
+  published licence products via all_products[handle].price_min (never hardcoded,
+  trailing .00 stripped). Every "Choose" CTA links to
+  /pages/licence-builder?licence=<grant> so the builder preselects the grant.
+
+  Anchor: the outermost wrapper carries id="{{ section.settings.anchor_id }}"
+  (default "pricing") so a button elsewhere on the page can link to #pricing and
+  scroll here. A separate inner wrapper carries the CSS-scoping id.
+
+  Blocks:
+    - group : full-width red uppercase group heading row
+    - row   : feature label + column A cell (soft tick / dash) + column B cell
+              (solid tick / dash). Ticks/dashes keep the .lts-lc-sr screen-reader
+              text + aria-hidden glyph for accessibility.
+{%- endcomment -%}
+
+{%- comment -%} Resolve the two licence products by handle for live "from" prices. {%- endcomment -%}
+{%- assign p_a = all_products[section.settings.col_a_product] -%}
+{%- assign p_b = all_products[section.settings.col_b_product] -%}
+{%- assign p_c = all_products[section.settings.col_c_product] -%}
+
+{%- comment -%}
+  Per-band price blob for the two column products, so the JS can swap each
+  header's "from $X" for the exact band price when the size picker fires
+  lts:size-change. Shape: { "a": { "<band>": <price>, ... }, "b": { ... } }.
+  Each variant's option1 is like "Band 5"; strip "Band " to get the band key.
+{%- endcomment -%}
+<script id="lts-lct-prices" type="application/json">{ "a": {
+{%- if p_a != blank -%}{%- for v in p_a.variants -%}"{{ v.option1 | remove: 'Band ' }}": {{ v.price | money_without_currency | remove: ',' }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}{%- endif -%}
+}, "b": {
+{%- if p_b != blank -%}{%- for v in p_b.variants -%}"{{ v.option1 | remove: 'Band ' }}": {{ v.price | money_without_currency | remove: ',' }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}{%- endif -%}
+}, "c": {
+{%- if p_c != blank -%}{%- for v in p_c.variants -%}"{{ v.option1 | remove: 'Band ' }}": {{ v.price | money_without_currency | remove: ',' }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}{%- endif -%}
+} }</script>
+
+<div id="{{ section.settings.anchor_id }}" class="lts-lct-anchor">
+  <div class="lts-lct" id="lts-lct-{{ section.id }}">
+    <section class="lts-lct-blk lts-lct-tint">
+      <div class="lts-lct-wrap">
+        {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+          <div class="lts-lct-headc lts-lct-rise">
+            {%- if section.settings.heading != blank -%}<h2>{{ section.settings.heading | escape }}</h2>{%- endif -%}
+            {%- if section.settings.subheading != blank -%}<p class="lts-lct-sub">{{ section.settings.subheading | escape }}</p>{%- endif -%}
+          </div>
+        {%- endif -%}
+
+        <div class="lts-lct-cmp lts-lct-rise" style="animation-delay:.08s">
+          <div class="lts-lct-cmpgrid">
+            {%- comment -%} ===== column headers ===== {%- endcomment -%}
+            <div class="lts-lct-frow lts-lct-frow-top"></div>
+            <div class="lts-lct-cell lts-lct-ph">
+              <span class="lts-lct-nm">{{ section.settings.col_a_name | escape }}</span>
+              {%- if section.settings.col_a_desc != blank -%}<span class="lts-lct-ds">{{ section.settings.col_a_desc | escape }}</span>{%- endif -%}
+              {%- if p_a != blank -%}<span class="lts-lct-pr" data-col="a" data-prefix="{{ section.settings.price_prefix | escape }}"><span data-affix>{{ section.settings.price_prefix | escape }} </span><b data-price>{{ p_a.price_min | money | remove: '.00' }}</b></span>{%- endif -%}
+              {%- if section.settings.col_a_button_label != blank -%}<a class="lts-lct-btn" href="{{ section.settings.col_a_button_url }}">{{ section.settings.col_a_button_label | escape }}</a>{%- endif -%}
+            </div>
+            <div class="lts-lct-cell lts-lct-ph lts-lct-c3">
+              {%- if section.settings.col_b_badge != blank -%}<span class="lts-lct-hpill">{{ section.settings.col_b_badge | escape }}</span>{%- endif -%}
+              <span class="lts-lct-nm">{{ section.settings.col_b_name | escape }}</span>
+              {%- if section.settings.col_b_desc != blank -%}<span class="lts-lct-ds">{{ section.settings.col_b_desc | escape }}</span>{%- endif -%}
+              {%- if p_b != blank -%}<span class="lts-lct-pr" data-col="b" data-prefix="{{ section.settings.price_prefix | escape }}"><span data-affix>{{ section.settings.price_prefix | escape }} </span><b data-price>{{ p_b.price_min | money | remove: '.00' }}</b></span>{%- endif -%}
+              {%- if section.settings.col_b_button_label != blank -%}<a class="lts-lct-btn lts-lct-solid" href="{{ section.settings.col_b_button_url }}">{{ section.settings.col_b_button_label | escape }}</a>{%- endif -%}
+            </div>
+            <div class="lts-lct-cell lts-lct-ph">
+              <span class="lts-lct-nm">{{ section.settings.col_c_name | escape }}</span>
+              {%- if section.settings.col_c_desc != blank -%}<span class="lts-lct-ds">{{ section.settings.col_c_desc | escape }}</span>{%- endif -%}
+              {%- if p_c != blank -%}<span class="lts-lct-pr" data-col="c" data-prefix="{{ section.settings.price_prefix | escape }}"><span data-affix>{{ section.settings.price_prefix | escape }} </span><b data-price>{{ p_c.price_min | money | remove: '.00' }}</b></span>{%- endif -%}
+              {%- if section.settings.col_c_button_label != blank -%}<a class="lts-lct-btn" href="{{ section.settings.col_c_button_url }}">{{ section.settings.col_c_button_label | escape }}</a>{%- endif -%}
+            </div>
+
+            {%- comment -%} ===== rows + group headings from blocks ===== {%- endcomment -%}
+            {%- for block in section.blocks -%}
+              {%- case block.type -%}
+                {%- when 'group' -%}
+                  <div class="lts-lct-grouprow" {{ block.shopify_attributes }}>{{ block.settings.title | escape }}</div>
+                {%- when 'row' -%}
+                  {%- assign is_last = false -%}
+                  {%- if forloop.last -%}{%- assign is_last = true -%}{%- endif -%}
+                  <div class="lts-lct-frow{% if is_last %} lts-lct-last{% endif %}" {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</div>
+                  <div class="lts-lct-cell{% if is_last %} lts-lct-last{% endif %}">
+                    {%- if block.settings.col_a -%}
+                      <span class="lts-lct-tick lts-lct-soft" aria-hidden="true">&#10003;</span><span class="lts-lct-sr">Included</span>
+                    {%- else -%}
+                      <span class="lts-lct-dash" aria-hidden="true"></span><span class="lts-lct-sr">Not included</span>
+                    {%- endif -%}
+                  </div>
+                  <div class="lts-lct-cell lts-lct-c3{% if is_last %} lts-lct-last{% endif %}">
+                    {%- if block.settings.col_b -%}
+                      <span class="lts-lct-tick" aria-hidden="true">&#10003;</span><span class="lts-lct-sr">Included</span>
+                    {%- else -%}
+                      <span class="lts-lct-dash" aria-hidden="true"></span><span class="lts-lct-sr">Not included</span>
+                    {%- endif -%}
+                  </div>
+                  <div class="lts-lct-cell{% if is_last %} lts-lct-last{% endif %}">
+                    {%- if block.settings.col_c -%}
+                      <span class="lts-lct-tick lts-lct-soft" aria-hidden="true">&#10003;</span><span class="lts-lct-sr">Included</span>
+                    {%- else -%}
+                      <span class="lts-lct-dash" aria-hidden="true"></span><span class="lts-lct-sr">Not included</span>
+                    {%- endif -%}
+                  </div>
+              {%- endcase -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+{% stylesheet %}
+.lts-lct{
+  --lc-red:#c8102e; --lc-red-strong:#b0102a; --lc-red-deep:#8f0f24; --lc-red-ink:#5e0a18;
+  --lc-red-50:#fdeef0; --lc-red-100:#fbdbe0;
+  --lc-ink:#241a17; --lc-body:#4a423e; --lc-muted:#736a65; --lc-line:#efe7e3; --lc-hair:#f4eeeb;
+  --lc-bg:#fffefe; --lc-surface:#fff;
+  --lc-r:14px; --lc-r-lg:18px;
+  --lc-shadow-sm:0 1px 2px rgba(60,20,25,.06);
+  --lc-shadow:0 10px 24px -14px rgba(90,20,30,.30);
+  --lc-ok:0 8px 30px -12px rgba(200,16,46,.35);
+  --lc-e:cubic-bezier(.2,.7,.2,1);
+  font-family:'Nunito',system-ui,'Segoe UI',Roboto,sans-serif;color:var(--lc-body);line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.lts-lct *{box-sizing:border-box}
+.lts-lct .lts-lct-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+.lts-lct .lts-lct-wrap{max-width:1000px;margin:0 auto;padding:0 22px}
+.lts-lct h2{color:var(--lc-ink);text-wrap:balance;margin:0;font-size:clamp(22px,3.6vw,30px);font-weight:900;letter-spacing:-.02em}
+.lts-lct .lts-lct-sub{font-size:clamp(15px,2.2vw,18px);color:var(--lc-muted);max-width:60ch;text-wrap:pretty}
+.lts-lct a{color:inherit}
+
+/* reveal */
+.lts-lct .lts-lct-rise{opacity:0;transform:translateY(14px);animation:lts-lct-rise .7s var(--lc-e) forwards}
+@keyframes lts-lct-rise{to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.lts-lct .lts-lct-rise{animation:none;opacity:1;transform:none}}
+
+.lts-lct .lts-lct-blk{padding:clamp(44px,7vw,72px) 0}
+.lts-lct .lts-lct-tint{background:#fdfafa;border-top:1px solid var(--lc-hair);border-bottom:1px solid var(--lc-hair)}
+.lts-lct .lts-lct-headc{text-align:center;max-width:62ch;margin:0 auto 6px}
+.lts-lct .lts-lct-headc .lts-lct-sub{margin:8px auto 0}
+
+/* ===== comparison ===== */
+.lts-lct .lts-lct-cmp{margin-top:30px;position:relative}
+.lts-lct .lts-lct-cmpgrid{display:grid;grid-template-columns:minmax(200px,1.7fr) 1fr 1fr 1fr;background:var(--lc-surface);border:1px solid var(--lc-line);border-radius:var(--lc-r-lg);overflow:hidden}
+.lts-lct .lts-lct-cmpgrid > *{padding:15px 18px;display:flex;align-items:center;border-bottom:1px solid var(--lc-hair)}
+.lts-lct .lts-lct-cmpgrid .lts-lct-c3{background:var(--lc-red-50)}
+.lts-lct .lts-lct-cmpgrid .lts-lct-frow{grid-column:1;color:var(--lc-body);font-weight:600;font-size:15px}
+.lts-lct .lts-lct-cmpgrid .lts-lct-frow-top{border-bottom:1px solid var(--lc-line)}
+.lts-lct .lts-lct-cmpgrid .lts-lct-cell{justify-content:center}
+.lts-lct .lts-lct-cmpgrid .lts-lct-grouprow{grid-column:1 / -1;background:#fff;color:var(--lc-red);font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;padding-top:20px;padding-bottom:8px;border-bottom:0}
+.lts-lct .lts-lct-cmpgrid .lts-lct-last{border-bottom:0}
+.lts-lct .lts-lct-ph{position:relative;flex-direction:column;align-items:center;text-align:center;gap:2px;padding-top:38px;padding-bottom:22px;border-bottom:1px solid var(--lc-line)}
+.lts-lct .lts-lct-ph .lts-lct-nm{font-size:20px;font-weight:900;color:var(--lc-ink)}
+.lts-lct .lts-lct-ph .lts-lct-ds{font-size:12.5px;color:var(--lc-muted);font-weight:700}
+.lts-lct .lts-lct-ph .lts-lct-pr{margin-top:8px;font-size:13px;color:var(--lc-muted);font-weight:700}
+.lts-lct .lts-lct-ph .lts-lct-pr b{display:block;font-size:26px;color:var(--lc-ink);font-weight:900;line-height:1.05}
+.lts-lct .lts-lct-ph .lts-lct-btn{margin-top:12px}
+.lts-lct .lts-lct-hpill{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--lc-red);color:#fff;font-size:10.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:5px 13px;border-radius:999px;white-space:nowrap;box-shadow:var(--lc-ok)}
+.lts-lct .lts-lct-tick{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--lc-red);color:#fff;font-size:13px;font-weight:900}
+.lts-lct .lts-lct-tick.lts-lct-soft{background:var(--lc-red-50);color:var(--lc-red)}
+.lts-lct .lts-lct-dash{width:16px;height:2px;border-radius:2px;background:#e2d6d2;display:inline-block}
+
+.lts-lct .lts-lct-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:800;font-size:14px;padding:11px 20px;border-radius:999px;cursor:pointer;text-decoration:none;border:1.5px solid var(--lc-red);background:#fff;color:var(--lc-red);transition:transform .2s var(--lc-e),box-shadow .2s var(--lc-e),background .2s}
+.lts-lct .lts-lct-btn:hover{transform:translateY(-2px)}
+.lts-lct .lts-lct-btn.lts-lct-solid{background:var(--lc-red);color:#fff;border-color:var(--lc-red);box-shadow:var(--lc-ok)}
+.lts-lct .lts-lct-btn.lts-lct-solid:hover{background:var(--lc-red-strong)}
+
+@media(max-width:860px){
+  .lts-lct .lts-lct-cmpgrid{grid-template-columns:minmax(140px,1.4fr) 1fr 1fr 1fr}
+}
+/* Small screens: the grid can't shrink below its header content (name + price +
+   button), so let the table scroll horizontally inside its own container rather
+   than overflow the page. A faint right-edge fade hints there's more to see. */
+@media(max-width:620px){
+  .lts-lct .lts-lct-cmp{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .lts-lct .lts-lct-cmpgrid{min-width:660px;grid-template-columns:minmax(150px,1.3fr) 1fr 1fr 1fr}
+  .lts-lct .lts-lct-cmpgrid > *{padding:12px 12px}
+  .lts-lct .lts-lct-ph{padding-top:34px;padding-bottom:16px}
+}
+{% endstylesheet %}
+
+{% javascript %}
+// Live column-header prices: react to the size picker's lts:size-change event.
+// When a band is set, show that band's exact price for each column product and
+// drop the "from" prefix; when band is null, restore the SSR "from $X" fallback.
+// Self-contained: depends only on the document event + the #lts-lct-prices blob.
+(function(){
+  var blobEl = document.getElementById('lts-lct-prices');
+  if (!blobEl) return;
+  var PRICES;
+  try { PRICES = JSON.parse(blobEl.textContent || '{}'); }
+  catch (e) { return; } // malformed blob: leave SSR fallback untouched
+
+  // Mirror the pricing builder's money(): whole dollars, cents only if present.
+  function money(n){
+    return '$' + (n % 1 === 0 ? String(n) : n.toFixed(2));
+  }
+
+  // Cache each column's price element + its SSR "from $X" fallback (affix + price)
+  // so band:null can restore exactly what the server rendered.
+  var cols = {};
+  var prEls = document.querySelectorAll('.lts-lct-pr[data-col]');
+  for (var i = 0; i < prEls.length; i++){
+    var el = prEls[i];
+    var col = el.getAttribute('data-col');
+    var affix = el.querySelector('[data-affix]');
+    var price = el.querySelector('[data-price]');
+    if (!price) continue;
+    cols[col] = {
+      affix: affix,
+      price: price,
+      ssrAffix: affix ? affix.textContent : '',
+      ssrPrice: price.textContent
+    };
+  }
+
+  function apply(band){
+    for (var col in cols){
+      if (!cols.hasOwnProperty(col)) continue;
+      var c = cols[col];
+      var bandPrice = (band != null && PRICES[col]) ? PRICES[col][String(band)] : undefined;
+      if (band != null && bandPrice != null){
+        // Exact band price: drop the "from" affix, show the number.
+        if (c.affix) c.affix.textContent = '';
+        c.price.textContent = money(bandPrice);
+      } else {
+        // No band (or missing price): restore the SSR "from $X" fallback.
+        if (c.affix) c.affix.textContent = c.ssrAffix;
+        c.price.textContent = c.ssrPrice;
+      }
+    }
+  }
+
+  document.addEventListener('lts:size-change', function(e){
+    var band = (e && e.detail) ? e.detail.band : null;
+    apply(band);
+  });
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Licence table",
+  "tag": "section",
+  "class": "lts-lct-section",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anchor id (link with #)", "default": "pricing" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Copyright, Streaming, or All-in-One?" },
+    { "type": "text", "id": "subheading", "label": "Subheading", "default": "Pick the licence that fits how you use the music." },
+    { "type": "text", "id": "price_prefix", "label": "Price prefix", "default": "from" },
+    { "type": "header", "content": "Column A" },
+    { "type": "text", "id": "col_a_name", "label": "Column A name", "default": "Copyright" },
+    { "type": "text", "id": "col_a_desc", "label": "Column A description", "default": "Just in the room" },
+    { "type": "text", "id": "col_a_product", "label": "Column A product handle (live price)", "default": "copyright-licence" },
+    { "type": "text", "id": "col_a_button_label", "label": "Column A button label", "default": "Choose" },
+    { "type": "text", "id": "col_a_button_url", "label": "Column A button URL", "default": "/pages/licence-builder?licence=copyright" },
+    { "type": "header", "content": "Column B (featured)" },
+    { "type": "text", "id": "col_b_name", "label": "Column B name", "default": "All-in-One" },
+    { "type": "text", "id": "col_b_desc", "label": "Column B description", "default": "Room and online" },
+    { "type": "text", "id": "col_b_badge", "label": "Column B badge", "default": "Most popular" },
+    { "type": "text", "id": "col_b_product", "label": "Column B product handle (live price)", "default": "all-in-one-licence" },
+    { "type": "text", "id": "col_b_button_label", "label": "Column B button label", "default": "Choose" },
+    { "type": "text", "id": "col_b_button_url", "label": "Column B button URL", "default": "/pages/licence-builder?licence=all_in_one" },
+    { "type": "header", "content": "Column C" },
+    { "type": "text", "id": "col_c_name", "label": "Column C name", "default": "Streaming" },
+    { "type": "text", "id": "col_c_desc", "label": "Column C description", "default": "Online only" },
+    { "type": "text", "id": "col_c_product", "label": "Column C product handle (live price)", "default": "streaming-licence" },
+    { "type": "text", "id": "col_c_button_label", "label": "Column C button label", "default": "Choose" },
+    { "type": "text", "id": "col_c_button_url", "label": "Column C button URL", "default": "/pages/licence-builder?licence=streaming" }
+  ],
+  "blocks": [
+    {
+      "type": "group",
+      "name": "Group heading",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Group title", "default": "Group" }
+      ]
+    },
+    {
+      "type": "row",
+      "name": "Feature row",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Feature label", "default": "Feature" },
+        { "type": "checkbox", "id": "col_a", "label": "Included in Column A", "default": true },
+        { "type": "checkbox", "id": "col_b", "label": "Included in Column B", "default": true },
+        { "type": "checkbox", "id": "col_c", "label": "Included in Column C", "default": false }
+      ]
+    }
+  ],
+  "enabled_on": { "templates": ["page"] },
+  "presets": [
+    {
+      "name": "Licence table",
+      "blocks": [
+        { "type": "group", "settings": { "title": "In your services and lessons" } },
+        { "type": "row", "settings": { "label": "Print lyrics and song sheets", "col_a": true, "col_b": true, "col_c": false } },
+        { "type": "row", "settings": { "label": "Project words on screen", "col_a": true, "col_b": true, "col_c": false } },
+        { "type": "row", "settings": { "label": "Show our videos in the room", "col_a": true, "col_b": true, "col_c": false } },
+        { "type": "row", "settings": { "label": "Record your live performances", "col_a": true, "col_b": true, "col_c": false } },
+        { "type": "row", "settings": { "label": "Translate lyrics (with approval)", "col_a": true, "col_b": true, "col_c": false } },
+        { "type": "group", "settings": { "title": "Online" } },
+        { "type": "row", "settings": { "label": "Livestream your services", "col_a": false, "col_b": true, "col_c": true } },
+        { "type": "row", "settings": { "label": "Upload to YouTube and socials", "col_a": false, "col_b": true, "col_c": true } },
+        { "type": "row", "settings": { "label": "Share recordings with your community", "col_a": false, "col_b": true, "col_c": true } },
+        { "type": "group", "settings": { "title": "Every licence" } },
+        { "type": "row", "settings": { "label": "Covers all your purchases", "col_a": true, "col_b": true, "col_c": true } },
+        { "type": "row", "settings": { "label": "Valid worldwide, 1 year", "col_a": true, "col_b": true, "col_c": true } },
+        { "type": "row", "settings": { "label": "Download your files", "col_a": true, "col_b": true, "col_c": true } }
+      ]
+    }
+  ]
+}
+{% endschema %}

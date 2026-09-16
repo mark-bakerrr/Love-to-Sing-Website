@@ -41,49 +41,42 @@
     "faq_TP63FD": {
       "type": "faq",
       "blocks": {
-        "faq-spacing": {
-          "type": "spacing",
-          "static": true,
+        "grp_downloads": {
+          "type": "faq_group",
           "settings": {
-            "spacing_top": 80,
-            "spacing_bottom": 40,
-            "spacing_top_mobile": 40,
-            "spacing_bottom_mobile": 20
-          },
-          "blocks": {}
+            "faq_group": "faq-downloads",
+            "max_items": 0
+          }
+        },
+        "grp_account": {
+          "type": "faq_group",
+          "settings": {
+            "faq_group": "faq-account",
+            "max_items": 0
+          }
+        },
+        "grp_licenses": {
+          "type": "faq_group",
+          "settings": {
+            "faq_group": "faq-licenses",
+            "max_items": 0
+          }
         }
       },
+      "block_order": [
+        "grp_downloads",
+        "grp_account",
+        "grp_licenses"
+      ],
       "name": "FAQ",
       "settings": {
         "border_top": false,
         "border_bottom": false,
-        "title": "Category",
-        "subtitle": "Find answers to your most pressing questions about music licenses for Churches and Schools.",
-        "faq_group": "faq-1"
-      }
-    },
-    "faq_8qghkr": {
-      "type": "faq",
-      "blocks": {
-        "faq-spacing": {
-          "type": "spacing",
-          "static": true,
-          "settings": {
-            "spacing_top": 40,
-            "spacing_bottom": 80,
-            "spacing_top_mobile": 20,
-            "spacing_bottom_mobile": 40
-          },
-          "blocks": {}
-        }
-      },
-      "name": "FAQ",
-      "settings": {
-        "border_top": false,
-        "border_bottom": false,
-        "title": "Category",
-        "subtitle": "Find answers to your most pressing questions about music licenses for Churches and Schools.",
-        "faq_group": "faq-2"
+        "open_first": false,
+        "title": "Frequently asked questions",
+        "subtitle": "Downloads, your account, and music licences.",
+        "padding_top": 80,
+        "padding_bottom": 80
       }
     },
     "button_text_ek8KFB": {
@@ -143,7 +136,6 @@
     "main",
     "hero_banner_F7tnPc",
     "faq_TP63FD",
-    "faq_8qghkr",
     "button_text_ek8KFB",
     "newsletter_banner_DQjXij"
   ]

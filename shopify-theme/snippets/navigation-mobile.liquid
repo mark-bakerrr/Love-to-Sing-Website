@@ -1,7 +1,24 @@
 {%- comment -%}
-  Accepts:
+  Full-page mobile menu overlay (below 990px).
 
-  - menu {Linklist}
+  Reuses the existing <header-drawer> open/close machinery (assets/global.js):
+    - <header-drawer ... data-breakpoint="990"> — the custom element JS binds to.
+    - <details id="Details-menu-drawer-container"> + its <summary> burger —
+      clicking the summary toggles `.menu-opening` on the details and calls
+      bodyScroll.lock(summary.nextElementSibling). The summary's NEXT sibling MUST
+      stay the overlay content div (#menu-drawer) so the scroll-lock targets it.
+    - [header-drawer="close-button"] — JS calls closeMenuDrawer() on click.
+  We do NOT use the old side-drawer drill-down (submenu-open / close-submenu):
+  each top-level item is a native <details> accordion (no JS needed).
+
+  The nav is the mobile linklist (`menu`) enriched by the typed `menu_item`
+  blocks (same normalised-title match as navigation-desktop.liquid), so mobile
+  mirrors desktop. Each top-level item dispatches by `menu_type` to a
+  links-only, mobile-appropriate accordion body.
+
+  Accepts:
+  - menu {Linklist}                 — the mobile linklist (settings.menu_mobile)
+  - menu_item_blocks {Array}        — section.blocks | where 'type','menu_item'
 {%- endcomment -%}
 
 <header-drawer class="header-drawer large-up-hide" data-breakpoint="990">
@@ -10,11 +27,26 @@
       {%- render 'icon', icon: 'burger' -%}
     </summary><!-- /.header-drawer__button focus-inset -->
 
-    <div class="header-drawer__content" id="menu-drawer" tabindex="-1">
-      <div class="header-drawer__inner">
-        <div class="header-drawer__head">
+    <div class="header-drawer__content mobile-overlay" id="menu-drawer" tabindex="-1">
+      <div class="header-drawer__inner mobile-overlay__inner">
+        {%- comment -%} Top bar: logo + close. {%- endcomment -%}
+        <div class="header-drawer__head mobile-overlay__top">
+          <a href="{{- routes.root_url -}}" class="mobile-overlay__logo inline-unstyled-link focus-inset">
+            {%- if section.settings.logo != blank -%}
+              <img
+                src="{{- section.settings.logo | image_url: width: 200 -}}"
+                loading="lazy"
+                width="{{- section.settings.logo.width -}}"
+                height="{{- section.settings.logo.height -}}"
+                alt="{{- section.settings.logo.alt | default: shop.name | escape -}}"
+              >
+            {%- else -%}
+              <span class="mobile-overlay__logo-text">{{- shop.name | escape -}}</span>
+            {%- endif -%}
+          </a>
+
           <button
-            class="button-reset"
+            class="button-reset mobile-overlay__close"
             header-drawer="close-button"
           >
             <span class="visually-hidden">
@@ -23,17 +55,10 @@
 
             {%- render 'icon-close' -%}
           </button><!-- /.button-reset -->
+        </div><!-- /.mobile-overlay__top -->
 
-          {%- if shop.customer_accounts_enabled -%}
-            <div class="header-drawer__header-utils">
-              <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" class="header__utils-link full-unstyled-link focus-inset" title="{%- if customer -%}{{ 'accessibility.account' | t }}{%- else -%}{{ 'accessibility.sign_in' | t }}{%- endif -%}">
-                {%- render 'icon', icon: 'user' -%}
-              </a>
-            </div><!-- /.header-drawer__header-utils -->
-          {%- endif -%}
-        </div><!-- /.header-drawer__head -->
-
-        <div class="header-drawer__search">
+        {%- comment -%} Search row (predictive-search, Header namespace). {%- endcomment -%}
+        <div class="header-drawer__search mobile-overlay__search">
           <predictive-search class="no-js-hidden header-drawer__predictive-search">
             <div class="header-drawer__predictive-search-wrapper motion-reduce">
               {%-
@@ -57,116 +82,219 @@
               <predictive-search-results class="header-drawer__search-results"></predictive-search-results>
             </div>
           </predictive-search>
-        </div><!-- /.header-drawer__search -->
+        </div><!-- /.mobile-overlay__search -->
 
-        <nav class="header-drawer__nav">
-          <ul class="header-drawer__menu list-unstyled" role="list">
+        {%- comment -%} Nav = mobile linklist, enriched by typed menu_item blocks. {%- endcomment -%}
+        <nav class="header-drawer__nav mobile-overlay__nav">
+          <ul class="mobile-overlay__menu list-unstyled" role="list">
             {%- for link in menu.links -%}
-              <li class="header-drawer__menu-item">
-                {%- if link.links.size > 0 -%}
-                  <details id="Details-menu-drawer-menu-item-{{- forloop.index -}}">
-                    <summary class="header-drawer__link focus-inset{% if link.child_active %} is-current{% endif %}">
-                      <span>
-                        {{- link.title | escape -}}
-                      </span>
+              {%- liquid
+                # Match a typed menu_item block by normalised title (same as desktop).
+                assign link_key = link.title | strip | downcase
+                assign block_settings = ''
+                for candidate in menu_item_blocks
+                  assign candidate_key = candidate.settings.title | strip | downcase
+                  if candidate_key == link_key
+                    assign block_settings = candidate.settings
+                    break
+                  endif
+                endfor
 
-                      <i>
+                # Decide the menu type. No block (or a 'simple' block) → native links.
+                assign menu_type = 'simple'
+                if block_settings != '' and block_settings != blank
+                  assign menu_type = block_settings.menu_type
+                endif
+              -%}
+
+              {%- comment -%} Does this item have an expandable panel? {%- endcomment -%}
+              {%- liquid
+                assign has_panel = false
+                case menu_type
+                  when 'songs'
+                    for i in (1..6)
+                      assign k_coll = 'songs_cat' | append: i | append: '_collection'
+                      if block_settings[k_coll] != blank
+                        assign has_panel = true
+                        break
+                      endif
+                    endfor
+                  when 'shop'
+                    if block_settings.shop_menu != blank and block_settings.shop_menu.links.size > 0
+                      assign has_panel = true
+                    endif
+                  when 'discover'
+                    if block_settings.discover_links != blank and block_settings.discover_links.links.size > 0
+                      assign has_panel = true
+                    elsif block_settings.discover_blog != blank and block_settings.discover_blog.articles.size > 0
+                      assign has_panel = true
+                    endif
+                  when 'countdown'
+                    for i in (1..4)
+                      assign k_title = 'cd' | append: i | append: '_title'
+                      assign k_date = 'cd' | append: i | append: '_date'
+                      if block_settings[k_title] != blank or block_settings[k_date] != blank
+                        assign has_panel = true
+                        break
+                      endif
+                    endfor
+                  else
+                    if link.links.size > 0
+                      assign has_panel = true
+                    endif
+                endcase
+              -%}
+
+              <li class="mobile-overlay__item">
+                {%- if has_panel -%}
+                  <details class="mobile-overlay__details">
+                    <summary class="mobile-overlay__summary focus-inset{% if link.child_active %} is-current{% endif %}">
+                      <span>{{- link.title | escape -}}</span>
+                      <i class="mobile-overlay__chev">
                         {%- render 'icon', icon: 'chevron-right' -%}
                       </i>
                     </summary>
 
-                    <div class="header-drawer__submenu" id="link-{{- link.title | handle -}}" tabindex="-1">
-                      <ul class="header-drawer__menu list-unstyled" role="list" tabindex="-1">
-                        <li>
-                          <button
-                            class="button-reset header-drawer__submenu-close"
-                            header-drawer="close-submenu"
-                          >
-                            <i>
-                              {%- render 'icon', icon: 'chevron-left' -%}
-                            </i>
-
-                            <span>
-                              {{- 'accessibility.back' | t -}}
-                            </span>
-                          </button><!-- /.header-drawer__submenu-close -->
-                        </li>
-
-                        <li>
-                          <p class="header-drawer__submenu-title">
-                            {{- link.title | escape -}}
-                          </p><!-- /.header-drawer__submenu-title -->
-                        </li>
-
-                        {%- for child_link in link.links -%}
-                          <li class="header-drawer__submenu-item">
-                            {%- if child_link.links.size > 0 -%}
-                              <details id="Details-menu-drawer-submenu-{{- forloop.index -}}">
-                                <summary class="header-drawer__link focus-inset">
-                                  <span>
-                                    {{- child_link.title | escape -}}
-                                  </span>
-
-                                  <i>
-                                    {%- render 'icon', icon: 'chevron-right' -%}
-                                  </i>
-                                </summary>
-
-                                <div class="header-drawer__submenu" id="childlink-{{- child_link.title | handle -}}">
-                                  <ul class="header-drawer__menu list-unstyled" role="list" tabindex="-1">
-                                    <li>
-                                      <button
-                                        class="button-reset header-drawer__submenu-close"
-                                        header-drawer="close-submenu"
-                                      >
-                                        <i>
-                                          {%- render 'icon', icon: 'chevron-left' -%}
-                                        </i>
-
-                                        <span>
-                                          {{- 'accessibility.back' | t -}}
-                                        </span>
-                                      </button><!-- /.header-drawer__submenu-close -->
-                                    </li>
-
-                                    <li>
-                                      <p class="header-drawer__submenu-title">
-                                        {{- child_link.title | escape -}}
-                                      </p><!-- /.header-drawer__submenu-title -->
-                                    </li>
-
-                                    {%- for grand_child_link in child_link.links -%}
-                                      <li class="header-drawer__submenu-item">
-                                        <a href="{{- grand_child_link.url -}}" class="header-drawer__link full-unstyled-link focus-inset{% if grand_child_link.current %} is-current{% endif %}"{% if grand_child_link.current %} aria-current="page"{% endif %}>
-                                          {{- grand_child_link.title | escape -}}
-                                        </a>
-                                      </li><!-- /.header-drawer__submenu-item -->
-                                    {%- endfor -%}
-                                  </ul><!-- /.header-drawer__menu list-unstyled -->
-                                </div><!-- /.header-drawer__submenu -->
-                              </details>
-                            {%- else -%}
-                              <a href="{{- child_link.url -}}" class="header-drawer__link full-unstyled-link focus-inset{% if child_link.current %} is-current{% endif %}"{% if child_link.current %} aria-current="page"{% endif %}>
-                                {{- child_link.title | escape -}}
+                    <div class="mobile-overlay__sub">
+                      {%- case menu_type -%}
+                        {%- when 'songs' -%}
+                          {%- for i in (1..6) -%}
+                            {%- liquid
+                              assign prefix = 'songs_cat' | append: i
+                              assign k_coll = prefix | append: '_collection'
+                              assign k_label = prefix | append: '_label'
+                              assign coll = block_settings[k_coll]
+                              assign label = block_settings[k_label]
+                            -%}
+                            {%- if coll != blank -%}
+                              {%- assign cat_label = label | default: coll.title -%}
+                              <a href="{{ coll.url }}" class="mobile-overlay__sublink full-unstyled-link focus-inset">
+                                <span>{{ cat_label | escape }}</span>
                               </a>
                             {%- endif -%}
-                          </li><!-- /.header-drawer__submenu-item -->
-                        {%- endfor -%}
-                      </ul><!-- /.header-drawer__menu list-unstyled -->
-                    </div><!-- /.header-drawer__submenu -->
+                          {%- endfor -%}
+
+                        {%- when 'shop' -%}
+                          {%- for parent in block_settings.shop_menu.links -%}
+                            <a href="{{ parent.url }}" class="mobile-overlay__sublink full-unstyled-link focus-inset{% if parent.active %} is-active{% endif %}">
+                              <span>{{ parent.title | escape }}</span>
+                            </a>
+                            {%- if parent.links.size > 0 -%}
+                              {%- for child in parent.links -%}
+                                <a href="{{ child.url }}" class="mobile-overlay__sublink mobile-overlay__sublink--child full-unstyled-link focus-inset{% if child.active %} is-active{% endif %}">
+                                  <span>{{ child.title | escape }}</span>
+                                </a>
+                              {%- endfor -%}
+                            {%- endif -%}
+                          {%- endfor -%}
+
+                        {%- when 'discover' -%}
+                          {%- if block_settings.discover_links != blank -%}
+                            {%- for top in block_settings.discover_links.links -%}
+                              {%- if top.links.size > 0 -%}
+                                {%- for child in top.links -%}
+                                  <a href="{{ child.url }}" class="mobile-overlay__sublink full-unstyled-link focus-inset{% if child.active %} is-active{% endif %}">
+                                    <span>{{ child.title | escape }}</span>
+                                  </a>
+                                {%- endfor -%}
+                              {%- else -%}
+                                <a href="{{ top.url }}" class="mobile-overlay__sublink full-unstyled-link focus-inset{% if top.active %} is-active{% endif %}">
+                                  <span>{{ top.title | escape }}</span>
+                                </a>
+                              {%- endif -%}
+                            {%- endfor -%}
+                          {%- endif -%}
+                          {%- if block_settings.discover_blog != blank -%}
+                            {%- for article in block_settings.discover_blog.articles limit: 3 -%}
+                              <a href="{{ article.url }}" class="mobile-overlay__sublink mobile-overlay__sublink--child full-unstyled-link focus-inset">
+                                <span>{{ article.title | escape }}</span>
+                              </a>
+                            {%- endfor -%}
+                          {%- endif -%}
+
+                        {%- when 'countdown' -%}
+                          {%- for i in (1..4) -%}
+                            {%- liquid
+                              assign k_title = 'cd' | append: i | append: '_title'
+                              assign k_date = 'cd' | append: i | append: '_date'
+                              assign k_link = 'cd' | append: i | append: '_link'
+                              assign cd_title = block_settings[k_title]
+                              assign cd_date = block_settings[k_date]
+                              assign cd_link = block_settings[k_link]
+                            -%}
+                            {%- if cd_title != blank or cd_date != blank -%}
+                              {%- liquid
+                                assign target = cd_date | date: '%s' | plus: 0
+                                assign now = 'now' | date: '%s' | plus: 0
+                                assign days = target | minus: now | divided_by: 86400
+                                if days < 0
+                                  assign days = 0
+                                endif
+                                assign unit = 'days'
+                                assign title_down = cd_title | downcase
+                                if title_down contains 'christmas'
+                                  assign unit = 'sleeps'
+                                endif
+                                assign cd_display = cd_title | default: 'Countdown'
+                              -%}
+                              {%- if cd_link != blank -%}
+                                <a href="{{ cd_link }}" class="mobile-overlay__sublink full-unstyled-link focus-inset">
+                                  <span>{{ cd_display | escape }}</span>
+                                  <small class="mobile-overlay__sublink-meta">{{ days }} {{ unit }}</small>
+                                </a>
+                              {%- else -%}
+                                <span class="mobile-overlay__sublink mobile-overlay__sublink--static">
+                                  <span>{{ cd_display | escape }}</span>
+                                  <small class="mobile-overlay__sublink-meta">{{ days }} {{ unit }}</small>
+                                </span>
+                              {%- endif -%}
+                            {%- endif -%}
+                          {%- endfor -%}
+
+                        {%- else -%}
+                          {%- comment -%} simple / no block: native child links. {%- endcomment -%}
+                          {%- for child_link in link.links -%}
+                            <a href="{{ child_link.url }}" class="mobile-overlay__sublink full-unstyled-link focus-inset{% if child_link.current %} is-active{% endif %}"{% if child_link.current %} aria-current="page"{% endif %}>
+                              <span>{{ child_link.title | escape }}</span>
+                            </a>
+                            {%- if child_link.links.size > 0 -%}
+                              {%- for grand_child_link in child_link.links -%}
+                                <a href="{{ grand_child_link.url }}" class="mobile-overlay__sublink mobile-overlay__sublink--child full-unstyled-link focus-inset{% if grand_child_link.current %} is-active{% endif %}"{% if grand_child_link.current %} aria-current="page"{% endif %}>
+                                  <span>{{ grand_child_link.title | escape }}</span>
+                                </a>
+                              {%- endfor -%}
+                            {%- endif -%}
+                          {%- endfor -%}
+                      {%- endcase -%}
+                    </div><!-- /.mobile-overlay__sub -->
                   </details>
                 {%- else -%}
                   <a
                     href="{{- link.url -}}"
-                    class="header-drawer__link full-unstyled-link focus-inset{% if link.current %} is-current{% endif %}"
+                    class="mobile-overlay__flat full-unstyled-link focus-inset{% if link.current %} is-current{% endif %}"
                     {% if link.current %}aria-current="page"{% endif %}
                   >{{- link.title | escape -}}</a>
                 {%- endif -%}
-              </li><!-- /.header-drawer__menu-item -->
+              </li><!-- /.mobile-overlay__item -->
             {%- endfor -%}
-          </ul><!-- /.header-drawer__menu list-unstyled -->
-        </nav><!-- /.header-drawer__nav -->
-      </div><!-- /.header-drawer__inner -->
-    </div><!-- /#menu-drawer.header-drawer__content -->
-  </details><!-- /#Details-menu-drawer-container.header-drawer__container -->
+          </ul><!-- /.mobile-overlay__menu -->
+        </nav><!-- /.mobile-overlay__nav -->
+
+        {%- comment -%} Footer: Cart + Account (mirror header utils). {%- endcomment -%}
+        <div class="mobile-overlay__foot">
+          <a href="{{- routes.cart_url -}}" class="mobile-overlay__foot-link full-unstyled-link focus-inset">
+            {%- render 'icon', icon: 'cart' -%}
+            <span>{{- 'accessibility.cart' | t -}}</span>
+          </a>
+
+          {%- if shop.customer_accounts_enabled -%}
+            <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" class="mobile-overlay__foot-link full-unstyled-link focus-inset">
+              {%- render 'icon', icon: 'user' -%}
+              <span>{%- if customer -%}{{ 'accessibility.account' | t }}{%- else -%}{{ 'accessibility.sign_in' | t }}{%- endif -%}</span>
+            </a>
+          {%- endif -%}
+        </div><!-- /.mobile-overlay__foot -->
+      </div><!-- /.mobile-overlay__inner -->
+    </div><!-- /#menu-drawer.mobile-overlay -->
+  </details><!-- /#Details-menu-drawer-container -->
 </header-drawer><!-- /.header-drawer large-up-hide -->

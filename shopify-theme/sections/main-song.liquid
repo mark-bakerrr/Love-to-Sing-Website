@@ -11,8 +11,10 @@
   assign thumbnail = product.images[0] | image_url: width: 1080
   assign description = product.description
 
-  assign album = product.metafields.custom.album_product.value
-  assign video_purchase_url = product.metafields.my_fields.video_purchase_url
+  # WS3: `album` / `video_purchase_url` assigns removed — the shop drawer
+  # replaced the buttons that used them. To revert, restore these assigns:
+  #   album = product.metafields.custom.album_product.value
+  #   video_purchase_url = product.metafields.my_fields.video_purchase_url
   assign pdf_file = product.metafields.custom.pdf_lyric_sheet_download | file_url
   assign pdf = pdf_file | default: product.metafields.global.pdf
   assign lyrics = product.metafields.my_fields.song_lyrics
@@ -91,27 +93,87 @@
             </p><!-- /.main-song__description -->
           {%- endif -%}
 
-          {%- if album != blank or video_purchase_url != blank -%}
-            <div class="main-song__actions">
-              {%- if album != blank -%}
-                <a href="{{- album.url -}}" class="button button--full">
-                  <span>
-                    {% render 'icon-cart' %}
+          {%- comment -%}
+            WS3 shop drawer (epic #158): the album / buy-video buttons are
+            replaced by a single "Get the music" trigger that opens the shop
+            drawer (Shop Drawer app embed must be enabled for this theme).
+            Original buttons preserved below for instant revert.
 
-                    {{- 'song.buy_album' | t -}}
-                  </span>
-                </a><!-- /.button -->
-              {%- endif -%}
+            {%- if album != blank or video_purchase_url != blank -%}
+              <div class="main-song__actions">
+                {%- if album != blank -%}
+                  <a href="{{- album.url -}}" class="button button--full">
+                    <span>{% render 'icon-cart' %}{{- 'song.buy_album' | t -}}</span>
+                  </a>
+                {%- endif -%}
+                {%- if video_purchase_url != blank -%}
+                  <a href="{{- video_purchase_url -}}" class="button button--secondary button--full">
+                    <span>{{- 'song.buy_video_song' | t -}}</span>
+                  </a>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          {%- endcomment -%}
 
-              {%- if video_purchase_url != blank -%}
-                <a href="{{- video_purchase_url -}}" class="button button--secondary button--full">
-                  <span>
-                    {{- 'song.buy_video_song' | t -}}
-                  </span>
-                </a><!-- /.button button--secondary -->
-              {%- endif -%}
-            </div><!-- /.main-song__actions -->
-          {%- endif -%}
+          <div class="main-song__actions main-song__actions--shop">
+            <button
+              type="button"
+              class="button button--full main-song__cta"
+              data-lts-shop-trigger
+              aria-haspopup="dialog"
+              aria-expanded="false"
+            >
+              <span><span class="main-song__cta-label">{% render 'icon-cart' %}{{ 'song.get_the_music' | t }}</span><span class="main-song__cta-price">&nbsp;&mdash; {{ 'song.from_price' | t }}</span></span>
+            </button>
+            <p class="main-song__actions-note">{{ 'song.get_the_music_note' | t }}</p>
+          </div><!-- /.main-song__actions -->
+          {%- comment -%} Styles for the shop-drawer CTA above — remove together with it. {%- endcomment -%}
+          {%- style -%}
+            .main-song__actions--shop .main-song__cta,
+            .main-song__actions--shop .main-song__actions-note {
+              grid-column: 1 / -1;
+            }
+            .main-song__actions--shop .main-song__cta,
+            .main-song__actions--shop .main-song__cta span {
+              font-size: 1.6rem;
+            }
+            /* Label and price are atomic units: when the column is too narrow
+               for one line, the price wraps below as a whole, centered —
+               never mid-word. */
+            .main-song__actions--shop .main-song__cta span {
+              flex-wrap: wrap;
+              justify-content: center;
+              row-gap: 0;
+              line-height: 1.4;
+            }
+            .main-song__cta-label {
+              display: inline-flex;
+              align-items: center;
+              gap: 1.2rem;
+              white-space: nowrap;
+            }
+            .main-song__cta-price {
+              font-weight: 400;
+              opacity: 0.85;
+              white-space: nowrap;
+            }
+            /* Balance the video against a taller info column on tablet widths
+               (it otherwise top-aligns and the CTA lands well below it). */
+            .main-song__media {
+              align-self: center;
+            }
+            .main-song__actions-note {
+              font-size: 1.3rem;
+              letter-spacing: 0.02em;
+              opacity: 0.75;
+              text-align: center;
+            }
+            @media (max-width: 767px) {
+              .main-song__actions--shop .main-song__cta span {
+                font-size: 1.6rem;
+              }
+            }
+          {%- endstyle -%}
         </div><!-- /.main-song__info -->
       </div><!-- /.main-song__grid -->
     </div><!-- /.container -->
@@ -263,6 +325,26 @@
               {% render 'share', object: product %}
             </div><!-- /.main-song__share -->
           {%- endif -%}
+
+          {%- assign countdown_blocks = section.blocks | where: 'type', 'countdown' -%}
+          {%- for block in countdown_blocks -%}
+            <div class="main-song__countdown" {{ block.shopify_attributes }}>
+              {% render 'countdown-card',
+                design: block.settings.design,
+                heading: block.settings.heading,
+                target_month: block.settings.target_month,
+                target_day: block.settings.target_day,
+                reference_tz: block.settings.reference_tz,
+                recurring: block.settings.recurring,
+                end_behavior: block.settings.end_behavior,
+                end_message: block.settings.end_message,
+                grace_days: block.settings.grace_days,
+                cta_label: block.settings.cta_label,
+                cta_link: block.settings.cta_link,
+                transparent_bg: block.settings.transparent_bg
+              %}
+            </div><!-- /.main-song__countdown -->
+          {%- endfor -%}
         </div><!-- /.main-song__body-main -->
       </div><!-- /.main-song__body-inner -->
 
@@ -361,6 +443,49 @@
         }
       ]
     },
+    {
+      "type": "countdown",
+      "name": "Countdown",
+      "limit": 1,
+      "settings": [
+        { "type": "select", "id": "design", "label": "Design", "default": "xmas-globe", "options": [
+          { "group": "Christmas", "value": "xmas-advent", "label": "Christmas — Advent Cards" },
+          { "group": "Christmas", "value": "xmas-globe", "label": "Christmas — Snow Globe" },
+          { "group": "Christmas", "value": "xmas-sleigh", "label": "Christmas — Sleigh" },
+          { "group": "Halloween", "value": "hall-jack", "label": "Halloween — Jack-o'-Lantern" },
+          { "group": "Halloween", "value": "hall-neon", "label": "Halloween — Spooky Neon" },
+          { "group": "Halloween", "value": "hall-cauldron", "label": "Halloween — Cauldron" }
+        ] },
+        { "type": "text", "id": "heading", "label": "Heading (optional)" },
+        { "type": "header", "content": "Countdown target" },
+        { "type": "number", "id": "target_month", "label": "Target month", "default": 12, "info": "Month the countdown ends (1–12). E.g. 12 for December." },
+        { "type": "number", "id": "target_day", "label": "Target day", "default": 25, "info": "Day of that month the countdown reaches zero. The timer hits 00:00:00 at the start of this day in the reference timezone below." },
+        { "type": "select", "id": "reference_tz", "label": "Reference timezone", "default": "America/New_York", "info": "Every visitor sees the same numbers regardless of their own timezone.", "options": [
+          { "value": "America/New_York", "label": "New York (Eastern)" },
+          { "value": "America/Chicago", "label": "Chicago (Central)" },
+          { "value": "America/Denver", "label": "Denver (Mountain)" },
+          { "value": "America/Los_Angeles", "label": "Los Angeles (Pacific)" },
+          { "value": "UTC", "label": "UTC / London (GMT)" },
+          { "value": "Europe/London", "label": "London (UK)" },
+          { "value": "Pacific/Auckland", "label": "Auckland (New Zealand)" },
+          { "value": "Australia/Sydney", "label": "Sydney (Australia)" }
+        ] },
+        { "type": "checkbox", "id": "recurring", "label": "Repeat every year", "default": true },
+        { "type": "header", "content": "When the countdown reaches zero" },
+        { "type": "select", "id": "end_behavior", "label": "At zero", "default": "message", "options": [
+          { "value": "hide", "label": "Hide" },
+          { "value": "message", "label": "Show message" },
+          { "value": "message-then-hide", "label": "Show message then hide" }
+        ] },
+        { "type": "inline_richtext", "id": "end_message", "label": "End message", "default": "It's here!" },
+        { "type": "number", "id": "grace_days", "label": "Grace days", "default": 6, "info": "For \"Show message then hide\": days the message stays up after zero before hiding." },
+        { "type": "header", "content": "Call to action" },
+        { "type": "text", "id": "cta_label", "label": "Button label", "default": "See the countdown" },
+        { "type": "url", "id": "cta_link", "label": "Button link", "info": "The button only appears when a link is set." },
+        { "type": "header", "content": "Appearance" },
+        { "type": "checkbox", "id": "transparent_bg", "label": "Transparent background", "default": false, "info": "Removes the skin's coloured background panel." }
+      ]
+    }
   ]
 
 }

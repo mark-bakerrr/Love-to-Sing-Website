@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Song Credits — Wireframe (theme tokens)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@0,400;0,500;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
+<style>
+/* tokens from the live theme (base.css) */
+:root{
+  --c-neutral-50:#fff;--c-neutral-100:#F4F4F4;--c-neutral-200:#E8E8E8;--c-neutral-300:#B0B0B0;
+  --c-neutral-400:#888;--c-neutral-500:#6D6D6D;--c-neutral-900:#3D3D3D;--c-neutral-950:#000;
+  --c-red-50:#FDEFEF;--c-red-100:#FCDCDB;--c-red-200:#FABFBE;--c-red-400:#EC5450;--c-red-500:#B91F1C;--c-red-600:#912422;--c-red-700:#781D1B;
+  --color-paragraphs:#141414;--color-headings:#141414;
+  --radius-s:.8rem;--radius-m:1.6rem;--radius-l:2.4rem;
+  --fz-t:1.2rem;--fz-s:1.4rem;--fz-r:1.6rem;--fz-m:1.8rem;--fz-l:2rem;
+  --ease-smooth:cubic-bezier(0.22,1,0.36,1);--duration:200ms;
+}
+html{font-size:62.5%}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Nunito",system-ui,sans-serif;color:var(--color-paragraphs);background:#fff;font-size:var(--fz-r);line-height:1.5}
+.container{max-width:120rem;margin:0 auto;padding:0 2.4rem}
+h1,h2,h3,h4{margin:0;color:var(--color-headings)}
+a{color:inherit}
+.page-note{max-width:120rem;margin:2.4rem auto 0;padding:0 2.4rem;color:var(--c-neutral-500);font-weight:700;font-size:var(--fz-s)}
+.tag{display:inline-block;background:#111;color:#fff;font-size:1.1rem;font-weight:800;padding:3px 9px;border-radius:6px;letter-spacing:.06em;margin-left:8px}
+
+/* ---- Song About section (faithful to song-about.css) ---- */
+.song-about{padding:5.6rem 0}
+.song-about__inner{display:grid;grid-template-columns:608fr 460fr;gap:8rem;padding:6.4rem;border-radius:var(--radius-m);background:var(--c-neutral-100)}
+.song-about__title{margin-bottom:2.4rem;font-size:3.2rem;font-weight:900;line-height:1.1}
+.song-about__meta{display:flex;flex-wrap:wrap;gap:1.2rem 3.2rem;margin-bottom:2.4rem}
+.song-about__meta p{font-size:var(--fz-s);color:var(--c-neutral-500);display:flex;align-items:center;margin:0}
+.song-about__meta svg{margin-right:.8rem}
+.song-about__meta span{color:var(--color-paragraphs);margin-left:.25em}
+.song-about__video{aspect-ratio:16/9;border-radius:var(--radius-s);background:linear-gradient(150deg,#EC5450,#912422);display:grid;place-items:center;color:#fff;margin-bottom:2.4rem}
+.song-about__video svg{width:5.6rem;height:5.6rem;opacity:.9}
+.song-about__content{color:var(--c-neutral-900)}
+.song-about__aside-title{margin-bottom:1.6rem;font-size:var(--fz-l);font-weight:800}
+.song-about__collections{list-style:none;display:flex;flex-wrap:wrap;gap:.8rem;margin:0;padding:0}
+.song-about__collection{font-size:var(--fz-r);font-weight:500;text-decoration:none;display:block;padding:.4rem 1.2rem;border:1px solid var(--c-neutral-300);border-radius:4rem;transition:background-color var(--duration) linear}
+.song-about__collection:hover{background:var(--c-neutral-300)}
+.aside-divider{height:1px;background:var(--c-neutral-200);margin:2.8rem 0}
+
+/* ================= CREDIT BLOCK VARIANTS ================= */
+/* shared */
+.credits h3.credits__label,.song-about__aside-title{color:var(--color-headings)}
+
+/* A — Minimal stacked (role phrased, name emphasised) */
+.creditsA{display:flex;flex-direction:column;gap:.6rem}
+.creditsA .line{font-size:var(--fz-r);color:var(--c-neutral-500);font-weight:600}
+.creditsA .line b{color:var(--color-paragraphs);font-weight:800}
+.creditsA .line a{color:var(--c-red-600);text-decoration:none;font-weight:800;border-bottom:1px solid transparent;transition:border-color var(--duration) var(--ease-smooth)}
+.creditsA .line a:hover{border-color:var(--c-red-600)}
+.creditsA .copyright{margin-top:.8rem;font-size:var(--fz-s);color:var(--c-neutral-400);font-weight:600}
+
+/* B — Uppercase micro-label rows */
+.creditsB{display:flex;flex-direction:column;gap:1.4rem}
+.creditsB .row{display:flex;flex-direction:column;gap:.2rem}
+.creditsB .role{font-size:1.05rem;letter-spacing:.14em;text-transform:uppercase;color:var(--c-neutral-400);font-weight:800}
+.creditsB .who{font-size:var(--fz-m);font-weight:800}
+.creditsB .who a{color:var(--c-red-600);text-decoration:none}
+.creditsB .who a:hover{text-decoration:underline}
+.creditsB .copyright{margin-top:.4rem;font-size:var(--fz-s);color:var(--c-neutral-400);font-weight:700}
+
+/* C — Credits card with red accent */
+.creditsC{border:1px solid var(--c-red-100);background:var(--c-red-50);border-radius:var(--radius-m);padding:2rem 2.2rem;position:relative;overflow:hidden}
+.creditsC::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c-red-500)}
+.creditsC .credits__label{font-size:1.1rem;letter-spacing:.14em;text-transform:uppercase;color:var(--c-red-600);font-weight:800;margin-bottom:1.2rem}
+.creditsC .line{font-size:var(--fz-r);color:var(--c-neutral-900);font-weight:600;display:flex;gap:.6rem;padding:.35rem 0}
+.creditsC .line .role{color:var(--c-neutral-500)}
+.creditsC .line b{color:var(--color-paragraphs);font-weight:800}
+.creditsC .line a{color:var(--c-red-600);text-decoration:none;font-weight:800}
+.creditsC .line a:hover{text-decoration:underline}
+.creditsC .copyright{margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--c-red-100);font-size:var(--fz-s);color:var(--c-neutral-500);font-weight:700}
+
+/* comparison strip */
+.compare{background:var(--c-neutral-100);padding:4rem 0;margin-top:2rem}
+.compare__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2.4rem}
+.card{background:#fff;border:1px solid var(--c-neutral-200);border-radius:var(--radius-m);padding:2.4rem}
+.card h4{font-size:var(--fz-s);text-transform:uppercase;letter-spacing:.1em;color:var(--c-neutral-400);margin-bottom:1.6rem}
+@media(max-width:1023px){.song-about__inner{grid-template-columns:1fr;padding:3.2rem;gap:4rem}.compare__grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<p class="page-note">Song About section with a Credits block placed <b>in the aside, above the Categories (tags)</b>. Variant <b>A</b> is shown in context; all three compared below. <span class="tag">WIREFRAME · theme tokens</span></p>
+
+<!-- ===== IN CONTEXT: full Song About section ===== -->
+<section class="song-about">
+  <div class="container">
+    <div class="song-about__inner">
+      <!-- LEFT: main -->
+      <div class="song-about__main">
+        <h2 class="song-about__title">Christmas Is a Season of Love</h2>
+        <div class="song-about__meta">
+          <p>🗓 <span>Released December 1, 2024</span></p>
+          <p>⏱ <span>2:48</span></p>
+        </div>
+        <div class="song-about__video"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="song-about__content">
+          <p>A warm, original Southern-Hemisphere Christmas song for kids and families — celebrating that Christmas is, above all, a season of love. Sing along with the lyric video, print the words, and make it part of your nativity or classroom celebration.</p>
+        </div>
+      </div>
+      <!-- RIGHT: aside — CREDITS above TAGS -->
+      <div class="song-about__aside">
+        <h3 class="song-about__aside-title">Credits</h3>
+        <div class="credits creditsA">
+          <p class="line">Written by <a href="#">Linda Adamson</a></p>
+          <p class="line">Performed by <b>Love to Sing</b></p>
+          <p class="copyright">© Love to Sing Limited</p>
+        </div>
+
+        <div class="aside-divider"></div>
+
+        <h3 class="song-about__aside-title">Categories</h3>
+        <ul class="song-about__collections">
+          <li><a class="song-about__collection" href="#">Christmas Songs</a></li>
+          <li><a class="song-about__collection" href="#">Original Songs</a></li>
+          <li><a class="song-about__collection" href="#">Nativity</a></li>
+          <li><a class="song-about__collection" href="#">Kiwi Christmas</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COMPARE THE 3 CREDIT DESIGNS (with extra roles to show phrasing) ===== -->
+<section class="compare">
+  <div class="container">
+    <p class="page-note" style="margin:0 0 2rem;padding:0">Credit-block design options — shown with extra roles to demonstrate the role→phrase mapping (Written by / Arranged by / Produced by / Performed by):</p>
+    <div class="compare__grid">
+
+      <div class="card">
+        <h4>A · Minimal stacked</h4>
+        <div class="credits creditsA">
+          <p class="line">Written by <a href="#">Linda Adamson</a></p>
+          <p class="line">Arranged by <a href="#">John Smith</a></p>
+          <p class="line">Produced by <a href="#">Sam Lee</a></p>
+          <p class="line">Performed by <b>Love to Sing</b></p>
+          <p class="copyright">© Love to Sing Limited</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>B · Micro-label rows</h4>
+        <div class="credits creditsB">
+          <div class="row"><span class="role">Written by</span><span class="who"><a href="#">Linda Adamson</a></span></div>
+          <div class="row"><span class="role">Arranged by</span><span class="who"><a href="#">John Smith</a></span></div>
+          <div class="row"><span class="role">Produced by</span><span class="who"><a href="#">Sam Lee</a></span></div>
+          <div class="row"><span class="role">Performed by</span><span class="who">Love to Sing</span></div>
+          <p class="copyright">© Love to Sing Limited</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>C · Accent card</h4>
+        <div class="credits creditsC">
+          <p class="credits__label">Credits</p>
+          <p class="line"><span class="role">Written by</span> <a href="#">Linda Adamson</a></p>
+          <p class="line"><span class="role">Arranged by</span> <a href="#">John Smith</a></p>
+          <p class="line"><span class="role">Produced by</span> <a href="#">Sam Lee</a></p>
+          <p class="line"><span class="role">Performed by</span> <b>Love to Sing</b></p>
+          <p class="copyright">© Love to Sing Limited</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

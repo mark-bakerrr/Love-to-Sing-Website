@@ -22,16 +22,111 @@
 }
 
 .header--solid:before,
+.header.is-solid:before,
 .is-stuck .header:before {
   opacity: 1;
 }
 
-.is-stuck .header {
+.is-stuck .header,
+.header.is-solid {
   box-shadow: 0 0.8rem 10rem #00000044;
+}
+
+/* ------------------------------------------------------------ *\
+  Floating pill variant
+  Transparent over the hero at the top -> fills + shadow on scroll
+  (`.is-solid` toggled by JS in Task 2). `.header--floating` sits on
+  the header root; the pill centres and rounds via `--radius-m`.
+\* ------------------------------------------------------------ */
+.header--floating {
+  width: min(132rem, calc(100% - 2.4rem));
+  margin-inline: auto;
+  margin-top: 1.2rem;
+  border-radius: var(--radius-m);
+  transition: margin var(--duration-default) ease-in-out,
+    width var(--duration-default) ease-in-out,
+    box-shadow var(--duration-default) ease-in-out;
+}
+
+/* Clip the background overlay to the pill's rounded corners */
+.header--floating:before {
+  border-radius: var(--radius-m);
+}
+
+.header--floating.is-solid {
+  box-shadow: 0 1rem 3rem #00000038;
+}
+
+/* Keep the full-bleed megamenu spanning the viewport once the header
+   is narrowed to a centred pill: the pill's left edge sits 1.2rem in,
+   so re-anchor the 100vw panel back to the viewport edge. */
+/* Floating: the mega panel is a detached rounded CARD matched to the pill width.
+   The pill does NOT grow on open; a small gap below means the pill's rounded
+   corners reveal the page (not a panel edge), so there are no coloured corner
+   arcs. Internal widths switch from vw to % so they fit the card, not the vw. */
+.header--floating .header__megamenu {
+  left: 0;
+  width: 100%;
+  top: calc(100% + 0.8rem);
+  border: 0;
+  box-shadow: none;
+  /* overflow stays VISIBLE so the :before hover-bridge that spans the gap to
+     the card is not clipped (otherwise the menu closes when the mouse crosses
+     the gap). The rounding/clipping/shadow live on the inner .megamenu below. */
+}
+
+.header--floating .megamenu {
+  --main-menu-width: 24rem;
+  --products-width: calc(100% - var(--main-menu-width));
+  --submenu-width: 20rem;
+  --submenu-products-width: calc(100% - var(--main-menu-width) - var(--submenu-width));
+  border-radius: var(--radius-l);
+  overflow: hidden;
+  box-shadow: 0 1.8rem 4.4rem #00000033;
+}
+
+/* Docked header (floating toggle OFF): the full-width panel attaches directly
+   under the header as a flush rectangle. Rounded corners only make sense for
+   the floating (detached card) mode — when docked they reveal the page behind
+   the corners (a white wedge against the Songs red rail; invisible white-on-
+   white on the other panels). Square ALL corners. Higher specificity than the
+   per-type `.megamenu--* { border-radius }` rules, so it overrides them. */
+.header:not(.header--floating) .megamenu {
+  border-radius: 0;
+}
+
+/* Songs: the coloured left rail rounds its own left corners to match the card
+   clip — square them too when docked so the red fills flush to the edges. */
+.header:not(.header--floating) .megamenu--songs .megamenu__inner--songs {
+  border-radius: 0;
+}
+
+@media (max-width: 990px) {
+  .header--floating {
+    width: calc(100% - 1.6rem);
+    margin-top: 0.8rem;
+  }
 }
 
 .header--solid[class*="main-color-"]:before {
   background: linear-gradient(180deg, var(--c-main-500) 0%, var(--c-main-600) 100%);
+}
+
+/* White-space-behind-the-pill fix.
+   On solid inner templates (e.g. product pages) the main section reserves the
+   header height with TRANSPARENT top padding, so the FLOATING pill's transparent
+   top/side margins reveal the white page behind the fixed header. Paint just that
+   reserved strip in the page's own scheme colour (var(--c-main-*) is set by the
+   template's main-color-* class) so the pill floats over colour, not white.
+   Scoped to floating mode via :has(); when the header is docked it covers this
+   strip completely, so the band is never seen. */
+body:has(.header--floating) .main-song {
+  background-image: linear-gradient(
+    var(--c-main-500) 0,
+    var(--c-main-500) 9rem,
+    transparent 9rem
+  );
+  background-repeat: no-repeat;
 }
 
 .header.menu-open {
@@ -39,8 +134,14 @@
   color: var(--c-neutral-950);
 }
 
+/* Keep the centre logo visible and IN FRONT of the mega panel when a menu is open. */
 .header.menu-open .header__logo {
-  opacity: 0;
+  opacity: 1;
+  z-index: calc(var(--z-modals) + 1);
+}
+
+.header__logo {
+  z-index: calc(var(--z-modals) + 1);
 }
 
 .header__inner {
@@ -65,6 +166,8 @@
 .header__logo svg {
   width: 100%;
   height: auto;
+  /* slight lift so the seasonal logo reads on any header colour */
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.22));
 }
 
 @media screen and (max-width: 989px) {
@@ -368,28 +471,210 @@
   height: 100%;
 }
 
-.header-drawer__head {
+/* ============================================================
+   FULL-PAGE MOBILE MENU OVERLAY (below 990px)
+   Restyles the drawer content (#menu-drawer) into a full-viewport
+   overlay with the brand deep-red gradient. The open/close is still
+   driven by <header-drawer> + `.menu-opening` (assets/global.js).
+   ============================================================ */
+
+.mobile-overlay__inner {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+}
+
+/* Top bar: logo + close */
+.mobile-overlay__top {
+  display: flex;
+  justify-content: flex-end;
   align-items: center;
-  padding: 1.6rem 2rem;
+  padding: 2rem 2.4rem;
+  flex: 0 0 auto;
 }
 
-.header-drawer__search {
+.mobile-overlay__logo {
+  display: none; /* hidden per design — the centred header logo already shows */
+}
+
+.mobile-overlay__logo img {
+  max-height: 4.4rem;
+  width: auto;
+  height: auto;
+  background: #fff;
+  border-radius: var(--radius-s, 0.6rem);
+}
+
+.mobile-overlay__logo-text {
+  font-size: var(--fz-l);
+  font-weight: 900;
+  color: #fff;
+}
+
+.mobile-overlay__close {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: transform var(--duration-short) ease,
+    background var(--duration-short) ease;
+}
+
+.mobile-overlay__close:hover,
+.mobile-overlay__close:focus-visible {
+  background: rgba(255, 255, 255, 0.24);
+  transform: rotate(90deg);
+}
+
+.mobile-overlay__close svg {
+  width: 2.2rem;
+  height: 2.2rem;
+}
+
+/* Search row */
+.mobile-overlay__search {
   position: relative;
-  padding: 1.6rem 2rem;
-  background-color: var(--c-neutral-100);
-  border-top: 1px solid var(--c-neutral-200);
-  border-bottom: 1px solid var(--c-neutral-200);
+  padding: 0 2.4rem 1.6rem;
+  background: transparent;
+  border: 0;
+  flex: 0 0 auto;
 }
 
-.header-drawer__nav {
+/* Nav (scrolls) */
+.mobile-overlay__nav {
   position: relative;
-  flex: 0 1 100%;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.4rem 2.4rem 2rem;
+  scrollbar-width: none;
 }
 
-.header-drawer__header-utils .header__utils-link {
-  padding-right: 0;
+.mobile-overlay__nav::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-overlay__item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.mobile-overlay__summary,
+.mobile-overlay__flat {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.8rem 0.4rem;
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.mobile-overlay__summary::-webkit-details-marker {
+  display: none;
+}
+
+.mobile-overlay__summary.is-current,
+.mobile-overlay__flat.is-current {
+  color: #fff;
+}
+
+.mobile-overlay__chev {
+  display: inline-flex;
+  line-height: 0;
+  opacity: 0.8;
+  transition: transform var(--duration-default) ease;
+}
+
+.mobile-overlay__chev svg {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+.mobile-overlay__details[open] > .mobile-overlay__summary .mobile-overlay__chev {
+  transform: rotate(90deg);
+}
+
+.mobile-overlay__sub {
+  padding: 0.2rem 0 1.6rem;
+}
+
+.mobile-overlay__sublink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 0.4rem;
+  text-decoration: none;
+  font-size: var(--fz-l);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.mobile-overlay__sublink--child {
+  padding-left: 2rem;
+  font-size: var(--fz-m);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.mobile-overlay__sublink--static {
+  cursor: default;
+}
+
+.mobile-overlay__sublink-meta {
+  opacity: 0.62;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.mobile-overlay__sublink.is-active {
+  color: #fff;
+}
+
+/* Footer: Cart + Account */
+.mobile-overlay__foot {
+  display: flex;
+  gap: 1rem;
+  padding: 1.6rem 2.4rem 2.4rem;
+  flex: 0 0 auto;
+}
+
+.mobile-overlay__foot-link {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  padding: 1.4rem;
+  border-radius: var(--radius-m, 1rem);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: var(--fz-s);
+}
+
+.mobile-overlay__foot-link svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-overlay__close,
+  .mobile-overlay__chev {
+    transition: none;
+  }
 }
 
 .header-drawer__search-form {
@@ -401,17 +686,33 @@
   border: none;
   position: absolute;
   width: 5.4rem;
-  height: 4.6rem;
+  height: 5rem;
   display: flex;
   justify-content: center;
   align-items: center;
   top: 0;
   right: 0;
+  color: #fff;
 }
 
 .header-drawer__search .header-drawer__search-form__button svg {
   width: 2rem;
   height: auto;
+}
+
+/* Dark search input on the gradient overlay */
+.mobile-overlay__search input[type="search"] {
+  height: 5rem;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  color: #fff;
+  padding: 0 5rem 0 1.8rem;
+  font-weight: 700;
+}
+
+.mobile-overlay__search input[type="search"]::placeholder {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .header-drawer__search-results {
@@ -420,10 +721,12 @@
   width: 100%;
   top: 100%;
   left: 0;
-  height: calc(100vh - 11.9rem - 1.7rem);
+  max-height: 60vh;
   background-color: var(--color-background-secondary);
+  color: var(--color-text);
+  border-radius: var(--radius-m, 1rem);
   overflow-y: auto;
-  z-index: 1;
+  z-index: 3;
   visibility: hidden;
   opacity: 0;
   will-change: opacity;
@@ -489,72 +792,323 @@
   justify-content: center;
 }
 
-.header-drawer__content {
-  background-color: var(--color-background-secondary);
+/* Full-page overlay shell — the gradient adopts the current page/product colour
+   scheme via --c-main-* (inherited from the header's main-color-* class), with a
+   dark scrim layered on top for depth. Falls back to brand red. */
+.header-drawer__content.mobile-overlay {
+  background:
+    linear-gradient(160deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.28) 45%, rgba(0, 0, 0, 0.66) 100%),
+    var(--c-main-500, #b91f1c);
   width: 100%;
+  height: 100dvh;
   position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   z-index: var(--z-header);
   opacity: 0;
   visibility: hidden;
   transform: translateX(-100%);
-  transition: all var(--duration-default);
-  overflow-y: auto;
-  overflow-x: hidden;
+  transition: transform var(--duration-default),
+    opacity var(--duration-default), visibility var(--duration-default);
+  overflow: hidden;
 }
 
-.menu-opening .header-drawer__content {
+.menu-opening .header-drawer__content.mobile-overlay {
   opacity: 1;
   visibility: visible;
   transform: translateX(0);
 }
 
-.header-drawer__link {
-  padding: 1.6rem 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--c-neutral-200);
-  font-weight: 500;
-}
-
-.header-drawer__link svg {
-  margin-left: 1rem;
-}
-
-.header-drawer__submenu {
-  position: absolute;
-  top: 0;
-  left: 100%;
-  width: 100%;
-  height: 100%;
-  background-color: var(--color-background-secondary);
-  transition: left var(--duration-default) ease;
-  z-index: 1;
-}
-
-.header-drawer__submenu-title {
-  font-weight: 700;
-  font-size: var(--fz-m);
-  padding: 1.6rem 2rem 0.8rem;
-  margin-bottom: 0;
-}
-
-.header-drawer__submenu-close {
-  display: flex;
-  align-items: center;
-  padding: 1.6rem 2rem;
-  width: 100%;
-  gap: 0.8rem;
-  border-bottom: 1px solid var(--c-neutral-200);
-
-  i {
-    line-height: 0;
+@media (prefers-reduced-motion: reduce) {
+  .header-drawer__content.mobile-overlay {
+    transition: opacity var(--duration-default),
+      visibility var(--duration-default);
+    transform: none;
   }
 }
 
-.menu-opening > .header-drawer__submenu {
+/* ==========================================================================
+   FULL-SCREEN SEARCH OVERLAY  (snippets/search-overlay.liquid + search-overlay.js)
+   Frosted full-screen surface wrapping the theme's <predictive-search> engine.
+   Local fallbacks are declared for tokens that aren't defined globally
+   (--ease-spring/--ease-smooth/--duration-fast/--shadow-card).
+   ========================================================================== */
+.search-overlay {
+  --so-ease-spring: cubic-bezier(0.35, 1.55, 0.65, 1);
+  --so-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --so-duration: 240ms;
+  --so-shadow-card: var(--shadow-card, 0 6px 20px rgba(20, 20, 20, 0.1));
+
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modals, 800);
+
+  display: flex;
+  flex-direction: column;
+  /* Scroll the whole fixed overlay so the scrollbar sits on the viewport edge
+     (browser-style), not on an inset parent div. */
+  overflow-y: auto;
+
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--so-duration) var(--so-ease-smooth),
+    visibility var(--so-duration) var(--so-ease-smooth);
+}
+
+.search-overlay[hidden] {
+  display: none;
+}
+
+.search-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.search-overlay__top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.6rem;
+  width: 100%;
+  max-width: 96rem;
+  margin: 0 auto;
+  /* Keep the close button pinned while the overlay scrolls. */
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: var(--space-300, 2.4rem) var(--space-400, 3.2rem);
+}
+
+.search-overlay__logo {
+  display: none; /* hidden per design — the centred header logo already shows */
+}
+
+.search-overlay__logo img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-height: 5.6rem;
+  max-width: 22rem;
+}
+
+.search-overlay__logo-text {
+  font-size: var(--fz-l, 2rem);
+  font-weight: 900;
+  color: var(--c-red-600, #912422);
+}
+
+.search-overlay__close {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  border: 0;
+  background: var(--c-neutral-100, #f4f4f4);
+  color: var(--color-foreground, #141414);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex: none;
+  transition: transform var(--so-duration) var(--so-ease-spring),
+    background var(--so-duration) var(--so-ease-smooth);
+}
+
+.search-overlay__close:hover {
+  background: var(--c-red-100, #fcdcdb);
+  transform: rotate(90deg);
+}
+
+.search-overlay__close svg {
+  width: 2.2rem;
+  height: 2.2rem;
+}
+
+.search-overlay__body {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 96rem;
+  margin: 0 auto;
+  /* Extra top padding so the search field clears the centred logo badge. */
+  padding: 3.2rem var(--space-400, 3.2rem) var(--space-500, 4rem);
+}
+
+/* The <predictive-search> disclosure is required by the JS element, but the
+   overlay itself is the disclosure surface — so keep the details permanently
+   open and flatten it visually. */
+.search-overlay__disclosure {
+  display: block;
+}
+
+.search-overlay__summary {
+  display: block;
+}
+
+.search-overlay__field-wrap {
+  position: relative;
+}
+
+/* Big input with an animated red underline. */
+.search-overlay__form {
+  display: block;
+}
+
+.search-overlay__form .field {
+  position: relative;
+  margin: 0;
+}
+
+.search-overlay__form .field__input,
+.search-overlay__form input[type='search'] {
+  width: 100%;
+  border: 0;
+  border-bottom: 2px solid var(--c-neutral-200, #e8e8e8);
+  border-radius: 0;
+  outline: 0;
+  background: none;
+  padding: 1.2rem 0.4rem;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  color: var(--color-foreground, #141414);
+  transition: border-color var(--so-duration) var(--so-ease-smooth);
+}
+
+.search-overlay__form .field__input::placeholder,
+.search-overlay__form input[type='search']::placeholder {
+  color: var(--c-neutral-300, #b0b0b0);
+  font-weight: 700;
+}
+
+/* Animated underline that grows in on focus — softened so it isn't so harshly red. */
+.search-overlay__form .field::after {
+  content: '';
+  position: absolute;
   left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0;
+  background: var(--c-red-400, #d15a57);
+  transition: width var(--so-duration) var(--so-ease-smooth);
+}
+
+.search-overlay__form .field:focus-within::after {
+  width: 100%;
+}
+
+.search-overlay__results {
+  display: block;
+  margin-top: var(--space-250, 2rem);
+}
+
+/* Chips row. */
+.search-overlay__chips {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin: var(--space-300, 2.4rem) 0 var(--space-250, 2rem);
+}
+
+.search-overlay__chip {
+  border: 0;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: var(--fz-s, 1.4rem);
+  padding: 0.8rem 1.6rem;
+  border-radius: 999px;
+  background: var(--c-neutral-100, #f4f4f4);
+  color: var(--color-foreground, #141414);
+  cursor: pointer;
+  transition: background var(--so-duration) var(--so-ease-smooth),
+    color var(--so-duration) var(--so-ease-smooth);
+}
+
+.search-overlay__chip:hover {
+  background: var(--c-neutral-200, #e8e8e8);
+}
+
+.search-overlay__chip.is-active {
+  background: var(--c-red-500, #b91f1c);
+  color: #fff;
+}
+
+/* Popular searches. */
+.search-overlay__sec {
+  margin-top: var(--space-300, 2.4rem);
+}
+
+.search-overlay__sec-title {
+  margin: 0 0 var(--space-150, 1.2rem);
+  color: var(--color-subdued, #6b6b6b);
+}
+
+.search-overlay__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.search-overlay__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: var(--so-shadow-card);
+  text-decoration: none;
+  color: var(--color-foreground, #141414);
+  font-weight: 700;
+  font-size: var(--fz-s, 1.4rem);
+  transition: transform var(--so-duration) var(--so-ease-spring);
+}
+
+.search-overlay__pill:hover {
+  transform: translateY(-2px);
+}
+
+/* Entrance stagger: each [style="--i:N"] child rises + fades in. */
+.search-overlay__top > [style*='--i'],
+.search-overlay__body > [style*='--i'] {
+  opacity: 0;
+  transform: translateY(1.2rem);
+}
+
+.search-overlay.is-open .search-overlay__top > [style*='--i'],
+.search-overlay.is-open .search-overlay__body > [style*='--i'] {
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--so-duration) var(--so-ease-smooth),
+    transform var(--so-duration) var(--so-ease-spring);
+  transition-delay: calc(var(--i, 0) * 45ms + 60ms);
+}
+
+@media screen and (max-width: 749px) {
+  .search-overlay__top {
+    padding: var(--space-250, 2rem) var(--space-250, 2rem);
+  }
+
+  .search-overlay__body {
+    padding: 1.6rem var(--space-250, 2rem) var(--space-400, 3.2rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-overlay,
+  .search-overlay.is-open .search-overlay__top > [style*='--i'],
+  .search-overlay.is-open .search-overlay__body > [style*='--i'],
+  .search-overlay__form .field::after,
+  .search-overlay__close,
+  .search-overlay__pill {
+    transition: opacity var(--so-duration) linear,
+      visibility var(--so-duration) linear;
+    transform: none;
+  }
+
+  .search-overlay__top > [style*='--i'],
+  .search-overlay__body > [style*='--i'] {
+    opacity: 1;
+    transform: none;
+  }
 }

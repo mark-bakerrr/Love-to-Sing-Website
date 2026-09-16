@@ -5,8 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="">
-    <link rel="canonical" href="{{ canonical_url }}">
-    {%- if request.page_type == 'search' -%}
+    {% render 'lts-canonical' %}
+    {%- if request.page_type == 'search' or product.type == 'Licence' or product.type == 'Membership' or template.suffix == 'licence' or template.suffix == 'single-licences' or page.handle == 'licence-terms' -%}
       <meta name="robots" content="noindex,follow">
     {%- endif -%}
     <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
@@ -42,6 +42,13 @@
     {% render 'meta-tags' %}
 
     <script src="{{ 'global.js' | asset_url }}" defer="defer"></script>
+
+    {%- comment -%}
+      Loaded BEFORE content_for_header (where app embeds inject) and WITHOUT defer
+      so its fetch/XHR patch installs before the Shop Drawer app captures window.fetch.
+      Keeps the standard cart drawer + header count in sync with external cart adds.
+    {%- endcomment -%}
+    <script src="{{ 'cart-sync.js' | asset_url }}"></script>
 
     {{ content_for_header }}
 
@@ -126,5 +133,6 @@
       }
     </script>
   {% render 'lts-blog-blocks' %}
+  {% render 'countdown-widget' %}
   </body>
 </html>

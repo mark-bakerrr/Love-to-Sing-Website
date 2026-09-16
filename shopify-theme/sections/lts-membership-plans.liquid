@@ -1,0 +1,416 @@
+{%- comment -%}
+  Love to Sing - Consumer Membership Plans section.
+
+  A storefront funnel where individuals / families join a streaming membership.
+  Three editable tier cards (Free / Premium / Family). Family is the featured
+  "Best value" card in the red-deep premium treatment.
+
+  LIVE PRICES: Premium + Family read their live variant price from the published
+  consumer membership products via `all_products[handle]` (block.settings
+  .product_handle). Free has no product -> shows "Free".
+
+  JOIN -> CART -> CHECKOUT: we SSR a tiny data blob mapping each tier's product
+  handle to its first variant id, keyed by the block index. The Join button adds
+  that variant to the cart via /cart/add.js then redirects to /checkout. No org
+  or name line-item properties are attached - this is a consumer membership; the
+  activate-on-purchase webhook ties the Membership to the customer from the order
+  (it reads the product's custom.membership_tier). If a variant is missing the
+  button is disabled gracefully.
+
+  Brand craft mirrors sections/lts-licence-pricing.liquid (--lc-* red family,
+  Nunito, radii <=18, soft shadows, soft-pink tick circles, fade-up +
+  reduced-motion, responsive stack). No em-dashes anywhere.
+{%- endcomment -%}
+
+{%- comment -%} ── SSR the variant-id blob for the Join buttons ── {%- endcomment -%}
+{%- capture plans_data -%}{"tiers":{
+{%- assign emitted = 0 -%}
+{%- for block in section.blocks -%}
+  {%- if block.type == 'tier' -%}
+    {%- assign handle = block.settings.product_handle | strip -%}
+    {%- if handle != blank -%}
+      {%- assign p = all_products[handle] -%}
+      {%- if p != blank and p.first_available_variant != blank -%}
+        {%- if emitted > 0 -%},{%- endif -%}
+        "{{ forloop.index0 }}":{"variantId":{{ p.selected_or_first_available_variant.id }}}
+        {%- assign emitted = emitted | plus: 1 -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+}}{%- endcapture -%}
+<script id="lts-mp-data-{{ section.id }}" type="application/json">{{ plans_data }}</script>
+
+<section class="lts-mp-blk" id="lts-mp-{{ section.id }}">
+  <div class="lts-mp-wrap">
+    <div class="lts-mp-headc">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="lts-mp-eyebrow lts-mp-rise">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="lts-mp-rise" style="animation-delay:.06s">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="lts-mp-sub lts-mp-rise" style="animation-delay:.1s">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="lts-mp-grid">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'tier' -%}
+          {%- assign handle = block.settings.product_handle | strip -%}
+          {%- assign price_txt = '' -%}
+          {%- if handle != blank -%}
+            {%- assign p = all_products[handle] -%}
+            {%- if p != blank and p.price != blank -%}
+              {%- assign price_txt = p.price | money | remove: '.00' -%}
+            {%- endif -%}
+          {%- endif -%}
+          <div
+            class="lts-mp-card lts-mp-rise{% if block.settings.featured %} lts-mp-feature{% endif %}{% if block.settings.premium %} lts-mp-premium{% endif %}"
+            style="animation-delay:{{ forloop.index0 | times: 0.06 | plus: 0.16 }}s"
+            data-tier-index="{{ forloop.index0 }}"
+            {{ block.shopify_attributes }}
+          >
+            {%- if block.settings.featured and block.settings.pill_text != blank -%}
+              <span class="lts-mp-pop">{{ block.settings.pill_text | escape }}</span>
+            {%- elsif block.settings.premium and block.settings.pill_text != blank -%}
+              <span class="lts-mp-pop lts-mp-pop-premium">{{ block.settings.pill_text | escape }}</span>
+            {%- endif -%}
+
+            {%- if block.settings.icon != blank -%}
+              <div class="lts-mp-ic" aria-hidden="true">{{ block.settings.icon }}</div>
+            {%- endif -%}
+            {%- if block.settings.name != blank -%}
+              <h3>{{ block.settings.name | escape }}</h3>
+            {%- endif -%}
+            {%- if block.settings.tagline != blank -%}
+              <p class="lts-mp-tag">{{ block.settings.tagline | escape }}</p>
+            {%- endif -%}
+
+            <div class="lts-mp-pricebox">
+              {%- if price_txt != blank -%}
+                <span class="lts-mp-price">{{ price_txt }}</span>
+                <span class="lts-mp-per">a year</span>
+              {%- else -%}
+                <span class="lts-mp-price">Free</span>
+              {%- endif -%}
+            </div>
+
+            {%- if block.settings.features != blank -%}
+              <ul>
+                {%- assign feats = block.settings.features | newline_to_br | split: '<br />' -%}
+                {%- for feat in feats -%}
+                  {%- assign feat_clean = feat | strip -%}
+                  {%- if feat_clean != blank -%}
+                    <li>
+                      <span class="lts-mp-tick" aria-hidden="true">&#10003;</span>
+                      <span class="lts-mp-sronly">Included: </span>{{ feat_clean | escape }}
+                    </li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+
+            {%- if block.settings.button_label != blank -%}
+              {%- if block.settings.cta_type == 'join' -%}
+                {%- comment -%} Join -> add membership variant to cart -> /checkout {%- endcomment -%}
+                <button
+                  type="button"
+                  class="lts-mp-btn lts-mp-btn-join{% if block.settings.featured %} lts-mp-btn-solid{% endif %}{% if block.settings.premium %} lts-mp-btn-premium{% endif %}"
+                  data-tier-join="{{ forloop.index0 }}"
+                >{{ block.settings.button_label | escape }}</button>
+              {%- else -%}
+                {%- comment -%} Browse -> a plain link (Free tier / browse songs) {%- endcomment -%}
+                <a
+                  class="lts-mp-btn{% if block.settings.featured %} lts-mp-btn-solid{% endif %}{% if block.settings.premium %} lts-mp-btn-premium{% endif %}"
+                  href="{{ block.settings.free_url | default: '/collections/all' }}"
+                >{{ block.settings.button_label | escape }}</a>
+              {%- endif -%}
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lts-mp-blk{
+    --lc-red:#c8102e; --lc-red-strong:#b0102a; --lc-red-deep:#8f0f24; --lc-red-ink:#5e0a18;
+    --lc-red-50:#fdeef0; --lc-red-100:#fbdbe0;
+    --lc-ink:#241a17; --lc-body:#4a423e; --lc-muted:#736a65; --lc-line:#efe7e3; --lc-hair:#f4eeeb;
+    --lc-bg:#fffefe; --lc-surface:#fff;
+    --lc-r:14px; --lc-r-lg:18px;
+    --lc-shadow-sm:0 1px 2px rgba(60,20,25,.06);
+    --lc-shadow:0 10px 24px -14px rgba(90,20,30,.30);
+    --lc-ok:0 8px 30px -12px rgba(200,16,46,.35);
+    --lc-e:cubic-bezier(.2,.7,.2,1);
+    font-family:'Nunito',system-ui,'Segoe UI',Roboto,sans-serif;color:var(--lc-body);line-height:1.55;-webkit-font-smoothing:antialiased;
+    padding:clamp(44px,7vw,72px) 0;background:var(--lc-bg);
+  }
+  .lts-mp-blk *{box-sizing:border-box}
+  .lts-mp-blk .lts-mp-sronly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  .lts-mp-blk .lts-mp-wrap{max-width:1040px;margin:0 auto;padding:0 22px}
+  .lts-mp-blk h2,.lts-mp-blk h3{color:var(--lc-ink);text-wrap:balance;margin:0}
+  .lts-mp-blk h2{font-size:clamp(22px,3.6vw,30px);font-weight:900;letter-spacing:-.02em}
+  .lts-mp-blk a{color:inherit}
+  .lts-mp-blk .lts-mp-eyebrow{display:inline-block;font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--lc-red);margin-bottom:10px}
+  .lts-mp-blk .lts-mp-headc{text-align:center;max-width:64ch;margin:0 auto 6px}
+  .lts-mp-blk .lts-mp-sub{font-size:clamp(15px,2.2vw,18px);color:var(--lc-muted);max-width:60ch;text-wrap:pretty;margin:8px auto 0}
+
+  /* reveal */
+  .lts-mp-blk .lts-mp-rise{opacity:0;transform:translateY(14px);animation:lts-mp-rise .7s var(--lc-e) forwards}
+  @keyframes lts-mp-rise{to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){.lts-mp-blk .lts-mp-rise{animation:none;opacity:1;transform:none}}
+
+  /* ===== three cards ===== */
+  .lts-mp-blk .lts-mp-grid{margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
+  .lts-mp-blk .lts-mp-card{position:relative;display:flex;flex-direction:column;background:var(--lc-surface);border-radius:var(--lc-r-lg);padding:28px 24px;box-shadow:var(--lc-shadow-sm);border:1px solid var(--lc-hair);transition:transform .35s var(--lc-e),box-shadow .35s var(--lc-e)}
+  .lts-mp-blk .lts-mp-card:hover{transform:translateY(-4px);box-shadow:var(--lc-shadow)}
+  .lts-mp-blk .lts-mp-card.lts-mp-feature{border:0;background:#fff;box-shadow:var(--lc-ok);outline:2px solid var(--lc-red);outline-offset:0;transform:scale(1.04);z-index:2}
+  .lts-mp-blk .lts-mp-card.lts-mp-feature:hover{transform:scale(1.04) translateY(-5px)}
+  .lts-mp-blk .lts-mp-card.lts-mp-premium{border:0;background:linear-gradient(160deg,#fff 0%,#fff5f6 100%);box-shadow:var(--lc-shadow);outline:2px solid var(--lc-red-deep);outline-offset:0}
+  /* Family = both featured + premium: keep the elevated scale, use the deep-red accent. */
+  .lts-mp-blk .lts-mp-card.lts-mp-feature.lts-mp-premium{outline-color:var(--lc-red-deep);box-shadow:var(--lc-ok);background:linear-gradient(160deg,#fff 0%,#fff5f6 100%)}
+  .lts-mp-blk .lts-mp-card .lts-mp-ic{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:var(--lc-red-50);color:var(--lc-red);font-size:23px}
+  .lts-mp-blk .lts-mp-card.lts-mp-premium .lts-mp-ic{background:var(--lc-red-deep);color:#fff}
+  .lts-mp-blk .lts-mp-card h3{font-size:21px;font-weight:900;margin:13px 0 0;letter-spacing:-.01em}
+  .lts-mp-blk .lts-mp-card .lts-mp-tag{font-size:13.5px;color:var(--lc-muted);font-weight:700;margin:4px 0 0}
+  .lts-mp-blk .lts-mp-card .lts-mp-pop{position:absolute;top:14px;right:14px;font-size:10px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--lc-red);padding:4px 10px;border-radius:999px}
+  .lts-mp-blk .lts-mp-card .lts-mp-pop-premium{background:var(--lc-red-deep)}
+  .lts-mp-blk .lts-mp-pricebox{margin:18px 0 4px;display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;min-height:34px}
+  .lts-mp-blk .lts-mp-price{font-size:32px;font-weight:900;color:var(--lc-ink);line-height:1;letter-spacing:-.02em}
+  .lts-mp-blk .lts-mp-per{font-size:13px;font-weight:700;color:var(--lc-muted)}
+  .lts-mp-blk .lts-mp-card ul{list-style:none;padding:0;margin:16px 0 0;flex:1}
+  .lts-mp-blk .lts-mp-card li{position:relative;padding:6px 0 6px 28px;font-size:14px;color:var(--lc-body);font-weight:600}
+  .lts-mp-blk .lts-mp-card li .lts-mp-tick{position:absolute;left:0;top:7px;width:18px;height:18px;border-radius:50%;background:var(--lc-red-50);color:var(--lc-red);font-size:10.5px;font-weight:900;display:grid;place-items:center;line-height:1}
+  .lts-mp-blk .lts-mp-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;font:inherit;font-weight:800;font-size:14px;padding:12px 20px;border-radius:999px;cursor:pointer;text-decoration:none;border:1.5px solid var(--lc-red);background:#fff;color:var(--lc-red);transition:transform .2s var(--lc-e),box-shadow .2s var(--lc-e),background .2s}
+  .lts-mp-blk .lts-mp-btn:hover{transform:translateY(-2px)}
+  .lts-mp-blk .lts-mp-btn.lts-mp-btn-solid{background:var(--lc-red);color:#fff;border-color:var(--lc-red);box-shadow:var(--lc-ok)}
+  .lts-mp-blk .lts-mp-btn.lts-mp-btn-solid:hover{background:var(--lc-red-strong)}
+  .lts-mp-blk .lts-mp-btn.lts-mp-btn-premium{background:var(--lc-red-deep);color:#fff;border-color:var(--lc-red-deep);box-shadow:var(--lc-shadow)}
+  .lts-mp-blk .lts-mp-btn.lts-mp-btn-premium:hover{background:var(--lc-red-ink)}
+  .lts-mp-blk .lts-mp-btn[disabled],.lts-mp-blk .lts-mp-btn.is-disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+  .lts-mp-blk .lts-mp-btn.is-loading{opacity:.75;cursor:progress}
+
+  @media(max-width:900px){
+    .lts-mp-blk .lts-mp-grid{grid-template-columns:1fr;max-width:440px;margin-left:auto;margin-right:auto}
+    .lts-mp-blk .lts-mp-card.lts-mp-feature{transform:none}
+    .lts-mp-blk .lts-mp-card.lts-mp-feature:hover{transform:translateY(-4px)}
+  }
+{% endstylesheet %}
+
+<script>
+(function(){
+  var root = document.getElementById('lts-mp-{{ section.id }}');
+  if(!root) return;
+
+  // Variant-id map SSR'd from the published membership products (never hardcoded).
+  // Keyed by tier block index -> { variantId }.
+  var DATA = {};
+  try { DATA = JSON.parse(document.getElementById('lts-mp-data-{{ section.id }}').textContent) || {}; } catch(e) { DATA = {}; }
+  var TIERS = DATA.tiers || {};
+
+  var joinBtns = root.querySelectorAll('.lts-mp-btn-join[data-tier-join]');
+
+  // Disable any Join button whose variant is missing (product unpublished / no variant).
+  for (var i=0;i<joinBtns.length;i++){
+    var idx = joinBtns[i].getAttribute('data-tier-join');
+    var t = TIERS[idx];
+    if (!t || !t.variantId){
+      joinBtns[i].setAttribute('disabled','');
+      joinBtns[i].classList.add('is-disabled');
+      joinBtns[i].setAttribute('aria-disabled','true');
+    }
+  }
+
+  function join(btn){
+    var idx = btn.getAttribute('data-tier-join');
+    var t = TIERS[idx];
+    if (!t || !t.variantId) return; // guarded
+    if (btn.classList.contains('is-loading')) return;
+    btn.classList.add('is-loading');
+    btn.setAttribute('aria-busy','true');
+
+    // Add the membership variant to the cart, then send to checkout.
+    fetch('/cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: [{ id: t.variantId, quantity: 1 }] })
+    }).then(function(res){
+      if (!res.ok) throw new Error('cart/add failed ' + res.status);
+      window.location.href = '/checkout';
+    }).catch(function(err){
+      // Re-enable so the shopper can retry; log for diagnostics.
+      btn.classList.remove('is-loading');
+      btn.removeAttribute('aria-busy');
+      if (window.console && console.error) console.error('[lts-membership] join failed', err);
+    });
+  }
+
+  for (var j=0;j<joinBtns.length;j++){
+    joinBtns[j].addEventListener('click', function(){ join(this); });
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Membership plans",
+  "tag": "section",
+  "class": "lts-mp-section",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Love to Sing membership"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Stream every Love to Sing song"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Full songs, ad free, on every device. Pick the plan that fits your family."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tier",
+      "name": "Tier card",
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icon (emoji)",
+          "default": "♪"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Free"
+        },
+        {
+          "type": "text",
+          "id": "tagline",
+          "label": "Tagline",
+          "default": "Have a listen"
+        },
+        {
+          "type": "text",
+          "id": "product_handle",
+          "label": "Product handle (drives live price)",
+          "info": "The membership product's handle, e.g. premium-membership-annual. Leave blank for the Free tier to show \"Free\"."
+        },
+        {
+          "type": "textarea",
+          "id": "features",
+          "label": "Features (one per line)",
+          "default": "30 second song previews\nBrowse the whole catalogue\nNo account needed"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Browse songs"
+        },
+        {
+          "type": "select",
+          "id": "cta_type",
+          "label": "CTA behaviour",
+          "options": [
+            { "value": "browse", "label": "Browse (link)" },
+            { "value": "join", "label": "Join (add to cart, go to checkout)" }
+          ],
+          "default": "browse"
+        },
+        {
+          "type": "url",
+          "id": "free_url",
+          "label": "Browse link URL (Browse CTA only)",
+          "info": "Where the Free / browse button links to. Defaults to /collections/all."
+        },
+        {
+          "type": "checkbox",
+          "id": "featured",
+          "label": "Featured (elevated, outline, pill)",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "premium",
+          "label": "Premium (darker deep-red accent)",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "pill_text",
+          "label": "Pill text (featured / premium only)",
+          "default": "Best value"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 3,
+  "presets": [
+    {
+      "name": "Membership plans",
+      "blocks": [
+        {
+          "type": "tier",
+          "settings": {
+            "icon": "♪",
+            "name": "Free",
+            "tagline": "Have a listen",
+            "product_handle": "",
+            "features": "30 second song previews\nBrowse the whole catalogue\nNo account needed",
+            "button_label": "Browse songs",
+            "cta_type": "browse",
+            "featured": false,
+            "premium": false,
+            "pill_text": "Best value"
+          }
+        },
+        {
+          "type": "tier",
+          "settings": {
+            "icon": "★",
+            "name": "Premium",
+            "tagline": "The whole catalogue, just for you",
+            "product_handle": "premium-membership-annual",
+            "features": "Full songs, ad free\nStream on every device\nDownload MP3 and FLAC\nOne profile",
+            "button_label": "Join Premium",
+            "cta_type": "join",
+            "featured": false,
+            "premium": false,
+            "pill_text": "Best value"
+          }
+        },
+        {
+          "type": "tier",
+          "settings": {
+            "icon": "♥",
+            "name": "Family",
+            "tagline": "Everything in Premium, for the whole family",
+            "product_handle": "family-membership-annual",
+            "features": "Everything in Premium\nUp to 6 family profiles\nFull songs, ad free\nStream on every device\nDownload MP3 and FLAC",
+            "button_label": "Join Family",
+            "cta_type": "join",
+            "featured": true,
+            "premium": true,
+            "pill_text": "Best value"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

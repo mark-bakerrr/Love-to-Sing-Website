@@ -141,3 +141,7 @@
 .hero-banner .hero__content-image-overlay .media img {
   width: 100%;
 }
+
+/* Rounded corners on hero side image when enabled (buy-a-licence). */
+.hero-banner .hero__content-image-aside.is-rounded .media{padding-bottom:56.25% !important;border-radius:var(--radius-l,2.4rem) !important;overflow:hidden !important;}
+.hero-banner .hero__content-image-aside.is-rounded .media img{border-radius:var(--radius-l,2.4rem) !important;object-fit:cover !important;}

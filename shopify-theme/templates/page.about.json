@@ -28,6 +28,7 @@
         "video_mobile": "",
         "overlay_color": "#2D0B0A",
         "overlay_opacity": 80,
+        "round_aside": false,
         "image_overlay_alignment": "center",
         "image_overlay_width": 60,
         "eyebrow": "Hello, We are",
@@ -47,7 +48,7 @@
             "icon_svg": "<svg width=\"48\" height=\"49\" viewbox=\"0 0 48 49\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M38 34.5V10.5C38 9.43913 37.5786 8.42172 36.8284 7.67157C36.0783 6.92143 35.0609 6.5 34 6.5H8\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n<path d=\"M16 42.5H40C41.0609 42.5 42.0783 42.0786 42.8284 41.3284C43.5786 40.5783 44 39.5609 44 38.5V36.5C44 35.9696 43.7893 35.4609 43.4142 35.0858C43.0391 34.7107 42.5304 34.5 42 34.5H22C21.4696 34.5 20.9609 34.7107 20.5858 35.0858C20.2107 35.4609 20 35.9696 20 36.5V38.5C20 39.5609 19.5786 40.5783 18.8284 41.3284C18.0783 42.0786 17.0609 42.5 16 42.5ZM16 42.5C14.9391 42.5 13.9217 42.0786 13.1716 41.3284C12.4214 40.5783 12 39.5609 12 38.5V10.5C12 9.43913 11.5786 8.42172 10.8284 7.67157C10.0783 6.92143 9.06087 6.5 8 6.5C6.93913 6.5 5.92172 6.92143 5.17157 7.67157C4.42143 8.42172 4 9.43913 4 10.5V14.5C4 15.0304 4.21071 15.5391 4.58579 15.9142C4.96086 16.2893 5.46957 16.5 6 16.5H12\" stroke=\"black\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path>\n</svg>",
             "icon_width": 48,
             "heading": "Our History",
-            "text": "<p>Founded in 1991 by Linda Adamson, Love to Sing has grown into a multi-media studio</p>"
+            "text": "<p>Founded in 1994 by Linda Adamson, Love to Sing has grown into a multi-media studio</p>"
           }
         },
         "feature_item_C7gp7c": {
@@ -131,13 +132,73 @@
       "settings": {
         "background": "#F4F4F4",
         "flip_content": false,
-        "image": "shopify://shop_images/about-santa.png",
+        "image": "shopify://shop_images/linda-adamson-jamie-adamson-tessa-adamson-love-to-sing_jpg.jpg",
         "push_content_up": false,
         "content_color": "#000000",
         "eyebrow": "Our Journey",
         "eyebrow_color": "#b91f1c",
         "title": "Over 30 years of fun",
-        "content": "<p>Founded by Linda Adamson in 1991, Love to Sing began as a small New Zealand children's music company born from a passion for quality kids' songs. What started with songbooks published by Scholastic NZ has grown into a globally loved music brand with over 400 songs, a billion YouTube views, and listeners in every country on earth. From classrooms in New Zealand to living rooms across the globe, our mission remains the same — to connect people of all ages through the joy of singing together.<br/><br/></p>",
+        "content": "<p>Founded by Linda Adamson in 1994, Love to Sing began as a small New Zealand children's music company born from a passion for quality kids' songs. What started with songbooks published by Scholastic NZ has grown into a globally loved music brand with over 400 songs, over a billion YouTube views and listeners in every country. Love to Sing has five YouTube channels, with Christmas Songs & Carols - Love to Sing becoming one of the biggest Christmas music channels in the world. From classrooms in New Zealand to living rooms across the globe, our mission remains the same - to connect people of all ages through the joy of singing together.<br/><br/></p>",
+        "button_text": "",
+        "button_url": ""
+      }
+    },
+    "image_and_text_XY6qbe": {
+      "type": "image-and-text",
+      "blocks": {
+        "image-text-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.image-and-text.name",
+      "settings": {
+        "background": "#ffffff",
+        "flip_content": true,
+        "image": "shopify://shop_images/mark-baker-linda-adamson-tessa-baker-love-to-sing-family-team-christmas_jpg.jpg",
+        "push_content_up": false,
+        "content_color": "#000000",
+        "eyebrow": "Created with Love",
+        "eyebrow_color": "#b91f1c",
+        "title": "The Heart of Love to Sing",
+        "content": "<p>Family has always been at the heart of Love to Sing. Linda writes and creates music; Tessa, who has been part of Love to Sing since childhood as a singer and performer, now leads Creative Production; and Mark brings creativity together with business, technical, website and production expertise<strong>. </strong>Their different skills complement one another, while a wider team of talented musicians, singers, arrangers, artists and creative professionals helps bring each project to life. Today, Love to Sing has five YouTube channels, with Christmas Songs & Carols - Love to Sing becoming one of the biggest Christmas music channels in the world.<br/><br/></p>",
+        "button_text": "",
+        "button_url": ""
+      }
+    },
+    "image_and_text_BhjKDW": {
+      "type": "image-and-text",
+      "blocks": {
+        "image-text-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 80,
+            "spacing_bottom": 80,
+            "spacing_top_mobile": 40,
+            "spacing_bottom_mobile": 40
+          },
+          "blocks": {}
+        }
+      },
+      "name": "t:sections.image-and-text.name",
+      "settings": {
+        "background": "#F4F4F4",
+        "flip_content": false,
+        "image": "shopify://shop_images/ove-to-sing-choir-symphony-under-the-stars-big-screen_jpg.jpg",
+        "push_content_up": false,
+        "content_color": "#000000",
+        "eyebrow": "From New Zealand to the World",
+        "eyebrow_color": "#b91f1c",
+        "title": "Growing, changing and reaching new audiences",
+        "content": "<p>The Love to Sing catalogue grew from illustrated songbooks and cassettes into CDs, videos, DVDs, fitness programmes and teaching resources, reaching both education and retail markets before expanding into national television. Generations of Love to Sing choirs and Action Kids also brought the music to life on stage - from schools, libraries and community shows to some of New Zealand’s largest outdoor events, with audiences of more than 200,000 people. Love to Sing music and products were also published, licensed and distributed internationally, taking a New Zealand family business into markets around the world.<br/><br/></p>",
         "button_text": "",
         "button_url": ""
       }
@@ -161,15 +222,47 @@
       "settings": {
         "background": "#ffffff",
         "flip_content": true,
-        "image": "shopify://shop_images/about-play-guitar.png",
+        "image": "shopify://shop_images/inda-adamson-early-love-to-sing-show-guitar-children_jpg.jpg",
         "push_content_up": false,
         "content_color": "#000000",
         "eyebrow": "Created with Love",
         "eyebrow_color": "#b91f1c",
-        "title": "Every song is filled with love",
-        "content": "<p><br/>Every Love to Sing song is crafted with heart and soul. From the melodies and arrangements to the lyrics and production, we pour love into every note. Whether it's a nursery rhyme to make little ones giggle, a Christmas carol to bring families together, or an action song to get kids moving, our music is made to spark joy and create memories that last a lifetime.<br/><br/></p>",
+        "title": "Happy Vibrations Around the World",
+        "content": "<p>Long before YouTube or digital streaming, Linda had a simple dream: to create happy vibrations around the world through music. Today, Love to Sing brings together original songs written by Linda and much-loved traditional music, reaching audiences through YouTube, Spotify and other digital platforms and generating billions of views and streams worldwide. More than three decades later, Linda continues to write new music alongside Tessa, Mark and the wider Love to Sing creative team. The technology and audiences may have changed enormously, but the idea behind Love to Sing remains wonderfully simple: Connecting the world through the power of song.<br/></p>",
         "button_text": "",
         "button_url": ""
+      }
+    },
+    "team_grid": {
+      "type": "team-grid",
+      "blocks": {
+        "m1": {
+          "type": "member",
+          "settings": {
+            "handle": "linda-adamson"
+          }
+        },
+        "m2": {
+          "type": "member",
+          "settings": {
+            "handle": "tessa-baker"
+          }
+        },
+        "m3": {
+          "type": "member",
+          "settings": {
+            "handle": "mark-baker"
+          }
+        }
+      },
+      "block_order": [
+        "m1",
+        "m2",
+        "m3"
+      ],
+      "settings": {
+        "heading": "Meet the team",
+        "columns": 3
       }
     },
     "product_timeline_XMj6nM": {
@@ -202,9 +295,9 @@
           "type": "review",
           "settings": {
             "stars": 5,
-            "content": "My favourite song is My Mum Likes to Rock and Roll. I do hearty fun warm ups.",
-            "author": "Danielle",
-            "position": "Primary Teacher"
+            "content": "Hello There,\nMy name is Henry Salmon, and after a visit to my grandchildren, and great grandchildren over Christmas at Kati Kati, NZ, they introduced me to your wonderful disc of AT THE ZOO, and I at the age of ninety five, I enjoyed it as much as they did, and it gave me the idea of purchasing a couple, and letting the old folk at the home where I also am a tenant, to participate in that enjoyment.",
+            "author": "Henry",
+            "position": "Love to Sing Fan"
           },
           "blocks": {}
         },
@@ -222,9 +315,9 @@
           "type": "review",
           "settings": {
             "stars": 5,
-            "content": "I am enjoying teaching children through music from your website. It is just wonderful.",
-            "author": "Harji",
-            "position": "Music Teacher"
+            "content": "I am a New Zealand citizen and New Zealand Early childhood teacher. I used to listen to your CD's when I was in New Zealand they are awesome. Now I am working in the USA at a Montessori school and I have already introduced a few songs from Love to Sing CD's to our kids. They really enjoy!",
+            "author": "Saradha",
+            "position": "Teacher"
           },
           "blocks": {}
         },
@@ -232,9 +325,9 @@
           "type": "review",
           "settings": {
             "stars": 5,
-            "content": "I used to listen to your songs when I was in New Zealand they are awesome. Now I am working in the USA at a Montessori school and I have already introduced a few songs from Love to Sing to our kids. They really enjoy!.",
-            "author": "Saradha",
-            "position": "Kindergarten Teacher"
+            "content": "Thank you for singing and dancing at my school! I had a good time when you played \"My Mum loves to Rock and Roll\". All of the songs you were playing, I loved everything!",
+            "author": "Ana Talakai",
+            "position": "School Kid"
           },
           "blocks": {}
         },
@@ -301,7 +394,10 @@
     "youtube_stats_eXRYi6",
     "richtext_mbafpD",
     "image_and_text_NkXykK",
+    "image_and_text_XY6qbe",
+    "image_and_text_BhjKDW",
     "image_and_text_Ybi4jM",
+    "team_grid",
     "product_timeline_XMj6nM",
     "featured_reviews_zfTxqH",
     "newsletter_banner_wh8yRt"

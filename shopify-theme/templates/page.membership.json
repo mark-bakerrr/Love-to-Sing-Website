@@ -1,0 +1,73 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "plans": {
+      "type": "lts-membership-plans",
+      "blocks": {
+        "tier_free": {
+          "type": "tier",
+          "settings": {
+            "icon": "♪",
+            "name": "Free",
+            "tagline": "Have a listen",
+            "product_handle": "",
+            "features": "30 second song previews\nBrowse the whole catalogue\nNo account needed",
+            "button_label": "Browse songs",
+            "cta_type": "browse",
+            "free_url": "/collections/all",
+            "featured": false,
+            "premium": false,
+            "pill_text": "Best value"
+          }
+        },
+        "tier_premium": {
+          "type": "tier",
+          "settings": {
+            "icon": "★",
+            "name": "Premium",
+            "tagline": "The whole catalogue, just for you",
+            "product_handle": "premium-membership-annual",
+            "features": "Full songs, ad free\nStream on every device\nDownload MP3 and FLAC\nOne profile",
+            "button_label": "Join Premium",
+            "cta_type": "join",
+            "featured": false,
+            "premium": false,
+            "pill_text": "Best value"
+          }
+        },
+        "tier_family": {
+          "type": "tier",
+          "settings": {
+            "icon": "♥",
+            "name": "Family",
+            "tagline": "Everything in Premium, for the whole family",
+            "product_handle": "family-membership-annual",
+            "features": "Everything in Premium\nUp to 6 family profiles\nFull songs, ad free\nStream on every device\nDownload MP3 and FLAC",
+            "button_label": "Join Family",
+            "cta_type": "join",
+            "featured": true,
+            "premium": true,
+            "pill_text": "Best value"
+          }
+        }
+      },
+      "block_order": [
+        "tier_free",
+        "tier_premium",
+        "tier_family"
+      ],
+      "settings": {}
+    }
+  },
+  "order": [
+    "plans"
+  ]
+}
