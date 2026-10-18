@@ -12,6 +12,14 @@
   Cart drawer: the Santa v2 theme's cart-drawer.js listens for `cart:reload`
   (re-fetches + opens the drawer). We also fire `cart:open` (harmless no-op on
   this theme) per the plan, in case a future drawer wires it separately.
+
+  Step 5 (optional) lets the customer pick songs / videos / albums to add in the
+  same cart call. Popular picks are SSR'd per org type from the theme editor;
+  search results come from sections/lts-licence-picker-results.liquid via the
+  Section Rendering API. Rows + the pickable rule: snippets/lts-picker-row.liquid.
+  Plan: docs/plans/2026-10-19-feat-licence-builder-song-picker-plan.md
+
+  All prices are integer cents (variant.price) so totals never touch floats.
 {%- endcomment -%}
 
 {%- comment -%} ── SSR the live price/variant blob from the licence products ──
@@ -26,7 +34,7 @@
   {%- assign kv = pair | split: ":" -%}{%- assign p = all_products[kv[0]] -%}{%- assign key = kv[1] -%}
   {%- if p != blank -%}
     {%- if emitted > 0 -%},{%- endif -%}
-    "{{ key }}":{"from":{{ p.price_min | money_without_currency | remove: ',' }},"variants":{ {%- for v in p.variants -%}"{{ v.option1 | remove: 'Band ' }}":{"id":{{ v.id }},"price":{{ v.price | money_without_currency | remove: ',' }}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%} }}
+    "{{ key }}":{"from":{{ p.price_min }},"variants":{ {%- for v in p.variants -%}"{{ v.option1 | remove: 'Band ' }}":{"id":{{ v.id }},"price":{{ v.price }}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%} }}
     {%- assign emitted = emitted | plus: 1 -%}
   {%- endif -%}
 {%- endfor -%}
@@ -78,6 +86,50 @@
           <input class="lts-lb-txt" id="lts-lb-orgName" aria-label="Organisation name" placeholder="e.g. St Mary's Anglican Church" />
           <div class="lts-lb-hint">Printed on your licence certificate.</div>
         </div>
+
+        <div class="lts-lb-step lts-lb-picker"
+             data-search-url="{{ routes.search_url }}"
+             data-cart-url="{{ routes.cart_url }}"
+             data-cart-add-url="{{ routes.cart_add_url }}"
+             data-popular-heading="{{ section.settings.popular_heading | escape }}">
+          <div class="lts-lb-n">5 &middot; Add songs &amp; videos <span class="lts-lb-opt">(optional)</span></div>
+          <p class="lts-lb-hint lts-lb-picker__memnote" hidden>{{ section.settings.membership_note | escape }}</p>
+
+          <div class="lts-lb-seg-row lts-lb-seg-row--chips" role="group" aria-label="Filter results by type">
+            <button type="button" class="lts-lb-seg lts-lb-picker__chipbtn" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" class="lts-lb-seg lts-lb-picker__chipbtn" data-filter="song" aria-pressed="false">Songs</button>
+            <button type="button" class="lts-lb-seg lts-lb-picker__chipbtn" data-filter="video" aria-pressed="false">Videos</button>
+          </div>
+
+          <div class="lts-lb-picker__search" role="search" aria-label="Song and video search">
+            <label class="lts-lb-qlab" for="lts-lb-q-{{ section.id }}">Search songs, videos and albums</label>
+            <input class="lts-lb-txt lts-lb-picker__q" id="lts-lb-q-{{ section.id }}" type="search" autocomplete="off"
+                   enterkeyhint="search" aria-describedby="lts-lb-qhint-{{ section.id }}"
+                   aria-controls="lts-lb-res-{{ section.id }}" placeholder="e.g. Pohutukawa Tree" />
+            <div class="lts-lb-hint" id="lts-lb-qhint-{{ section.id }}">Type 2 or more letters.</div>
+          </div>
+
+          <div class="lts-lb-picker__popular" hidden>
+            <p class="lts-lb-picker__poplab"></p>
+            {%- assign pick_orgs = 'church,school,community' | split: ',' -%}
+            {%- for o in pick_orgs -%}
+              {%- assign pick_key = 'picks_' | append: o -%}
+              <ul class="lts-lb-results" role="list" data-org="{{ o }}" hidden>
+                {%- for p in section.settings[pick_key] -%}
+                  {%- render 'lts-picker-row', product: p, source: 'popular' -%}
+                {%- endfor -%}
+              </ul>
+            {%- endfor -%}
+          </div>
+
+          <div class="lts-lb-picker__results" id="lts-lb-res-{{ section.id }}" aria-busy="false" hidden></div>
+
+          <div class="lts-lb-picker__picked" hidden>
+            <div class="lts-lb-picker__pickedh" tabindex="-1">Your picks</div>
+            <ul class="lts-lb-picker__pickedlist" role="list"></ul>
+          </div>
+          <p class="visually-hidden lts-lb-picker__status" role="status"></p>
+        </div>
       </div>
 
       <aside class="lts-lb-sumcard">
@@ -85,6 +137,8 @@
         <div class="lts-lb-pr" id="lts-lb-sumPrice">from $29</div>
         <div class="lts-lb-per" id="lts-lb-sumPer">a year, enter your size</div>
         <ul id="lts-lb-sumFeatures"></ul>
+        <button type="button" class="lts-lb-sumcard__picks" id="lts-lb-sumPicks" hidden></button>
+        <p class="lts-lb-sumcard__error" id="lts-lb-cartErr" role="alert"></p>
         <button type="button" class="lts-lb-addcart" id="lts-lb-addBtn" disabled>Add to cart</button>
         <div class="lts-lb-fine">By adding to cart you agree to our <a href="{{ shop.privacy_policy.url }}" target="_blank" rel="noopener">Privacy Policy</a>, <a href="{{ shop.terms_of_service.url }}" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="/pages/licence-terms" target="_blank" rel="noopener">Licence Terms</a>.</div>
       </aside>
@@ -152,12 +206,65 @@
   .lts-lb-fine a{color:var(--red);font-weight:800;text-decoration:underline;text-underline-offset:2px}
   .lts-lb-fine a:hover{color:var(--red-strong)}
 
+  /* step 5: songs & videos picker */
+  .lts-lb-opt{font-weight:700;text-transform:none;letter-spacing:0}
+  .lts-lb-picker__memnote{margin:0 0 14px}
+  .lts-lb-seg-row--chips{flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .lts-lb-seg-row--chips .lts-lb-seg{flex:0 0 auto;min-block-size:44px;padding:9px 18px}
+  .lts-lb-picker__q{border-color:#958a84}
+  .lts-lb-picker button:focus-visible,.lts-lb-picker__q:focus-visible,.lts-lb-picker__pickedh:focus-visible,.lts-lb-sumcard__picks:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+  .lts-lb-picker__poplab{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:20px 0 10px}
+  .lts-lb-picker__popular[hidden],.lts-lb-picker__results[hidden],.lts-lb-picker__picked[hidden],.lts-lb-results[hidden]{display:none}
+  .lts-lb-picker__results{margin-top:16px;transition:opacity .18s var(--e)}
+  .lts-lb-picker__results[aria-busy="true"]{opacity:.55;min-block-size:120px}
+  .lts-lb-results{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+  .lts-lb-pick{display:grid;grid-template-columns:48px minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:8px 8px 8px 10px;border:1.5px solid var(--line);border-radius:var(--r);background:#fff;transition:border-color .18s var(--e),background-color .18s var(--e)}
+  .lts-lb-pick[hidden]{display:none}
+  .lts-lb-pick--picked{border-color:var(--red);background:var(--red-50)}
+  .lts-lb-pick__thumb{display:block;inline-size:48px;block-size:48px;border-radius:8px;object-fit:cover;background:var(--hair)}
+  .lts-lb-pick__body{min-inline-size:0}
+  .lts-lb-pick__title{display:block;font-weight:800;color:var(--ink);font-size:14.5px;line-height:1.3;overflow-wrap:anywhere}
+  .lts-lb-pick__kind{display:inline-block;margin-block-start:4px;padding:1px 8px;border-radius:999px;background:var(--red-50);color:var(--red-ink);font-size:11.5px;font-weight:800}
+  .lts-lb-pick--picked .lts-lb-pick__kind{background:#fff}
+  .lts-lb-pick__price{font-weight:800;color:var(--ink);font-size:14px;white-space:nowrap}
+  .lts-lb-pick__toggle{min-block-size:44px;min-inline-size:88px;padding:0 14px;border:1.5px solid var(--red);border-radius:var(--r-sm);background:#fff;color:var(--red-ink);font:inherit;font-weight:900;font-size:14px;cursor:pointer;transition:background-color .18s var(--e),color .18s var(--e)}
+  .lts-lb-pick__toggle:hover{background:var(--red-50)}
+  .lts-lb-pick__toggle[aria-pressed="true"]{background:var(--red);color:#fff}
+  .lts-lb-picker__msg{padding:16px;border:1.5px dashed var(--line);border-radius:var(--r);color:var(--body);font-size:14.5px}
+  .lts-lb-picker__msg[hidden]{display:none}
+  .lts-lb-picker__msg p{margin:0 0 6px}
+  .lts-lb-picker__link{min-block-size:44px;padding:0;border:0;background:none;font:inherit;font-weight:900;color:var(--red);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+  .lts-lb-picker__more{display:block;inline-size:100%;margin-top:10px;min-block-size:44px;border:1.5px solid var(--line);border-radius:var(--r);background:#fff;font:inherit;font-weight:800;color:var(--ink);cursor:pointer}
+  .lts-lb-picker__more[hidden]{display:none}
+  .lts-lb-picker__picked{margin-top:20px;padding-top:16px;border-top:1px solid var(--hair)}
+  .lts-lb-picker__pickedh{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:10px}
+  .lts-lb-picker__pickedlist{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+  .lts-lb-picker__chip{display:inline-flex;align-items:center;gap:8px;max-inline-size:100%;padding-inline-start:14px;border:1.5px solid var(--red);border-radius:999px;background:var(--red-50);color:var(--red-ink);font-size:13.5px;font-weight:800}
+  .lts-lb-picker__chipt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lts-lb-picker__chipp{font-weight:700;white-space:nowrap}
+  .lts-lb-picker__remove{flex:0 0 auto;inline-size:44px;block-size:44px;border:0;border-radius:999px;background:none;color:var(--red-ink);font-size:20px;line-height:1;cursor:pointer}
+  .lts-lb-picker__remove:hover{background:var(--red-100)}
+  .lts-lb-sumcard__picks{display:block;inline-size:100%;margin:0 0 14px;padding:10px 12px;border:1px dashed var(--red);border-radius:var(--r-sm);background:var(--red-50);color:var(--red-ink);font:inherit;font-weight:800;font-size:14px;cursor:pointer}
+  .lts-lb-sumcard__picks[hidden]{display:none}
+  .lts-lb-sumcard__error{margin:0 0 12px;padding:10px 12px;border-radius:var(--r-sm);background:var(--red-50);color:var(--red-ink);font-size:13.5px;font-weight:700;text-align:left}
+  .lts-lb-sumcard__error:empty{display:none}
+  @media(prefers-reduced-motion:reduce){
+    .lts-lb-pick,.lts-lb-pick__toggle,.lts-lb-picker__results{transition:none}
+  }
+
   @media(max-width:860px){
     .lts-lb-builder{grid-template-columns:1fr}
     .lts-lb-sumcard{position:static}
   }
   @media(max-width:520px){
     .lts-lb-seg-row{flex-direction:column}
+    .lts-lb-seg-row--chips{flex-direction:row}
+    .lts-lb-pick{grid-template-columns:48px minmax(0,1fr) auto;gap:4px 10px}
+    .lts-lb-pick__toggle{min-inline-size:72px;padding:0 10px}
+    .lts-lb-pick__thumb{grid-row:1 / span 2}
+    .lts-lb-pick__body{grid-column:2;grid-row:1}
+    .lts-lb-pick__price{grid-column:2;grid-row:2}
+    .lts-lb-pick__toggle{grid-column:3;grid-row:1 / span 2}
   }
 {% endstylesheet %}
 
@@ -208,6 +315,12 @@
     school:"students",
     community:"attendees"
   };
+  // Plural noun read after the "Popular with" heading setting.
+  var ORG_PLURAL = {
+    church:"churches",
+    school:"schools",
+    community:"community groups"
+  };
 
   // Pre-fill from URL params: ?licence= (grant), ?org= (org type), ?size= (number).
   // Defaults: grant all_in_one, org church, empty size. Params are normalized +
@@ -253,9 +366,280 @@
     return gd.variants[String(band)] || null;
   }
 
-  function money(n){
-    // Whole-dollar prices; show cents only if present.
-    return '$' + (n % 1 === 0 ? String(n) : n.toFixed(2));
+  function money(cents){
+    // Integer cents in; whole-dollar prices show without cents.
+    cents = Math.round(cents);
+    return '$' + (cents % 100 === 0 ? String(cents / 100) : (cents / 100).toFixed(2));
+  }
+
+  // ── Step 5: songs & videos picker ───────────────────────────────────────
+  var picker = root.querySelector('.lts-lb-picker');
+  var CFG = {
+    searchUrl: picker.getAttribute('data-search-url') || '/search',
+    cartUrl: picker.getAttribute('data-cart-url') || '/cart',
+    cartAddUrl: picker.getAttribute('data-cart-add-url') || '/cart/add',
+    popularHeading: picker.getAttribute('data-popular-heading') || ''
+  };
+  var qInput = picker.querySelector('.lts-lb-picker__q');
+  var popularBox = picker.querySelector('.lts-lb-picker__popular');
+  var popLabel = picker.querySelector('.lts-lb-picker__poplab');
+  var resultsBox = picker.querySelector('.lts-lb-picker__results');
+  var pickedWrap = picker.querySelector('.lts-lb-picker__picked');
+  var pickedHead = picker.querySelector('.lts-lb-picker__pickedh');
+  var pickedList = picker.querySelector('.lts-lb-picker__pickedlist');
+  var statusEl = picker.querySelector('.lts-lb-picker__status');
+  var memNote = picker.querySelector('.lts-lb-picker__memnote');
+
+  // picks: variant id (ALWAYS a string) -> {title, kind, price (cents)}.
+  // Rows are re-rendered from this Map, never the other way round.
+  var picks = new Map();
+  var filter = 'all';          // all | song | video
+  var searching = false;       // a 2+ letter search is showing results
+  var resultLimit = 8;
+  var searchTimer = null, searchCtl = null;
+  var busy = false;            // add-to-cart in flight
+
+  function picksTotal(){
+    var t = 0;
+    picks.forEach(function(p){ t += p.price; });
+    return t;
+  }
+  function itemsWord(n){ return n === 1 ? '1 item' : n + ' items'; }
+  function pickSummary(){
+    return picks.size === 0 ? 'No picks.' : itemsWord(picks.size) + ' picked, ' + money(picksTotal()) + '.';
+  }
+
+  function announce(msg){
+    statusEl.textContent = '';
+    setTimeout(function(){ statusEl.textContent = msg; }, 50);
+  }
+
+  // GA4 - no-op when gtag is missing (same guard as trackPreview in lts-shop-drawer).
+  function track(name, params){
+    try {
+      if (typeof window.gtag !== 'function') return;
+      params.surface = 'licence_builder';
+      window.gtag('event', name, params);
+    } catch(e){}
+  }
+
+  // Reflect the picks Map onto every rendered row (popular + search) and the picked list.
+  function syncRows(){
+    var rows = picker.querySelectorAll('.lts-lb-pick');
+    for (var i=0;i<rows.length;i++){
+      var on = picks.has(rows[i].getAttribute('data-variant-id'));
+      rows[i].classList.toggle('lts-lb-pick--picked', on);
+      var btn = rows[i].querySelector('.lts-lb-pick__toggle');
+      btn.setAttribute('aria-pressed', on);
+      btn.querySelector('.lts-lb-pick__state').textContent = on ? 'Added ✓' : 'Add';
+    }
+    renderPickedList();
+  }
+
+  function renderPickedList(){
+    pickedList.textContent = '';
+    picks.forEach(function(p, id){
+      var li = document.createElement('li');
+      li.className = 'lts-lb-picker__chip';
+      var t = document.createElement('span');
+      t.className = 'lts-lb-picker__chipt';
+      t.textContent = p.title;
+      var pr = document.createElement('span');
+      pr.className = 'lts-lb-picker__chipp';
+      pr.textContent = money(p.price);
+      var x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'lts-lb-picker__remove';
+      x.setAttribute('data-variant-id', id);
+      x.setAttribute('aria-label', 'Remove ' + p.title);
+      x.innerHTML = '<span aria-hidden="true">&times;</span>';
+      li.appendChild(t); li.appendChild(pr); li.appendChild(x);
+      pickedList.appendChild(li);
+    });
+    pickedWrap.hidden = picks.size === 0;
+    pickedHead.textContent = 'Your picks (' + picks.size + ')';
+  }
+
+  function matchesFilter(row){
+    return filter === 'all' || row.getAttribute('data-kind') === filter;
+  }
+
+  // Show the current org's popular list (filtered) or the search results
+  // (filtered + limited). Returns the number of matching rows on show.
+  function applyFilter(){
+    var popVisible = 0;
+    var lists = popularBox.querySelectorAll('ul[data-org]');
+    for (var i=0;i<lists.length;i++){
+      var current = lists[i].getAttribute('data-org') === org;
+      lists[i].hidden = !current;
+      if (!current) continue;
+      var prow = lists[i].querySelectorAll('.lts-lb-pick');
+      for (var j=0;j<prow.length;j++){
+        prow[j].hidden = !matchesFilter(prow[j]);
+        if (!prow[j].hidden) popVisible++;
+      }
+    }
+    popLabel.textContent = CFG.popularHeading ? (CFG.popularHeading + ' ' + ORG_PLURAL[org]) : '';
+    popLabel.hidden = !CFG.popularHeading;
+    popularBox.hidden = searching || popVisible === 0;
+    if (!searching) return popVisible;
+
+    var rows = resultsBox.querySelectorAll('.lts-lb-pick');
+    var matched = 0;
+    for (var k=0;k<rows.length;k++){
+      if (matchesFilter(rows[k])){
+        matched++;
+        rows[k].hidden = matched > resultLimit;
+      } else {
+        rows[k].hidden = true;
+      }
+    }
+    var more = resultsBox.querySelector('.lts-lb-picker__more');
+    if (more){
+      more.hidden = matched <= resultLimit;
+      more.textContent = 'Show more (' + (matched - resultLimit) + ')';
+    }
+    var empty = resultsBox.querySelector('.lts-lb-picker__msg--empty');
+    if (empty){
+      var noun = filter === 'video' ? 'No videos' : filter === 'song' ? 'No songs' : 'No songs or videos';
+      empty.querySelector('p').textContent = noun + ' match "' + empty.getAttribute('data-term') + '".';
+      empty.hidden = matched !== 0;
+    }
+    return matched;
+  }
+
+  function buildMsg(text, btnLabel, action){
+    var d = document.createElement('div');
+    d.className = 'lts-lb-picker__msg';
+    var p = document.createElement('p');
+    p.textContent = text;
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'lts-lb-picker__link';
+    b.setAttribute('data-action', action);
+    b.textContent = btnLabel;
+    d.appendChild(p); d.appendChild(b);
+    return d;
+  }
+
+  function resultsWord(n){ return n === 0 ? 'No results' : (n === 1 ? '1 result' : n + ' results'); }
+
+  function runSearch(term){
+    clearTimeout(searchTimer);
+    if (searchCtl) searchCtl.abort();
+    searchCtl = typeof AbortController === 'function' ? new AbortController() : null;
+    resultLimit = 8;
+    searching = true;
+    resultsBox.hidden = false;
+    resultsBox.setAttribute('aria-busy', 'true');
+    applyFilter();
+
+    var url = new URL(CFG.searchUrl, location.origin);
+    url.searchParams.set('q', term);
+    url.searchParams.set('type', 'product');
+    url.searchParams.set('options[prefix]', 'last');
+    url.searchParams.set('options[unavailable_products]', 'hide');
+    url.searchParams.set('section_id', 'lts-licence-picker-results');
+
+    fetch(url.toString(), { signal: searchCtl ? searchCtl.signal : undefined })
+      .then(function(r){
+        if (!r.ok) throw new Error('Search failed: ' + r.status);
+        return r.text();
+      })
+      .then(function(html){
+        if (term !== qInput.value.trim()) return; // stale response
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var list = doc.querySelector('.lts-lb-results');
+        resultsBox.textContent = '';
+        if (list) resultsBox.appendChild(document.importNode(list, true));
+        var empty = buildMsg('', 'Clear search', 'clear');
+        empty.classList.add('lts-lb-picker__msg--empty');
+        empty.setAttribute('data-term', term);
+        resultsBox.appendChild(empty);
+        var more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'lts-lb-picker__more';
+        more.setAttribute('data-action', 'more');
+        resultsBox.appendChild(more);
+        resultsBox.setAttribute('aria-busy', 'false');
+        syncRows();
+        announce(resultsWord(applyFilter()));
+      })
+      .catch(function(err){
+        if (err && err.name === 'AbortError') return;
+        if (term !== qInput.value.trim()) return;
+        resultsBox.textContent = '';
+        resultsBox.appendChild(buildMsg('Search isn’t working right now. Try again in a moment.', 'Try again', 'retry'));
+        resultsBox.setAttribute('aria-busy', 'false');
+        announce('Search isn’t working right now.');
+      });
+  }
+
+  function onSearchInput(){
+    clearTimeout(searchTimer);
+    var term = qInput.value.trim();
+    if (term.length < 2){
+      if (searchCtl) searchCtl.abort();
+      searching = false;
+      resultsBox.hidden = true;
+      resultsBox.textContent = '';
+      resultsBox.setAttribute('aria-busy', 'false');
+      applyFilter();
+      return;
+    }
+    searchTimer = setTimeout(function(){ runSearch(term); }, 300);
+  }
+
+  function togglePick(row){
+    if (!row) return;
+    var id = row.getAttribute('data-variant-id');
+    var title = row.getAttribute('data-title') || '';
+    var added = !picks.has(id);
+    if (added){
+      picks.set(id, {
+        title: title,
+        kind: row.getAttribute('data-kind'),
+        price: parseInt(row.getAttribute('data-price'), 10) || 0
+      });
+    } else {
+      picks.delete(id);
+    }
+    syncRows();
+    render();
+    announce((added ? 'Added ' : 'Removed ') + title + '. ' + pickSummary());
+  }
+
+  // Remove from "Your picks", then move focus to the next ×, else the previous,
+  // else the heading (or the search box once the list is empty).
+  function removePick(btn){
+    var all = pickedList.querySelectorAll('.lts-lb-picker__remove');
+    var idx = Array.prototype.indexOf.call(all, btn);
+    var id = btn.getAttribute('data-variant-id');
+    var p = picks.get(id);
+    picks.delete(id);
+    syncRows();
+    render();
+    announce('Removed ' + (p ? p.title : 'item') + '. ' + pickSummary());
+    var left = pickedList.querySelectorAll('.lts-lb-picker__remove');
+    if (left.length) (left[idx] || left[idx - 1]).focus();
+    else qInput.focus();
+  }
+
+  function setFilter(f){
+    filter = f;
+    var chips = picker.querySelectorAll('.lts-lb-picker__chipbtn');
+    for (var i=0;i<chips.length;i++){ chips[i].setAttribute('aria-pressed', chips[i].getAttribute('data-filter') === f); }
+    var n = applyFilter();
+    if (searching) announce(resultsWord(n));
+  }
+
+  function showMore(){
+    var shownBefore = resultLimit;
+    resultLimit = Infinity;
+    applyFilter();
+    // Focus the first newly revealed row so keyboard users keep their place.
+    var rows = resultsBox.querySelectorAll('.lts-lb-pick:not([hidden])');
+    if (rows[shownBefore]) rows[shownBefore].querySelector('.lts-lb-pick__toggle').focus();
   }
 
   function render(){
@@ -268,6 +652,14 @@
     $('lts-lb-sizeLabel').textContent = SIZE_WORD[org];
     $('lts-lb-sumName').textContent = NAMES[grant];
     $('lts-lb-sumFeatures').innerHTML = (FEATURES[grant]||[]).map(function(f){ return '<li>'+f+'</li>'; }).join('');
+
+    // Step 5 summary first - the licence branches below return early.
+    var nPicks = picks.size, picksC = picksTotal();
+    var sumPicks = $('lts-lb-sumPicks');
+    sumPicks.hidden = nPicks === 0;
+    sumPicks.textContent = 'Songs & videos (' + nPicks + ') · ' + money(picksC);
+    memNote.hidden = !(grant === 'membership' && memNote.textContent.trim());
+    applyFilter();
 
     var num = parseInt($('lts-lb-sizeNum').value, 10);
     var nameOk = $('lts-lb-orgName').value.trim().length > 0;
@@ -287,23 +679,32 @@
       }
       var price = variant.price;
       $('lts-lb-bandNote').innerHTML = 'Band '+band+' ('+RANGES[org][band-1]+'), <b>'+money(price)+' a year</b>';
-      $('lts-lb-sumPrice').textContent = money(price);
-      $('lts-lb-sumPer').textContent = 'a year';
-      addBtn.disabled = !nameOk;
-      addBtn.textContent = nameOk ? ('Add to cart, '+money(price)) : 'Add your organisation name';
+      if (nPicks > 0){
+        $('lts-lb-sumPrice').textContent = money(price + picksC);
+        $('lts-lb-sumPer').textContent = 'total today (licence '+money(price)+' a year + '+itemsWord(nPicks)+')';
+      } else {
+        $('lts-lb-sumPrice').textContent = money(price);
+        $('lts-lb-sumPer').textContent = 'a year';
+      }
+      addBtn.disabled = busy || !nameOk;
+      if (busy) addBtn.textContent = 'Adding…';
+      else if (!nameOk) addBtn.textContent = 'Add your organisation name';
+      else addBtn.textContent = nPicks > 0 ? ('Add licence + '+itemsWord(nPicks)+', '+money(price + picksC)) : ('Add to cart, '+money(price));
     } else {
       var fp = fromPrice(grant);
       $('lts-lb-bandNote').textContent = 'Enter a number to see your price.';
       $('lts-lb-sumPrice').textContent = fp != null ? ('from '+money(fp)) : 'from …';
-      $('lts-lb-sumPer').textContent = 'a year, enter your size';
+      $('lts-lb-sumPer').textContent = nPicks > 0 ? ('a year, enter your size (+ '+money(picksC)+' songs & videos)') : 'a year, enter your size';
       addBtn.disabled = true;
-      addBtn.textContent = 'Add to cart';
+      addBtn.textContent = busy ? 'Adding…' : 'Add to cart';
     }
   }
 
-  // Add-to-cart: post the resolved variant + the four line-item properties,
+  // Add-to-cart: post the resolved licence variant + its line-item properties,
+  // plus every step 5 pick not already in the cart, in ONE /cart/add.js call,
   // then reload/open the theme cart drawer.
   function addToCart(){
+    if (busy) return;
     var num = parseInt($('lts-lb-sizeNum').value, 10);
     var orgName = $('lts-lb-orgName').value.trim();
     if (!(num > 0) || !orgName) return;
@@ -314,41 +715,69 @@
       render();
       return;
     }
-    var variantId = variant.id;
-    var addBtn = $('lts-lb-addBtn');
-    addBtn.disabled = true;
-    addBtn.textContent = 'Adding…';
+    var items = [{
+      id: variant.id,
+      quantity: 1,
+      properties:{
+        _lts_org_name: orgName,
+        _lts_org_type: org,
+        _lts_size_band: String(band),
+        _lts_declared_size: String(num),
+        'Size': RANGES[org][band-1] + ' ' + SIZE_NOUN[org]
+      }
+    }];
+    var addedC = variant.price;
+    var skipped = [];
+    var errEl = $('lts-lb-cartErr');
+    errEl.textContent = '';
+    busy = true;
+    render();
 
-    fetch('/cart/add.js', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        items:[{
-          id: variantId,
-          quantity: 1,
-          properties:{
-            _lts_org_name: orgName,
-            _lts_org_type: org,
-            _lts_size_band: String(band),
-            _lts_declared_size: String(num),
-            'Size': RANGES[org][band-1] + ' ' + SIZE_NOUN[org]
-          }
-        }]
+    fetch(CFG.cartUrl + '.js', { headers:{ 'Accept':'application/json' } })
+      .then(function(r){ return r.ok ? r.json() : { items: [] }; })
+      .catch(function(){ return { items: [] }; })
+      .then(function(cart){
+        // Skip picks already in the cart: the _lts_source property would make
+        // Shopify add a SECOND paid line, and the purchase webhook skips duplicates.
+        var inCart = {};
+        (cart.items || []).forEach(function(i){ inCart[String(i.variant_id)] = true; });
+        picks.forEach(function(p, id){
+          if (inCart[id]){ skipped.push(p.title); return; }
+          items.push({ id: Number(id), quantity: 1, properties: { _lts_source: 'licence_builder' } });
+          addedC += p.price;
+        });
+        return fetch(CFG.cartAddUrl + '.js', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', 'Accept':'application/json' },
+          body: JSON.stringify({ items: items })
+        });
       })
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(){
-      // Santa v2 cart-drawer.js: `cart:reload` re-fetches + opens the drawer.
-      // `cart:open` is a harmless no-op on this theme (dispatched per plan).
-      document.dispatchEvent(new CustomEvent('cart:reload'));
-      document.dispatchEvent(new CustomEvent('cart:open'));
-      render();
-    })
-    .catch(function(){
-      addBtn.disabled = false;
-      addBtn.textContent = 'Add to cart';
-      render();
-    });
+      .then(function(r){
+        return r.json().catch(function(){ return {}; }).then(function(j){
+          if (!r.ok) throw j;
+          return j;
+        });
+      })
+      .then(function(){
+        track('licence_builder_add_to_cart', { licence: grant, org_type: org, picks_count: items.length - 1, value: addedC / 100 });
+        picks.clear();
+        syncRows();
+        busy = false;
+        render();
+        if (skipped.length) announce(itemsWord(skipped.length) + ' already in your cart, not added again.');
+        // Santa v2 cart-drawer.js: `cart:reload` re-fetches + opens the drawer
+        // (cart-sync.js already fires `cart:refresh` after a successful add).
+        // `cart:open` is a harmless no-op on this theme (dispatched per plan).
+        document.dispatchEvent(new CustomEvent('cart:reload'));
+        document.dispatchEvent(new CustomEvent('cart:open'));
+      })
+      .catch(function(err){
+        busy = false;
+        errEl.textContent = (err && err.description) || 'Something went wrong adding to your cart. Please try again.';
+        // A 422 can still be a partial add - re-render the drawer from the real cart.
+        document.dispatchEvent(new CustomEvent('cart:refresh'));
+        render();
+      });
   }
 
   // wire up
@@ -360,10 +789,39 @@
   $('lts-lb-orgName').addEventListener('input', render);
   $('lts-lb-addBtn').addEventListener('click', addToCart);
 
+  // Step 5 - one delegated listener for toggles, chips, remove, more/clear/retry.
+  picker.addEventListener('click', function(e){
+    var el = e.target.closest ? e.target.closest('button') : null;
+    if (!el || !picker.contains(el)) return;
+    if (el.classList.contains('lts-lb-pick__toggle')){ togglePick(el.closest('.lts-lb-pick')); return; }
+    if (el.classList.contains('lts-lb-picker__remove')){ removePick(el); return; }
+    if (el.classList.contains('lts-lb-picker__chipbtn')){ setFilter(el.getAttribute('data-filter')); return; }
+    var action = el.getAttribute('data-action');
+    if (action === 'more'){ showMore(); return; }
+    if (action === 'clear'){ qInput.value = ''; onSearchInput(); qInput.focus(); return; }
+    if (action === 'retry'){
+      var t = qInput.value.trim();
+      if (t.length >= 2) runSearch(t);
+    }
+  });
+  qInput.addEventListener('input', onSearchInput);
+  qInput.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    var t = qInput.value.trim();
+    if (t.length >= 2) runSearch(t);
+  });
+  $('lts-lb-sumPicks').addEventListener('click', function(){
+    pickedHead.focus();
+    var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    pickedHead.scrollIntoView({ block:'center', behavior: still ? 'auto' : 'smooth' });
+  });
+
   // Apply the ?size= prefill (if any) before the first render so the band/price
   // resolve immediately for a fully pre-filled deep link.
   if (prefillSize){ $('lts-lb-sizeNum').value = prefillSize; }
 
+  syncRows();
   render();
 })();
 </script>
@@ -386,6 +844,42 @@
       "id": "subheading",
       "label": "Subheading",
       "default": "Tell us who it is for and how big you are, and we will show your exact price."
+    },
+    {
+      "type": "header",
+      "content": "Step 5: songs & videos"
+    },
+    {
+      "type": "text",
+      "id": "popular_heading",
+      "label": "Popular picks heading",
+      "info": "Followed by churches / schools / community groups. Leave blank to hide the heading.",
+      "default": "Popular with"
+    },
+    {
+      "type": "textarea",
+      "id": "membership_note",
+      "label": "Note shown when Membership is selected",
+      "info": "Leave blank to show no note.",
+      "default": "Membership already includes downloads of our whole catalogue. Add items here only if you want them straight away."
+    },
+    {
+      "type": "product_list",
+      "id": "picks_church",
+      "label": "Church popular picks",
+      "limit": 6
+    },
+    {
+      "type": "product_list",
+      "id": "picks_school",
+      "label": "School popular picks",
+      "limit": 6
+    },
+    {
+      "type": "product_list",
+      "id": "picks_community",
+      "label": "Community popular picks",
+      "limit": 6
     }
   ],
   "presets": [

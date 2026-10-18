@@ -1,0 +1,26 @@
+{%- comment -%}
+  Love to Sing - licence builder step 5 search results.
+
+  Never placed on a template: the licence builder fetches it via the Section
+  Rendering API from the storefront search route, e.g.
+    /search?q=pohu&type=product&options[unavailable_products]=hide&section_id=lts-licence-picker-results
+  and lifts the .lts-lb-results list out of the response. Styling lives in
+  sections/lts-licence-builder.liquid; the pickable rule lives in
+  snippets/lts-picker-row.liquid.
+{%- endcomment -%}
+<ul class="lts-lb-results" role="list">
+  {%- paginate search.results by 48 -%}
+    {%- for item in search.results -%}
+      {%- if item.object_type == 'product' -%}
+        {%- render 'lts-picker-row', product: item, source: 'search' -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endpaginate -%}
+</ul>
+
+{% schema %}
+{
+  "name": "Licence picker results",
+  "settings": []
+}
+{% endschema %}
