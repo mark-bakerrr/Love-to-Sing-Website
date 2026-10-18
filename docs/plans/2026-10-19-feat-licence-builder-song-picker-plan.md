@@ -29,6 +29,21 @@ brainstorm: docs/brainstorms/2026-10-19-licence-builder-song-picker-brainstorm.m
 ### Cut for v1 (YAGNI; every brainstorm decision survives)
 The per-term search cache, live "In cart" row states with `cart:refresh` re-sync, the 5-titles "+N more" summary, per-filter empty-state copy, the `licence_picker_add_item` GA4 event, and the mobile sticky bar (follow-up if mobile conversion lags).
 
+### Revision (2026-10-19, after Mark's review): two-screen flow
+Mark asked for the picker to become its own screen. He didn't want a lone search bar, wanted Your picks at the top, and wanted the summary card to persist. These supersede the step-5 layout described below:
+- **Screen 1 "Your licence"** holds steps 1–4. "Continue: add songs & videos" is enabled only when the licence is valid. A progress bar shows both screens.
+- **Screen 2 "Songs & videos"** (optional) contains, in order:
+  - "← Back to your licence"
+  - **Your picks**, at the top, with remove ×
+  - search
+  - **category tabs**, from theme-editor collection settings; defaults are Christmas `christmas-song-lyrics`, Kids `kids-song-lyrics`, Videos `christmas-video-songs`, Halloween `halloween-songs`, Celebration `celebration-song-lyrics`, Albums `digital-albums`. A "Popular" tab appears only when the org has curated picks.
+  - the All/Songs/Videos filter
+  - list rows with **Load more** (24 per page). A thin filtered page auto-fetches up to 3 more pages.
+- Screen 2 pushes `#songs`, so browser Back returns to screen 1. A reload on `#songs` starts on screen 1.
+- **The summary card persists on both screens.** It itemises the licence (band and price/yr) and every pick (with ×), then shows "Total today".
+- **Mobile:** a sticky bottom bar shows the order name, item count, total and Add to cart. It hides while the card is in view, and lifts the site-wide `.lts-cdw` countdown pill above itself.
+- `lts-licence-picker-results.liquid` now renders either `search.results` or `collection.products`, and emits `[data-has-next]`.
+
 ### Build notes (local build, 2026-10-19)
 - **Branch:** `feat/licence-builder-song-picker`, cut from `feat/mega-menu-rebuild`. That branch matches v3.2.0 (#185067962641), apart from editor settings in `templates/index.json`. `origin/main` is from June, 128 files behind.
 - **E-books use the `video_download` template**, so the suffix alone labelled them "Video". The snippet now also excludes `product.type == 'E-books'` and the `ebook` tag.

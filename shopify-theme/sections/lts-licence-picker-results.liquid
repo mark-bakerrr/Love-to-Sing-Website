@@ -1,22 +1,35 @@
 {%- comment -%}
-  Love to Sing - licence builder step 5 search results.
+  Love to Sing - licence builder "Add songs & videos" results (screen 2).
 
   Never placed on a template: the licence builder fetches it via the Section
-  Rendering API from the storefront search route, e.g.
+  Rendering API, either from storefront search or from a collection, e.g.
     /search?q=pohu&type=product&options[unavailable_products]=hide&section_id=lts-licence-picker-results
-  and lifts the .lts-lb-results list out of the response. Styling lives in
-  sections/lts-licence-builder.liquid; the pickable rule lives in
-  snippets/lts-picker-row.liquid.
+    /collections/kids-song-lyrics?section_id=lts-licence-picker-results&page=2
+  and appends the rows from .lts-lb-results. [data-has-next] tells the JS whether
+  a "Load more" page exists. Styling lives in sections/lts-licence-builder.liquid;
+  the pickable rule lives in snippets/lts-picker-row.liquid.
 {%- endcomment -%}
+{%- assign has_next = false -%}
 <ul class="lts-lb-results" role="list">
-  {%- paginate search.results by 48 -%}
-    {%- for item in search.results -%}
-      {%- if item.object_type == 'product' -%}
-        {%- render 'lts-picker-row', product: item, source: 'search' -%}
-      {%- endif -%}
-    {%- endfor -%}
-  {%- endpaginate -%}
+  {%- if search.performed -%}
+    {%- paginate search.results by 24 -%}
+      {%- for item in search.results -%}
+        {%- if item.object_type == 'product' -%}
+          {%- render 'lts-picker-row', product: item, source: 'search' -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if paginate.next -%}{%- assign has_next = true -%}{%- endif -%}
+    {%- endpaginate -%}
+  {%- elsif collection -%}
+    {%- paginate collection.products by 24 -%}
+      {%- for p in collection.products -%}
+        {%- render 'lts-picker-row', product: p, source: 'browse' -%}
+      {%- endfor -%}
+      {%- if paginate.next -%}{%- assign has_next = true -%}{%- endif -%}
+    {%- endpaginate -%}
+  {%- endif -%}
 </ul>
+<div data-has-next="{{ has_next }}" hidden></div>
 
 {% schema %}
 {
