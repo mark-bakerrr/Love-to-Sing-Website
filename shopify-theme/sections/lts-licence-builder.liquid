@@ -85,7 +85,7 @@
       <div class="lts-lb-panel">
         <ol class="lts-lb-progress" aria-label="Steps">
           <li><button type="button" class="lts-lb-progress__btn" data-goto="1" aria-current="step">1 &middot; Your licence</button></li>
-          <li><button type="button" class="lts-lb-progress__btn" data-goto="2" disabled>2 &middot; Songs &amp; videos<small>Optional</small></button></li>
+          <li><button type="button" class="lts-lb-progress__btn" data-goto="2" disabled>2 &middot; Songs &amp; videos</button></li>
         </ol>
 
         {%- comment -%} ── Screen 1: the licence ── {%- endcomment -%}
@@ -239,7 +239,7 @@
     padding:clamp(130px,14vw,180px) 0 clamp(44px,7vw,72px);background:var(--bg);
   }
   .lts-lb-blk *{box-sizing:border-box}
-  .lts-lb-wrap{max-width:1000px;margin:0 auto;padding:0 22px}
+  .lts-lb-wrap{max-width:1240px;margin:0 auto;padding:0 22px}
   .lts-lb-blk h2{color:var(--ink);text-wrap:balance;margin:0;font-size:clamp(22px,3.6vw,30px);font-weight:900;letter-spacing:-.02em}
   .lts-lb-sub{font-size:clamp(15px,2.2vw,18px);color:var(--muted);max-width:60ch;text-wrap:pretty;margin:8px auto 0}
   .lts-lb-eyebrow{display:inline-block;font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:10px}
@@ -251,7 +251,7 @@
   @media(prefers-reduced-motion:reduce){.lts-lb-rise{animation:none;opacity:1;transform:none}}
 
   /* builder */
-  .lts-lb-builder{margin-top:28px;display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+  .lts-lb-builder{margin-top:28px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:28px;align-items:start}
   .lts-lb-panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:6px 26px;box-shadow:var(--shadow-sm);scroll-margin-top:120px;min-width:0}
   .lts-lb-step{padding:22px 0;border-bottom:1px solid var(--hair)}
   .lts-lb-n{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
