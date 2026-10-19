@@ -139,7 +139,10 @@
              data-popular-heading="{{ section.settings.popular_heading | escape }}">
           <button type="button" class="lts-lb-back" data-goto="1">&larr; Back to your licence</button>
           <h3 class="lts-lb-screen__h" tabindex="-1">Add songs &amp; videos</h3>
-          <p class="lts-lb-screen__sub">Optional. Everything you pick goes in the cart with your licence.</p>
+          <div class="lts-lb-callout">
+            <span class="lts-lb-callout__tag">Optional</span>
+            <p class="lts-lb-callout__body"><strong>We recommend adding your songs now</strong> so your licence and music arrive together in one checkout. You can also buy songs and videos later; your licence covers them too.</p>
+          </div>
           <p class="lts-lb-hint lts-lb-picker__memnote" hidden>{{ section.settings.membership_note | escape }}</p>
 
           <div class="lts-lb-picker__picked" data-remove-scope>
@@ -278,7 +281,10 @@
   .lts-lb-progress__btn:disabled{cursor:not-allowed;opacity:.55}
   .lts-lb-screen[hidden]{display:none}
   .lts-lb-screen__h{margin:10px 0 2px;font-size:22px;font-weight:900;color:var(--ink);letter-spacing:-.01em;outline:none}
-  .lts-lb-screen__sub{margin:0 0 16px;color:var(--muted);font-size:14.5px}
+  .lts-lb-callout{display:flex;align-items:flex-start;gap:12px;margin:8px 0 18px;padding:14px 16px;border:1.5px solid var(--red-100);border-left:4px solid var(--red);border-radius:var(--r);background:var(--red-50)}
+  .lts-lb-callout__tag{flex:0 0 auto;margin-top:1px;padding:3px 10px;border-radius:999px;background:var(--red);color:#fff;font-size:11.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+  .lts-lb-callout__body{margin:0;color:var(--red-ink);font-size:14.5px;line-height:1.5}
+  .lts-lb-callout__body strong{font-weight:900}
   .lts-lb-next{padding:22px 0}
   .lts-lb-continue{display:block;inline-size:100%;min-block-size:52px;padding:14px;border:2px solid var(--red);border-radius:var(--r);background:#fff;color:var(--red-ink);font:inherit;font-weight:900;font-size:16px;cursor:pointer;transition:background-color .18s var(--e)}
   .lts-lb-continue:hover:not(:disabled){background:var(--red-50)}
@@ -383,6 +389,7 @@
   }
   @media(max-width:520px){
     .lts-lb-panel{padding:6px 16px}
+    .lts-lb-callout{flex-direction:column;gap:8px}
     .lts-lb-seg-row{flex-direction:column}
     .lts-lb-seg-row--chips{flex-direction:row}
     .lts-lb-pick{grid-template-columns:48px minmax(0,1fr) auto;gap:4px 10px}
