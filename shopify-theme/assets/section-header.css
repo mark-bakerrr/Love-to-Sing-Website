@@ -129,10 +129,8 @@ body:has(.header--floating) .main-song {
   background-repeat: no-repeat;
 }
 
-.header.menu-open {
-  background: #fff;
-  color: var(--c-neutral-950);
-}
+/* No .header.menu-open background/colour override: the header keeps its page
+   colour scheme while a mega menu is open (the panels set their own colours). */
 
 /* Keep the centre logo visible and IN FRONT of the mega panel when a menu is open. */
 .header.menu-open .header__logo {
@@ -253,9 +251,10 @@ body:has(.header--floating) .main-song {
   opacity: 0.7;
 }
 
+/* Open trigger keeps the header's own text colour (the header no longer turns
+   white when a mega menu opens, so a --c-main tint would vanish on the bar). */
 .header__nav-item:has(.header__megamenu):hover .header__nav-link {
   opacity: 1;
-  color: var(--c-main-500);
 }
 
 .header__nav-link i {

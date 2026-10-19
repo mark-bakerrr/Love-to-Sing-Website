@@ -301,6 +301,22 @@ table.cart-items td.cart-item__price {
     color var(--duration-default, 0.2s) ease;
 }
 
+/* Licence/membership artwork as a small one-row thumbnail, same box as the song tile. */
+.cart-item__thumb {
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  background-color: var(--c-main-100, var(--color-background-media));
+}
+
+.cart-item__thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .cart-item__icon-tile svg {
   display: block;
   width: 60%;
@@ -318,7 +334,8 @@ table.cart-items td.cart-item__price {
     width: 3.2rem;
   }
 
-  .cart-item__icon-tile {
+  .cart-item__icon-tile,
+  .cart-item__thumb {
     width: 3.2rem;
     height: 3.2rem;
   }

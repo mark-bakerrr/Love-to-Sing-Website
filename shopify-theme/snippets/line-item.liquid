@@ -23,6 +23,13 @@
     if is_song or line_item.image == blank
       assign use_icon = true
     endif
+    # Licences + memberships: compact one-row thumbnail (same size as the song tile), not large artwork.
+    assign lic_sfx = line_item.product.template_suffix | default: ''
+    assign is_licence = false
+    if line_item.product.type == 'Licence' or line_item.product.type == 'Membership' or lic_sfx contains 'licen' or lic_sfx contains 'membership'
+      assign is_licence = true
+      assign use_icon = true
+    endif
   -%}
   <td class="cart-item__media{% if use_icon %} cart-item__media--icon{% endif %}">
     <a href="{{- line_item.url -}}" class="cart-item__link">
@@ -33,7 +40,11 @@
         <div class="cart-item__icon-tile">
           {%- render 'icon', icon: 'music-note-single' -%}
         </div><!-- /.cart-item__icon-tile -->
-      {%- elsif line_item.image -%}
+      {%- elsif is_licence and line_item.image -%}
+        <div class="cart-item__thumb">
+          {{- line_item.image | image_url: width: 160, height: 160, crop: 'center' | image_tag: loading: 'lazy', alt: '', width: 80, height: 80 -}}
+        </div><!-- /.cart-item__thumb -->
+      {%- elsif line_item.image and is_licence == false -%}
         {%- assign media_aspect = '1-1' -%}
         {%- if line_item.product.tags contains 'videos' -%}
           {%- assign media_aspect = '16-9' -%}
@@ -48,7 +59,7 @@
           -%}
         </div><!-- /.media -->
       {%- else -%}
-        {%- comment -%} Imageless items (licences, memberships): keep the row aligned with a music tile. {%- endcomment -%}
+        {%- comment -%} Licences, memberships and imageless items: keep the row aligned with a music tile. {%- endcomment -%}
         <div class="cart-item__icon-tile">
           {%- render 'icon', icon: 'music-note' -%}
         </div><!-- /.cart-item__icon-tile -->
