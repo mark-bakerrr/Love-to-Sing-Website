@@ -110,7 +110,10 @@ html,body.pw-body{margin:0;height:100%;overflow:hidden;background:#c49a63;
 .pw-dd.open .pw-dd-btn svg{transform:rotate(180deg)}
 .pw-dd.active .pw-dd-btn{border-color:var(--pw-accent); box-shadow:0 0 0 1px var(--pw-accent) inset}
 .pw-dd-menu{
-  position:absolute; bottom:calc(100% + 10px); left:0; min-width:100%; width:max-content; max-width:240px;
+  /* Right-anchored: the filter bar sits at the right edge of the screen, so menus
+     open leftward instead of running off-screen. */
+  position:absolute; bottom:calc(100% + 10px); right:0; left:auto; min-width:100%; width:max-content;
+  max-width:min(360px, calc(100vw - 24px));
   max-height:290px; overflow:auto; overscroll-behavior:contain; display:none; z-index:40;
   background:rgba(20,21,26,.92); backdrop-filter:blur(14px);
   border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:6px;
@@ -136,6 +139,11 @@ html,body.pw-body{margin:0;height:100%;overflow:hidden;background:#c49a63;
   .pw-filters{top:auto; bottom:96px; right:12px; left:12px; flex-wrap:wrap; justify-content:center}
   .pw-dd{flex:1 1 30%; min-width:0}
   .pw-dd-btn{width:100%; max-width:none; justify-content:space-between}
+  /* Full-width bar on mobile: menus span the whole bar (fixed .pw-filters is the
+     containing block) so none can overflow the screen; long names wrap */
+  .pw-dd{position:static}
+  .pw-dd-menu{left:0; right:0; width:auto; max-width:none}
+  .pw-dd-item{white-space:normal}
 }
 
 /* ---------- Music player ---------- */
