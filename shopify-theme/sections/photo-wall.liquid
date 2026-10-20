@@ -89,7 +89,8 @@
       "title": {{ e.title.value | json }},
       "desc": {{ e.description.value | json }},
       "location": {{ e.location.value | json }},
-      "category": {{ e.category.value | json }},
+      {%- comment -%} Categories live in the `photo-wall-category` list field; legacy single `category` as fallback {%- endcomment -%}
+      "categories": {% if e['photo-wall-category'].value != blank %}{{ e['photo-wall-category'].value | json }}{% else %}{{ e.category.value | json }}{% endif %},
       "link": {{ e.link.value | json }},
       "people": [
         {%- for person in e.people.value -%}

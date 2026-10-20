@@ -16,7 +16,22 @@
     try { var el = document.getElementById(id); return el ? JSON.parse(el.textContent) : []; }
     catch (e) { return []; }
   }
-  var PHOTOS = readJSON('pw-data').filter(function (p) { return p && p.src; });
+  /* Category values arrive as an array (Liquid list field), a JSON string
+     (Storefront API list value), or a plain string (legacy field).
+     Normalise to a trimmed, de-duplicated array. */
+  function normCats(v){
+    if(v==null || v==='') return [];
+    if(typeof v==='string'){
+      var s=v.trim();
+      if(s.charAt(0)==='['){ try { v=JSON.parse(s); } catch(e){ v=[s]; } } else v=[s];
+    }
+    if(!Array.isArray(v)) v=[v];
+    var out=[];
+    v.forEach(function(c){ c=String(c==null?'':c).trim(); if(c && out.indexOf(c)<0) out.push(c); });
+    return out;
+  }
+  var PHOTOS = readJSON('pw-data').filter(function (p) { return p && p.src; })
+    .map(function (p) { p.categories = normCats(p.categories != null ? p.categories : p.category); return p; });
   var ALL = PHOTOS; /* unfiltered master list; PHOTOS is the currently visible subset */
   var TRACKS = readJSON('pw-tracks').filter(function (t) { return t && t.src; });
 
@@ -118,7 +133,7 @@
     var years={}, people={}, cats={};
     ALL.forEach(function(p){
       if(p.year) years[p.year]=1;
-      if(p.category) cats[p.category]=1;
+      (p.categories||[]).forEach(function(c){ cats[c]=1; });
       (p.people||[]).forEach(function(t){ if(t&&t.name) people[t.name]=1; });
     });
     ddYear.fill(Object.keys(years).sort());
@@ -130,7 +145,7 @@
     var y=ddYear?ddYear.value:'', pe=ddPerson?ddPerson.value:'', c=ddCat?ddCat.value:'';
     PHOTOS=ALL.filter(function(p){
       if(y && String(p.year)!==y) return false;
-      if(c && p.category!==c) return false;
+      if(c && (p.categories||[]).indexOf(c)<0) return false;
       if(pe && !(p.people||[]).some(function(t){ return t&&t.name===pe; })) return false;
       return true;
     });
@@ -159,7 +174,7 @@
       +' pageInfo{hasNextPage endCursor} nodes{'
       +' photo:field(key:"photo"){reference{... on MediaImage{ src:image{url(transform:{maxWidth:1000})} thumb:image{url(transform:{maxWidth:520})} }}}'
       +' year:field(key:"year"){value} title:field(key:"title"){value} desc:field(key:"description"){value}'
-      +' location:field(key:"location"){value} category:field(key:"category"){value} link:field(key:"link"){value}'
+      +' location:field(key:"location"){value} categories:field(key:"photo-wall-category"){value} category:field(key:"category"){value} link:field(key:"link"){value}'
       +' people:field(key:"people"){references(first:10){nodes{... on Metaobject{ name:field(key:"name"){value} onlineStoreUrl }}}}'
       +' product:field(key:"product"){reference{... on Product{ onlineStoreUrl featuredImage{url(transform:{maxWidth:200})} }}}'
       +' } } }';
@@ -184,7 +199,7 @@
           title: n.title ? n.title.value : null,
           desc: n.desc ? n.desc.value : null,
           location: n.location ? n.location.value : null,
-          category: n.category ? n.category.value : null,
+          categories: normCats(n.categories ? n.categories.value : (n.category ? n.category.value : null)),
           link: n.link ? n.link.value : null,
           people: n.people && n.people.references ? n.people.references.nodes.filter(Boolean).map(function(t){
             return { name: t.name ? t.name.value : '', url: t.onlineStoreUrl }; }) : [],
@@ -293,7 +308,7 @@
     }
     if(p.location){ meta += (meta?'<span class="pw-sep">·</span>':'')+'<span class="pw-loc">'+esc(p.location)+'</span>'; }
     if(meta) h+='<div class="pw-meta-row">'+meta+'</div>';
-    if(p.category) h+='<span class="pw-chip">'+esc(p.category)+'</span><br>';
+    if(p.categories && p.categories.length) h+=p.categories.map(function(c){ return '<span class="pw-chip">'+esc(c)+'</span>'; }).join(' ')+'<br>';
     if(p.product && p.product.url) h+='<a class="pw-product" href="'+esc(p.product.url)+'" target="_blank" rel="noopener" aria-label="Open product in a new tab">'
       +'<img src="'+esc(p.product.img)+'" alt="">'
       +'<span class="pw-ext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg></span>'
