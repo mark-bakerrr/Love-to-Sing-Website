@@ -245,7 +245,7 @@
         "grp": {
           "type": "faq_group",
           "settings": {
-            "faq_group": "faq-downloads",
+            "faq_group": "faq-video-downloads",
             "max_items": 0
           }
         }
