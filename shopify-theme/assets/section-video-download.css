@@ -1,0 +1,616 @@
+/* ------------------------------------------------------------ *\
+  Video download product page hero (sections/main-video-download)
+
+  Built on the song page head (main-song.css): the same red hearts
+  background (.main-song__background), white text, video left and the
+  buying column right. Colours, spacing, radii and type come from the
+  theme tokens in base.css (--c-main-*, --space-*, --radius-*, --fz-*);
+  the song's custom.main_color swaps --c-main-* like on the song page.
+\* ------------------------------------------------------------ */
+
+.video-dl {
+  --vdl-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --vdl-on-red: var(--color-background-body, #fff);
+  --vdl-line: rgb(255 255 255 / 0.45);
+  --vdl-wash: rgb(255 255 255 / 0.12);
+
+  position: relative;
+}
+
+/* ---- Head: mirrors .main-song__head spacing and transparent-header offset ---- */
+
+.video-dl__head {
+  position: relative;
+  padding-block: calc(var(--header-top-position, 7.4rem) + var(--space-500)) var(--space-1000);
+  color: var(--vdl-on-red);
+
+  @media (max-width: 767px) {
+    padding-block: calc(var(--header-top-position, 5.6rem) + var(--space-300)) var(--space-600);
+  }
+}
+
+.video-dl__breadcrumbs {
+  margin-bottom: var(--space-300);
+}
+
+.video-dl__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: var(--space-800);
+  align-items: start;
+
+  @media (max-width: 1139px) {
+    gap: var(--space-500);
+  }
+
+  @media (max-width: 767px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-400);
+  }
+}
+
+/* The preview stays in view while the buying column scrolls past it. */
+.video-dl__media {
+  position: sticky;
+  top: calc(var(--header-top-position, 7.4rem) + var(--space-300));
+
+  @media (max-width: 767px) {
+    position: static;
+  }
+}
+
+.video-dl__player.youtube-player,
+.video-dl__poster {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-l);
+  background: var(--c-black-800);
+
+  @media (max-width: 767px) {
+    border-radius: var(--radius-m);
+  }
+}
+
+.video-dl__poster {
+  height: auto;
+  object-fit: cover;
+}
+
+.video-dl__play {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  svg {
+    box-sizing: content-box;
+    padding: var(--space-250);
+    border-radius: 50%;
+    fill: var(--c-main-500);
+    background: var(--c-neutral-50);
+    transition: transform var(--duration-default) var(--vdl-ease);
+  }
+
+  &:hover svg {
+    transform: scale(1.06);
+  }
+
+  &:active svg {
+    transform: scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 0.3rem solid var(--c-neutral-50);
+    outline-offset: -0.6rem;
+    border-radius: var(--radius-l);
+  }
+}
+
+.youtube-player.is-active .video-dl__play {
+  display: none;
+}
+
+.video-dl__media-note {
+  margin: var(--space-150) 0 0;
+  font-size: var(--fz-s);
+  opacity: 0.85;
+}
+
+/* ---- Buying column ---- */
+
+.video-dl__info {
+  min-width: 0;
+  container-type: inline-size;
+  container-name: vdl-info;
+}
+
+.video-dl__block-small:not(:first-child) {
+  margin-top: var(--space-200);
+}
+
+.video-dl__block:not(:first-child) {
+  margin-top: var(--space-400);
+}
+
+.video-dl__title {
+  margin: 0;
+  color: inherit;
+  text-wrap: balance;
+}
+
+.video-dl__text {
+  font-size: var(--fz-m);
+  max-width: 52ch;
+
+  p {
+    padding: 0;
+    margin: 0;
+  }
+
+  p + p {
+    margin-top: var(--space-100);
+  }
+
+  a {
+    color: inherit;
+  }
+}
+
+/* Version tabs: a white track like the song page's video rows. */
+.video-dl__tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-50);
+  padding: var(--space-50);
+  border: 0.1rem solid var(--vdl-line);
+  border-radius: 4.8rem;
+}
+
+.video-dl__tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 4.4rem;
+  padding: 0 var(--space-300);
+  border-radius: 4.8rem;
+  font-size: var(--fz-s);
+  font-weight: 700;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--duration-default) var(--vdl-ease), transform var(--duration-short) var(--vdl-ease);
+
+  &:hover {
+    background: var(--vdl-wash);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 0.2rem solid currentColor;
+    outline-offset: 0.2rem;
+  }
+
+  &.is-active {
+    color: var(--c-main-600);
+    background: var(--c-neutral-50);
+  }
+}
+
+/* Specs: the theme's video metadata icons (main-product "metadata" block). */
+.video-dl__specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-150) var(--space-300);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fz-r);
+  font-weight: 600;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-100);
+    line-height: 1;
+  }
+
+  svg {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+/* Price */
+.video-dl__price-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-50) var(--space-200);
+}
+
+.video-dl__price {
+  margin: 0;
+  font-family: var(--font-heading-family);
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.video-dl__price-was {
+  margin-inline-end: var(--space-100);
+  font-size: var(--fz-l);
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.video-dl__price-note {
+  margin: 0;
+  font-size: var(--fz-s);
+  opacity: 0.9;
+}
+
+/* Buy */
+.video-dl__buy.button {
+  min-height: 5.6rem;
+  font-size: 1.6rem;
+  transition: opacity var(--duration-default) linear, transform var(--duration-short) var(--vdl-ease);
+
+  svg {
+    width: 1.8rem;
+    height: 1.8rem;
+    fill: currentColor;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &[aria-busy='true'] {
+    opacity: 0.7;
+  }
+}
+
+.video-dl__status:empty {
+  display: none;
+}
+
+.video-dl__status {
+  margin: var(--space-100) 0 0;
+  font-size: var(--fz-s);
+  font-weight: 700;
+}
+
+.video-dl__trust {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-50) var(--space-200);
+  margin: var(--space-150) 0 0;
+  font-size: var(--fz-s);
+  opacity: 0.9;
+}
+
+.video-dl__trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-100);
+
+  &::before {
+    content: '\2713';
+    font-weight: 900;
+  }
+}
+
+.video-dl__unavailable {
+  margin: 0;
+  padding: var(--space-200);
+  border: 0.1rem solid var(--vdl-line);
+  border-radius: var(--radius-s);
+  font-weight: 600;
+}
+
+/* Bundle: a white card on the red head, dark text, the theme's red accents. */
+.video-dl__bundle {
+  padding: var(--space-300);
+  border-radius: var(--radius-m);
+  color: var(--color-paragraphs, var(--c-black-800));
+  background: var(--c-neutral-50);
+}
+
+.video-dl__bundle-title {
+  margin: 0;
+  font-family: inherit;
+  font-size: var(--fz-m);
+  font-weight: 800;
+  color: var(--c-main-500);
+}
+
+.video-dl__bundle-intro {
+  margin: var(--space-50) 0 0;
+  font-size: var(--fz-s);
+  color: var(--c-black-500);
+}
+
+.video-dl__offers {
+  display: grid;
+  gap: var(--space-100);
+  margin-top: var(--space-200);
+}
+
+.video-dl__offer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-200);
+  width: 100%;
+  min-height: 5.6rem;
+  padding: var(--space-150) var(--space-150) var(--space-150) var(--space-200);
+  border: 0.1rem solid var(--c-neutral-200);
+  border-radius: var(--radius-s);
+  font: inherit;
+  text-align: start;
+  color: inherit;
+  background: var(--c-neutral-50);
+  cursor: pointer;
+  transition: border-color var(--duration-default) var(--vdl-ease), background-color var(--duration-default) var(--vdl-ease), transform var(--duration-short) var(--vdl-ease);
+
+  &:hover {
+    border-color: var(--c-main-300);
+    background: var(--c-main-50);
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+
+  &:focus-visible {
+    outline: 0.2rem solid var(--c-main-500);
+    outline-offset: 0.2rem;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+}
+
+.video-dl__offer-main {
+  display: grid;
+  gap: var(--space-50);
+  min-width: 0;
+}
+
+.video-dl__offer-label {
+  font-size: var(--fz-r);
+  font-weight: 700;
+  color: var(--c-black-900);
+}
+
+.video-dl__offer-save {
+  justify-self: start;
+  padding: 0.2rem var(--space-100);
+  border-radius: 4.8rem;
+  font-size: var(--fz-t);
+  font-weight: 800;
+  color: var(--c-green-800);
+  background: var(--c-green-200);
+}
+
+.video-dl__offer-price {
+  display: grid;
+  justify-items: end;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.video-dl__offer-was {
+  font-size: var(--fz-t);
+  color: var(--c-black-500);
+}
+
+.video-dl__offer-now {
+  font-size: var(--fz-m);
+  font-weight: 800;
+  color: var(--c-black-900);
+}
+
+.video-dl__offer-add {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3.7rem;
+  padding: 0 var(--space-200);
+  border-radius: 4.8rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-solid-button, #fff);
+  background: var(--c-main-500);
+}
+
+@container vdl-info (width < 400px) {
+  .video-dl__offer {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .video-dl__offer-add {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+}
+
+/* What you get: the licence cards' tick list, inverted for the red head. */
+.video-dl__label {
+  margin: 0 0 var(--space-150);
+  font-family: inherit;
+  font-size: var(--fz-r);
+  font-weight: 800;
+  color: inherit;
+}
+
+.video-dl__checks {
+  display: grid;
+  gap: var(--space-100);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fz-r);
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-150);
+    line-height: 1.4;
+  }
+}
+
+.video-dl__tick {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--c-main-500);
+  background: var(--c-neutral-50);
+}
+
+/* Use ideas */
+.video-dl__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-100);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.video-dl__chip {
+  padding: var(--space-100) var(--space-200);
+  border: 0.1rem solid var(--vdl-line);
+  border-radius: 4.8rem;
+  font-size: var(--fz-s);
+  font-weight: 700;
+}
+
+.video-dl__uses-link,
+.video-dl__song-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 4.4rem;
+  font-weight: 700;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+  text-decoration-thickness: 0.1rem;
+
+  &:hover {
+    text-decoration-thickness: 0.2rem;
+  }
+
+  &:focus-visible {
+    outline: 0.2rem solid currentColor;
+    outline-offset: 0.2rem;
+  }
+}
+
+.video-dl__uses-link {
+  margin-top: var(--space-100);
+  font-size: var(--fz-s);
+}
+
+/* Inline so a wrapped title keeps the arrow on its last line. */
+.video-dl__song-link {
+  display: inline;
+  line-height: 1.6;
+}
+
+.video-dl__song {
+  margin-bottom: 0;
+  padding-top: var(--space-300);
+  border-top: 0.1rem solid var(--vdl-line);
+}
+
+/* ---- Mobile sticky buy bar ---- */
+
+.video-dl__sticky {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: calc(var(--z-header, 400) - 1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-200);
+  padding: var(--space-150) var(--space-200);
+  padding-block-end: calc(var(--space-150) + env(safe-area-inset-bottom, 0px));
+  color: var(--c-black-900);
+  background: var(--c-neutral-50);
+  box-shadow: 0 -1px 2px rgb(0 0 0 / 0.06), 0 -8px 12px rgb(0 0 0 / 0.04);
+  animation: video-dl-rise 280ms var(--vdl-ease);
+
+  &[hidden] {
+    display: none;
+  }
+
+  @media (min-width: 750px) {
+    display: none;
+  }
+}
+
+.video-dl__sticky-text {
+  display: grid;
+  min-width: 0;
+  font-size: var(--fz-s);
+  line-height: 1.3;
+}
+
+.video-dl__sticky-price {
+  font-size: var(--fz-m);
+  font-weight: 800;
+}
+
+.video-dl__sticky-spec {
+  color: var(--c-black-500);
+}
+
+.video-dl__sticky-buy.button {
+  flex-shrink: 0;
+  min-height: 4.4rem;
+}
+
+@keyframes video-dl-rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video-dl__sticky {
+    animation: none;
+  }
+
+  .video-dl__play svg,
+  .video-dl__tab,
+  .video-dl__offer,
+  .video-dl__buy.button {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .video-dl__tab.is-active {
+    outline: 0.2rem solid CanvasText;
+  }
+}

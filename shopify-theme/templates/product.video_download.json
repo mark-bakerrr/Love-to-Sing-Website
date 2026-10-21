@@ -10,374 +10,288 @@
 {
   "sections": {
     "main": {
-      "type": "main-product",
+      "type": "main-video-download",
       "blocks": {
-        "breadcrumbs_agMdBJ": {
-          "type": "breadcrumbs",
+        "versions": {
+          "type": "versions",
           "settings": {}
         },
-        "title_UiHBGm": {
+        "title": {
           "type": "title",
           "settings": {}
         },
-        "price_b4UzxK": {
+        "specs": {
+          "type": "specs",
+          "settings": {
+            "show_ad_free": true
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Download the full sing-along video and play it on a TV, laptop, projector or big screen. No ads, no buffering, no Wi-Fi needed.</p>"
+          }
+        },
+        "price": {
           "type": "price",
-          "settings": {}
-        },
-        "description_dijYyc": {
-          "type": "description",
           "settings": {
-            "text": "{{ product.metafields.custom.short_description | metafield_tag }}"
+            "note": "One-off price. No subscription."
           }
         },
-        "divider_XghWqw": {
-          "type": "divider",
-          "settings": {}
-        },
-        "variant_selector_WNNtFc": {
-          "type": "variant_selector",
-          "settings": {}
-        },
-        "metadata_baaW9r": {
-          "type": "metadata",
-          "settings": {}
-        },
-        "quantity_QCBqCj": {
-          "type": "quantity",
-          "disabled": true,
-          "settings": {
-            "custom_label": ""
-          }
-        },
-        "divider_gQyjTn": {
-          "type": "divider",
-          "settings": {}
-        },
-        "buy_buttons_gMWGHq": {
+        "buy_buttons": {
           "type": "buy_buttons",
-          "settings": {}
+          "settings": {
+            "trust_text": "Secure checkout | Instant download"
+          }
         },
-        "divider_E8TULV": {
-          "type": "divider",
+        "bundle": {
+          "type": "bundle",
+          "settings": {
+            "intro": "Buy them together and pay less."
+          }
+        },
+        "includes": {
+          "type": "includes",
+          "settings": {
+            "heading": "What you get",
+            "show_lyrics": true,
+            "extra": "Plays offline on any screen"
+          }
+        },
+        "uses": {
+          "type": "uses",
+          "settings": {
+            "heading": "Made for singing together",
+            "items": "Family Christmas\nClassroom\nChristmas concert\nChurch service\nCommunity carols",
+            "link_text": "Showing it to a group? See licences",
+            "link_url": ""
+          }
+        },
+        "song_link": {
+          "type": "song_link",
           "settings": {}
         }
       },
       "block_order": [
-        "breadcrumbs_agMdBJ",
-        "title_UiHBGm",
-        "price_b4UzxK",
-        "description_dijYyc",
-        "divider_XghWqw",
-        "variant_selector_WNNtFc",
-        "metadata_baaW9r",
-        "quantity_QCBqCj",
-        "divider_gQyjTn",
-        "buy_buttons_gMWGHq",
-        "divider_E8TULV"
+        "versions",
+        "title",
+        "specs",
+        "price",
+        "buy_buttons",
+        "text",
+        "bundle",
+        "includes",
+        "uses",
+        "song_link"
       ],
-      "settings": {}
+      "settings": {
+        "background_image": "shopify://shop_images/hearts-background.png",
+        "background_opacity": 5,
+        "show_breadcrumbs": true,
+        "show_media_note": true,
+        "sticky_bar": true
+      }
     },
-    "featured_products_gnVjTg": {
-      "type": "featured-products",
+    "why_download": {
+      "type": "image-and-text",
+      "blocks": {
+        "image-text-spacing": {
+          "type": "spacing",
+          "static": true,
+          "settings": {
+            "spacing_top": 96,
+            "spacing_bottom": 96,
+            "spacing_top_mobile": 48,
+            "spacing_bottom_mobile": 48
+          },
+          "blocks": {}
+        }
+      },
+      "name": "Why download",
+      "settings": {
+        "background": "#ffffff",
+        "flip_content": false,
+        "image": "shopify://shop_images/starship-hospital-christmas-show-linda-adamson-and-love-to-sing-choir.jpg",
+        "push_content_up": false,
+        "content_color": "#000000",
+        "eyebrow": "Why download it?",
+        "eyebrow_color": "#b91f1c",
+        "title": "Press play and everyone sings",
+        "content": "<p>Streaming is fine at home. In a classroom, a hall or a lounge full of family, you want the song to just play.</p><ul><li><strong>No ads.</strong> Nothing pops up halfway through a verse.</li><li><strong>No Wi-Fi needed.</strong> The file plays offline, so a patchy connection can't stop the song.</li><li><strong>Made for the big screen.</strong> HD video that looks sharp on a TV or projector.</li><li><strong>Words on screen.</strong> Everyone can join in, even if they've never sung it before.</li></ul>",
+        "button_text": "",
+        "button_url": ""
+      }
+    },
+    "licences": {
+      "type": "video-download-licences",
+      "blocks": {
+        "copyright": {
+          "type": "card",
+          "settings": {
+            "grant": "copyright",
+            "icon": "🔊",
+            "name": "Copyright",
+            "tagline": "In the room",
+            "features": "Play, sing and perform live\nPrint lyrics and project words\nShow our videos in the room\nRecord your own performances",
+            "button_label": "Choose",
+            "featured": true,
+            "pill_text": "Best for screenings"
+          }
+        },
+        "all_in_one": {
+          "type": "card",
+          "settings": {
+            "grant": "all_in_one",
+            "icon": "✨",
+            "name": "All-in-One",
+            "tagline": "Room and online",
+            "features": "Everything in Copyright\nLivestream your services\nUpload to YouTube and social\nShare with your community",
+            "button_label": "Choose",
+            "featured": false,
+            "pill_text": ""
+          }
+        },
+        "streaming": {
+          "type": "card",
+          "settings": {
+            "grant": "streaming",
+            "icon": "🎬",
+            "name": "Streaming",
+            "tagline": "Online only",
+            "features": "Livestream your performances\nUpload to YouTube and social\nShare with your audience\nFor online-only ministries",
+            "button_label": "Choose",
+            "featured": false,
+            "pill_text": ""
+          }
+        }
+      },
+      "block_order": [
+        "copyright",
+        "all_in_one",
+        "streaming"
+      ],
+      "name": "Video licences",
+      "settings": {
+        "heading": "Using this video at school, church or a concert?",
+        "subheading": "Showing it to a group or streaming it online? Add a licence for your church, school or community group. The price depends on the size of your group.",
+        "anchor": "video-licences",
+        "foot_text": "Not sure which one you need?",
+        "build_label": "Build your licence",
+        "compare_label": "Compare all licences",
+        "compare_url": "shopify://pages/buy-a-licence"
+      }
+    },
+    "reviews": {
+      "type": "featured-reviews",
       "blocks": {
         "featured-products-spacing": {
           "type": "spacing",
           "static": true,
           "settings": {
-            "spacing_top": 80,
-            "spacing_bottom": 80,
-            "spacing_top_mobile": 20,
-            "spacing_bottom_mobile": 20
+            "spacing_top": 96,
+            "spacing_bottom": 48,
+            "spacing_top_mobile": 48,
+            "spacing_bottom_mobile": 24
           },
           "blocks": {}
+        },
+        "review_1": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "[REVIEW] Paste a real customer review of a video download here.",
+            "author": "[NAME]",
+            "position": "[ROLE, PLACE]"
+          }
+        },
+        "review_2": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "[REVIEW] Paste a real customer review of a video download here.",
+            "author": "[NAME]",
+            "position": "[ROLE, PLACE]"
+          }
+        },
+        "review_3": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "content": "[REVIEW] Paste a real customer review of a video download here.",
+            "author": "[NAME]",
+            "position": "[ROLE, PLACE]"
+          }
         }
       },
-      "name": "t:sections.featured-products.name",
+      "block_order": [
+        "review_1",
+        "review_2",
+        "review_3"
+      ],
+      "name": "Reviews",
       "settings": {
-        "show_placeholder_cards": true,
         "alt_background": false,
         "border_top": false,
         "border_bottom": false,
-        "title": "Buy video songs",
-        "subtitle": "Discover our video songs to listen offline",
-        "button_label": "View all",
-        "button_link": "shopify://collections/christmas-video-songs",
-        "large_tiles": false,
-        "product_aspect_ratio": "16-9",
-        "collection": "christmas-video-songs",
-        "product_list": [],
-        "products_count": 12,
+        "title": "What customers say",
+        "subtitle": "[REVIEW] Swap in real reviews from families, teachers and churches.",
         "autoplay": false,
         "autoplay_speed": 5
       }
     },
-    "faq_9gcR8U": {
+    "faq": {
       "type": "faq",
       "blocks": {
-        "faq-spacing": {
-          "type": "spacing",
-          "static": true,
+        "grp": {
+          "type": "faq_group",
           "settings": {
-            "spacing_top": 80,
-            "spacing_bottom": 80,
-            "spacing_top_mobile": 20,
-            "spacing_bottom_mobile": 20
-          },
-          "blocks": {}
+            "faq_group": "faq-video-downloads",
+            "max_items": 0
+          }
         }
       },
-      "disabled": true,
+      "block_order": [
+        "grp"
+      ],
       "name": "FAQ",
       "settings": {
         "border_top": false,
         "border_bottom": false,
-        "title": "How can you use our music?",
-        "subtitle": "Find answers to your most pressing questions about music licenses for Churches and Schools.",
-        "faq_group": "faq-1"
+        "open_first": false,
+        "title": "How to get your video",
+        "subtitle": "Buying and downloading is quick and easy. Here's everything you need to know.",
+        "padding_top": 48,
+        "padding_bottom": 96
       }
     },
-    "button_text_qeFdUJ": {
-      "type": "button-text",
-      "blocks": {
-        "faq-spacing": {
-          "type": "spacing",
-          "static": true,
-          "settings": {
-            "spacing_top": 0,
-            "spacing_bottom": 80,
-            "spacing_top_mobile": 0,
-            "spacing_bottom_mobile": 40
-          },
-          "blocks": {}
-        }
-      },
-      "disabled": true,
-      "name": "Button text",
-      "settings": {
-        "border_top": false,
-        "border_bottom": false,
-        "title": "Still have questions?",
-        "subtitle": "We're here to help you!",
-        "button_text": "Contact Us",
-        "button_url": "shopify://collections/all"
-      }
-    },
-    "featured_reviews_CYTrzp": {
-      "type": "featured-reviews",
-      "blocks": {
-        "review_LwJGVG": {
-          "type": "review",
-          "settings": {
-            "stars": 5,
-            "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare.",
-            "author": "Emily Johnson",
-            "position": "Music Producer, Freelance"
-          },
-          "blocks": {}
-        },
-        "review_JtG4Vt": {
-          "type": "review",
-          "settings": {
-            "stars": 5,
-            "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare.",
-            "author": "Emily Johnson",
-            "position": "Music Producer, Freelance"
-          },
-          "blocks": {}
-        },
-        "review_kBpaeP": {
-          "type": "review",
-          "settings": {
-            "stars": 5,
-            "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare.",
-            "author": "Emily Johnson",
-            "position": "Music Producer, Freelance"
-          },
-          "blocks": {}
-        },
-        "review_mrN6hz": {
-          "type": "review",
-          "settings": {
-            "stars": 5,
-            "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare.",
-            "author": "Emily Johnson",
-            "position": "Music Producer, Freelance"
-          },
-          "blocks": {}
-        },
-        "featured-products-spacing": {
-          "type": "spacing",
-          "static": true,
-          "settings": {
-            "spacing_top": 80,
-            "spacing_bottom": 80,
-            "spacing_top_mobile": 40,
-            "spacing_bottom_mobile": 40
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "review_LwJGVG",
-        "review_JtG4Vt",
-        "review_kBpaeP",
-        "review_mrN6hz"
-      ],
-      "disabled": true,
-      "name": "Featured reviews",
-      "settings": {
-        "alt_background": false,
-        "border_top": false,
-        "border_bottom": false,
-        "title": "Reviews",
-        "subtitle": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-        "autoplay": false,
-        "autoplay_speed": 5
-      }
-    },
-    "section_cta_xrLeV7": {
-      "type": "section-cta",
-      "blocks": {
-        "cta-spacing": {
-          "type": "spacing",
-          "static": true,
-          "settings": {
-            "spacing_top": 80,
-            "spacing_bottom": 80,
-            "spacing_top_mobile": 20,
-            "spacing_bottom_mobile": 20
-          },
-          "blocks": {}
-        },
-        "cta-button-1": {
-          "type": "button",
-          "disabled": true,
-          "static": true,
-          "settings": {
-            "heading": "Learn More",
-            "link": "shopify://pages/about-us",
-            "type": "text",
-            "icon_position": "right"
-          },
-          "blocks": {}
-        },
-        "cta-button-2": {
-          "type": "button",
-          "static": true,
-          "settings": {
-            "heading": "Learn more",
-            "link": "shopify://collections/love-to-sing-christmas-music-licences",
-            "type": "secondary",
-            "icon_position": ""
-          },
-          "blocks": {}
-        }
-      },
-      "name": "Section CTA",
-      "settings": {
-        "media_opacity": 5,
-        "image": "shopify://shop_images/hearts-background.png",
-        "background_content": "radial-gradient(rgba(185, 31, 28, 1), rgba(120, 29, 27, 1) 100%)",
-        "text_color": "#ffffff",
-        "title": "Don’t worry about copyright issues—purchase one of our music licenses for your church or school."
-      }
-    },
-    "featured_products_Md87zz": {
+    "related_videos": {
       "type": "featured-products",
       "blocks": {
         "featured-products-spacing": {
           "type": "spacing",
           "static": true,
           "settings": {
-            "spacing_top": 80,
-            "spacing_bottom": 80,
-            "spacing_top_mobile": 20,
-            "spacing_bottom_mobile": 20
+            "spacing_top": 96,
+            "spacing_bottom": 96,
+            "spacing_top_mobile": 48,
+            "spacing_bottom_mobile": 48
           },
           "blocks": {}
         }
       },
-      "name": "t:sections.featured-products.name",
-      "settings": {
-        "show_placeholder_cards": true,
-        "alt_background": false,
-        "border_top": false,
-        "border_bottom": false,
-        "title": "Albums",
-        "subtitle": "Discover our music to listen offline",
-        "button_label": "view all",
-        "button_link": "shopify://collections/digital-albums",
-        "large_tiles": false,
-        "product_aspect_ratio": "1-1",
-        "collection": "digital-albums",
-        "product_list": [],
-        "products_count": 12,
-        "autoplay": false,
-        "autoplay_speed": 5
-      }
-    },
-    "featured_products_AaT4X3": {
-      "type": "featured-products",
-      "blocks": {
-        "featured-products-spacing": {
-          "type": "spacing",
-          "static": true,
-          "settings": {
-            "spacing_top": 80,
-            "spacing_bottom": 80,
-            "spacing_top_mobile": 20,
-            "spacing_bottom_mobile": 20
-          },
-          "blocks": {}
-        }
-      },
-      "name": "t:sections.featured-products.name",
-      "settings": {
-        "show_placeholder_cards": false,
-        "alt_background": false,
-        "border_top": false,
-        "border_bottom": false,
-        "title": "Related Music Videos",
-        "subtitle": "Explore our diverse range of music offerings today!",
-        "button_label": "View All",
-        "button_link": "{{ section.settings.collection.url }}",
-        "large_tiles": false,
-        "product_aspect_ratio": "16-9",
-        "collection": "{{ product.metafields.custom.related_videos_collection.value }}",
-        "product_list": [],
-        "products_count": 12,
-        "autoplay": false,
-        "autoplay_speed": 5
-      }
-    },
-    "featured_products_wNH76r": {
-      "type": "featured-products",
-      "blocks": {
-        "featured-products-spacing": {
-          "type": "spacing",
-          "static": true,
-          "settings": {
-            "spacing_top": 80,
-            "spacing_bottom": 80,
-            "spacing_top_mobile": 20,
-            "spacing_bottom_mobile": 20
-          },
-          "blocks": {}
-        }
-      },
-      "name": "t:sections.featured-products.name",
+      "name": "More sing-along videos",
       "settings": {
         "show_placeholder_cards": false,
         "alt_background": true,
         "border_top": false,
         "border_bottom": false,
-        "title": "Related Albums",
-        "subtitle": "Explore our diverse range of music offerings today!",
-        "button_label": "View All",
-        "button_link": "{{ section.settings.collection.url }}",
+        "title": "More sing-along videos",
+        "subtitle": "Christmas favourites to download and play anywhere.",
+        "button_label": "View all",
+        "button_link": "shopify://collections/christmas-video-songs",
         "large_tiles": false,
-        "product_aspect_ratio": "1-1",
-        "collection": "{{ product.metafields.custom.related_albums_collection.value }}",
+        "product_aspect_ratio": "16-9",
+        "collection": "christmas-video-songs",
         "product_list": [],
         "products_count": 12,
         "autoplay": false,
@@ -414,14 +328,11 @@
   },
   "order": [
     "main",
-    "featured_products_gnVjTg",
-    "faq_9gcR8U",
-    "button_text_qeFdUJ",
-    "featured_reviews_CYTrzp",
-    "section_cta_xrLeV7",
-    "featured_products_Md87zz",
-    "featured_products_AaT4X3",
-    "featured_products_wNH76r",
+    "why_download",
+    "licences",
+    "reviews",
+    "faq",
+    "related_videos",
     "newsletter_banner_7g8X6E"
   ]
 }

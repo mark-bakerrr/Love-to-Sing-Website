@@ -1,0 +1,83 @@
+{%- doc -%}
+  Product + VideoObject JSON-LD for a video download product page
+  (main-video-download). The Product is what is sold; the VideoObject is the
+  YouTube preview of the same video, attached via `subjectOf`.
+
+  @param {object} product - The video download product
+  @param {object} [song] - The linked song product (lts.song), for the release date
+  @param {string} [video_id] - YouTube video id of the preview
+  @param {string} [specs] - lts.video_specs, e.g. "1080p MP4 · 2:48 · 214 MB"
+  @param {boolean} sellable - Whether the buy button is shown (drives availability)
+
+  @example
+  {% render 'video-download-schema', product: product, song: song, video_id: video_id, specs: specs, sellable: sellable %}
+{%- enddoc -%}
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign description = product.metafields.global.description_tag.value | default: product.description | strip_html | strip_newlines | truncate: 300
+
+  assign image_url = ''
+  if product.featured_image
+    assign image_url = product.featured_image | image_url: width: 1200 | prepend: 'https:'
+  endif
+
+  # Upload date: the song's release date, else when the product was created.
+  assign upload_date = song.metafields.custom.song_release_date.value | default: product.created_at | date: '%Y-%m-%d'
+
+  # Duration: lts.video_specs carries "m:ss" as its second part ("1080p MP4 · 2:48 · 214 MB").
+  assign iso_duration = ''
+  if specs != blank
+    assign parts = specs | split: '·'
+    for part in parts
+      assign p = part | strip
+      if p contains ':'
+        assign mmss = p | split: ':'
+        if mmss.size == 2
+          assign mins = mmss[0] | plus: 0
+          assign secs = mmss[1] | plus: 0
+          assign iso_duration = 'PT' | append: mins | append: 'M' | append: secs | append: 'S'
+        endif
+      endif
+    endfor
+  endif
+
+  if sellable
+    assign availability = 'https://schema.org/InStock'
+  else
+    assign availability = 'https://schema.org/OutOfStock'
+  endif
+-%}
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": {{ product.title | json }},
+    "url": {{ request.origin | append: product.url | json }},
+    {%- if image_url != blank %}
+    "image": [{{ image_url | json }}],
+    {%- endif %}
+    "description": {{ description | json }},
+    "sku": {{ variant.sku | default: variant.id | append: '' | json }},
+    "brand": { "@type": "Brand", "name": "Love to Sing" },
+    "offers": {
+      "@type": "Offer",
+      "price": {{ variant.price | divided_by: 100.0 | json }},
+      "priceCurrency": {{ cart.currency.iso_code | json }},
+      "availability": {{ availability | json }},
+      "url": {{ request.origin | append: product.url | json }}
+    }
+    {%- if video_id != blank -%},
+    "subjectOf": {
+      "@type": "VideoObject",
+      "name": {{ product.title | json }},
+      "description": {{ description | json }},
+      "thumbnailUrl": [{{ 'https://i.ytimg.com/vi/' | append: video_id | append: '/maxresdefault.jpg' | json }}],
+      "embedUrl": {{ 'https://www.youtube.com/embed/' | append: video_id | json }},
+      "uploadDate": {{ upload_date | json }}
+      {%- if iso_duration != blank -%},
+      "duration": {{ iso_duration | json }}
+      {%- endif %}
+    }
+    {%- endif %}
+  }
+</script>
