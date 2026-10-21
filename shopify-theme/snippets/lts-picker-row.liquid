@@ -5,7 +5,7 @@
   pickable-product rule lives in exactly one place.
 
   Renders NOTHING unless the product is pickable:
-    - video_download        → available
+    - video_download        → available AND (lts.downloads_ready OR global.edp_0 == '1')
     - album                 → available
     - song_* (list below)   → available AND lts.downloads_ready (cover-song gating)
     - anything else (licences, membership, lyrics books, legacy single.*) → never
@@ -34,7 +34,11 @@
   endif
   if product.available and is_ebook == false
     if sfx == 'video_download'
-      assign kind = 'video'
+      # Video downloads: offered only when Studio can deliver the file (lts.downloads_ready)
+      # or the product is still on EDP (global.edp_0, migration gate; drop with EDP, plan Task 36).
+      if product.metafields.lts.downloads_ready.value == true or product.metafields.global.edp_0 == '1'
+        assign kind = 'video'
+      endif
     elsif sfx == 'album'
       assign kind = 'album'
     elsif song_sfx contains sfx and product.metafields.lts.downloads_ready.value
