@@ -480,6 +480,7 @@
     "licence_build": "Build your licence",
     "faq_heading": "Questions",
     "reviews_heading": "Reviews",
+    "song_block_heading": "Video downloads",
     "sticky_label": "Buy this video",
     "play_preview": "Play the preview of {{ title }}",
     "preview_title": "{{ title }} preview",

@@ -35,9 +35,16 @@
             "title": "Youtube Music",
             "link": "https://music.youtube.com/channel/UCjDkTzwSifCid5vl3gLtfbQ"
           }
+        },
+        "video_downloads": {
+          "type": "video_downloads",
+          "settings": {
+            "heading": "Video downloads"
+          }
         }
       },
       "block_order": [
+        "video_downloads",
         "icon_button_iRFNKY",
         "icon_button_hapJGT",
         "icon_button_MYCCeP"

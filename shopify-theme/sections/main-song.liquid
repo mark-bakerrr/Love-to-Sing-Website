@@ -174,6 +174,12 @@
               }
             }
           {%- endstyle -%}
+
+          {%- comment -%} Video downloads (video-downloads plan Task 27): the song's sellable video products, from custom.related_videos. Renders nothing when there are none. {%- endcomment -%}
+          {%- assign video_blocks = section.blocks | where: 'type', 'video_downloads' -%}
+          {%- for block in video_blocks -%}
+            {%- render 'song-video-downloads', product: product, heading: block.settings.heading, block: block -%}
+          {%- endfor -%}
         </div><!-- /.main-song__info -->
       </div><!-- /.main-song__grid -->
     </div><!-- /.container -->
@@ -420,6 +426,15 @@
     }
   ],
   "blocks": [
+    {
+      "type": "video_downloads",
+      "name": "Video downloads",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Video downloads" },
+        { "type": "paragraph", "content": "Lists the song's video download products (custom.related_videos, written by Studio). Only videos that can be bought are shown; the block is hidden when there are none." }
+      ]
+    },
     {
       "type": "icon_button",
       "name": "Icon Button",
