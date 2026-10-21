@@ -14,9 +14,10 @@
   @param {object} product - The video download product being viewed
   @param {object} [siblings] - lts.sibling_videos products
   @param {object} [song] - The linked song product (lts.song)
+  @param {string} [intro] - Line under the heading (the block's intro setting)
 
   @example
-  {% render 'video-download-bundle', product: product, siblings: siblings, song: song %}
+  {% render 'video-download-bundle', product: product, siblings: siblings, song: song, intro: 'Get both versions and pay less.' %}
 {%- enddoc -%}
 {%- liquid
   assign variant = product.selected_or_first_available_variant
@@ -77,6 +78,11 @@
         {{- 'video_download.bundle_heading' | t -}}
       {%- endif -%}
     </h2>
-    {{ offers }}
+    {%- if intro != blank -%}
+      <p class="video-dl__bundle-intro">{{ intro | escape }}</p>
+    {%- endif -%}
+    <div class="video-dl__offers">
+      {{ offers }}
+    </div>
   </div>
 {%- endif -%}

@@ -484,6 +484,12 @@
     "sticky_label": "Buy this video",
     "play_preview": "Play the preview of {{ title }}",
     "preview_title": "{{ title }} preview",
-    "preview_note": "Watch the preview on YouTube. You download the full video file."
+    "preview_note": "Watch the preview on YouTube. You download the full video file.",
+    "duration_label": "Length: ",
+    "size_label": "File size: ",
+    "ad_free": "Ad-free",
+    "bundle_save": "Save {{ amount }}",
+    "bundle_add": "Add",
+    "licence_per_year": "a year"
   }
 }

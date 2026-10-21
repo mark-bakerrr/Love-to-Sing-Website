@@ -24,13 +24,20 @@
   data-group="{{ group | escape }}"
   data-count="{{ count }}"
 >
-  <span class="video-dl__offer-label">{{ label | t: first: first, second: second }}</span>
+  <span class="video-dl__offer-main">
+    <span class="video-dl__offer-label">{{ label | t: first: first, second: second }}</span>
+    {%- if pct > 0 and discounted < total -%}
+      {%- assign saved = total | minus: discounted | money -%}
+      <span class="video-dl__offer-save">{{ 'video_download.bundle_save' | t: amount: saved }}</span>
+    {%- endif -%}
+  </span>
   <span class="video-dl__offer-price">
     {%- if pct > 0 and discounted < total -%}
       <s class="video-dl__offer-was"><span class="visually-hidden">{{ 'video_download.bundle_was' | t }} </span>{{ total | money }}</s>
-      {{ discounted | money }}
+      <span class="video-dl__offer-now">{{ discounted | money }}</span>
     {%- else -%}
-      {{ total | money }}
+      <span class="video-dl__offer-now">{{ total | money }}</span>
     {%- endif -%}
   </span>
+  <span class="video-dl__offer-add">{{ 'video_download.bundle_add' | t }}</span>
 </button>

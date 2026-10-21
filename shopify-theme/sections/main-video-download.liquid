@@ -1,11 +1,13 @@
 {%- comment -%}
-  Video download product page (templates/product.video_download.json).
+  Video download product page hero (templates/product.video_download.json).
   Plan: love-to-sing-content-studio docs/plans/2026-10-20-video-downloads-in-studio-plan.md
-  Tasks 25-26; approved wireframe studio/app/(design)/wireframes/video-download.
+  Phase 3 (Tasks 25-26 + amendments).
 
-  Order: YouTube preview -> Vocal/Instrumental tabs -> title, price, what you get
-  -> buy + "Bundle and save" -> "Get the song" -> licence band -> FAQ / reviews
-  blocks -> (related videos = the template's featured-products section).
+  Layout mirrors the song page head (main-song): red hearts background, the
+  YouTube preview on the left and the buying column on the right. Everything in
+  the buying column is a reorderable block (versions, title, text, specs, price,
+  buy, bundle, what you get, uses, song link, apps). FAQ, reviews, licences and
+  related videos are separate theme sections in the template, not blocks here.
   Product + VideoObject JSON-LD comes from snippets/video-download-schema.
 
   Data is owned by Studio (lib/services/video-shopify.ts):
@@ -51,6 +53,17 @@
     assign video_id = yt | split: '/embed/' | last | split: '?' | first
   endif
 
+  # Specs "1080p MP4 · 2:48 · 214 MB" -> format, duration, size (any part may be missing).
+  assign spec_format = ''
+  assign spec_duration = ''
+  assign spec_size = ''
+  if specs != blank
+    assign spec_parts = specs | split: '·'
+    assign spec_format = spec_parts[0] | strip
+    assign spec_duration = spec_parts[1] | strip
+    assign spec_size = spec_parts[2] | strip
+  endif
+
   # Breadcrumb collection, same rules as main-song.
   assign current_collection = product.metafields.custom.breadcrumbs_collection.value
   unless current_collection
@@ -62,219 +75,267 @@
     endfor
   endunless
 
+  # Song colour theme (custom.main_color), same hook as main-song.
+  assign color_class = 'main-color-red'
+  assign main_color = song.metafields.custom.main_color.value | default: product.metafields.custom.main_color.value
+  if main_color != blank
+    assign color_class = 'main-color-' | append: main_color | downcase
+  endif
+
   assign form_id = 'VideoDownloadForm-' | append: section.id
   assign kind_order = 'vocal,instrumental,dance' | split: ','
 -%}
 
+{{- 'main-song.css' | asset_url | stylesheet_tag -}}
 {{- 'section-video-download.css' | asset_url | stylesheet_tag -}}
 {%- render 'video-download-schema', product: product, song: song, video_id: video_id, specs: specs, sellable: sellable -%}
 
-<div class="video-dl" id="VideoDownload-{{ section.id }}" data-video-dl>
-  <div class="container">
-    <nav class="video-dl__breadcrumbs" aria-label="{{- 'general.breadcrumbs.label' | t -}}">
-      {% render 'breadcrumbs-from-nav', breadcrumbs_menu: settings.breadcrumbs_map, current_collection: current_collection %}
-    </nav>
-
-    <div class="video-dl__grid">
-      <div class="video-dl__media">
-        {%- if video_id != blank -%}
-          {%- liquid
-            if product.featured_image
-              assign poster = product.featured_image | image_url: width: 1280
-            else
-              assign poster = 'https://i.ytimg.com/vi/' | append: video_id | append: '/maxresdefault.jpg'
-            endif
-          -%}
-          {{- 'youtube-player.css' | asset_url | stylesheet_tag -}}
-          <script src="{{- 'youtube-player.js' | asset_url -}}" defer></script>
-          {%- comment -%} Same youtube-player element as main-song; a real <button> inside makes it keyboard-operable (the click bubbles to the element). {%- endcomment -%}
-          <youtube-player class="youtube-player video-dl__player" video-id="{{ video_id | escape }}">
-            <img
-              src="{{ poster }}"
-              alt=""
-              width="1280"
-              height="720"
-              loading="eager"
-              fetchpriority="high"
-              class="youtube-player__thumbnail"
-            >
-            <button type="button" class="video-dl__play" aria-label="{{ 'video_download.play_preview' | t: title: product.title | escape }}">
-              <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path d="M8 5v14l11-7z"/></svg>
-            </button>
-            <iframe
-              title="{{ 'video_download.preview_title' | t: title: product.title | escape }}"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-            ></iframe>
-          </youtube-player>
-          <p class="video-dl__media-note">{{ 'video_download.preview_note' | t }}</p>
-        {%- elsif product.featured_image -%}
-          {{
-            product.featured_image
-            | image_url: width: 1280
-            | image_tag:
-              loading: 'eager',
-              fetchpriority: 'high',
-              class: 'video-dl__poster',
-              sizes: '(min-width: 990px) 58vw, 100vw',
-              widths: '640, 960, 1280'
-          }}
-        {%- endif -%}
+<div class="video-dl {{ color_class }}" id="VideoDownload-{{ section.id }}" data-video-dl>
+  <div class="video-dl__head">
+    {%- comment -%} Same background component as the song page head (main-song.css). {%- endcomment -%}
+    {%- if section.settings.background_image != blank -%}
+      <div class="main-song__background" style="--opacity: {{ section.settings.background_opacity | divided_by: 100.0 }};">
+        {{- section.settings.background_image | image_url: width: 1920 | image_tag: loading: 'eager', alt: '' -}}
       </div>
-
-      <div class="video-dl__info">
-        {%- if siblings.size > 0 -%}
-          <nav class="video-dl__tabs" aria-label="{{ 'video_download.versions_label' | t }}">
-            {%- comment -%} Current + siblings in a fixed order (vocal, instrumental, dance) so the tabs don't swap places between the two pages. {%- endcomment -%}
-            {%- for k in kind_order -%}
-              {%- assign key = 'video_download.kind_' | append: k -%}
-              {%- if kind == k -%}
-                <a class="video-dl__tab is-active" aria-current="page" href="{{ product.url }}">{{ key | t }}</a>
-              {%- endif -%}
-              {%- for s in siblings -%}
-                {%- assign s_kind = s.metafields.lts.video_kind.value | default: 'vocal' -%}
-                {%- if s_kind == k and s.handle != product.handle -%}
-                  <a class="video-dl__tab" href="{{ s.url }}">
-                    {%- if s_kind == kind -%}{{ s.title | escape }}{%- else -%}{{ key | t }}{%- endif -%}
-                  </a>
-                {%- endif -%}
-              {%- endfor -%}
-            {%- endfor -%}
-          </nav>
-        {%- endif -%}
-
-        <h1 class="video-dl__title">{{ product.title | escape }}</h1>
-        <p class="video-dl__price">
-          <span class="visually-hidden">{{ 'video_download.price_label' | t }}</span>
-          {{- variant.price | money -}}
-        </p>
-
-        <div class="video-dl__includes">
-          <h2 class="video-dl__includes-title">{{ 'video_download.what_you_get' | t }}</h2>
-          <ul class="video-dl__list" role="list">
-            {%- if is_video -%}
-              <li>{%- if specs != blank -%}{{ specs | escape }}{%- else -%}{{ 'video_download.default_specs' | t }}{%- endif -%}</li>
-            {%- endif -%}
-            <li>{{ 'video_download.instant' | t }}</li>
-            <li>{{ 'video_download.limit' | t }}</li>
-            {%- if is_video and kind != 'dance' and section.settings.show_lyrics_line -%}
-              <li>{{ 'video_download.lyrics' | t }}</li>
-            {%- endif -%}
-          </ul>
-        </div>
-
-        {%- if sellable -%}
-          {%- form 'product', product, id: form_id, class: 'video-dl__form' -%}
-            <input type="hidden" name="id" value="{{ variant.id }}">
-            <input type="hidden" name="quantity" value="1">
-            <button type="submit" name="add" class="button button--full video-dl__buy" data-video-dl-buy>
-              <span>{{ 'video_download.buy' | t }}</span>
-            </button>
-            <p class="video-dl__status" role="status" aria-live="polite" data-video-dl-status></p>
-          {%- endform -%}
-
-          {%- render 'video-download-bundle', product: product, siblings: siblings, song: song -%}
-        {%- else -%}
-          <p class="video-dl__unavailable">{{ 'video_download.unavailable' | t }}</p>
-        {%- endif -%}
-
-        {%- if song -%}
-          <a class="video-dl__song-link" href="{{ song.url }}">
-            {{- 'video_download.get_the_song' | t: title: song.title | escape -}}
-            <span aria-hidden="true">&nbsp;&rarr;</span>
-          </a>
-        {%- endif -%}
-      </div>
-    </div>
-
-    {%- if section.settings.show_licence_band -%}
-      {%- liquid
-        assign licences = 'copyright:copyright-licence,streaming:streaming-licence,all_in_one:all-in-one-licence' | split: ','
-        assign song_param = ''
-        if song
-          assign song_param = '&song=' | append: song.handle
-        endif
-      -%}
-      <section class="video-dl__licence" aria-labelledby="VideoDlLicence-{{ section.id }}">
-        <div class="video-dl__licence-head">
-          <h2 class="video-dl__licence-title" id="VideoDlLicence-{{ section.id }}">{{ 'video_download.licence_heading' | t }}</h2>
-          <p class="video-dl__licence-intro">{{ 'video_download.licence_intro' | t }}</p>
-        </div>
-        <ul class="video-dl__licence-list" role="list">
-          {%- for pair in licences -%}
-            {%- liquid
-              assign grant = pair | split: ':' | first
-              assign handle = pair | split: ':' | last
-              assign lic = all_products[handle]
-              assign name_key = 'video_download.licence_' | append: grant
-              assign use_key = name_key | append: '_use'
-            -%}
-            <li>
-              <a class="video-dl__licence-card" href="/pages/licence-builder?licence={{ grant }}{{ song_param | escape }}">
-                <span class="video-dl__licence-name">{{ name_key | t }}</span>
-                <span class="video-dl__licence-use">{{ use_key | t }}</span>
-                {%- if lic != blank and lic.price_min > 0 -%}
-                  {%- assign lic_price = lic.price_min | money -%}
-                  <span class="video-dl__licence-price">{{ 'video_download.licence_from' | t: price: lic_price }}</span>
-                {%- endif -%}
-              </a>
-            </li>
-          {%- endfor -%}
-        </ul>
-        <a class="button button--outlined video-dl__licence-build" href="/pages/licence-builder{% if song %}?song={{ song.handle | escape }}{% endif %}">
-          <span>{{ 'video_download.licence_build' | t }} <span aria-hidden="true">&rarr;</span></span>
-        </a>
-      </section>
+    {%- else -%}
+      <div class="main-song__background"></div>
     {%- endif -%}
 
-    {%- for block in section.blocks -%}
-      {%- case block.type -%}
-        {%- when 'faq_group' -%}
-          {%- assign entries = block.settings.faq_group.entries.value -%}
-          {%- if entries != blank -%}
-            {{- 'faq-item.css' | asset_url | stylesheet_tag -}}
-            {%- assign schema_items = '' -%}
-            <section class="video-dl__faq" aria-labelledby="VideoDlFaq-{{ block.id }}" {{ block.shopify_attributes }}>
-              <h2 class="video-dl__block-title" id="VideoDlFaq-{{ block.id }}">{%- if block.settings.heading != blank -%}{{ block.settings.heading | escape }}{%- else -%}{{ 'video_download.faq_heading' | t }}{%- endif -%}</h2>
-              <div class="video-dl__faq-list">
-                {%- for entry in entries -%}
-                  {%- if block.settings.max_items > 0 and forloop.index0 >= block.settings.max_items -%}{%- break -%}{%- endif -%}
-                  {%- assign answer = entry.answer | metafield_tag -%}
-                  {% render 'faq-item', heading: entry.question, answer: answer, is_open: false %}
-                  {%- capture schema_items -%}{{ schema_items }}{%- unless forloop.first -%},{%- endunless -%}{"@type":"Question","name":{{ entry.question | strip_html | json }},"acceptedAnswer":{"@type":"Answer","text":{{ answer | strip_html | strip_newlines | json }}}}{%- endcapture -%}
-                {%- endfor -%}
-              </div>
-            </section>
-            <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{{ schema_items }}]}</script>
-          {%- endif -%}
+    <div class="container relative">
+      {%- if section.settings.show_breadcrumbs -%}
+        <nav class="video-dl__breadcrumbs" aria-label="{{- 'general.breadcrumbs.label' | t -}}">
+          {% render 'breadcrumbs-from-nav', breadcrumbs_menu: settings.breadcrumbs_map, current_collection: current_collection %}
+        </nav>
+      {%- endif -%}
 
-        {%- when 'reviews' -%}
-          {%- comment -%} Real reviews only: the product's custom.reviews, else the song's. Nothing renders without them (no placeholder cards). {%- endcomment -%}
-          {%- assign reviews = product.metafields.custom.reviews.value | default: song.metafields.custom.reviews.value -%}
-          {%- if reviews != blank -%}
-            {{- 'card-review.css' | asset_url | stylesheet_tag -}}
-            <section class="video-dl__reviews" aria-labelledby="VideoDlReviews-{{ block.id }}" {{ block.shopify_attributes }}>
-              <h2 class="video-dl__block-title" id="VideoDlReviews-{{ block.id }}">{%- if block.settings.heading != blank -%}{{ block.settings.heading | escape }}{%- else -%}{{ 'video_download.reviews_heading' | t }}{%- endif -%}</h2>
-              <ul class="video-dl__reviews-list" role="list">
-                {%- for review in reviews limit: 6 -%}
-                  <li>
-                    {%- render 'card-review', stars: review.stars, content: review.content, image: review.image, author: review.author, position: review.position -%}
-                  </li>
-                {%- endfor -%}
-              </ul>
-            </section>
+      <div class="video-dl__grid">
+        <div class="video-dl__media">
+          {%- if video_id != blank -%}
+            {%- liquid
+              if product.featured_image
+                assign poster = product.featured_image | image_url: width: 1280
+              else
+                assign poster = 'https://i.ytimg.com/vi/' | append: video_id | append: '/maxresdefault.jpg'
+              endif
+            -%}
+            {{- 'youtube-player.css' | asset_url | stylesheet_tag -}}
+            <script src="{{- 'youtube-player.js' | asset_url -}}" defer></script>
+            {%- comment -%} Same youtube-player element as main-song; a real <button> inside makes it keyboard-operable (the click bubbles to the element). {%- endcomment -%}
+            <youtube-player class="youtube-player video-dl__player" video-id="{{ video_id | escape }}">
+              <img
+                src="{{ poster }}"
+                alt=""
+                width="1280"
+                height="720"
+                loading="eager"
+                fetchpriority="high"
+                class="youtube-player__thumbnail"
+              >
+              <button type="button" class="video-dl__play" aria-label="{{ 'video_download.play_preview' | t: title: product.title | escape }}">
+                <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+              <iframe
+                title="{{ 'video_download.preview_title' | t: title: product.title | escape }}"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              ></iframe>
+            </youtube-player>
+            {%- if section.settings.show_media_note -%}
+              <p class="video-dl__media-note">{{ 'video_download.preview_note' | t }}</p>
+            {%- endif -%}
+          {%- elsif product.featured_image -%}
+            {{
+              product.featured_image
+              | image_url: width: 1280
+              | image_tag:
+                loading: 'eager',
+                fetchpriority: 'high',
+                class: 'video-dl__poster',
+                sizes: '(min-width: 990px) 50vw, 100vw',
+                widths: '640, 960, 1280'
+            }}
           {%- endif -%}
-      {%- endcase -%}
-    {%- endfor -%}
+        </div>
+
+        <div class="video-dl__info">
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+              {%- when 'versions' -%}
+                {%- if siblings.size > 0 -%}
+                  <nav class="video-dl__tabs video-dl__block" aria-label="{{ 'video_download.versions_label' | t }}" {{ block.shopify_attributes }}>
+                    {%- comment -%} Current + siblings in a fixed order (vocal, instrumental, dance) so the tabs don't swap places between the two pages. {%- endcomment -%}
+                    {%- for k in kind_order -%}
+                      {%- assign key = 'video_download.kind_' | append: k -%}
+                      {%- if kind == k -%}
+                        <a class="video-dl__tab is-active" aria-current="page" href="{{ product.url }}">{{ key | t }}</a>
+                      {%- endif -%}
+                      {%- for s in siblings -%}
+                        {%- assign s_kind = s.metafields.lts.video_kind.value | default: 'vocal' -%}
+                        {%- if s_kind == k and s.handle != product.handle -%}
+                          <a class="video-dl__tab" href="{{ s.url }}">
+                            {%- if s_kind == kind -%}{{ s.title | escape }}{%- else -%}{{ key | t }}{%- endif -%}
+                          </a>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    {%- endfor -%}
+                  </nav>
+                {%- endif -%}
+
+              {%- when 'title' -%}
+                <h1 class="h3 video-dl__title video-dl__block-small" {{ block.shopify_attributes }}>{{ product.title | escape }}</h1>
+
+              {%- when 'text' -%}
+                {%- if block.settings.text != blank -%}
+                  <div class="video-dl__text rte video-dl__block-small" {{ block.shopify_attributes }}>{{ block.settings.text }}</div>
+                {%- endif -%}
+
+              {%- when 'specs' -%}
+                {%- if is_video -%}
+                  <ul class="video-dl__specs video-dl__block-small" role="list" {{ block.shopify_attributes }}>
+                    <li>
+                      {% render 'icon-resolution' %}
+                      {%- if spec_format != blank -%}{{ spec_format | escape }}{%- else -%}{{ 'video_download.default_specs' | t }}{%- endif -%}
+                    </li>
+                    {%- if spec_duration != blank -%}
+                      <li>
+                        {% render 'icon-duration' %}
+                        <span class="visually-hidden">{{ 'video_download.duration_label' | t }}</span>{{ spec_duration | escape }}
+                      </li>
+                    {%- endif -%}
+                    {%- if spec_size != blank -%}
+                      <li>
+                        {% render 'icon-size' %}
+                        <span class="visually-hidden">{{ 'video_download.size_label' | t }}</span>{{ spec_size | escape }}
+                      </li>
+                    {%- endif -%}
+                    {%- if block.settings.show_ad_free -%}
+                      <li>
+                        {% render 'icon-ad-free' %}
+                        {{- 'video_download.ad_free' | t -}}
+                      </li>
+                    {%- endif -%}
+                  </ul>
+                {%- endif -%}
+
+              {%- when 'price' -%}
+                <div class="video-dl__price-row video-dl__block" {{ block.shopify_attributes }}>
+                  <p class="video-dl__price">
+                    <span class="visually-hidden">{{ 'video_download.price_label' | t }}</span>
+                    {%- if variant.compare_at_price > variant.price -%}
+                      <s class="video-dl__price-was"><span class="visually-hidden">{{ 'video_download.bundle_was' | t }} </span>{{ variant.compare_at_price | money }}</s>
+                    {%- endif -%}
+                    {{- variant.price | money -}}
+                  </p>
+                  {%- if block.settings.note != blank -%}
+                    <p class="video-dl__price-note">{{ block.settings.note | escape }}</p>
+                  {%- endif -%}
+                </div>
+
+              {%- when 'buy_buttons' -%}
+                <div class="video-dl__buy-area video-dl__block-small" {{ block.shopify_attributes }}>
+                  {%- if sellable -%}
+                    {%- form 'product', product, id: form_id, class: 'video-dl__form' -%}
+                      <input type="hidden" name="id" value="{{ variant.id }}">
+                      <input type="hidden" name="quantity" value="1">
+                      <button type="submit" name="add" class="button button--white button--full button--icon button--icon-left video-dl__buy" data-video-dl-buy>
+                        <i>{% render 'icon-cart' %}</i>
+                        <span>{{ 'video_download.buy' | t }}</span>
+                      </button>
+                      <p class="video-dl__status" role="status" aria-live="polite" data-video-dl-status></p>
+                    {%- endform -%}
+                    {%- if block.settings.trust_text != blank -%}
+                      <p class="video-dl__trust">
+                        {%- assign trust_items = block.settings.trust_text | split: '|' -%}
+                        {%- for item in trust_items -%}
+                          {%- assign item_clean = item | strip -%}
+                          {%- if item_clean != blank -%}
+                            <span class="video-dl__trust-item">{{ item_clean | escape }}</span>
+                          {%- endif -%}
+                        {%- endfor -%}
+                      </p>
+                    {%- endif -%}
+                  {%- else -%}
+                    <p class="video-dl__unavailable">{{ 'video_download.unavailable' | t }}</p>
+                  {%- endif -%}
+                </div>
+
+              {%- when 'bundle' -%}
+                {%- if sellable -%}
+                  <div class="video-dl__block" {{ block.shopify_attributes }}>
+                    {%- render 'video-download-bundle', product: product, siblings: siblings, song: song, intro: block.settings.intro -%}
+                  </div>
+                {%- endif -%}
+
+              {%- when 'includes' -%}
+                <div class="video-dl__includes video-dl__block" {{ block.shopify_attributes }}>
+                  {%- if block.settings.heading != blank -%}
+                    <h2 class="video-dl__label">{{ block.settings.heading | escape }}</h2>
+                  {%- endif -%}
+                  <ul class="video-dl__checks" role="list">
+                    <li><span class="video-dl__tick" aria-hidden="true">&#10003;</span>{{ 'video_download.instant' | t }}</li>
+                    <li><span class="video-dl__tick" aria-hidden="true">&#10003;</span>{{ 'video_download.limit' | t }}</li>
+                    {%- if is_video and kind != 'dance' and block.settings.show_lyrics -%}
+                      <li><span class="video-dl__tick" aria-hidden="true">&#10003;</span>{{ 'video_download.lyrics' | t }}</li>
+                    {%- endif -%}
+                    {%- assign extra_lines = block.settings.extra | newline_to_br | split: '<br />' -%}
+                    {%- for line in extra_lines -%}
+                      {%- assign line_clean = line | strip -%}
+                      {%- if line_clean != blank -%}
+                        <li><span class="video-dl__tick" aria-hidden="true">&#10003;</span>{{ line_clean | escape }}</li>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </ul>
+                </div>
+
+              {%- when 'uses' -%}
+                {%- assign use_items = block.settings.items | newline_to_br | split: '<br />' -%}
+                <div class="video-dl__uses video-dl__block" {{ block.shopify_attributes }}>
+                  {%- if block.settings.heading != blank -%}
+                    <h2 class="video-dl__label">{{ block.settings.heading | escape }}</h2>
+                  {%- endif -%}
+                  <ul class="video-dl__chips" role="list">
+                    {%- for item in use_items -%}
+                      {%- assign item_clean = item | strip -%}
+                      {%- if item_clean != blank -%}
+                        <li class="video-dl__chip">{{ item_clean | escape }}</li>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </ul>
+                  {%- if block.settings.link_text != blank -%}
+                    <a class="video-dl__uses-link" href="{{ block.settings.link_url | default: '#video-licences' }}">
+                      {{- block.settings.link_text | escape -}}<span aria-hidden="true">&nbsp;&darr;</span>
+                    </a>
+                  {%- endif -%}
+                </div>
+
+              {%- when 'song_link' -%}
+                {%- if song -%}
+                  <p class="video-dl__song video-dl__block" {{ block.shopify_attributes }}>
+                    <a class="video-dl__song-link" href="{{ song.url }}">
+                      {{- 'video_download.get_the_song' | t: title: song.title | escape -}}
+                      <span aria-hidden="true">&nbsp;&rarr;</span>
+                    </a>
+                  </p>
+                {%- endif -%}
+
+              {%- when '@app' -%}
+                <div class="video-dl__block-small" {{ block.shopify_attributes }}>
+                  {%- render block -%}
+                </div>
+            {%- endcase -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    </div>
   </div>
 
-  {%- if sellable -%}
+  {%- if sellable and section.settings.sticky_bar -%}
     {%- comment -%} Mobile sticky buy bar: shown (below 750px) once the main buy button scrolls out of view. Submits the main form. {%- endcomment -%}
     <div class="video-dl__sticky" data-video-dl-sticky hidden>
       <span class="video-dl__sticky-text">
         <span class="video-dl__sticky-price">{{ variant.price | money }}</span>
-        {%- if specs != blank -%}<span class="video-dl__sticky-spec"> · {{ specs | split: '·' | first | strip }}</span>{%- endif -%}
+        {%- if spec_format != blank -%}<span class="video-dl__sticky-spec">{{ spec_format | escape }}</span>{%- endif -%}
       </span>
       <button type="submit" form="{{ form_id }}" name="add" class="button button--sm video-dl__sticky-buy">
         <span>{{ 'video_download.buy_short' | t }}</span>
@@ -303,7 +364,6 @@
     }
 
     async function add(items, btn) {
-      var label = btn ? btn.innerHTML : '';
       if (btn) { btn.disabled = true; btn.setAttribute('aria-busy', 'true'); }
       say(STR.adding);
       try {
@@ -318,7 +378,7 @@
       } catch (e) {
         say(STR.error);
       } finally {
-        if (btn) { btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = label; }
+        if (btn) { btn.disabled = false; btn.removeAttribute('aria-busy'); }
       }
     }
 
@@ -365,47 +425,159 @@
 {
   "name": "Video download",
   "tag": "section",
-  "class": "section section-video-download",
+  "class": "section-video-download",
   "settings": [
     {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image",
+      "info": "Same hearts pattern as the song page. The colour follows the song's custom.main_color."
+    },
+    {
+      "type": "range",
+      "id": "background_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Background image opacity",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
       "type": "checkbox",
-      "id": "show_lyrics_line",
-      "label": "Show \"Sing-along lyrics on screen\" for vocal and instrumental videos",
+      "id": "show_breadcrumbs",
+      "label": "Show breadcrumbs",
       "default": true
     },
     {
       "type": "checkbox",
-      "id": "show_licence_band",
-      "label": "Show the licence band",
+      "id": "show_media_note",
+      "label": "Show the note under the preview",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_bar",
+      "label": "Show the sticky buy bar on mobile",
       "default": true
     },
     {
       "type": "paragraph",
-      "content": "Licence prices come from the copyright-licence, streaming-licence and all-in-one-licence products. The buy button shows when lts.downloads_ready is true or the product is still on EDP (global.edp_0 = 1)."
+      "content": "The buy button shows when lts.downloads_ready is true or the product is still on EDP (global.edp_0 = 1). FAQ, reviews, licences and related videos are separate sections in this template."
     }
   ],
   "blocks": [
+    { "type": "@app" },
     {
-      "type": "faq_group",
-      "name": "FAQ",
+      "type": "versions",
+      "name": "Version tabs",
       "limit": 1,
       "settings": [
-        { "type": "text", "id": "heading", "label": "Heading", "default": "Questions" },
-        { "type": "metaobject", "id": "faq_group", "label": "FAQ group", "metaobject_type": "faq_group" },
-        { "type": "range", "id": "max_items", "min": 0, "max": 20, "step": 1, "label": "Max FAQs to show (0 = all)", "default": 0 }
+        { "type": "paragraph", "content": "Vocal / Instrumental tabs from lts.sibling_videos. Hidden when the video has no sibling." }
       ]
     },
     {
-      "type": "reviews",
-      "name": "Reviews",
+      "type": "title",
+      "name": "Title",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Download the full sing-along video and play it anywhere.</p>" }
+      ]
+    },
+    {
+      "type": "specs",
+      "name": "Video specs",
       "limit": 1,
       "settings": [
-        { "type": "text", "id": "heading", "label": "Heading", "default": "Reviews" },
-        { "type": "paragraph", "content": "Shows the product's custom.reviews (else the song's). Hidden when there are none." }
+        { "type": "paragraph", "content": "Resolution, length and file size from lts.video_specs." },
+        { "type": "checkbox", "id": "show_ad_free", "label": "Show \"Ad-free\"", "default": true }
+      ]
+    },
+    {
+      "type": "price",
+      "name": "Price",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "note", "label": "Note next to the price", "default": "One-off price. No subscription." }
+      ]
+    },
+    {
+      "type": "buy_buttons",
+      "name": "Buy button",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "trust_text", "label": "Reassurance line", "info": "Separate items with |", "default": "Secure checkout | Instant download" }
+      ]
+    },
+    {
+      "type": "bundle",
+      "name": "Bundle and save",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "intro", "label": "Intro line", "default": "Get both versions, or add the song, and pay less." },
+        { "type": "paragraph", "content": "Offers this video with each sibling video, and with the song MP3 when the song is downloads_ready. The saving comes from lts.bundle_discount." }
+      ]
+    },
+    {
+      "type": "includes",
+      "name": "What you get",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "What you get" },
+        { "type": "checkbox", "id": "show_lyrics", "label": "Show \"Sing-along lyrics on screen\" for vocal and instrumental videos", "default": true },
+        { "type": "textarea", "id": "extra", "label": "Extra lines (one per line)", "default": "Plays offline, so no Wi-Fi needed" }
+      ]
+    },
+    {
+      "type": "uses",
+      "name": "Use ideas",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Made for singing together" },
+        { "type": "textarea", "id": "items", "label": "Items (one per line)", "default": "Family Christmas\nClassroom\nChristmas concert\nChurch service\nCommunity carols" },
+        { "type": "text", "id": "link_text", "label": "Link text", "default": "Showing it to a group? See licences" },
+        { "type": "url", "id": "link_url", "label": "Link", "info": "Leave empty to jump to the licence section on this page." }
+      ]
+    },
+    {
+      "type": "song_link",
+      "name": "Song link",
+      "limit": 1,
+      "settings": [
+        { "type": "paragraph", "content": "\"Just want the audio?\" link to the song in lts.song." }
       ]
     }
   ],
   "enabled_on": { "templates": ["product"] },
-  "presets": []
+  "presets": [
+    {
+      "name": "Video download",
+      "blocks": [
+        { "type": "versions" },
+        { "type": "title" },
+        { "type": "specs" },
+        { "type": "price" },
+        { "type": "buy_buttons" },
+        { "type": "text" },
+        { "type": "bundle" },
+        { "type": "includes" },
+        { "type": "uses" },
+        { "type": "song_link" }
+      ]
+    }
+  ]
 }
 {% endschema %}
