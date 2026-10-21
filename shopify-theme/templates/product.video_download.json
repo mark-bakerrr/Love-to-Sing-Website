@@ -114,26 +114,27 @@
     "faq_9gcR8U": {
       "type": "faq",
       "blocks": {
-        "faq-spacing": {
-          "type": "spacing",
-          "static": true,
+        "grp": {
+          "type": "faq_group",
           "settings": {
-            "spacing_top": 80,
-            "spacing_bottom": 80,
-            "spacing_top_mobile": 20,
-            "spacing_bottom_mobile": 20
-          },
-          "blocks": {}
+            "faq_group": "faq-downloads",
+            "max_items": 0
+          }
         }
       },
+      "block_order": [
+        "grp"
+      ],
       "disabled": true,
       "name": "FAQ",
       "settings": {
         "border_top": false,
         "border_bottom": false,
+        "open_first": false,
         "title": "How can you use our music?",
         "subtitle": "Find answers to your most pressing questions about music licenses for Churches and Schools.",
-        "faq_group": "faq-1"
+        "padding_top": 80,
+        "padding_bottom": 80
       }
     },
     "button_text_qeFdUJ": {

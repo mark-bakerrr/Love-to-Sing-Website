@@ -1,0 +1,567 @@
+{%- comment -%}
+  LTS NATIVE shop drawer (TEST — Santa Tracker Preview v2).
+
+  A theme-native, pixel-parity port of the v1 app-embed "Get the music" drawer
+  (source: shopify/extensions/lts-blog-blocks/assets/shop-drawer.{css,js}). Opens
+  on the existing [data-lts-shop-trigger] button and renders ALL content from
+  Shopify itself — product metafields + Shopify Files CDN — with NO call to
+  Studio / the app proxy. Add-to-cart uses the native /cart/add.js.
+
+  Uses v1's exact .lts-sd-* markup + CSS; the accent tints v1 computes in JS are
+  derived here with color-mix() from the single --lts-accent (custom.main_color).
+
+  Sections (v1 order): album → song versions → cross-sells. Bundle + extras are
+  Studio-only (no metafield yet) so they degrade out, exactly like v1 with no
+  bundle. Data:
+    - versions      → lts.versions (list.product_reference)
+    - preview audio → custom.audio_preview (file_reference → Shopify Files CDN)
+    - album         → custom.song_main_album (product_reference)
+    - cross-sells   → custom.related_merch (list.product_reference)
+
+  To remove: delete this snippet + the {% render 'lts-shop-drawer' %} line in
+  sections/main-song.liquid, and re-enable the shop-drawer-embed app embed.
+{%- endcomment -%}
+
+{%- liquid
+  assign accent = '#c8102e'
+  assign mc = product.metafields.custom.main_color | downcase
+  case mc
+    when 'red'
+      assign accent = '#c8102e'
+    when 'green'
+      assign accent = '#2e7d32'
+    when 'blue'
+      assign accent = '#1565c0'
+    when 'gold', 'yellow'
+      assign accent = '#b8860b'
+    when 'purple'
+      assign accent = '#6a1b9a'
+    when 'pink'
+      assign accent = '#c2185b'
+    when 'orange'
+      assign accent = '#ef6c00'
+    when 'teal'
+      assign accent = '#00796b'
+  endcase
+  if mc contains '#'
+    assign accent = mc
+  endif
+
+  assign album = product.metafields.custom.song_main_album.value
+  # Only show a REAL, purchasable album. Exclude the per-track "single" products
+  # (template_suffix "single.album") — those are drafts standing in as albums and
+  # must never surface as the album upsell. album.available already drops drafts;
+  # the suffix check is the explicit belt-and-braces guard.
+  assign album_ok = false
+  if album and album.available
+    assign asuffix = album.template_suffix | default: ''
+    unless asuffix contains 'single'
+      assign album_ok = true
+    endunless
+  endif
+  assign merch = product.metafields.custom.related_merch.value
+  assign song_variant = product.selected_or_first_available_variant
+  assign ap = product.metafields.custom.audio_preview
+  assign ap_url = ap.value.url | default: ap.value
+  assign versions = product.metafields.lts.versions.value
+-%}
+
+{%- capture svg_play -%}<svg class="lts-sd-play-ico lts-sd-ico-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11.43-6.86a1 1 0 0 0 0-1.72L9.5 4.28A1 1 0 0 0 8 5.14z"/></svg>{%- endcapture -%}
+{%- capture svg_pause -%}<svg class="lts-sd-play-ico lts-sd-ico-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="4.8" width="3.6" height="14.4" rx="1"/><rect x="13.9" y="4.8" width="3.6" height="14.4" rx="1"/></svg>{%- endcapture -%}
+{%- capture svg_cart -%}<svg class="lts-sd-cart-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.2l2 11.2a1.6 1.6 0 0 0 1.6 1.3h8.1a1.6 1.6 0 0 0 1.58-1.27L21 7.5H6"/></svg>{%- endcapture -%}
+{%- capture svg_chevron -%}<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>{%- endcapture -%}
+
+<div class="lts-sd-root" data-lts-drawer aria-hidden="true" style="--lts-accent: {{ accent }};">
+  <div class="lts-sd-backdrop" data-lts-drawer-close></div>
+
+  <aside class="lts-sd-drawer" role="dialog" aria-modal="true" aria-label="Buy {{ product.title | escape }}">
+    <div class="lts-sd-grab" aria-hidden="true"><div class="lts-sd-handle"></div></div>
+    <div class="lts-sd-accent-strip"></div>
+
+    <header class="lts-sd-header">
+      <h2 class="lts-sd-title">Buy <span class="lts-sd-song-name">{{ product.title | escape }}</span></h2>
+      <button class="lts-sd-close" type="button" data-lts-drawer-close aria-label="Close shop drawer">✕</button>
+    </header>
+
+    <div class="lts-sd-body">
+      {%- comment -%} 1. Album card (hero upsell) — real albums only, never a "single". {%- endcomment -%}
+      {%- if album_ok -%}
+        <section class="lts-sd-section">
+          <article class="lts-sd-album-card">
+            <div class="lts-sd-ribbon">BEST VALUE</div>
+            <div class="lts-sd-album-main">
+              <div class="lts-sd-album-art" aria-hidden="true">
+                {%- if album.featured_image -%}<img src="{{ album.featured_image | image_url: width: 176 }}" alt="" loading="lazy">{%- else -%}<span aria-hidden="true">&#9834;</span>{%- endif -%}
+              </div>
+              <div class="lts-sd-album-info">
+                <h3 class="lts-sd-album-title">{{ album.title | escape }}</h3>
+                <p class="lts-sd-album-sub">The complete album</p>
+                <div class="lts-sd-album-price-row">
+                  <span class="lts-sd-album-price lts-sd-price">{{ album.price | money }}</span>
+                </div>
+              </div>
+            </div>
+            <button class="lts-sd-btn lts-sd-btn--block lts-sd-album-cta" type="button" data-lts-add data-variant="{{ album.selected_or_first_available_variant.id }}">Add album</button>
+          </article>
+        </section>
+      {%- endif -%}
+
+      {%- comment -%} 2. This song — one row per version: ▶ label ─progress─ price 🛒 {%- endcomment -%}
+      {%- if versions and versions.size > 0 -%}
+        <section class="lts-sd-section">
+          <div class="lts-sd-rows">
+            {%- for v in versions -%}
+              {%- assign vvar = v.selected_or_first_available_variant -%}
+              {%- assign vap = v.metafields.custom.audio_preview -%}
+              {%- assign vap_url = vap.value.url | default: vap.value -%}
+              <div class="lts-sd-row{% unless v.available %} lts-sd-row--unavailable{% endunless %}">
+                {%- if vap_url != blank -%}
+                  <button class="lts-sd-row-play" type="button" data-lts-preview data-lts-src="{{ vap_url }}" data-ga-item="{{ product.title | escape }}" data-ga-version="{{ v.title | escape }}" aria-pressed="false" aria-label="Play preview: {{ v.title | escape }}">{{ svg_play }}{{ svg_pause }}</button>
+                {%- else -%}
+                  <span class="lts-sd-row-play-gap" aria-hidden="true"></span>
+                {%- endif -%}
+                <span class="lts-sd-row-label">{{ v.title | escape }}</span>
+                <span class="lts-sd-row-line" aria-hidden="true"><span class="lts-sd-row-line-fill"></span></span>
+                <span class="lts-sd-row-price lts-sd-price">{{ v.price | money }}</span>
+                <button class="lts-sd-row-add" type="button" data-lts-add data-variant="{{ vvar.id }}"{% unless v.available %} disabled{% endunless %} aria-label="Add {{ v.title | escape }} to cart">{{ svg_cart }}</button>
+              </div>
+            {%- endfor -%}
+          </div>
+        </section>
+      {%- else -%}
+        <section class="lts-sd-section">
+          <div class="lts-sd-rows">
+            <div class="lts-sd-row">
+              {%- if ap_url != blank -%}
+                <button class="lts-sd-row-play" type="button" data-lts-preview data-lts-src="{{ ap_url }}" data-ga-item="{{ product.title | escape }}" data-ga-version="{{ product.title | escape }}" aria-pressed="false" aria-label="Play preview: {{ product.title | escape }}">{{ svg_play }}{{ svg_pause }}</button>
+              {%- else -%}
+                <span class="lts-sd-row-play-gap" aria-hidden="true"></span>
+              {%- endif -%}
+              <span class="lts-sd-row-label">{{ product.title | escape }}</span>
+              <span class="lts-sd-row-line" aria-hidden="true"><span class="lts-sd-row-line-fill"></span></span>
+              <span class="lts-sd-row-price lts-sd-price">{{ product.price | money }}</span>
+              <button class="lts-sd-row-add" type="button" data-lts-add data-variant="{{ song_variant.id }}"{% unless song_variant.available %} disabled{% endunless %} aria-label="Add {{ product.title | escape }} to cart">{{ svg_cart }}</button>
+            </div>
+          </div>
+        </section>
+      {%- endif -%}
+
+      {%- comment -%}
+        3. "Get Everything" bundle — the song + its arrangements at a % off.
+        The bundle IS the versions list (mother + arrangements); groupKey is the
+        product handle and the discount comes from lts.bundle_discount (written by
+        apply-version-bundles.ts), so no extra metafield is needed. "Add bundle"
+        adds every version variant stamped with the _lts_bundle / _lts_bundle_n
+        cart properties so the Cart Transform + Discount Function apply the saving.
+        Prices are in cents (Liquid product.price); discount floored per line to
+        mirror the Discount Function exactly.
+      {%- endcomment -%}
+      {%- if versions and versions.size >= 2 -%}
+        {%- assign bpct = 15 -%}
+        {%- assign bd = product.metafields.lts.bundle_discount.value -%}
+        {%- if bd.percentage -%}{%- assign bpct = bd.percentage -%}{%- endif -%}
+        {%- assign b_was = 0 -%}
+        {%- assign b_now = 0 -%}
+        {%- for v in versions -%}
+          {%- assign c = v.price -%}
+          {%- assign off = c | times: bpct | divided_by: 100 -%}
+          {%- assign b_was = b_was | plus: c -%}
+          {%- assign b_now = b_now | plus: c | minus: off -%}
+        {%- endfor -%}
+        {%- capture b_variants -%}{%- for v in versions -%}{{ v.selected_or_first_available_variant.id }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}{%- endcapture -%}
+        {%- capture b_contents -%}{%- for v in versions -%}{%- if forloop.first -%}{{ v.title | escape }}{%- else -%}{%- assign vshort = v.title | remove_first: product.title | strip -%}&nbsp;&middot;&nbsp;{{ vshort | default: v.title | escape }}{%- endif -%}{%- endfor -%}{%- endcapture -%}
+        <section class="lts-sd-section">
+          <article class="lts-sd-bundle-card">
+            <div class="lts-sd-bundle-head">
+              <span class="lts-sd-bundle-sparkle" aria-hidden="true">✨</span>
+              <h3 class="lts-sd-bundle-title">Get Everything</h3>
+              <span class="lts-sd-bundle-save-pill">Save {{ bpct }}%</span>
+            </div>
+            <p class="lts-sd-bundle-contents">{{ b_contents }}</p>
+            <div class="lts-sd-bundle-price-row">
+              <span class="lts-sd-bundle-was lts-sd-price">{{ b_was | money }}</span>
+              <span class="lts-sd-bundle-now lts-sd-price">{{ b_now | money }}</span>
+            </div>
+            <button class="lts-sd-btn lts-sd-btn--block lts-sd-btn--premium lts-sd-bundle-cta" type="button" data-lts-bundle-add data-group="{{ product.handle }}" data-count="{{ versions.size }}" data-variants="{{ b_variants }}">Add bundle</button>
+          </article>
+        </section>
+      {%- endif -%}
+
+      {%- comment -%} 5. You might also like — cross-sell tiles {%- endcomment -%}
+      {%- if merch != blank -%}
+        {%- assign shown = 0 -%}
+        {%- capture tiles -%}
+          {%- for m in merch limit: 6 -%}
+            {%- if m.available -%}
+              {%- assign shown = shown | plus: 1 -%}
+              <a class="lts-sd-tile" href="{{ m.url }}">
+                <div class="lts-sd-tile-thumb" aria-hidden="true">{%- if m.featured_image -%}<img src="{{ m.featured_image | image_url: width: 220 }}" alt="" loading="lazy">{%- else -%}<span aria-hidden="true">&#9834;</span>{%- endif -%}</div>
+                <div class="lts-sd-tile-name">{{ m.title | escape }}</div>
+                <div class="lts-sd-tile-price lts-sd-price">{{ m.price | money }}</div>
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endcapture -%}
+        {%- if shown > 0 -%}
+          <section class="lts-sd-section">
+            <h3 class="lts-sd-section-label">You might also like</h3>
+            <div class="lts-sd-cross-sells">{{ tiles }}</div>
+          </section>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+
+    <footer class="lts-sd-cartbar">
+      <div class="lts-sd-cartbar-summary">
+        <span class="lts-sd-cartbar-glyph" aria-hidden="true">{{ svg_cart }}</span>
+        <span><span class="lts-sd-cartbar-count" data-lts-cart-count>{{ cart.item_count }} item{% unless cart.item_count == 1 %}s{% endunless %}</span><span class="lts-sd-cartbar-total lts-sd-price" data-lts-cart-total>{{ cart.total_price | money }}</span></span>
+      </div>
+      <a class="lts-sd-viewcart" href="/cart">View cart</a>
+      <button class="lts-sd-btn lts-sd-checkout" type="button" data-lts-checkout{% if cart.item_count == 0 %} disabled{% endif %}>Checkout &rarr;</button>
+    </footer>
+
+    <audio data-lts-preview-audio preload="none"></audio>
+  </aside>
+</div>
+
+{%- comment -%} Sticky mini-player — appears when the in-page "Get the music" trigger
+scrolls off-screen (IntersectionObserver in the script). Mirrors the v1 app-drawer
+sticky bar: play the song's 30s preview (Shopify CDN), quick add-to-cart, and "Get
+the music" opens the full drawer. Removed by the script when there is no trigger
+(e.g. a "coming soon" song). {%- endcomment -%}
+<div class="lts-sd-stickybar" data-lts-stickybar role="region" aria-label="Quick player — {{ product.title | escape }}" style="--lts-accent: {{ accent }};">
+  <span class="lts-sd-stickybar__progress" aria-hidden="true"><span class="lts-sd-stickybar__fill"><span class="lts-sd-stickybar__dot"></span></span></span>
+  {%- if ap_url != blank -%}
+    <button class="lts-sd-stickybar__play" type="button" data-lts-preview data-lts-src="{{ ap_url }}" data-ga-item="{{ product.title | escape }}" data-ga-version="{{ product.title | escape }}" aria-pressed="false" aria-label="Play preview">{{ svg_play }}{{ svg_pause }}</button>
+  {%- endif -%}
+  <div class="lts-sd-stickybar__info">
+    <span class="lts-sd-stickybar__title">{{ product.title | escape }}</span>
+    <span class="lts-sd-stickybar__meta lts-sd-price">From {{ product.price | money }}</span>
+  </div>
+  <button class="lts-sd-stickybar__add" type="button" data-lts-add data-variant="{{ song_variant.id }}" aria-label="Add {{ product.title | escape }} to cart">{{ svg_cart }}</button>
+  <button class="lts-sd-stickybar__more" type="button" data-lts-stickybar-more aria-haspopup="dialog" aria-expanded="false"><span class="lts-sd-stickybar__more-label">Get the music</span>{{ svg_chevron }}</button>
+</div>
+
+{%- style -%}
+  .lts-sd-root {
+    --lts-accent-dark: color-mix(in srgb, var(--lts-accent) 82%, #000);
+    --lts-accent-light: color-mix(in srgb, var(--lts-accent) 74%, #fff);
+    --lts-accent-tint-04: color-mix(in srgb, var(--lts-accent) 5%, #fff);
+    --lts-accent-tint-10: color-mix(in srgb, var(--lts-accent) 10%, #fff);
+    --lts-accent-faint: color-mix(in srgb, var(--lts-accent) 15%, #fff);
+    --lts-accent-glow: color-mix(in srgb, var(--lts-accent) 28%, transparent);
+    --lts-accent-border: color-mix(in srgb, var(--lts-accent) 36%, #fff);
+    --lts-bg: #FFFBF7; --lts-ink: #2b2220; --lts-muted: rgba(0,0,0,.55);
+    --lts-hairline: rgba(43,34,32,.10); --lts-green: #1e7e34;
+    --lts-gold-1: #f0bd5a; --lts-gold-2: #d29a2e;
+    --lts-radius-card: 16px;
+    --lts-shadow-card: 0 1px 2px rgba(43,34,32,.05), 0 6px 20px rgba(43,34,32,.07);
+    position: fixed; inset: 0; z-index: 2147483000; visibility: hidden; pointer-events: none;
+    font-family: inherit; font-size: 15.2px; line-height: 1.45; color: var(--lts-ink);
+  }
+  .lts-sd-root.is-open { visibility: visible; }
+  .lts-sd-root, .lts-sd-root * { box-sizing: border-box; margin: 0; padding: 0; }
+  .lts-sd-root button { font: inherit; cursor: pointer; }
+  /* Host-theme :empty{display:none} shim */
+  .lts-sd-backdrop, .lts-sd-accent-strip, .lts-sd-handle, .lts-sd-row-line, .lts-sd-row-line-fill { display: block !important; }
+  .lts-sd-root :focus-visible { outline: 2px solid var(--lts-accent); outline-offset: 2px; }
+
+  .lts-sd-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.45); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); pointer-events: auto; opacity: 0; transition: opacity 280ms cubic-bezier(.32,.72,.33,1); }
+  .lts-sd-root.is-open .lts-sd-backdrop { opacity: 1; }
+
+  .lts-sd-drawer { position: absolute; top: 0; right: 0; bottom: 0; width: 480px; max-width: 100%; background: var(--lts-bg); box-shadow: -12px 0 40px rgba(0,0,0,.22); display: flex; flex-direction: column; pointer-events: auto; transform: translateX(100%); transition: transform 280ms cubic-bezier(.32,.72,.33,1); }
+  .lts-sd-root.is-open .lts-sd-drawer { transform: translateX(0); }
+  .lts-sd-grab { display: none; }
+  .lts-sd-accent-strip { height: 5px; flex: none; background: linear-gradient(90deg, var(--lts-accent), var(--lts-accent-dark)); }
+
+  .lts-sd-header { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 24px 14px; }
+  .lts-sd-title { font-size: 18.4px; font-weight: 600; letter-spacing: -.01em; }
+  .lts-sd-song-name { color: var(--lts-accent); }
+  .lts-sd-close { flex: none; width: 40px; height: 40px; margin: -8px -8px -8px 0; display: grid; place-items: center; border: none; border-radius: 999px; background: transparent; font-size: 16.8px; color: var(--lts-muted); }
+  .lts-sd-close:hover { background: rgba(43,34,32,.07); color: var(--lts-ink); }
+
+  .lts-sd-body { flex: 1; overflow-y: auto; padding: 4px 24px 24px; scrollbar-width: thin; scrollbar-color: rgba(43,34,32,.25) transparent; }
+  .lts-sd-body::-webkit-scrollbar { width: 8px; }
+  .lts-sd-body::-webkit-scrollbar-thumb { background: rgba(43,34,32,.22); border-radius: 999px; border: 2px solid var(--lts-bg); }
+  .lts-sd-section { margin-top: 28px; }
+  .lts-sd-section:first-child { margin-top: 4px; }
+  .lts-sd-section-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; color: var(--lts-muted); margin-bottom: 12px; }
+  .lts-sd-price { font-variant-numeric: tabular-nums; }
+
+  .lts-sd-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; border-radius: 12px; padding: 13px 22px; font-size: 15.2px; font-weight: 700; color: #fff; background: var(--lts-accent); box-shadow: 0 4px 14px var(--lts-accent-glow); transition: transform .16s cubic-bezier(.16,1,.3,1), box-shadow .16s ease; }
+  .lts-sd-btn:hover { transform: translateY(-1px); box-shadow: 0 7px 20px var(--lts-accent-glow); }
+  .lts-sd-btn:active { transform: scale(.98); }
+  .lts-sd-btn:disabled { opacity: .7; cursor: default; box-shadow: none; transform: none; }
+  .lts-sd-btn--block { width: 100%; }
+  .lts-sd-btn.is-added { background: var(--lts-green); }
+
+  /* Album card */
+  .lts-sd-album-card { position: relative; overflow: hidden; border: 1px solid var(--lts-accent-faint); border-radius: var(--lts-radius-card); background: linear-gradient(160deg, #fff 30%, var(--lts-accent-tint-04)); box-shadow: 0 1px 2px rgba(43,34,32,.05), 0 10px 28px var(--lts-accent-tint-10); padding: 20px; }
+  .lts-sd-ribbon { position: absolute; top: 17px; left: -34px; width: 140px; transform: rotate(-45deg); background: linear-gradient(180deg, var(--lts-gold-1), var(--lts-gold-2)); color: #5b3c06; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-align: center; padding: 5px 0; box-shadow: 0 2px 6px rgba(43,34,32,.18); }
+  .lts-sd-album-main { display: flex; gap: 16px; align-items: center; padding-left: 28px; }
+  .lts-sd-album-art { flex: none; width: 88px; height: 88px; border-radius: 12px; overflow: hidden; background: linear-gradient(135deg, var(--lts-accent-light) 0%, var(--lts-accent) 55%, var(--lts-accent-dark) 100%); display: grid; place-items: center; color: #fff; font-size: 38px; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 4px 10px var(--lts-accent-glow); text-shadow: 0 2px 4px rgba(0,0,0,.25); }
+  .lts-sd-album-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .lts-sd-album-info { flex: 1; min-width: 0; }
+  .lts-sd-album-title { font-size: 16.8px; font-weight: 600; letter-spacing: -.01em; }
+  .lts-sd-album-sub { font-size: 14.1px; color: var(--lts-muted); margin-top: 2px; }
+  .lts-sd-album-price-row { display: flex; align-items: baseline; gap: 10px; margin-top: 10px; }
+  .lts-sd-album-price { font-size: 21.6px; font-weight: 700; }
+  .lts-sd-album-cta { margin-top: 16px; }
+
+  /* Song rows */
+  .lts-sd-rows { display: flex; flex-direction: column; }
+  .lts-sd-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px; border-bottom: 1px solid rgba(43,34,32,.06); }
+  .lts-sd-row:last-child { border-bottom: none; }
+  .lts-sd-row-label { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.7px; }
+  .lts-sd-row-line { flex: 1; min-width: 32px; height: 2px; border-radius: 2px; background: var(--lts-accent-faint); overflow: hidden; }
+  .lts-sd-row-line-fill { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--lts-accent); transition: width .2s linear; }
+  .lts-sd-row-price { flex: none; font-size: 14.7px; font-weight: 700; }
+  .lts-sd-row-play, .lts-sd-row-add { flex: none; height: 34px; min-width: 34px; padding: 0 7px; display: grid; place-items: center; border-radius: 9px; font-size: 13.6px; font-weight: 700; white-space: nowrap; transition: background .15s ease, transform .15s ease; }
+  .lts-sd-row-play { border: 1px solid var(--lts-accent-border); background: var(--lts-accent-tint-04); color: var(--lts-accent); }
+  .lts-sd-row-play:hover { background: var(--lts-accent-tint-10); }
+  .lts-sd-row-play:active { transform: scale(.94); }
+  .lts-sd-row-play-gap { flex: none; width: 34px; }
+  .lts-sd-row-add { border: none; color: #fff; background: var(--lts-accent); }
+  .lts-sd-row-add:hover { background: var(--lts-accent-dark); }
+  .lts-sd-row-add:active { transform: scale(.92); }
+  .lts-sd-row-add:disabled { opacity: .4; cursor: not-allowed; }
+  .lts-sd-row-add.is-added { background: var(--lts-green); }
+  .lts-sd-cart-ico { display: block; width: 20px; height: 20px; }
+  .lts-sd-row-add .lts-sd-cart-ico { width: 17px; height: 17px; }
+  .lts-sd-cartbar-glyph .lts-sd-cart-ico { width: 19px; height: 19px; }
+  .lts-sd-play-ico { display: block; width: 14px; height: 14px; }
+  .lts-sd-ico-pause { display: none; }
+  .lts-sd-row-play.is-playing .lts-sd-ico-play { display: none; }
+  .lts-sd-row-play.is-playing .lts-sd-ico-pause { display: block; }
+  .lts-sd-row--unavailable .lts-sd-row-price { text-decoration: line-through; color: var(--lts-muted); }
+
+  /* Get Everything bundle card */
+  .lts-sd-btn--premium { background: linear-gradient(180deg, var(--lts-accent-light), var(--lts-accent-dark)); }
+  .lts-sd-bundle-card { position: relative; overflow: hidden; border: 1px solid var(--lts-hairline); border-radius: var(--lts-radius-card); background: #fff; box-shadow: var(--lts-shadow-card); padding: 18px 20px 20px; }
+  .lts-sd-bundle-card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 38%, rgba(240,189,90,.10) 47%, rgba(255,255,255,.55) 52%, rgba(240,189,90,.08) 57%, transparent 66%); pointer-events: none; }
+  .lts-sd-bundle-card > * { position: relative; }
+  .lts-sd-bundle-head { display: flex; align-items: center; gap: 8px; }
+  .lts-sd-bundle-sparkle { font-size: 16px; }
+  .lts-sd-bundle-title { font-size: 16.3px; font-weight: 600; letter-spacing: -.01em; }
+  .lts-sd-bundle-save-pill { margin-left: auto; font-size: 11.8px; font-weight: 700; letter-spacing: .03em; color: var(--lts-accent); background: var(--lts-accent-tint-10); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+  .lts-sd-bundle-contents { font-size: 14.1px; color: var(--lts-muted); margin-top: 6px; }
+  .lts-sd-bundle-price-row { display: flex; align-items: baseline; justify-content: flex-end; gap: 10px; margin-top: 12px; }
+  .lts-sd-bundle-was { font-size: 14.4px; color: var(--lts-muted); text-decoration: line-through; }
+  .lts-sd-bundle-now { font-size: 20px; font-weight: 700; }
+  .lts-sd-bundle-cta { margin-top: 12px; }
+
+  /* Cross-sells */
+  .lts-sd-cross-sells { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .lts-sd-tile { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; border: 1px solid var(--lts-hairline); border-radius: 12px; background: #fff; padding: 8px; text-align: left; text-decoration: none; color: var(--lts-ink); transition: box-shadow .15s ease; }
+  .lts-sd-tile:hover { box-shadow: var(--lts-shadow-card); }
+  .lts-sd-tile-thumb { aspect-ratio: 1; border-radius: 8px; overflow: hidden; display: grid; place-items: center; font-size: 30px; margin-bottom: 8px; background: linear-gradient(135deg, #e7e0d6, #d4cabb); color: #fff; }
+  .lts-sd-tile-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .lts-sd-tile-name { font-size: 12.8px; font-weight: 500; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; }
+  .lts-sd-tile-price { font-size: 12.8px; font-weight: 700; color: var(--lts-muted); padding: 1px 2px 2px; }
+
+  /* Footer cart bar */
+  .lts-sd-cartbar { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 24px; background: #fff; border-top: 1px solid var(--lts-hairline); box-shadow: 0 -6px 16px rgba(43,34,32,.07); }
+  .lts-sd-cartbar-summary { display: flex; align-items: center; gap: 9px; font-size: 14.7px; }
+  .lts-sd-cartbar-glyph { font-size: 18.4px; display: inline-block; }
+  .lts-sd-cartbar-count { color: var(--lts-muted); }
+  .lts-sd-cartbar-count::after { content: " · "; }
+  .lts-sd-cartbar-total { font-weight: 700; }
+  .lts-sd-viewcart { margin-left: auto; padding: 9px 12px; border-radius: 999px; font-size: 14.5px; font-weight: 600; color: var(--lts-muted); text-decoration: none; white-space: nowrap; }
+  .lts-sd-viewcart:hover { background: rgba(43,34,32,.07); color: var(--lts-ink); }
+  .lts-sd-checkout:disabled { opacity: .6; cursor: not-allowed; }
+
+  @media (max-width: 640px) {
+    .lts-sd-drawer { top: auto; left: 0; right: 0; bottom: 0; width: 100%; height: 85%; border-radius: 20px 20px 0 0; box-shadow: 0 -12px 40px rgba(0,0,0,.28); overflow: hidden; transform: translateY(100%); }
+    .lts-sd-root.is-open .lts-sd-drawer { transform: translateY(0); }
+    .lts-sd-grab { display: grid; flex: none; padding: 10px 0 8px; place-items: center; }
+    .lts-sd-handle { width: 36px; height: 4px; border-radius: 999px; background: rgba(43,34,32,.25); }
+    .lts-sd-accent-strip { height: 4px; }
+    .lts-sd-header { padding: 14px 20px 10px; }
+    .lts-sd-body { padding: 2px 20px 20px; -webkit-overflow-scrolling: touch; }
+    .lts-sd-cross-sells { gap: 10px; }
+    .lts-sd-cartbar { gap: 14px; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lts-sd-backdrop, .lts-sd-drawer, .lts-sd-row-line-fill { transition: none; }
+  }
+
+  /* ── Sticky mini-player (ported from the v1 app drawer) ─────────────── */
+  .lts-sd-stickybar {
+    position: fixed; left: 16px; right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 2147482000; display: flex; align-items: center; gap: 12px;
+    max-width: 680px; margin: 0 auto; border: none; border-radius: 16px;
+    padding: 11px 12px; font: inherit; color: #fff;
+    background: var(--lts-accent, #1565c0);
+    box-shadow: 0 12px 32px -8px rgba(0,0,0,.42), 0 3px 10px rgba(0,0,0,.18);
+    overflow: hidden; opacity: 0; visibility: hidden; transform: translateY(16px);
+    transition: opacity .38s cubic-bezier(.16,1,.3,1), transform .44s cubic-bezier(.16,1,.3,1), visibility 0s linear .44s;
+  }
+  .lts-sd-stickybar.is-visible { opacity: 1; visibility: visible; transform: translateY(0); transition: opacity .44s cubic-bezier(.16,1,.3,1), transform .48s cubic-bezier(.16,1,.3,1); }
+  .lts-sd-stickybar__progress { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,.22); opacity: 0; transition: opacity .25s ease; }
+  .lts-sd-stickybar.is-playing .lts-sd-stickybar__progress { opacity: 1; }
+  .lts-sd-stickybar__fill { display: block; position: relative; height: 100%; width: 0; background: #fff; border-radius: 0 2px 2px 0; transition: width .12s linear; }
+  .lts-sd-stickybar__dot { position: absolute; right: -4px; top: 50%; width: 9px; height: 9px; margin-top: -4.5px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.45); }
+  .lts-sd-stickybar__play { flex: 0 0 auto; width: 44px; height: 44px; display: grid; place-items: center; border: none; border-radius: 12px; background: rgba(255,255,255,.16); color: #fff; line-height: 0; cursor: pointer; transition: background .16s ease, transform .12s cubic-bezier(.16,1,.3,1); }
+  .lts-sd-stickybar__play:hover { background: rgba(255,255,255,.27); }
+  .lts-sd-stickybar__play:active { transform: scale(.9); }
+  .lts-sd-stickybar__play .lts-sd-play-ico { width: 16px; height: 16px; }
+  .lts-sd-stickybar__play.is-playing .lts-sd-ico-play { display: none; }
+  .lts-sd-stickybar__play.is-playing .lts-sd-ico-pause { display: block; }
+  .lts-sd-stickybar__info { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 1px; line-height: 1.2; }
+  .lts-sd-stickybar__title { font-weight: 700; font-size: 15px; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lts-sd-stickybar__meta { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.82); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lts-sd-stickybar__add { flex: 0 0 auto; min-width: 46px; height: 46px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 11px; border: none; border-radius: 12px; background: #fff; color: var(--lts-accent, #1565c0); font-weight: 700; font-size: 13px; white-space: nowrap; line-height: 1; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,.18); transition: transform .12s cubic-bezier(.16,1,.3,1), box-shadow .16s ease; }
+  .lts-sd-stickybar__add .lts-sd-cart-ico { width: 21px; height: 21px; }
+  .lts-sd-stickybar__add svg { display: block; }
+  .lts-sd-stickybar__add:hover { transform: translateY(-1px); box-shadow: 0 7px 18px rgba(0,0,0,.24); }
+  .lts-sd-stickybar__add:active { transform: scale(.93); }
+  .lts-sd-stickybar__add.is-added { background: rgba(255,255,255,.94); }
+  .lts-sd-stickybar__more { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; border: 1px solid rgba(255,255,255,.38); border-radius: 12px; padding: 0 14px; height: 46px; font: inherit; font-weight: 700; font-size: 13.5px; white-space: nowrap; background: transparent; color: #fff; cursor: pointer; transition: background .16s ease, border-color .16s ease; }
+  .lts-sd-stickybar__more svg { margin-right: -2px; }
+  .lts-sd-stickybar__more:hover { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.6); }
+  @media (prefers-reduced-motion: reduce) {
+    .lts-sd-stickybar { transform: none; transition: opacity .2s linear, visibility 0s linear .2s; }
+    .lts-sd-stickybar.is-visible { transform: none; transition: opacity .2s linear; }
+    .lts-sd-stickybar__play, .lts-sd-stickybar__add, .lts-sd-stickybar__fill { transition: none; }
+  }
+  @media (max-width: 480px) {
+    .lts-sd-stickybar { left: 10px; right: 10px; gap: 9px; padding: 9px 10px; border-radius: 14px; }
+    .lts-sd-stickybar__play { width: 42px; height: 42px; }
+    .lts-sd-stickybar__add { height: 44px; }
+    .lts-sd-stickybar__more { padding: 0; width: 44px; height: 44px; justify-content: center; }
+    .lts-sd-stickybar__more svg { margin-right: 0; }
+    .lts-sd-stickybar__more-label { display: none; }
+  }
+{%- endstyle -%}
+
+<script>
+  (function () {
+    var root = document.querySelector('[data-lts-drawer]');
+    if (!root || root.dataset.ltsReady) return;
+    root.dataset.ltsReady = '1';
+
+    function open() { root.classList.add('is-open'); root.setAttribute('aria-hidden', 'false'); document.documentElement.style.overflow = 'hidden'; }
+    function close() { root.classList.remove('is-open'); root.setAttribute('aria-hidden', 'true'); document.documentElement.style.overflow = ''; stopPreview(); }
+
+    document.querySelectorAll('[data-lts-shop-trigger]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) { e.preventDefault(); e.stopImmediatePropagation(); open(); }, true);
+    });
+    root.querySelectorAll('[data-lts-drawer-close]').forEach(function (el) { el.addEventListener('click', close); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && root.classList.contains('is-open')) close(); });
+
+    var checkoutBtn = root.querySelector('[data-lts-checkout]');
+    if (checkoutBtn) checkoutBtn.addEventListener('click', function () { if (!checkoutBtn.disabled) window.location.href = '/checkout'; });
+
+    // ---- native add to cart ----
+    function markAdded(el) {
+      var orig = el.innerHTML;
+      el.classList.add('is-added'); el.textContent = '✓ Added';
+      setTimeout(function () { el.classList.remove('is-added'); el.innerHTML = orig; }, 1600);
+    }
+    function formatMoney(cents) {
+      var el = root.querySelector('[data-lts-cart-total]');
+      var sym = (el && /^\D+/.exec(el.textContent)) || ['$'];
+      return sym[0] + (cents / 100).toFixed(2);
+    }
+    function refreshCart() {
+      return fetch('/cart.js').then(function (r) { return r.json(); }).then(function (cart) {
+        var c = root.querySelector('[data-lts-cart-count]');
+        var t = root.querySelector('[data-lts-cart-total]');
+        if (c) c.textContent = cart.item_count + ' item' + (cart.item_count === 1 ? '' : 's');
+        if (t) t.textContent = formatMoney(cart.total_price);
+        if (checkoutBtn) checkoutBtn.disabled = cart.item_count === 0;
+      });
+    }
+    function addToCart(el) {
+      var id = el.getAttribute('data-variant');
+      if (!id) return;
+      fetch('/cart/add.js', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: [{ id: Number(id), quantity: 1 }] }) })
+        .then(function (r) { return r.json(); }).then(function () { markAdded(el); return refreshCart(); })
+        .catch(function () { el.textContent = 'Error'; });
+    }
+    root.addEventListener('click', function (e) {
+      var el = e.target.closest('[data-lts-add]');
+      if (!el || el.hasAttribute('disabled')) return;
+      e.preventDefault(); e.stopPropagation();
+      addToCart(el);
+    });
+
+    // ---- "Add bundle": every version line stamped with the _lts_bundle props
+    // so the Cart Transform + Discount Function apply the saving (fixed bundle).
+    root.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-lts-bundle-add]');
+      if (!b || b.disabled) return;
+      e.preventDefault(); e.stopPropagation();
+      var props = { _lts_bundle: b.getAttribute('data-group'), _lts_bundle_n: b.getAttribute('data-count') };
+      var lines = (b.getAttribute('data-variants') || '').split(',').filter(Boolean)
+        .map(function (id) { return { id: Number(id), quantity: 1, properties: props }; });
+      if (!lines.length) return;
+      var orig = b.innerHTML; b.disabled = true; b.textContent = 'Adding…';
+      fetch('/cart/add.js', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: lines }) })
+        .then(function (r) { return r.json(); })
+        .then(function () { b.textContent = '✓ Added'; b.classList.add('is-added'); refreshCart(); setTimeout(function () { b.disabled = false; b.classList.remove('is-added'); b.innerHTML = orig; }, 1600); })
+        .catch(function () { b.disabled = false; b.innerHTML = orig; });
+    });
+
+    // ---- preview playback (shared by the version rows AND the sticky bar) ----
+    var audio = root.querySelector('[data-lts-preview-audio]');
+    var currentBtn = null;
+    var playMeta = null;              // GA4 params for the currently-playing preview
+    var stickyBar = null, stickyPlay = null; // assigned in the sticky block below
+    function stopPreview() { if (audio) audio.pause(); }
+    function setPlaying(btn, on) {
+      if (!btn) return;
+      btn.classList.toggle('is-playing', on);                      // row/sticky play glyph
+      if (btn === stickyPlay && stickyBar) stickyBar.classList.toggle('is-playing', on); // sticky progress hairline
+    }
+    // Progress-fill element for a play button — the sticky bar's own fill, or the row's.
+    function fillOf(btn) {
+      if (btn === stickyPlay && stickyBar) return stickyBar.querySelector('.lts-sd-stickybar__fill');
+      var row = btn.closest('.lts-sd-row'); return row ? row.querySelector('.lts-sd-row-line-fill') : null;
+    }
+    // GA4: theme.liquid loads gtag (G-4Y6LJZHQ89, send_page_view:false), so only
+    // these custom events reach GA4. No-op when gtag is absent. Same event names +
+    // param shape as the app drawer + album player so all three surfaces aggregate.
+    function trackPreview(name, meta) { if (!window.gtag || !meta) return; try { window.gtag('event', name, meta); } catch (e) {} }
+    function metaFor(btn) {
+      var item = btn.getAttribute('data-ga-item') || '';
+      return { item_name: item, version: btn.getAttribute('data-ga-version') || item, product_type: 'song', surface: btn === stickyPlay ? 'sticky_bar' : 'song_drawer' };
+    }
+    // Play `btn`'s data-lts-src (toggles pause if it is already the playing one).
+    function togglePlay(btn) {
+      var src = btn.getAttribute('data-lts-src');
+      if (!src) return;
+      if (currentBtn === btn && !audio.paused) { audio.pause(); return; }
+      if (audio.getAttribute('src') !== src) audio.setAttribute('src', src);
+      if (currentBtn && currentBtn !== btn) { setPlaying(currentBtn, false); var pf = fillOf(currentBtn); if (pf) pf.style.width = '0'; }
+      currentBtn = btn;
+      var meta = metaFor(btn);
+      // Fire on the play() resolve so only real (non-autoplay-blocked) starts count.
+      audio.play().then(function () { playMeta = meta; trackPreview('song_preview_play', meta); }).catch(function () {});
+    }
+    root.querySelectorAll('[data-lts-preview]').forEach(function (btn) { btn.addEventListener('click', function () { togglePlay(btn); }); });
+    if (audio) {
+      audio.addEventListener('timeupdate', function () { if (!currentBtn || !audio.duration) return; var f = fillOf(currentBtn); if (f) f.style.width = (audio.currentTime / audio.duration * 100) + '%'; });
+      audio.addEventListener('play', function () { setPlaying(currentBtn, true); });
+      audio.addEventListener('pause', function () { setPlaying(currentBtn, false); });
+      // Natural end of the 30s clip = a completed listen (user pause/switch does not count).
+      audio.addEventListener('ended', function () { setPlaying(currentBtn, false); var f = currentBtn && fillOf(currentBtn); if (f) f.style.width = '0'; trackPreview('song_preview_complete', playMeta); });
+    }
+
+    // ---- sticky mini-player: shows when the in-page trigger scrolls off-screen ----
+    stickyBar = document.querySelector('[data-lts-stickybar]');
+    var stickyTrigger = document.querySelector('[data-lts-shop-trigger]');
+    if (stickyBar && stickyTrigger && 'IntersectionObserver' in window) {
+      stickyPlay = stickyBar.querySelector('.lts-sd-stickybar__play');
+      new IntersectionObserver(function (entries) { stickyBar.classList.toggle('is-visible', !entries[0].isIntersecting); }).observe(stickyTrigger);
+      if (stickyPlay) stickyPlay.addEventListener('click', function () { togglePlay(stickyPlay); });
+      var sAdd = stickyBar.querySelector('.lts-sd-stickybar__add');
+      if (sAdd) sAdd.addEventListener('click', function () { addToCart(sAdd); });
+      var sMore = stickyBar.querySelector('[data-lts-stickybar-more]');
+      if (sMore) sMore.addEventListener('click', open);
+    } else if (stickyBar) {
+      stickyBar.remove(); // no trigger (coming-soon song) or no IO support → no bar
+    }
+  })();
+</script>

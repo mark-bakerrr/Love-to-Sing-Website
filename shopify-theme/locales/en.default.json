@@ -424,6 +424,9 @@
   "song": {
     "buy_album": "Buy Album",
     "buy_video_song": "Buy Video Song",
+    "get_the_music": "Get the music",
+    "from_price": "From $1.99",
+    "get_the_music_note": "MP3 · FLAC · Sheet music · Bundles",
     "download": "Download",
     "stream_anywhere": "Stream Anywhere",
     "spofity": "Spotify",
