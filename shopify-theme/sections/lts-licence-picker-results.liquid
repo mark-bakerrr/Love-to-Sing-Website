@@ -6,7 +6,10 @@
     /search?q=pohu&type=product&options[unavailable_products]=hide&section_id=lts-licence-picker-results
     /collections/kids-song-lyrics?section_id=lts-licence-picker-results&page=2
   and appends the rows from .lts-lb-results. [data-has-next] tells the JS whether
-  a "Load more" page exists. Styling lives in sections/lts-licence-builder.liquid;
+  a "Load more" page exists.
+  In product context (/products/<handle>?section_id=lts-licence-picker-results,
+  the builder's ?song= deep link) it returns that product's row plus its main
+  video (custom.song_video_product), each only if pickable. Styling lives in sections/lts-licence-builder.liquid;
   the pickable rule lives in snippets/lts-picker-row.liquid.
 {%- endcomment -%}
 {%- assign has_next = false -%}
@@ -27,6 +30,12 @@
       {%- endfor -%}
       {%- if paginate.next -%}{%- assign has_next = true -%}{%- endif -%}
     {%- endpaginate -%}
+  {%- elsif product -%}
+    {%- render 'lts-picker-row', product: product, source: 'deeplink' -%}
+    {%- assign main_video = product.metafields.custom.song_video_product.value -%}
+    {%- if main_video -%}
+      {%- render 'lts-picker-row', product: main_video, source: 'deeplink' -%}
+    {%- endif -%}
   {%- endif -%}
 </ul>
 <div data-has-next="{{ has_next }}" hidden></div>

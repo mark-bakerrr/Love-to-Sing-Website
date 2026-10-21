@@ -454,10 +454,11 @@
     community:"community groups"
   };
 
-  // Pre-fill from URL params: ?licence= (grant), ?org= (org type), ?size= (number).
-  // Defaults: grant all_in_one, org church, empty size. Params are normalized +
-  // validated; unknown values fall back to defaults / are ignored.
-  var grant = "all_in_one", org = "church", prefillSize = "";
+  // Pre-fill from URL params: ?licence= (grant), ?org= (org type), ?size= (number),
+  // ?song= (product handle, pre-picked on screen 2; see preselectSong below).
+  // Defaults: grant all_in_one, org church, empty size, no song. Params are
+  // normalized + validated; unknown values fall back to defaults / are ignored.
+  var grant = "all_in_one", org = "church", prefillSize = "", prefillSong = "";
   try {
     var params = new URLSearchParams(location.search);
     // grant: accept - or _ (e.g. all-in-one → all_in_one, membership).
@@ -472,6 +473,9 @@
       var sn = parseInt(s, 10);
       if (sn > 0) prefillSize = String(sn);
     }
+    // song: a Shopify product handle only (lowercase letters, digits, hyphens).
+    var sg = (params.get('song') || '').trim().toLowerCase();
+    if (/^[a-z0-9][a-z0-9-]*$/.test(sg) && sg.length <= 255) prefillSong = sg;
   } catch(e){}
 
   function $(id){ return document.getElementById(id); }
@@ -1117,8 +1121,47 @@
   // A reload on #songs can't restore the licence inputs - start on screen 1.
   if (location.hash === '#songs') history.replaceState(null, '', location.pathname + location.search);
 
+  // ?song=HANDLE (e.g. from the video download page's licence cards): pick that
+  // song, plus its main video when the picker offers it, as if chosen in the
+  // picker, so screen 2 opens with them under "Your picks" and the summary card
+  // lists them. Rows come from lts-licence-picker-results rendered in the
+  // product's context, so lts-picker-row's pickable rule still decides. An
+  // unknown handle (404) or an unpickable product returns no rows and is
+  // silently ignored.
+  function preselectSong(handle){
+    var base = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+    var url = new URL(base + 'products/' + encodeURIComponent(handle), location.origin);
+    url.searchParams.set('section_id', 'lts-licence-picker-results');
+    fetch(url.toString())
+      .then(function(r){ return r.ok ? r.text() : ''; })
+      .then(function(html){
+        if (!html) return;
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var rows = doc.querySelectorAll('.lts-lb-results .lts-lb-pick');
+        var added = [];
+        for (var i = 0; i < rows.length; i++){
+          var id = rows[i].getAttribute('data-variant-id');
+          if (!id || picks.has(id)) continue;
+          var title = rows[i].getAttribute('data-title') || '';
+          picks.set(id, {
+            title: title,
+            kind: rows[i].getAttribute('data-kind'),
+            price: parseInt(rows[i].getAttribute('data-price'), 10) || 0
+          });
+          added.push(title);
+        }
+        if (!added.length) return;
+        syncRows();
+        render();
+        announce('Added ' + added.join(' and ') + '. ' + pickSummary());
+        track('licence_song_preselect', { item_name: added[0], items: added.length });
+      })
+      .catch(function(){});
+  }
+
   syncRows();
   render();
+  if (prefillSong) preselectSong(prefillSong);
 })();
 </script>
 
