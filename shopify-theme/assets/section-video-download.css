@@ -530,6 +530,12 @@
   font-size: var(--fz-s);
 }
 
+/* Inline so a wrapped title keeps the arrow on its last line. */
+.video-dl__song-link {
+  display: inline;
+  line-height: 1.6;
+}
+
 .video-dl__song {
   margin-bottom: 0;
   padding-top: var(--space-300);
