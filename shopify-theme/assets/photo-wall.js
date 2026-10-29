@@ -179,7 +179,10 @@
     }
     if(typeof window.gsap!=='undefined' && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)){
       var cards=world.querySelectorAll('.pw-card');
-      if(cards.length) gsap.from(cards,{autoAlpha:0,scale:.85,duration:.5,ease:'power2.out',
+      /* force3D:false keeps the tween 2D. With GSAP's default (3D while tweening)
+         WebKit promotes every card to its own GPU layer drawn at full size x3 on
+         an iPhone, ~1GB for 225 cards, and iOS kills the tab. */
+      if(cards.length) gsap.from(cards,{autoAlpha:0,scale:.85,duration:.5,ease:'power2.out',force3D:false,
         stagger:{each:0.004,from:'random'}});
     }
   }
