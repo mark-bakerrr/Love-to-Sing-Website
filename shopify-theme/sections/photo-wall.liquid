@@ -85,6 +85,7 @@
     {
       "src": {{ e.photo.value | image_url: width: 1000 | json }},
       "thumb": {{ e.photo.value | image_url: width: 520 | json }},
+      "tiny": {{ e.photo.value | image_url: width: 200 | json }},
       "year": {{ e.year.value | json }},
       "title": {{ e.title.value | json }},
       "desc": {{ e.description.value | json }},

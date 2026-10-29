@@ -42,8 +42,9 @@
     return function(){ seed|=0; seed=seed+0x6D2B79F5|0; var t=Math.imul(seed^seed>>>15,1|seed);
       t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
   }
-  var CELL_W=420, CELL_H=380, COLS=1, worldW=0, worldH=0;
+  var CELL_W=420, CELL_H=380, COLS=1, worldW=0, worldH=0, CARDS=[];
   function buildWall(){
+    CARDS=[];
     Array.prototype.slice.call(world.querySelectorAll('.pw-card')).forEach(function(n){ n.parentNode.removeChild(n); });
     COLS=Math.max(1, Math.ceil(Math.sqrt(Math.max(1,PHOTOS.length)*1.6)));
     PHOTOS.forEach(function(p,i){
@@ -60,8 +61,9 @@
       card.style.transform='rotate('+rot.toFixed(2)+'deg)';
       card.dataset.i=i;
       card.innerHTML='<span class="pw-cardpin"></span><span class="pw-pill">'+esc(p.year)+'</span>'
-        +'<img loading="lazy" src="'+esc(p.thumb||p.src)+'" alt="'+esc(p.title||'')+'">';
+        +'<img loading="lazy" src="'+esc(p.tiny||p.thumb||p.src)+'" alt="'+esc(p.title||'')+'">';
       world.appendChild(card);
+      CARDS.push({img:card.querySelector('img'), p:p, x:x, y:y, w:w});
     });
     worldW=COLS*CELL_W+240; worldH=Math.ceil(Math.max(1,PHOTOS.length)/COLS)*CELL_H+240;
     var wm=document.getElementById('pw-watermark');
@@ -71,7 +73,27 @@
 
   /* ---------- Pan + zoom ---------- */
   var tx=0, ty=0, scale=1, MIN=.35, MAX=2.2;
-  function apply(){ world.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')'; }
+  function apply(){ world.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')'; scheduleLOD(); }
+
+  /* ---------- Image level-of-detail ----------
+     Zoomed out to fit, every card is on screen at ~15-60px wide, so lazy
+     loading fetches all of them. Decoding every 520px thumb (~230MB for 225
+     photos) crashes Chrome on Android. Cards start on the small `tiny` image
+     and only swap to `thumb` while near the viewport and drawn big enough to
+     need it; they drop back once off screen so memory stays bounded. */
+  var TINY_W=200, lodT=0;
+  function scheduleLOD(){ clearTimeout(lodT); lodT=setTimeout(updateLOD,150); }
+  function updateLOD(){
+    var vw=vp.clientWidth, vh=vp.clientHeight, dpr=window.devicePixelRatio||1;
+    var mx=vw*.5, my=vh*.5;
+    CARDS.forEach(function(c){
+      var w=c.w*scale, l=tx+c.x*scale, t=ty+c.y*scale;
+      var near=l+w>-mx && t+w*1.6>-my && l<vw+mx && t<vh+my;
+      var low=c.p.tiny||c.p.thumb||c.p.src, high=c.p.thumb||c.p.src;
+      var want=near && w*dpr>TINY_W*1.3 ? high : low;
+      if(c.img.getAttribute('src')!==want) c.img.src=want;
+    });
+  }
   function centre(){
     var vw=vp.clientWidth, vh=vp.clientHeight;
     scale=Math.min(1, Math.min(vw/worldW, vh/worldH)*1.15);
@@ -172,7 +194,7 @@
     var TOKEN='c8a4184e06fafbe91bb6835a3a4eccca'; // public storefront token (unauthenticated read)
     var QUERY='query($cursor:String){ metaobjects(type:"photo_wall", first:100, after:$cursor){'
       +' pageInfo{hasNextPage endCursor} nodes{'
-      +' photo:field(key:"photo"){reference{... on MediaImage{ src:image{url(transform:{maxWidth:1000})} thumb:image{url(transform:{maxWidth:520})} }}}'
+      +' photo:field(key:"photo"){reference{... on MediaImage{ src:image{url(transform:{maxWidth:1000})} thumb:image{url(transform:{maxWidth:520})} tiny:image{url(transform:{maxWidth:200})} }}}'
       +' year:field(key:"year"){value} title:field(key:"title"){value} desc:field(key:"description"){value}'
       +' location:field(key:"location"){value} categories:field(key:"photo-wall-category"){value} category:field(key:"category"){value} link:field(key:"link"){value}'
       +' people:field(key:"people"){references(first:10){nodes{... on Metaobject{ name:field(key:"name"){value} onlineStoreUrl }}}}'
@@ -195,6 +217,7 @@
         return {
           src: ref && ref.src ? ref.src.url : null,
           thumb: ref && ref.thumb ? ref.thumb.url : null,
+          tiny: ref && ref.tiny ? ref.tiny.url : null,
           year: n.year ? n.year.value : null,
           title: n.title ? n.title.value : null,
           desc: n.desc ? n.desc.value : null,
