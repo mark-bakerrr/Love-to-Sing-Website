@@ -48,7 +48,7 @@ html,body.pw-body{margin:0;height:100%;overflow:hidden;background:#c49a63;
 .pw-card{
   position:absolute; background:#fff; border-radius:14px; padding:10px 10px 12px;
   box-shadow:0 18px 40px rgba(0,0,0,.45); cursor:pointer;
-  transition:transform .18s ease, box-shadow .18s ease; will-change:transform;
+  transition:transform .18s ease, box-shadow .18s ease;
 }
 .pw-card img{display:block; width:100%; height:auto; border-radius:7px; background:#e9e9ec; pointer-events:none;}
 .pw-pill{
