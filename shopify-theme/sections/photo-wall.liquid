@@ -30,12 +30,17 @@
 
 <div class="pw-hint" id="pw-hint">Drag to explore · Scroll to zoom</div>
 
-<div class="pw-controls">
-  <button id="pw-zoom-in" aria-label="Zoom in">+</button>
-  <button id="pw-zoom-out" aria-label="Zoom out">&minus;</button>
-  <button id="pw-recentre" aria-label="Recentre" title="Recentre">&#9673;</button>
-</div>
-
+{%- comment -%}
+  Bottom dock. Order matters: it lays out right-to-left, bottom-up, so zoom
+  controls sit at the right edge, filters beside them and the player wraps
+  above the filters on narrow screens.
+{%- endcomment -%}
+<div class="pw-dock">
+  <div class="pw-controls">
+    <button id="pw-zoom-in" aria-label="Zoom in">+</button>
+    <button id="pw-zoom-out" aria-label="Zoom out">&minus;</button>
+    <button id="pw-recentre" aria-label="Recentre" title="Recentre">&#9673;</button>
+  </div>
 <div class="pw-filters" id="pw-filters" hidden>
   <span class="pw-f-count" id="pw-f-count"></span>
 </div>
@@ -64,6 +69,7 @@
     </div>
   </div>
 {%- endif -%}
+</div>
 
 <div class="pw-modal" id="pw-modal">
   <div class="pw-backdrop" data-close></div>
