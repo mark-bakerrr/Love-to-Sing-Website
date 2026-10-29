@@ -82,17 +82,33 @@ html,body.pw-body{margin:0;height:100%;overflow:hidden;background:#c49a63;
   transition:opacity .4s ease;
 }
 
-.pw-controls{position:fixed; right:18px; bottom:18px; z-index:30; display:flex; flex-direction:column; gap:8px;}
+.pw-controls{display:flex; flex-direction:column; gap:8px;}
 .pw-controls button{
   width:44px; height:44px; border-radius:12px; border:1px solid rgba(255,255,255,.12);
   background:rgba(20,21,26,.8); backdrop-filter:blur(10px); color:#fff; font-size:20px;
   cursor:pointer; display:grid; place-items:center;
 }
 .pw-controls button:hover{background:rgba(40,42,50,.9)}
+.pw-controls button:active,.pw-dd-btn:active,#pw-f-clear:active,.pw-player button:active{transform:scale(.94)}
+.pw-controls button,.pw-dd-btn,#pw-f-clear,.pw-player button{transition:transform var(--dur-fast) var(--ease-smooth),background var(--dur-fast) var(--ease-smooth),opacity var(--dur-fast) var(--ease-smooth)}
+
+/* ---------- Bottom dock: zoom controls + filters + music player ----------
+   One fixed strip holding all three, so none can cover another.
+   row-reverse + wrap-reverse keep zoom and filters on the bottom line at the
+   right; when the player can't share that line it wraps above the filters
+   instead of overlapping them. */
+.pw-dock{
+  position:fixed; left:18px; right:18px; bottom:18px; z-index:30;
+  display:flex; flex-direction:row-reverse; flex-wrap:wrap-reverse;
+  justify-content:space-between; align-items:flex-start; gap:10px 12px;
+  pointer-events:none;
+}
+.pw-dock > *{pointer-events:auto}
+.pw-player{margin-right:auto}
 
 /* ---------- Filters ---------- */
 .pw-filters{
-  position:fixed; right:74px; bottom:18px; z-index:30; display:flex; align-items:center; gap:8px;
+  position:relative; z-index:2; display:flex; align-items:center; gap:8px;
   padding:8px 12px; border-radius:14px; background:rgba(20,21,26,.7);
   backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.1);
 }
@@ -135,11 +151,11 @@ html,body.pw-body{margin:0;height:100%;overflow:hidden;background:#c49a63;
   background:#fff; color:#111; font:800 13px 'Nunito',system-ui,sans-serif;
 }
 .pw-f-count{font:700 12px 'Nunito',system-ui,sans-serif; opacity:.65; white-space:nowrap}
-@media (max-width:900px){
-  .pw-filters{top:auto; bottom:96px; right:12px; left:12px; flex-wrap:wrap; justify-content:center}
+@media (max-width:720px){
+  .pw-filters{flex-wrap:wrap; justify-content:center}
   .pw-dd{flex:1 1 30%; min-width:0}
   .pw-dd-btn{width:100%; max-width:none; justify-content:space-between}
-  /* Full-width bar on mobile: menus span the whole bar (fixed .pw-filters is the
+  /* Full-width bar on mobile: menus span the whole bar (.pw-filters is the
      containing block) so none can overflow the screen; long names wrap */
   .pw-dd{position:static}
   .pw-dd-menu{left:0; right:0; width:auto; max-width:none}
@@ -148,7 +164,7 @@ html,body.pw-body{margin:0;height:100%;overflow:hidden;background:#c49a63;
 
 /* ---------- Music player ---------- */
 .pw-player{
-  position:fixed; left:18px; bottom:18px; z-index:30;
+  position:relative; z-index:1;
   display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:4px 12px;
   padding:10px 16px 12px 10px; border-radius:16px; background:rgba(20,21,26,.8);
   backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.12);
@@ -246,7 +262,17 @@ html,body.pw-body{margin:0;height:100%;overflow:hidden;background:#c49a63;
   .pw-dialog{flex-direction:column;max-height:90vh}
   .pw-photo{border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:14px}
   .pw-photo img{max-height:42vh}
-  .pw-player{max-width:calc(100vw - 100px)}
+  /* Phones: dock and zoom column hug a 12px gutter; player and filters each
+     take a full line, player on top */
+  /* Phones: filters take the full width along the bottom; the player and the
+     zoom column share the row above */
+  .pw-dock{left:12px; right:12px; bottom:12px; display:grid; gap:8px;
+    grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"player controls" "filters filters";
+    align-items:end}
+  .pw-controls{grid-area:controls}
+  .pw-filters{grid-area:filters}
+  .pw-player{grid-area:player; max-width:none; margin:0}
+  .pw-player .t,.pw-player .a{max-width:none}
 }
 @media (prefers-reduced-motion:reduce){
   .pw-backdrop,.pw-dialog,.pw-card{transition:none!important}
