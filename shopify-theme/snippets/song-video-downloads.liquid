@@ -1,0 +1,106 @@
+{%- doc -%}
+  "Video downloads" rows on a song page (main-song `video_downloads` block,
+  plan Task 27). One row per video product in the song's custom.related_videos
+  (fallback custom.song_video_product), both written by Studio. A video is
+  listed only when it is available and sellable: lts.downloads_ready is true or
+  it is still delivered by EDP (global.edp_0 = 1), the same gate as the video
+  page's buy button. Renders nothing when no video qualifies (no empty heading).
+
+  @param {object} product - The song product
+  @param {string} [heading] - Block heading
+  @param {object} [block] - The section block, for theme-editor attributes
+
+  @example
+  {% render 'song-video-downloads', product: product, heading: block.settings.heading, block: block %}
+{%- enddoc -%}
+{%- liquid
+  # Rows are captured first so nothing (not even the heading) renders when no video qualifies.
+  assign videos = product.metafields.custom.related_videos.value
+  capture rows
+    if videos != blank
+      for v in videos
+        render 'song-video-row', video: v
+      endfor
+    else
+      assign main_video = product.metafields.custom.song_video_product.value
+      if main_video
+        render 'song-video-row', video: main_video
+      endif
+    endif
+  endcapture
+  assign rows = rows | strip
+-%}
+{%- if rows != blank -%}
+  <div class="song-videos" {% if block %}{{ block.shopify_attributes }}{% endif %}>
+    <h2 class="song-videos__title">{%- if heading != blank -%}{{ heading | escape }}{%- else -%}{{ 'video_download.song_block_heading' | t }}{%- endif -%}</h2>
+    <ul class="song-videos__list" role="list">
+      {{ rows }}
+    </ul>
+  </div>
+  {%- style -%}
+    /* Sits in main-song's red hero, so colours come from the hero text colour. */
+    .song-videos {
+      margin-top: 2.4rem;
+    }
+    .song-videos__title {
+      margin: 0 0 1rem;
+      font-family: inherit;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: inherit;
+    }
+    .song-videos__list {
+      display: grid;
+      gap: 0.8rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .song-videos__row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 1.2rem;
+      min-height: 4.8rem;
+      padding: 0.8rem 1.6rem;
+      border: 0.1rem solid rgb(255 255 255 / 0.45);
+      border-radius: 0.8rem;
+      font-size: 1.4rem;
+      color: inherit;
+      text-decoration: none;
+      transition: background-color 150ms ease;
+    }
+    .song-videos__row:hover {
+      background: rgb(255 255 255 / 0.12);
+    }
+    .song-videos__row:focus-visible {
+      outline: 0.2rem solid currentColor;
+      outline-offset: 0.2rem;
+    }
+    .song-videos__kind {
+      font-weight: 700;
+    }
+    .song-videos__specs {
+      opacity: 0.85;
+      min-width: 0;
+    }
+    .song-videos__price {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    @media (max-width: 479px) {
+      .song-videos__row {
+        grid-template-columns: 1fr auto;
+      }
+      .song-videos__specs {
+        grid-column: 1 / -1;
+        grid-row: 2;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .song-videos__row {
+        transition: none;
+      }
+    }
+  {%- endstyle -%}
+{%- endif -%}

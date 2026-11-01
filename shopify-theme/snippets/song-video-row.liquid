@@ -1,0 +1,27 @@
+{%- doc -%}
+  One video download row for snippets/song-video-downloads. Outputs nothing
+  unless the video is available and sellable (lts.downloads_ready true, or
+  still on EDP via global.edp_0 = 1; same gate as the video page).
+
+  @param {object} video - A video download product
+
+  @example
+  {% render 'song-video-row', video: video %}
+{%- enddoc -%}
+{%- if video.available -%}
+  {%- if video.metafields.lts.downloads_ready.value == true or video.metafields.global.edp_0 == '1' -%}
+    {%- liquid
+      assign v_kind = video.metafields.lts.video_kind.value | default: 'vocal'
+      assign kind_key = 'video_download.kind_' | append: v_kind
+      assign v_specs = video.metafields.lts.video_specs.value
+    -%}
+    <li>
+      <a class="song-videos__row" href="{{ video.url }}">
+        <span class="song-videos__kind">{{ kind_key | t }}</span>
+        <span class="song-videos__specs">{{ v_specs | escape }}</span>
+        <span class="song-videos__price">{{ video.price | money }}<span aria-hidden="true"> &rarr;</span></span>
+        <span class="visually-hidden">{{ video.title | escape }}</span>
+      </a>
+    </li>
+  {%- endif -%}
+{%- endif -%}

@@ -1,0 +1,66 @@
+{%- comment -%}
+  Love to Sing - one pickable product row for the licence builder's step 5
+  ("Add songs & videos"). Used by the SSR popular picks and by
+  sections/lts-licence-picker-results.liquid (search results), so the
+  pickable-product rule lives in exactly one place.
+
+  Renders NOTHING unless the product is pickable:
+    - video_download        → available AND (lts.downloads_ready OR global.edp_0 == '1')
+    - album                 → available
+    - song_* (list below)   → available AND lts.downloads_ready (cover-song gating)
+    - anything else (licences, membership, lyrics books, legacy single.*) → never
+    - e-books (type 'E-books' / tag 'ebook') → never. NB they use the
+      video_download template, so the suffix alone would mislabel them "Video".
+
+  The song/album rule MUST mirror the app embed's sellable rule:
+  love-to-sing-content-studio/shopify/extensions/lts-blog-blocks/blocks/shop-drawer-embed.liquid:32-37
+  A missing lts.downloads_ready metafield counts as false (song hidden), same as the embed.
+
+  `song_lyrics` is deliberately NOT in the song list until confirmed to be real song products.
+
+  Params:
+    product - the product (required)
+    source  - 'popular' | 'browse' | 'search' (emitted as data-source)
+
+  data-price is the variant price in integer cents (presentment currency).
+{%- endcomment -%}
+{%- liquid
+  assign sfx = product.template_suffix | default: ''
+  assign song_sfx = 'song_christmas,song_kids,song_celebration,song_halloween' | split: ','
+  assign kind = ''
+  assign is_ebook = false
+  if product.type == 'E-books' or product.tags contains 'ebook'
+    assign is_ebook = true
+  endif
+  if product.available and is_ebook == false
+    if sfx == 'video_download'
+      # Video downloads: offered only when Studio can deliver the file (lts.downloads_ready)
+      # or the product is still on EDP (global.edp_0, migration gate; drop with EDP, plan Task 36).
+      if product.metafields.lts.downloads_ready.value == true or product.metafields.global.edp_0 == '1'
+        assign kind = 'video'
+      endif
+    elsif sfx == 'album'
+      assign kind = 'album'
+    elsif song_sfx contains sfx and product.metafields.lts.downloads_ready.value
+      assign kind = 'song'
+    endif
+  endif
+  assign v = product.selected_or_first_available_variant
+-%}
+{%- if kind != '' and v -%}
+  <li class="lts-lb-pick" data-kind="{{ kind }}" data-variant-id="{{ v.id }}" data-price="{{ v.price }}" data-title="{{ product.title | escape }}" data-source="{{ source | default: 'search' }}">
+    {%- if product.featured_image -%}
+      {{ product.featured_image | image_url: width: 96, height: 96, crop: 'center' | image_tag: loading: 'lazy', alt: '', width: 48, height: 48, class: 'lts-lb-pick__thumb' }}
+    {%- else -%}
+      <span class="lts-lb-pick__thumb lts-lb-pick__thumb--empty" aria-hidden="true"></span>
+    {%- endif -%}
+    <span class="lts-lb-pick__body">
+      <span class="lts-lb-pick__title">{{ product.title | escape }}</span>
+      <span class="lts-lb-pick__kind">{{ kind | capitalize }}</span>
+    </span>
+    <span class="lts-lb-pick__price">{{ v.price | money }}</span>
+    <button type="button" class="lts-lb-pick__toggle" aria-pressed="false" aria-label="Add {{ product.title | escape }} to your picks">
+      <span class="lts-lb-pick__state" aria-hidden="true">Add</span>
+    </button>
+  </li>
+{%- endif -%}

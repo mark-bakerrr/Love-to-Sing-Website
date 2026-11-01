@@ -1,0 +1,441 @@
+{%- comment -%}
+  Licence band for the video download page (plan Phase 3 amendment 1).
+
+  Same card language as the /pages/buy-a-licence pricing section
+  (lts-licence-pricing): white cards with a tinted icon tile, "From $X a year",
+  red tick list, pill buttons and one featured card with a red outline. Its
+  tokens are copied below (--lc-*) so both surfaces stay in step; change them
+  together.
+
+  Prices are read live from the licence products (price_min, always shown as
+  "From $X" because they scale by size band). Card buttons deep-link into the
+  licence builder with the grant and, when the product links a song (lts.song),
+  the song pre-selected: /pages/licence-builder?licence=<grant>&song=<handle>.
+{%- endcomment -%}
+{%- liquid
+  assign song = product.metafields.lts.song.value
+  assign song_param = ''
+  if song
+    assign song_param = '&song=' | append: song.handle
+  endif
+  assign heading_id = 'VideoDlLicences-' | append: section.id
+-%}
+
+<section class="vdl-lic" id="{{ section.settings.anchor | default: 'video-licences' | handleize }}" aria-labelledby="{{ heading_id }}">
+  <div class="vdl-lic__wrap">
+    <div class="vdl-lic__head">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="vdl-lic__title" id="{{ heading_id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="vdl-lic__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <ul class="vdl-lic__grid" role="list">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign grant = block.settings.grant
+          case grant
+            when 'copyright'
+              assign lic = all_products['copyright-licence']
+            when 'streaming'
+              assign lic = all_products['streaming-licence']
+            when 'all_in_one'
+              assign lic = all_products['all-in-one-licence']
+            else
+              assign lic = all_products['organisation-membership']
+          endcase
+        -%}
+        <li class="vdl-lic__card{% if block.settings.featured %} vdl-lic__card--featured{% endif %}" {{ block.shopify_attributes }}>
+          {%- if block.settings.featured and block.settings.pill_text != blank -%}
+            <span class="vdl-lic__pill">{{ block.settings.pill_text | escape }}</span>
+          {%- endif -%}
+
+          {%- if block.settings.icon != blank -%}
+            <span class="vdl-lic__icon" aria-hidden="true">{{ block.settings.icon | escape }}</span>
+          {%- endif -%}
+
+          <h3 class="vdl-lic__name">{{ block.settings.name | escape }}</h3>
+          {%- if block.settings.tagline != blank -%}
+            <p class="vdl-lic__tag">{{ block.settings.tagline | escape }}</p>
+          {%- endif -%}
+
+          {%- if lic != blank and lic.price_min > 0 -%}
+            {%- assign lic_price = lic.price_min | money -%}
+            <p class="vdl-lic__pricebox">
+              <span class="vdl-lic__price">{{ 'video_download.licence_from' | t: price: lic_price }}</span>
+              <span class="vdl-lic__per">{{ 'video_download.licence_per_year' | t }}</span>
+            </p>
+          {%- endif -%}
+
+          {%- if block.settings.features != blank -%}
+            <ul class="vdl-lic__features" role="list">
+              {%- assign feats = block.settings.features | newline_to_br | split: '<br />' -%}
+              {%- for feat in feats -%}
+                {%- assign feat_clean = feat | strip -%}
+                {%- if feat_clean != blank -%}
+                  <li><span class="vdl-lic__tick" aria-hidden="true">&#10003;</span>{{ feat_clean | escape }}</li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+
+          {%- if block.settings.button_label != blank -%}
+            <a
+              class="vdl-lic__btn{% if block.settings.featured %} vdl-lic__btn--solid{% endif %}"
+              href="/pages/licence-builder?licence={{ grant }}{{ song_param | escape }}"
+            >
+              {{- block.settings.button_label | escape -}}
+              <span class="visually-hidden"> {{ block.settings.name | escape }}</span>
+            </a>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+
+    {%- if section.settings.build_label != blank or section.settings.compare_label != blank -%}
+      <p class="vdl-lic__foot">
+        {%- if section.settings.foot_text != blank -%}
+          <span>{{ section.settings.foot_text | escape }}</span>
+        {%- endif -%}
+        {%- if section.settings.build_label != blank -%}
+          <a class="vdl-lic__link" href="/pages/licence-builder{% if song %}?song={{ song.handle | escape }}{% endif %}">
+            {{- section.settings.build_label | escape -}}<span aria-hidden="true">&nbsp;&rarr;</span>
+          </a>
+        {%- endif -%}
+        {%- if section.settings.compare_label != blank -%}
+          <a class="vdl-lic__link" href="{{ section.settings.compare_url | default: '/pages/buy-a-licence' }}">
+            {{- section.settings.compare_label | escape -}}
+          </a>
+        {%- endif -%}
+      </p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  /* Tokens copied from sections/lts-licence-pricing.liquid (.lts-lp-blk). */
+  .vdl-lic {
+    --lc-red: #c8102e;
+    --lc-red-strong: #b0102a;
+    --lc-red-ink: #5e0a18;
+    --lc-red-50: #fdeef0;
+    --lc-ink: #241a17;
+    --lc-body: #4a423e;
+    --lc-muted: #736a65;
+    --lc-hair: #f4eeeb;
+    --lc-r: 14px;
+    --lc-r-lg: 18px;
+    --lc-shadow-sm: 0 1px 2px rgba(60, 20, 25, 0.06);
+    --lc-shadow: 0 10px 24px -14px rgba(90, 20, 30, 0.3);
+    --lc-ok: 0 8px 30px -12px rgba(200, 16, 46, 0.35);
+    --lc-e: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+    padding: clamp(56px, 8vw, 96px) 0;
+    font-family: 'Nunito', var(--font-body-family, system-ui), sans-serif;
+    line-height: 1.55;
+    color: var(--lc-body);
+    background: var(--lc-red-50);
+    scroll-margin-top: var(--header-top-position, 7.4rem);
+  }
+
+  .vdl-lic__wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 22px;
+  }
+
+  .vdl-lic__head {
+    max-width: 64ch;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .vdl-lic__title {
+    margin: 0;
+    font-size: clamp(24px, 3.6vw, 34px);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--lc-ink);
+    text-wrap: balance;
+  }
+
+  .vdl-lic__sub {
+    max-width: 60ch;
+    margin: 10px auto 0;
+    font-size: clamp(15px, 2.2vw, 18px);
+    color: var(--lc-body);
+    text-wrap: pretty;
+  }
+
+  .vdl-lic__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    align-items: stretch;
+    margin: 36px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .vdl-lic__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 26px 22px;
+    border: 1px solid var(--lc-hair);
+    border-radius: var(--lc-r-lg);
+    background: #fff;
+    box-shadow: var(--lc-shadow-sm);
+    transition: transform 0.35s var(--lc-e), box-shadow 0.35s var(--lc-e);
+  }
+
+  .vdl-lic__card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--lc-shadow);
+  }
+
+  .vdl-lic__card--featured {
+    z-index: 1;
+    border: 0;
+    outline: 2px solid var(--lc-red);
+    box-shadow: var(--lc-ok);
+  }
+
+  .vdl-lic__pill {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: var(--lc-red);
+  }
+
+  .vdl-lic__icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 22px;
+    color: var(--lc-red);
+    background: var(--lc-red-50);
+  }
+
+  .vdl-lic__name {
+    margin: 13px 0 0;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    color: var(--lc-ink);
+  }
+
+  .vdl-lic__tag {
+    margin: 4px 0 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--lc-muted);
+  }
+
+  .vdl-lic__pricebox {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 7px;
+    margin: 16px 0 4px;
+  }
+
+  .vdl-lic__price {
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--lc-ink);
+  }
+
+  .vdl-lic__per {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--lc-muted);
+  }
+
+  .vdl-lic__features {
+    flex: 1;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .vdl-lic__features li {
+    position: relative;
+    padding: 6px 0 6px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--lc-body);
+  }
+
+  .vdl-lic__tick {
+    position: absolute;
+    top: 8px;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 10.5px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--lc-red);
+    background: var(--lc-red-50);
+  }
+
+  .vdl-lic__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    margin-top: 18px;
+    padding: 12px 20px;
+    border: 1.5px solid var(--lc-red);
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 800;
+    text-decoration: none;
+    color: var(--lc-red);
+    background: #fff;
+    transition: transform 0.2s var(--lc-e), background-color 0.2s;
+  }
+
+  .vdl-lic__btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .vdl-lic__btn:active {
+    transform: scale(0.98);
+  }
+
+  .vdl-lic__btn:focus-visible,
+  .vdl-lic__link:focus-visible {
+    outline: 2px solid var(--lc-red);
+    outline-offset: 3px;
+  }
+
+  .vdl-lic__btn--solid {
+    color: #fff;
+    background: var(--lc-red);
+    box-shadow: var(--lc-ok);
+  }
+
+  .vdl-lic__btn--solid:hover {
+    background: var(--lc-red-strong);
+  }
+
+  .vdl-lic__foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px 20px;
+    margin: 28px 0 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--lc-ink);
+  }
+
+  .vdl-lic__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--lc-red);
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+
+  .vdl-lic__link:hover {
+    color: var(--lc-red-ink);
+  }
+
+  @media (max-width: 900px) {
+    .vdl-lic__grid {
+      grid-template-columns: minmax(0, 1fr);
+      max-width: 480px;
+      margin-inline: auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vdl-lic__card,
+    .vdl-lic__btn {
+      transition: none;
+    }
+
+    .vdl-lic__card:hover,
+    .vdl-lic__btn:hover {
+      transform: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Video licences",
+  "tag": "div",
+  "class": "section-video-licences",
+  "enabled_on": { "templates": ["product"] },
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Using this video at school, church or a concert?" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Showing it to a group or streaming it online? Add a licence for your church, school or community group. The price depends on the size of your group." },
+    { "type": "text", "id": "anchor", "label": "Anchor id", "info": "The \"See licences\" link in the hero jumps here.", "default": "video-licences" },
+    { "type": "header", "content": "Footer links" },
+    { "type": "text", "id": "foot_text", "label": "Text", "default": "Not sure which one you need?" },
+    { "type": "text", "id": "build_label", "label": "Licence builder link", "default": "Build your licence" },
+    { "type": "text", "id": "compare_label", "label": "Compare link", "default": "Compare all licences" },
+    { "type": "url", "id": "compare_url", "label": "Compare link URL", "info": "Defaults to /pages/buy-a-licence" },
+    { "type": "paragraph", "content": "Prices come from the copyright-licence, streaming-licence, all-in-one-licence and organisation-membership products. Buttons open the licence builder with the grant and this video's song pre-selected." }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Licence card",
+      "settings": [
+        {
+          "type": "select",
+          "id": "grant",
+          "label": "Licence (drives price and link)",
+          "options": [
+            { "value": "copyright", "label": "Copyright" },
+            { "value": "all_in_one", "label": "All-in-One" },
+            { "value": "streaming", "label": "Streaming" },
+            { "value": "membership", "label": "Membership" }
+          ],
+          "default": "copyright"
+        },
+        { "type": "text", "id": "icon", "label": "Icon (emoji)", "default": "🔊" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Copyright" },
+        { "type": "text", "id": "tagline", "label": "Tagline", "default": "In the room" },
+        { "type": "textarea", "id": "features", "label": "Features (one per line)", "default": "Play, sing and perform live\nPrint lyrics and project words\nShow our videos in the room\nRecord your own performances" },
+        { "type": "text", "id": "button_label", "label": "Button label", "default": "Choose" },
+        { "type": "checkbox", "id": "featured", "label": "Featured (red outline, solid button, pill)", "default": false },
+        { "type": "text", "id": "pill_text", "label": "Pill text (featured only)" }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "Video licences",
+      "blocks": [
+        { "type": "card", "settings": { "grant": "copyright", "featured": true } },
+        { "type": "card", "settings": { "grant": "all_in_one", "icon": "✨", "name": "All-in-One", "tagline": "Room and online", "features": "Everything in Copyright\nLivestream your services\nUpload to YouTube and social\nShare with your community" } },
+        { "type": "card", "settings": { "grant": "streaming", "icon": "🎬", "name": "Streaming", "tagline": "Online only", "features": "Livestream your performances\nUpload to YouTube and social\nShare with your audience\nFor online-only ministries" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

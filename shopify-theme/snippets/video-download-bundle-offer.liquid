@@ -1,0 +1,43 @@
+{%- doc -%}
+  One "Bundle and save" offer button (rendered by video-download-bundle).
+  The click handler in main-video-download.liquid reads data-variants,
+  data-group and data-count and adds the lines with _lts_bundle properties.
+
+  @param {string} label - Locale key for the offer label
+  @param {string} [first] - First version label (bundle_both only)
+  @param {string} [second] - Second version label (bundle_both only)
+  @param {number} total - Sum of the lines, in cents
+  @param {number} discounted - Total after the bundle saving, in cents
+  @param {number} pct - Bundle discount percentage (0 = none)
+  @param {string} variants_csv - Comma-separated variant ids to add
+  @param {string} group - _lts_bundle group id (the song handle)
+  @param {number} count - Number of lines in the bundle (_lts_bundle_n)
+
+  @example
+  {% render 'video-download-bundle-offer', label: 'video_download.bundle_song', total: 898, discounted: 763, pct: 15, variants_csv: '1,2', group: 'silent-night', count: 2 %}
+{%- enddoc -%}
+<button
+  type="button"
+  class="video-dl__offer"
+  data-video-dl-bundle
+  data-variants="{{ variants_csv }}"
+  data-group="{{ group | escape }}"
+  data-count="{{ count }}"
+>
+  <span class="video-dl__offer-main">
+    <span class="video-dl__offer-label">{{ label | t: first: first, second: second }}</span>
+    {%- if pct > 0 and discounted < total -%}
+      {%- assign saved = total | minus: discounted | money -%}
+      <span class="video-dl__offer-save">{{ 'video_download.bundle_save' | t: amount: saved }}</span>
+    {%- endif -%}
+  </span>
+  <span class="video-dl__offer-price">
+    {%- if pct > 0 and discounted < total -%}
+      <s class="video-dl__offer-was"><span class="visually-hidden">{{ 'video_download.bundle_was' | t }} </span>{{ total | money }}</s>
+      <span class="video-dl__offer-now">{{ discounted | money }}</span>
+    {%- else -%}
+      <span class="video-dl__offer-now">{{ total | money }}</span>
+    {%- endif -%}
+  </span>
+  <span class="video-dl__offer-add">{{ 'video_download.bundle_add' | t }}</span>
+</button>
